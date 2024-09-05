@@ -1,0 +1,50 @@
+local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local registry_mod = require(script.Parent.registry)
+local types = require(ReplicatedStorage.Shared.types)
+local asset_server = require(ReplicatedStorage.Shared.asset_server)
+local items_mod = require(ReplicatedStorage.Shared.items)
+
+type Entity = types.Entity
+type HexGrid = types.HexGrid
+
+local model = asset_server.load "Entities/Vault"
+
+function update_model(self: Entity, grid: HexGrid)
+	local crystal = grid.entity_instance_map[self.id]:FindFirstChild "crystal" :: BasePart
+	if self.status == "complete" and #self.inventory.items > 0 then
+		local base_size = Vector3.new(0.351, 1.03, 0.351)
+		local size_scale = math.pow(#self.inventory.items, 1 / 3)
+		crystal.Size = base_size * size_scale
+		crystal.Color = items_mod.item_colors[self.inventory.items[1]]
+	else
+		crystal.Transparency = 1
+	end
+end
+
+registry_mod.registry["vault"] = registry_mod.with_defaults {
+	model = model,
+	update = function(self: Entity, grid: HexGrid, old: Entity)
+		update_model(self, grid)
+	end,
+	init = function(self: Entity, grid: HexGrid)
+		update_model(self, grid)
+		task.spawn(function()
+			local t = 0
+			while task.wait() do
+				local entity = grid.entities[self.id]
+				if not entity then
+					return
+				end
+				if not entity.inventory then
+					continue
+				end
+				local instance = grid.entity_instance_map[self.id]:FindFirstChild "crystal" :: BasePart
+				local start = instance.Position
+				instance:PivotTo(CFrame.Angles(0, t, 0) + start)
+				t = (t + 0.01) % (math.pi * 2)
+			end
+		end)
+	end,
+}
+
+return {}

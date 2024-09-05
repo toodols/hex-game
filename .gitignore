@@ -1,0 +1,10 @@
+# Project place file
+# /hex-game.rbxlx
+
+/game.rbxl
+
+# Roblox Studio lock files
+/*.rbxlx.lock
+/*.rbxl.lock
+
+/Packages

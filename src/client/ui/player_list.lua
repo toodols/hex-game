@@ -1,0 +1,266 @@
+local ContextActionService = game:GetService "ContextActionService"
+local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local React = require(ReplicatedStorage.Packages.react)
+local ReactRoblox = require(ReplicatedStorage.Packages["react-roblox"])
+local types = require(ReplicatedStorage.Shared.types)
+local themes = require(script.Parent.themes)
+local util = require(ReplicatedStorage.Shared.util)
+local MainContext = require(script.Parent.context).MainContext
+
+type TeamData = types.TeamData
+type HexGrid = types.HexGrid
+
+function TeamSection(props: {
+	team: TeamData,
+})
+	return React.createElement("Frame", {
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundColor3 = Color3.fromRGB(12, 12, 12),
+		BackgroundTransparency = 0.2,
+		BorderColor3 = Color3.fromRGB(27, 42, 53),
+		Size = UDim2.fromScale(1, 0),
+	}, {
+		VerticalLayout = React.createElement("UIListLayout", {
+			Padding = UDim.new(0, 1),
+			SortOrder = Enum.SortOrder.LayoutOrder,
+		}),
+
+		Body = React.createElement(
+			"Frame",
+			{
+				AutomaticSize = Enum.AutomaticSize.Y,
+				BackgroundTransparency = 1,
+				LayoutOrder = 3,
+				Size = UDim2.fromScale(1, 0),
+			},
+			{
+				VerticalLayout3 = React.createElement("UIListLayout", {
+					Padding = UDim.new(0, 1),
+					SortOrder = Enum.SortOrder.LayoutOrder,
+				}),
+			},
+			util.table_map(props.team.players, function(player)
+				return React.createElement("TextLabel", {
+					AutomaticSize = Enum.AutomaticSize.Y,
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					FontFace = Font.new(
+						"rbxasset://fonts/families/Michroma.json",
+						Enum.FontWeight.Bold,
+						Enum.FontStyle.Normal
+					),
+					LayoutOrder = 2,
+					RichText = true,
+					Size = UDim2.fromScale(1, 0),
+					Text = `{player.DisplayName} (<font color="#888"><i>@{player.Name}</i></font>)`,
+					TextColor3 = Color3.fromRGB(170, 170, 170),
+					TextSize = 15,
+					TextWrapped = true,
+					TextXAlignment = Enum.TextXAlignment.Left,
+				}, {
+					Padding = React.createElement("UIPadding", {
+						PaddingLeft = UDim.new(0, 5),
+						PaddingRight = UDim.new(0, 5),
+					}),
+				})
+			end)
+		),
+
+		Frame = React.createElement("Frame", {
+			AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1,
+			Size = UDim2.fromScale(1, 0),
+		}, {
+			Header = React.createElement("TextLabel", {
+				AutomaticSize = Enum.AutomaticSize.Y,
+				BackgroundTransparency = 1,
+				FontFace = Font.new(
+					"rbxasset://fonts/families/Michroma.json",
+					Enum.FontWeight.Bold,
+					Enum.FontStyle.Normal
+				),
+				LayoutOrder = 1,
+				Size = UDim2.fromScale(1, 0),
+				Text = props.team.name,
+				TextColor3 = props.team.color.color,
+				TextSize = 20,
+				TextWrapped = true,
+				TextXAlignment = Enum.TextXAlignment.Left,
+			}, {
+				Padding = React.createElement("UIPadding", {
+					PaddingLeft = UDim.new(0, 5),
+					PaddingRight = UDim.new(0, 5),
+				}),
+
+				UIStroke = React.createElement("UIStroke", {
+					Color = Color3.fromRGB(255, 255, 255),
+					Transparency = 0.8,
+				}),
+			}),
+
+			-- Score = React.createElement("TextLabel", {
+			-- 	AutomaticSize = Enum.AutomaticSize.Y,
+			-- 	BackgroundTransparency = 1,
+			-- 	BorderColor3 = Color3.fromRGB(0, 0, 0),
+			-- 	BorderSizePixel = 0,
+			-- 	FontFace = Font.new(
+			-- 		"rbxasset://fonts/families/Michroma.json",
+			-- 		Enum.FontWeight.Bold,
+			-- 		Enum.FontStyle.Normal
+			-- 	),
+			-- 	LayoutOrder = 1,
+			-- 	Size = UDim2.fromScale(1, 0),
+			-- 	Text = "21 Tiles",
+			-- 	TextColor3 = Color3.fromRGB(170, 170, 170),
+			-- 	TextSize = 20,
+			-- 	TextWrapped = true,
+			-- 	TextXAlignment = Enum.TextXAlignment.Right,
+			-- }, {
+			-- 	Padding = React.createElement("UIPadding", {
+			-- 		PaddingLeft = UDim.new(0, 5),
+			-- 		PaddingRight = UDim.new(0, 5),
+			-- 	}),
+			-- }),
+		}),
+
+		Corner = React.createElement("UICorner", {
+			CornerRadius = UDim.new(0, 4),
+		}),
+	})
+end
+
+function PlayerList()
+	local grid: HexGrid = React.useContext(MainContext).grid
+	local visible, set_visible = React.useState(false)
+	local teams, set_teams = React.useState(grid.teams)
+
+	React.useEffect(function()
+		grid.grid_update_signal.listen(function(updates)
+			for _, update in updates do
+				if update.type == "teams" then
+					set_teams(update.teams)
+				end
+			end
+		end)
+
+		ContextActionService:BindAction("player_list", function(actionName, inputState, inputObject)
+			if inputState == Enum.UserInputState.Begin then
+				set_visible(true)
+			elseif inputState == Enum.UserInputState.End then
+				set_visible(false)
+			end
+		end, false, Enum.KeyCode.T)
+		return function()
+			ContextActionService:UnbindAction "player_list"
+		end
+	end, {})
+
+	return React.createElement("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		AutomaticSize = Enum.AutomaticSize.XY,
+		BackgroundTransparency = 1,
+		LayoutOrder = 1,
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(1, 0),
+		Visible = visible,
+	}, {
+		VerticalLayout = React.createElement("UIListLayout", {
+			Padding = UDim.new(0, 1),
+			SortOrder = Enum.SortOrder.LayoutOrder,
+		}),
+
+		Container = React.createElement("Frame", {
+			AutomaticSize = Enum.AutomaticSize.XY,
+			BackgroundTransparency = 1,
+			LayoutOrder = 2,
+			Position = UDim2.fromScale(0, 0.12),
+			Size = UDim2.fromScale(1, 0),
+		}, {
+			HorizontalLayout = React.createElement("UIListLayout", {
+				FillDirection = Enum.FillDirection.Horizontal,
+				Padding = UDim.new(0, 4),
+				SortOrder = Enum.SortOrder.LayoutOrder,
+			}),
+
+			ItemsScrollingFrame = React.createElement(
+				"ScrollingFrame",
+				themes.theme_solid {
+					AutomaticCanvasSize = Enum.AutomaticSize.Y,
+					AutomaticSize = Enum.AutomaticSize.Y,
+					BorderSizePixel = 0,
+					CanvasSize = UDim2.new(),
+					ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0),
+					ScrollBarThickness = 4,
+					Size = UDim2.fromScale(1, 0),
+				},
+				{
+					Corner = React.createElement("UICorner", {
+						CornerRadius = UDim.new(0, 4),
+					}),
+
+					VerticalLayout = React.createElement("UIListLayout", {
+						Padding = UDim.new(0, 5),
+						SortOrder = Enum.SortOrder.LayoutOrder,
+					}),
+
+					Padding = React.createElement("UIPadding", {
+						PaddingTop = UDim.new(0, 3),
+					}),
+
+					UISizeConstraint = React.createElement("UISizeConstraint", {
+						MinSize = Vector2.new(0, 200),
+					}),
+				},
+				(
+					util.table_map(teams, function(team: TeamData)
+						if team.is_player_team or team.is_spectator_team then
+							return React.createElement(TeamSection, { team = team })
+						else
+							return React.createElement(React.Fragment)
+						end
+					end)
+				)
+			),
+		}),
+
+		UISizeConstraint = React.createElement("UISizeConstraint", {
+			MaxSize = Vector2.new(600, math.huge),
+		}),
+
+		Header = React.createElement("Frame", {
+			BackgroundColor3 = Color3.fromRGB(13, 13, 13),
+			BackgroundTransparency = 0.2,
+			BorderColor3 = Color3.fromRGB(27, 42, 53),
+			BorderSizePixel = 0,
+			LayoutOrder = 1,
+			Size = UDim2.new(1, 0, 0, 40),
+		}, {
+			VerticalLayout = React.createElement("UIListLayout", {
+				SortOrder = Enum.SortOrder.LayoutOrder,
+			}),
+
+			Corner = React.createElement("UICorner", {
+				CornerRadius = UDim.new(0, 4),
+			}),
+
+			Title = React.createElement(
+				"TextLabel",
+				themes.theme_title {
+					Size = UDim2.fromScale(0, 1),
+					Text = "Players",
+					TextSize = 18,
+				},
+				{
+					SidePad = React.createElement("UIPadding", {
+						PaddingLeft = UDim.new(0, 15),
+						PaddingRight = UDim.new(0, 15),
+					}),
+				}
+			),
+		}),
+	})
+end
+
+return {
+	PlayerList = PlayerList,
+}

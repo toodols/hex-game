@@ -1,0 +1,104 @@
+local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local types = require(ReplicatedStorage.Shared.types)
+local util = require(ReplicatedStorage.Shared.util)
+local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+
+type HexGrid = types.HexGrid
+type CubicCoordinate = types.CubicCoordinate
+type EncodedCoordinate = types.EncodedCoordinate
+
+function compute_systems(grid: HexGrid)
+	local systems: { { CubicCoordinate } } = {}
+	local visited: { [EncodedCoordinate]: { CubicCoordinate } } = {}
+
+	for encoded_initial_coord in grid.cells do
+		if visited[encoded_initial_coord] then
+			continue
+		end
+		-- find any unvisited coords
+		local initial_coord = hex_grid_mod.decode_coord(encoded_initial_coord)
+		local initial_entity = grid:query_entity({
+			primary_coordinate = initial_coord,
+			type = "wires",
+			status = "complete",
+			is_destroyed = false,
+		})[1]
+
+		if initial_entity then
+			local system_visited = {}
+			table.insert(systems, {})
+			local visitable_stack: { CubicCoordinate } = { initial_coord }
+			local visitable_stack_map: { [EncodedCoordinate]: true } = {}
+
+			-- a DFS on connected neighbors, then mark those as visited
+			while #visitable_stack > 0 do
+				local coord = table.remove(visitable_stack)
+				local encoded_coord = hex_grid_mod.encode_coord(coord)
+				local ent = grid:query_entity({
+					type = "wires",
+					status = "complete",
+					is_destroyed = false,
+					primary_coordinate = coord,
+				})[1]
+				local cell = grid:get_cell(coord)
+
+				if ent and not system_visited[encoded_coord] and not visited[encoded_coord] then
+					if ent.owner == initial_entity.owner then
+						table.insert(systems[#systems], coord)
+						local portals = {}
+						if cell.type == "portal" and cell.portal.open then
+							portals = cell.portal.group
+						end
+						for _, portal in portals do
+							local encoded_neighbor_coord = hex_grid_mod.encode_coord(portal)
+							if
+								not visited[encoded_neighbor_coord] and not visitable_stack_map[encoded_neighbor_coord]
+							then
+								table.insert(visitable_stack, portal)
+								visitable_stack_map[encoded_neighbor_coord] = true
+							end
+						end
+						for _, neighbor in hex_grid_mod.neighbors_eq(coord, 1) do
+							local encoded_neighbor_coord = hex_grid_mod.encode_coord(neighbor)
+							if not visitable_stack_map[encoded_neighbor_coord] then
+								table.insert(visitable_stack, neighbor)
+								visitable_stack_map[encoded_neighbor_coord] = true
+							end
+						end
+
+						visited[encoded_coord] = systems[#systems]
+					end
+					system_visited[encoded_coord] = true
+				end
+
+				visitable_stack_map[encoded_coord] = nil
+			end
+		end
+	end
+
+	-- convert system from a collection of connected coordinates to a collection of connected entities
+	local result = {}
+	for _, system in systems do
+		local entities_map = {}
+		for _, coord in system do
+			for _, entity_id in grid:get_cell(coord).entities do
+				if grid.entities[entity_id].status == "complete" then
+					entities_map[entity_id] = true
+				end
+			end
+		end
+		local entities = {}
+		for entity_id in entities_map do
+			entities[entity_id] = grid.entities[entity_id]
+		end
+		table.insert(result, entities)
+	end
+
+	-- TODO: entities that are not connected to any system will be treated as its own independent system
+	grid.systems = result
+	return result
+end
+
+return {
+	compute_systems = compute_systems,
+}
