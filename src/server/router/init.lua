@@ -270,6 +270,7 @@ function on_decision(grid: HexGrid, plr: Player, data: { Decision })
 		updates_mod.flush_updates(grid)
 
 		grid:purge_dead_entities()
+		return 0
 	end, plr, data)
 end
 

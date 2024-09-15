@@ -7,14 +7,16 @@ local util = require(ReplicatedStorage.Shared.util)
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local types = require(ReplicatedStorage.Shared.types)
 local formatting = require(ReplicatedStorage.Shared.formatting)
-
-local Corner = require(script.Parent.corner).Corner
-local themes = require(script.Parent.themes)
-local Separator = require(script.Parent.separator).Separator
-local Cost = require(script.Parent.cost).Cost
 local researches_mod = require(ReplicatedStorage.Shared.researches)
-local MainContext = require(script.Parent.context).MainContext
-local client_entity_mod = require(script.Parent.Parent.entity)
+
+local themes = require(ReplicatedStorage.Client.ui.themes)
+local Cost = require(script.Parent.cost).Cost
+local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
+local client_entity_mod = require(ReplicatedStorage.Client.ui.Parent.entity)
+local util_components = require(ReplicatedStorage.Client.ui.util_components)
+
+local Corner = util_components.Corner
+local Separator = util_components.Separator
 
 local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: RemoteEvent
 
@@ -145,7 +147,7 @@ function BuildingItem(props: { type: string, cell: CubicCoordinate, researches: 
 
 				Top = React.createElement("Frame", {
 					BackgroundTransparency = 1,
-					Size = UDim2.fromScale(1, 1),
+					Size = UDim2.new(1, 0, 1, 0),
 				}, {
 
 					ItemTitle = React.createElement(
@@ -169,7 +171,7 @@ function BuildingItem(props: { type: string, cell: CubicCoordinate, researches: 
 							AutomaticSize = Enum.AutomaticSize.Y,
 							BackgroundTransparency = 1,
 							LayoutOrder = 3,
-							Size = UDim2.fromScale(1, 0),
+							Size = UDim2.new(1, 0, 0, 0),
 							Text = formatting.format_text(shared_behavior.description),
 							TextWrapped = true,
 							TextSize = 13,
@@ -181,7 +183,7 @@ function BuildingItem(props: { type: string, cell: CubicCoordinate, researches: 
 							BackgroundTransparency = 1,
 							LayoutOrder = 4,
 							AutomaticSize = Enum.AutomaticSize.Y,
-							Size = UDim2.fromScale(1, 0),
+							Size = UDim2.new(1, 0, 0, 0),
 							Text = "Requires Research: " .. table.concat(
 								util.table_map(shared_behavior.required_research, function(research_id)
 									local name = researches_mod.researches[research_id].name
@@ -348,7 +350,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 						Enum.FontWeight.Regular,
 						Enum.FontStyle.Normal
 					),
-					Size = UDim2.fromScale(0, 1),
+					Size = UDim2.new(0, 0, 1, 0),
 					Text = if i == current_page then `<b>{page.name}</b>` else page.name,
 					TextColor3 = Color3.fromRGB(255, 255, 255),
 					TextSize = 18,

@@ -1,9 +1,10 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local React = require(ReplicatedStorage.Packages.react)
 local RunService = game:GetService "RunService"
-local MainContext = require(script.Parent.context).MainContext
-local Corner = require(script.Parent.corner).Corner
-local themes = require(script.Parent.themes)
+local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
+local themes = require(ReplicatedStorage.Client.ui.themes)
+local util_components = require(ReplicatedStorage.Client.ui.util_components)
+local Corner = util_components.Corner
 
 local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: RemoteEvent
 
@@ -30,9 +31,9 @@ function TopCenter()
 			local current_time = DateTime.now().UnixTimestampMillis
 			bar_ref.current.Size =
 				UDim2.new((current_time - grid.turn_start_time) / (grid.turn_end_time - grid.turn_start_time), 0, 1, 0)
-			display_ref.current.Text = "Next Turn: "
-				.. math.floor((grid.turn_end_time - current_time) / 100) / 10
-				.. "s"
+			local t = grid.turn_end_time - current_time
+			t = math.max(0, t)
+			display_ref.current.Text = "Next Turn: " .. math.floor(t / 100) / 10 .. "s"
 		end)
 
 		return function()
@@ -80,8 +81,8 @@ function TopCenter()
 					Enum.FontWeight.Bold,
 					Enum.FontStyle.Normal
 				),
-				Position = UDim2.fromScale(0, 0.325),
-				Size = UDim2.fromScale(1, 0.4),
+				Position = UDim2.new(0, 0, 0.325, 0),
+				Size = UDim2.new(1, 0, 0.4, 0),
 				Text = tostring(grid.turn) .. '<font color="#00FF00" size="30"></font>',
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 50,
@@ -132,7 +133,7 @@ function TopCenter()
 				BackgroundColor3 = Color3.fromRGB(57, 57, 57),
 				BorderColor3 = Color3.fromRGB(0, 0, 0),
 				BorderSizePixel = 0,
-				Size = UDim2.fromScale(0, 1),
+				Size = UDim2.new(0, 0, 1, 0),
 				ref = bar_ref,
 			}, {
 				Corner = React.createElement("UICorner", {
@@ -150,7 +151,7 @@ function TopCenter()
 					Enum.FontWeight.Bold,
 					Enum.FontStyle.Normal
 				),
-				Position = UDim2.fromScale(0.5, 0.5),
+				Position = UDim2.new(0.5, 0, 0.5, 0),
 				Size = UDim2.fromOffset(0, 20),
 				Text = "Next Turn: 0.0s",
 				TextColor3 = Color3.fromRGB(255, 255, 255),
@@ -189,7 +190,7 @@ function TopCenter()
 				BorderSizePixel = 0,
 				Image = "http://www.roblox.com/asset/?id=6026667005",
 				LayoutOrder = 1,
-				Position = UDim2.fromScale(0, 0.5),
+				Position = UDim2.new(0, 0, 0.5, 0),
 				Size = UDim2.fromOffset(20, 20),
 			}),
 
@@ -201,7 +202,7 @@ function TopCenter()
 				BorderSizePixel = 0,
 				FontFace = Font.new "rbxasset://fonts/families/SourceSansPro.json",
 				LayoutOrder = 2,
-				Size = UDim2.fromScale(0, 1),
+				Size = UDim2.new(0, 0, 1, 0),
 				Text = "Skip",
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 20,
@@ -227,7 +228,7 @@ function TopCenter()
 				BorderSizePixel = 0,
 				FontFace = Font.new "rbxasset://fonts/families/SourceSansPro.json",
 				LayoutOrder = 2,
-				Size = UDim2.fromScale(0, 1),
+				Size = UDim2.new(0, 0, 1, 0),
 				Text = `{grid.current_skips}/{grid.needed_skips}`,
 				TextColor3 = Color3.fromRGB(190, 190, 190),
 				TextSize = 15,

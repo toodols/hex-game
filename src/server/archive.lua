@@ -16,6 +16,8 @@ type Context = {}
 type Schema<T> = {
 	serialize: (T, Context) -> any,
 	deserialize: (any, Context) -> T,
+	-- serialize_binary: ((T, Context) -> string)?,
+	-- deserialize_binary: ((string, Context) -> T)?,
 }
 
 function enum(symbols: { string }): Schema<string>
@@ -33,7 +35,7 @@ function enum(symbols: { string }): Schema<string>
 			return symbol_map[symbol] or symbol
 		end,
 		deserialize = function(symbol_id): any
-			return symbols[tonumber(symbol_id)] or symbol_id
+			return symbols[tonumber(symbol_id) :: any] or symbol_id
 		end,
 	}
 end

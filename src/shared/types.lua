@@ -99,7 +99,7 @@ export type Entity = {
 		always_visible: boolean?,
 		-- timestamp of when it was first requested to be constructed
 		requested_at: number,
-	}?,
+	},
 }
 
 export type EntityId = string
@@ -159,7 +159,7 @@ export type HexCell = {
 				portal: boolean?,
 			},
 		},
-	}?,
+	},
 }
 
 export type TeamColor = {
@@ -327,13 +327,13 @@ export type Schedule = {
 
 export type HexGrid = {
 	-- instances are always nil on the server, while always a table on the client
-	entity_instance_map: InstanceMap<EntityId>?,
+	entity_instance_map: InstanceMap<EntityId>,
 	entities: { [EntityId]: Entity },
 	grid_update_signal: Signal<{ GridUpdate }>,
 	instance_entity_map: { [Instance]: EntityId },
 	-- ngl i forgot why I used EncodedCoordinate instead of CubicCoordinate
 	instance_cell_map: { [Instance]: EncodedCoordinate },
-	cell_instance_map: InstanceMap<EncodedCoordinate>?,
+	cell_instance_map: InstanceMap<EncodedCoordinate>,
 	cells: { [EncodedCoordinate]: HexCell },
 
 	cell_instance_root: Folder?,
@@ -348,7 +348,7 @@ export type HexGrid = {
 	-- extents: Extents,
 	get_cell: (self: HexGrid, coordinate: CubicCoordinate) -> HexCell,
 	-- returns table of entities that fit the criteria
-	query_entity: (self: HexGrid, props: table) -> { Entity },
+	query_entity: (self: HexGrid, props: any) -> { Entity },
 	get_player_team: (self: HexGrid, player: Player) -> TeamData,
 	new_team: (self: HexGrid, players: { Player }, color: TeamColor?, name: string?) -> TeamData,
 	purge_dead_entities: (self: HexGrid) -> nil,

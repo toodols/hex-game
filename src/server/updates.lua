@@ -15,11 +15,11 @@ function flush_updates(grid: HexGrid)
 				continue
 			end
 			local mapped = util.table_filter_map(buffer, function(update: GridUpdate)
+				local target = (update :: any).target or "everyone"
 				if
 					team.server_data.visibility ~= "full"
-					and update.target
-					and update.target ~= "everyone"
-					and table.find(update.target, team.id) == nil
+					and target ~= "everyone"
+					and table.find(target, team.id) == nil
 				then
 					return
 				end
@@ -46,6 +46,7 @@ function flush_updates(grid: HexGrid)
 							coordinate = update.coordinate,
 						}
 					end
+					return nil
 				elseif update.type == "cells" then
 					return {
 						type = update.type,

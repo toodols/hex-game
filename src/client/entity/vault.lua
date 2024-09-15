@@ -10,6 +10,7 @@ type HexGrid = types.HexGrid
 local model = asset_server.load "Entities/Vault"
 
 function update_model(self: Entity, grid: HexGrid)
+	assert(self.inventory ~= nil, "inventory nil")
 	local crystal = grid.entity_instance_map[self.id]:FindFirstChild "crystal" :: BasePart
 	if self.status == "complete" and #self.inventory.items > 0 then
 		local base_size = Vector3.new(0.351, 1.03, 0.351)

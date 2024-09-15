@@ -1,11 +1,10 @@
 local ContextActionService = game:GetService "ContextActionService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local React = require(ReplicatedStorage.Packages.react)
-local ReactRoblox = require(ReplicatedStorage.Packages["react-roblox"])
 local types = require(ReplicatedStorage.Shared.types)
-local themes = require(script.Parent.themes)
 local util = require(ReplicatedStorage.Shared.util)
-local MainContext = require(script.Parent.context).MainContext
+local themes = require(ReplicatedStorage.Client.ui.themes)
+local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 
 type TeamData = types.TeamData
 type HexGrid = types.HexGrid
@@ -18,7 +17,7 @@ function TeamSection(props: {
 		BackgroundColor3 = Color3.fromRGB(12, 12, 12),
 		BackgroundTransparency = 0.2,
 		BorderColor3 = Color3.fromRGB(27, 42, 53),
-		Size = UDim2.fromScale(1, 0),
+		Size = UDim2.new(1, 0, 0, 0),
 	}, {
 		VerticalLayout = React.createElement("UIListLayout", {
 			Padding = UDim.new(0, 1),
@@ -31,7 +30,7 @@ function TeamSection(props: {
 				AutomaticSize = Enum.AutomaticSize.Y,
 				BackgroundTransparency = 1,
 				LayoutOrder = 3,
-				Size = UDim2.fromScale(1, 0),
+				Size = UDim2.new(1, 0, 0, 0),
 			},
 			{
 				VerticalLayout3 = React.createElement("UIListLayout", {
@@ -51,7 +50,7 @@ function TeamSection(props: {
 					),
 					LayoutOrder = 2,
 					RichText = true,
-					Size = UDim2.fromScale(1, 0),
+					Size = UDim2.new(1, 0, 0, 0),
 					Text = `{player.DisplayName} (<font color="#888"><i>@{player.Name}</i></font>)`,
 					TextColor3 = Color3.fromRGB(170, 170, 170),
 					TextSize = 15,
@@ -69,7 +68,7 @@ function TeamSection(props: {
 		Frame = React.createElement("Frame", {
 			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundTransparency = 1,
-			Size = UDim2.fromScale(1, 0),
+			Size = UDim2.new(1, 0, 0, 0),
 		}, {
 			Header = React.createElement("TextLabel", {
 				AutomaticSize = Enum.AutomaticSize.Y,
@@ -80,7 +79,7 @@ function TeamSection(props: {
 					Enum.FontStyle.Normal
 				),
 				LayoutOrder = 1,
-				Size = UDim2.fromScale(1, 0),
+				Size = UDim2.new(1, 0, 0, 0),
 				Text = props.team.name,
 				TextColor3 = props.team.color.color,
 				TextSize = 20,
@@ -109,7 +108,7 @@ function TeamSection(props: {
 			-- 		Enum.FontStyle.Normal
 			-- 	),
 			-- 	LayoutOrder = 1,
-			-- 	Size = UDim2.fromScale(1, 0),
+			-- 	Size = UDim2.new(1, 0, 0, 0),
 			-- 	Text = "21 Tiles",
 			-- 	TextColor3 = Color3.fromRGB(170, 170, 170),
 			-- 	TextSize = 20,
@@ -160,8 +159,8 @@ function PlayerList()
 		AutomaticSize = Enum.AutomaticSize.XY,
 		BackgroundTransparency = 1,
 		LayoutOrder = 1,
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromScale(1, 0),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		Size = UDim2.new(1, 0, 0, 0),
 		Visible = visible,
 	}, {
 		VerticalLayout = React.createElement("UIListLayout", {
@@ -173,8 +172,8 @@ function PlayerList()
 			AutomaticSize = Enum.AutomaticSize.XY,
 			BackgroundTransparency = 1,
 			LayoutOrder = 2,
-			Position = UDim2.fromScale(0, 0.12),
-			Size = UDim2.fromScale(1, 0),
+			Position = UDim2.new(0, 0, 0.12, 0),
+			Size = UDim2.new(1, 0, 0, 0),
 		}, {
 			HorizontalLayout = React.createElement("UIListLayout", {
 				FillDirection = Enum.FillDirection.Horizontal,
@@ -191,7 +190,7 @@ function PlayerList()
 					CanvasSize = UDim2.new(),
 					ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0),
 					ScrollBarThickness = 4,
-					Size = UDim2.fromScale(1, 0),
+					Size = UDim2.new(1, 0, 0, 0),
 				},
 				{
 					Corner = React.createElement("UICorner", {
@@ -246,7 +245,7 @@ function PlayerList()
 			Title = React.createElement(
 				"TextLabel",
 				themes.theme_title {
-					Size = UDim2.fromScale(0, 1),
+					Size = UDim2.new(0, 0, 1, 0),
 					Text = "Players",
 					TextSize = 18,
 				},

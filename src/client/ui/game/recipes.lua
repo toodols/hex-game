@@ -5,7 +5,7 @@ local util = require(ReplicatedStorage.Shared.util)
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local items_mod = require(ReplicatedStorage.Shared.items)
 local Cost = require(script.Parent.cost).Cost
-local hooks = require(script.Parent.hooks)
+local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local factory_behavior = shared_entity_mod.registry.factory
 local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: RemoteEvent
 
@@ -108,7 +108,7 @@ function Recipes(props: { entity_id: EntityId, on_close: () -> () })
 					Enum.FontWeight.Bold,
 					Enum.FontStyle.Normal
 				),
-				Size = UDim2.fromScale(0, 1),
+				Size = UDim2.new(0, 0, 1, 0),
 				Text = "Recipes",
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 18,
@@ -127,8 +127,8 @@ function Recipes(props: { entity_id: EntityId, on_close: () -> () })
 				AutomaticSize = Enum.AutomaticSize.XY,
 				BackgroundTransparency = 1,
 				LayoutOrder = 2,
-				Position = UDim2.fromScale(0, 0.12),
-				Size = UDim2.fromScale(1, 0),
+				Position = UDim2.new(0, 0, 0.12, 0),
+				Size = UDim2.new(1, 0, 0, 0),
 			},
 			{
 				UIPadding = React.createElement("UIPadding", {

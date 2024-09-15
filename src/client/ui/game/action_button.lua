@@ -27,7 +27,7 @@ function ActionButton(props: {
 				BackgroundTransparency = 1,
 			}):Play()
 		end,
-		Position = UDim2.fromScale(0, 0),
+		Position = UDim2.new(0, 0, 0, 0),
 		Size = UDim2.new(1, 0, 0, 20),
 		Text = props.Text,
 		TextColor3 = props.color,

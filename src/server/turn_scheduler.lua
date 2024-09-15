@@ -6,6 +6,9 @@ local action_phase_mod = require(script.Parent.action_phase)
 type HexGrid = types.HexGrid
 
 function init(grid: HexGrid)
+	if grid.turn_schedule then
+		return
+	end
 	local co
 	co = coroutine.create(function()
 		local iter = 0
@@ -29,7 +32,6 @@ function init(grid: HexGrid)
 			grid.skipped = {}
 			recalculate_skips(grid)
 			updates_mod.flush_updates(grid)
-
 			task.delay(wait_time, function(target_iter)
 				if iter == target_iter then
 					coroutine.resume(co)
@@ -40,21 +42,25 @@ function init(grid: HexGrid)
 		end
 	end)
 
-	coroutine.resume(co)
-
 	grid.turn_schedule = {
 		skip = function()
 			coroutine.resume(co)
 		end,
 	}
-	recalculate_skips(grid)
+
+	coroutine.resume(co)
 end
 
 function recalculate_skips(grid: HexGrid)
+	assert(grid.turn_schedule, "grid.turn_schedule not initialized")
 	local needed_skips = 0
 	for _, team in grid.teams do
 		needed_skips += #team.players
 	end
+
+	-- if needed_skips == 0 then
+	-- 	return
+	-- end
 
 	if #grid.skipped >= needed_skips then
 		grid.turn_schedule.skip()

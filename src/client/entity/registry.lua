@@ -8,7 +8,7 @@ type HexCell = types.HexCell
 
 local registry: { [string]: ClientEntityBehavior } = {}
 type ClientEntityBehavior = {
-	model: Instance?,
+	model: Instance,
 
 	-- this happens before the model is parented to workspace
 	init: (self: Entity, grid: HexGrid) -> (),
@@ -32,7 +32,7 @@ local transparency = {
 	complete = 0,
 }
 
-function with_defaults(t: table)
+function with_defaults(t: any)
 	return {
 		model = t.model,
 		init = t.init or function() end,

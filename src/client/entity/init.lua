@@ -1,13 +1,9 @@
--- Dependency chain:
--- entity <-- {stockpile, wires} <-- registry
-
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local StarterPack = game:GetService "StarterPack"
 local registry_mod = require(script.registry)
 local hex_grid = require(ReplicatedStorage.Shared.hex_grid)
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
-local into_vec3 = hex_grid.into_vec3
+
 type Entity = types.Entity
 type HexGrid = types.HexGrid
 

@@ -9,7 +9,6 @@ local items_mod = require(ReplicatedStorage.Shared.items)
 
 local server_types = require(ServerScriptService.Server.types)
 local server_entity_mod = require(ServerScriptService.Server.entity)
-local remotes_mod = require(ServerScriptService.Server.remotes)
 local server_util = require(ServerScriptService.Server.util)
 local damage_mod = require(ServerScriptService.Server.damage)
 local serialize_mod = require(ServerScriptService.Server.serialize)
@@ -108,7 +107,7 @@ function run_action_phase(grid: HexGrid)
 			entities = entities,
 			overflow_items = {},
 			power = 0,
-			team = grid.entities[next(entities)].owner,
+			team = grid.entities[next(entities) :: any].owner,
 		} :: System
 
 		-- mark blueprints neighboring the system for promotion
@@ -191,7 +190,7 @@ function run_action_phase(grid: HexGrid)
 				table.insert(old_queue, action)
 			end
 
-			for _, exchange_action: EntityAction in
+			for _, exchange_action: any in
 				util.table_extract(action_state.queue, function(action)
 					return (action.type == "exchange" or action.type == "exchange_promise")
 						and table.find(util.table_keys(system.entities), action.entity_id) ~= nil
@@ -543,7 +542,7 @@ function run_action_phase(grid: HexGrid)
 		else
 			local targets: { TeamId } = {}
 			for _, team_id in util.table_keys(values) do
-				table.insert(targets, grid.teams[team_id])
+				table.insert(targets, team_id)
 			end
 			table.insert(grid.updates_buffer[#grid.updates_buffer], {
 				type = "entity_update",

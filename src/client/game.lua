@@ -9,8 +9,8 @@ local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local items_mod = require(ReplicatedStorage.Shared.items)
 
-local ui = require(script.ui)
-local client_entity_mod = require(script.entity)
+local init_game_ui = require(script.Parent.ui.game).init_ui
+local client_entity_mod = require(script.Parent.entity)
 local cells_mod = require(ReplicatedStorage.Shared.cells)
 
 -- apparently local x: RemoteEvent is the same as local x: Instance. Nice.
@@ -108,7 +108,8 @@ function update_tile_deconstructs(grid: HexGrid, coordinate: CubicCoordinate)
 	end
 end
 
-function init(grid_data: PartialHexGrid)
+function init()
+	local grid_data = get_hex_grid_data_remote:InvokeServer()
 	local grid = hex_grid_mod.new_grid_from_data(grid_data)
 
 	local entity_folder = Instance.new "Folder"
@@ -154,44 +155,10 @@ function init(grid_data: PartialHexGrid)
 		local updated_entities = {}
 
 		for _, update in updates do
-			-- if update.type == "entity_add" then
-			-- 	local entity = update.entity
-			-- 	if grid.entities[entity.id] then
-			-- 		error "Duplicate entity add. This is a bug"
-			-- 	end
-			-- 	grid.entities[entity.id] = entity
-
-			-- 	for _, coord in entity.coordinates do
-			-- 		local cell = grid:get_cell(coord)
-			-- 		table.insert(cell.entities, entity.id)
-			-- 	end
-
-			-- 	init_entity_client(grid, entity)
-
-			-- 	-- update neighbor
-			-- 	client_entity_mod.registry[entity.type].init(entity, grid)
-			-- 	update_neighbors(grid, entity.coordinates)
-			-- elseif update.type == "entity_remove" then
-			-- 	local entity = grid.entities[update.entity.id]
-			-- 	for _, coord in entity.coordinates do
-			-- 		local cell = grid:get_cell(coord)
-			-- 		util.table_remove_needle(cell.entities, entity.id)
-			-- 	end
-
-			-- 	grid.entities[update.entity.id] = nil
-			-- 	local instance: Instance = grid.entity_instance_map[entity.id]
-			-- 	if instance then
-			-- 		instance:Destroy()
-			-- 	end
-			-- 	grid.entity_instance_map[entity.id] = nil
-			-- 	-- play_animation(instance)
-			-- 	update_neighbors(grid, entity.coordinates)
-			-- 	update_tile_deconstructs(grid, update.entity.primary_coordinate)
 			if update.type == "entity_update" then
 				-- should be fine if single threaded
 				local old_entity = grid.entities[update.entity.id]
 				grid.entities[update.entity.id] = update.entity
-				-- first pass: populate grid.entities with the data
 				table.insert(updated_entities, { old = old_entity, new = update.entity })
 			elseif update.type == "turn_timer" then
 				grid.turn_end_time = update.turn_end_time
@@ -293,9 +260,10 @@ function init(grid_data: PartialHexGrid)
 		grid:purge_dead_entities()
 	end)
 	--
-	ui.init_ui(grid)
+	init_game_ui(grid)
 	return grid
 end
 
-local grid_data = get_hex_grid_data_remote:InvokeServer()
-local grid = init(grid_data)
+return {
+	init = init,
+}

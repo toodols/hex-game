@@ -10,17 +10,17 @@ local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local formatting = require(ReplicatedStorage.Shared.formatting)
 local items_mod = require(ReplicatedStorage.Shared.items)
 
-local hooks = require(script.Parent.hooks)
-local client_entity_mod = require(script.Parent.Parent.entity)
-local context_mod = require(script.Parent.context)
-local themes = require(script.Parent.themes)
-local Corner = require(script.Parent.corner).Corner
-local Container = require(script.Parent.container).Container
-local Separator = require(script.Parent.separator).Separator
+local hooks = require(ReplicatedStorage.Client.ui.hooks)
+local client_entity_mod = require(ReplicatedStorage.Client.ui.Parent.entity)
+local context_mod = require(ReplicatedStorage.Client.ui.context)
+local themes = require(ReplicatedStorage.Client.ui.themes)
 local ActionButton = require(script.Parent.action_button).ActionButton
 local Cost = require(script.Parent.cost).Cost
 local MainContext = context_mod.MainContext
 local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: RemoteEvent
+local util_components = require(ReplicatedStorage.Client.ui.util_components)
+local Corner = util_components.Corner
+local Separator = util_components.Separator
 
 type EntityId = types.EntityId
 type GridUpdate = types.GridUpdate
@@ -113,7 +113,7 @@ function EntityInformation(props: {
 		ref = ref,
 	}, {
 		Corner = React.createElement(Corner),
-		Container = React.createElement(Container, {}, {
+		Container = React.createElement("Frame", themes.theme_container {}, {
 			VerticalLayout = React.createElement("UIListLayout", {
 				Padding = UDim.new(0, 4),
 				SortOrder = Enum.SortOrder.LayoutOrder,
@@ -127,13 +127,13 @@ function EntityInformation(props: {
 				BorderSizePixel = 0,
 				ref = header_ref,
 				LayoutOrder = 1,
-				Size = UDim2.fromScale(1, 0),
+				Size = UDim2.new(1, 0, 0, 0),
 			}, {
 				title = React.createElement(
 					"TextLabel",
 					themes.theme_title {
 						TextColor3 = text_color,
-						Size = UDim2.fromScale(1, 1),
+						Size = UDim2.new(1, 0, 1, 0),
 						Text = shared_behavior.name,
 					},
 					{
@@ -150,7 +150,7 @@ function EntityInformation(props: {
 						props.on_select()
 					end,
 					BackgroundTransparency = 1,
-					Size = UDim2.fromScale(1, 1),
+					Size = UDim2.new(1, 0, 1, 0),
 					Text = "",
 					ZIndex = 10,
 				}),
@@ -163,7 +163,7 @@ function EntityInformation(props: {
 						BackgroundTransparency = 1,
 						BorderColor3 = Color3.fromRGB(0, 0, 0),
 						BorderSizePixel = 0,
-						Position = UDim2.fromScale(1, 0),
+						Position = UDim2.new(1, 0, 0, 0),
 						Size = UDim2.new(0, 100, 1, 0),
 					},
 					{
@@ -187,7 +187,7 @@ function EntityInformation(props: {
 							BackgroundTransparency = 1,
 							BorderSizePixel = 0,
 							TextColor3 = Color3.fromRGB(255, 255, 255),
-							Size = UDim2.fromScale(100, 100),
+							Size = UDim2.new(0, 100, 0, 100),
 							TextSize = 12,
 							TextXAlignment = Enum.TextXAlignment.Right,
 							Text = if entity.max_health ~= math.huge
@@ -334,7 +334,7 @@ function EntityInformation(props: {
 						-- IIFE IN LUA??? :vomit:
 						(function()
 							local cost = {}
-							for item, amount in pairs(entity.cost) do
+							for item, amount in entity.cost do
 								cost[item] = `{entity.cost_fulfilled[item] or 0}/{amount}`
 							end
 							return React.createElement(Cost, {

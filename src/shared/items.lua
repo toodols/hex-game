@@ -87,7 +87,7 @@ function inventory_sum(accumulator: { [Item]: number }, items: { Item })
 end
 
 -- Returns whether `accumulator` has enough items to satisfy `target`
-function accumulator_satisfies_target(accumulator: { [Item]: number }, target: { [Item]: number })
+function accumulator_satisfies_target(accumulator: { [Item]: number? }, target: { [Item]: number? })
 	for item, count in target do
 		if count > 0 and (not accumulator[item] or accumulator[item] < count) then
 			return false

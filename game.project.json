@@ -1,0 +1,32 @@
+{
+	"name": "hex-game-game",
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"Shared": {
+				"$path": "src/shared"
+			},
+			"Packages": {
+				"$path": "Packages"
+			},
+			"Client": {
+				"$path": "src/client"
+			}
+		},
+		"ServerScriptService": {
+			"Server": {
+				"$path": "src/server"
+			},
+			"server_init": {
+				"$path": "src/init/game.server.lua"
+			}
+		},
+		"StarterPlayer": {
+			"StarterPlayerScripts": {
+				"client_init": {
+					"$path": "src/init/game.client.lua"
+				}
+			}
+		}
+	}
+}

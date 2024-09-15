@@ -34,9 +34,7 @@ export type EntityAction =
 export type ActionState = {
 	queue: { EntityAction },
 	-- read as: entity is dirty for team in dirty_entities[entity.id][team.id]
-	dirty_entities: { [EntityId]: { everyone: true } | {
-		[TeamId]: true,
-	} },
+	dirty_entities: { [EntityId]: { [EntityId | "everyone"]: true? } },
 	dead_entities: { [EntityId]: true },
 	decayable_entities: { [EntityId]: boolean },
 }

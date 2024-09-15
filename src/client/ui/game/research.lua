@@ -1,4 +1,3 @@
-local ContextActionService = game:GetService "ContextActionService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local TweenService = game:GetService "TweenService"
 local UserInputService = game:GetService "UserInputService"
@@ -8,15 +7,16 @@ local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local formatting = require(ReplicatedStorage.Shared.formatting)
 
-local themes = require(script.Parent.themes)
-local MainContext = require(script.Parent.context).MainContext
+local themes = require(ReplicatedStorage.Client.ui.themes)
+local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local ActionButton = require(script.Parent.action_button).ActionButton
 local Cost = require(script.Parent.cost).Cost
-local Corner = require(script.Parent.corner).Corner
-local hooks = require(script.Parent.hooks)
+local util_components = require(ReplicatedStorage.Client.ui.util_components)
+local Corner = util_components.Corner
+
 local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: RemoteEvent
-local formatting = require(ReplicatedStorage.Shared.formatting)
 
 type CubicCoordinate = types.CubicCoordinate
 type Entity = types.Entity
@@ -69,13 +69,12 @@ function Icon(props: {
 			ZIndex = ZIndex,
 			LayoutOrder = props.LayoutOrder,
 		})
-	elseif icon.type == "none" then
+	else
 		return React.createElement(React.Fragment)
 	end
 end
 
 function Aside(props: { state: ResearchState, on_add: () -> (), on_remove: () -> () })
-	local icon = props.state.icon
 	return React.createElement(
 		"Frame",
 		themes.theme_solid {
@@ -188,7 +187,7 @@ function Node(props: { state: ResearchState, on_click: () -> () })
 		}),
 		Image = React.createElement("ImageLabel", {
 			BackgroundTransparency = 1,
-			Size = UDim2.fromScale(1, 1),
+			Size = UDim2.new(1, 0, 1, 0),
 			Rotation = 90,
 			ImageTransparency = 0.5,
 			ScaleType = Enum.ScaleType.Fit,
@@ -202,8 +201,8 @@ function Node(props: { state: ResearchState, on_click: () -> () })
 		}),
 		Hitbox = React.createElement("TextButton", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.fromScale(0.5, 0.5),
-			Size = UDim2.fromScale(0.9, 0.9),
+			Position = UDim2.new(0.5, 0, 0.5, 0),
+			Size = UDim2.new(0.9, 0, 0.9, 0),
 			BackgroundTransparency = 0.9,
 			Text = "",
 			[React.Event.MouseButton1Click] = function()
@@ -291,8 +290,8 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 		BackgroundTransparency = 0.05,
 		BorderColor3 = Color3.fromRGB(27, 42, 53),
 		LayoutOrder = 1,
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromScale(1, 1),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		Size = UDim2.new(1, 0, 1, 0),
 		Active = true,
 	}, {
 		Header = React.createElement("Frame", {
@@ -319,7 +318,7 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 					Enum.FontWeight.Bold,
 					Enum.FontStyle.Normal
 				),
-				Size = UDim2.fromScale(1, 1),
+				Size = UDim2.new(1, 0, 1, 0),
 				Text = "Research",
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 18,
@@ -336,7 +335,7 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 			"Frame",
 			{
 				AnchorPoint = Vector2.new(0.5, 0.5),
-				Position = UDim2.fromScale(0.5, 0.4),
+				Position = UDim2.new(0.5, 0, 0.4, 0),
 				BackgroundTransparency = 1,
 				ref = transform_ref,
 				Size = UDim2.fromOffset(TRANSFORM_SIZE, TRANSFORM_SIZE),
@@ -348,8 +347,8 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 					ImageTransparency = 0.9,
 					Position = UDim2.fromScale(pos[1], pos[2]),
 					ScaleType = Enum.ScaleType.Tile,
-					Size = UDim2.fromScale(1, 1),
-					TileSize = UDim2.fromScale(0.139, 0.145),
+					Size = UDim2.new(1, 0, 1, 0),
+					TileSize = UDim2.new(0.139, 0, 0.145, 0),
 				})
 			end),
 			util.table_map(util.table_keys(entity.researches.states), function(id)

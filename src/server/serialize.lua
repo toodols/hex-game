@@ -1,5 +1,4 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local effective_visibility = require(ReplicatedStorage.Shared.effective_visibility).effective_visibility
@@ -11,6 +10,7 @@ type TeamId = types.TeamId
 type HexCell = types.HexCell
 type PartialHexGrid = types.PartialHexGrid
 type TeamData = types.TeamData
+type EntityId = types.EntityId
 
 function buildable_for_team(grid: HexGrid, cell: HexCell, team: TeamId): boolean
 	local result = false
@@ -36,7 +36,7 @@ function serialize_team(grid: HexGrid, team: TeamData): TeamData
 	end
 	return copy :: TeamData
 end
-function serialize_entity_for_team(grid: HexGrid, entity: Entity, team: TeamId): Entity | nil
+function serialize_entity_for_team(grid: HexGrid, entity: Entity, team: TeamId): Entity?
 	local cell = grid:get_cell(entity.primary_coordinate)
 	local visible_for_team = effective_visibility(cell.server_data.visibility[team])
 		or entity.server_data.always_visible
@@ -52,6 +52,7 @@ function serialize_entity_for_team(grid: HexGrid, entity: Entity, team: TeamId):
 		end
 		return copy :: Entity
 	end
+	return nil
 end
 
 function serialize_cell_for_team(grid: HexGrid, cell: HexCell, team: TeamId): HexCell | nil
@@ -75,6 +76,7 @@ function serialize_cell_for_team(grid: HexGrid, cell: HexCell, team: TeamId): He
 			visible_for_team = visible_for_team,
 			buildable_for_team = buildable_for_team(grid, cell, team),
 			influences = influences,
+			server_data = nil :: any,
 		}
 	else
 		return {
@@ -87,10 +89,19 @@ function serialize_cell_for_team(grid: HexGrid, cell: HexCell, team: TeamId): He
 			type = cell.type,
 			visible_for_team = visible_for_team,
 			influences = {},
+			server_data = nil :: any,
 		}
 	end
 end
 function serialize_grid_for_team(grid: HexGrid, team: TeamId): PartialHexGrid
+	local entities: { [EntityId]: Entity } = {}
+	for entity_id, entity in grid.entities do
+		local serialized = serialize_entity_for_team(grid, entity, team)
+		if serialized then
+			entities[entity_id] = serialized
+		end
+	end
+
 	local partial_grid: PartialHexGrid = {
 		cells = util.table_map(grid.cells, function(cell)
 			return serialize_cell_for_team(grid, cell, team)
@@ -105,14 +116,7 @@ function serialize_grid_for_team(grid: HexGrid, team: TeamId): PartialHexGrid
 		highest_turn = grid.highest_turn,
 		turn_end_time = grid.turn_end_time,
 		turn_start_time = grid.turn_start_time,
-		entities = util.table_from_entries(util.table_filter(
-			util.table_map(grid.entities, function(entity: Entity)
-				return { entity.id, serialize_entity_for_team(grid, entity, team) }
-			end),
-			function(entry)
-				return entry[1] ~= nil
-			end
-		)),
+		entities = entities,
 	}
 	return partial_grid
 end

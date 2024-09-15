@@ -68,6 +68,7 @@ function table_find_pred<T>(tab: { T }, pred: (value: T) -> boolean): T?
 			return value
 		end
 	end
+	return nil
 end
 
 -- creates a dictionary from a table of (K,V) entries
@@ -81,7 +82,7 @@ end
 
 -- filters out T which fails cond
 function table_filter<K, T>(tab: { [K]: T }, cond: (T) -> boolean): { [K]: T }
-	local result = {}
+	local result: any = {}
 	for idx, value in tab do
 		if cond(value) then
 			if type(idx) == "number" then
@@ -96,7 +97,7 @@ end
 
 -- maps I to O, excluding nil
 function table_filter_map<K, I, O>(tab: { [K]: I }, fn: (I) -> O?): { [K]: O }
-	local result = {}
+	local result: any = {}
 	for idx, value in tab do
 		local v = fn(value)
 		if v then
@@ -112,7 +113,7 @@ end
 
 -- filters out nil values
 function table_filter_nil<T>(tab: { T? }): { T }
-	return table_filter(tab, function(value)
+	return table_filter(tab :: { T }, function(value)
 		return value ~= nil
 	end)
 end
@@ -171,13 +172,13 @@ function deep_equal(a, b)
 		return false
 	end
 
-	for key in pairs(a) do
+	for key in a do
 		if not deep_equal(a[key], b[key]) then
 			return false
 		end
 	end
 
-	for key in pairs(b) do
+	for key in b do
 		if not deep_equal(a[key], b[key]) then
 			return false
 		end
@@ -188,7 +189,7 @@ end
 
 function deep_copy<T>(obj: T): T
 	if type(obj) == "table" then
-		local copy = {}
+		local copy: any = {}
 		for k, v in obj do
 			copy[k] = deep_copy(v)
 		end

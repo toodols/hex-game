@@ -17,13 +17,13 @@ local function update_model(self: Entity, grid: HexGrid)
 		return v.type == "ability" and v.ability_type == "scout_attack"
 	end)
 
-	local indicator: PVInstance = instance:FindFirstChild "AttackArrow"
+	local indicator: PVInstance? = instance:FindFirstChild "AttackArrow"
 	if attack then
-		if not indicator then
-			indicator = indicator_template:Clone()
-			indicator.Parent = instance
+		if indicator == nil then
+			indicator = indicator_template:Clone();
+			(indicator :: any).Parent = instance
 		end
-		indicator:PivotTo(
+		(indicator :: any):PivotTo(
 			CFrame.lookAt(
 				instance:GetPivot().Position,
 				instance:GetPivot().Position

@@ -1,12 +1,16 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
-type CubicCoordinate = types.CubicCoordinate
-local themes = require(script.Parent.themes)
-local Corner = require(script.Parent.corner).Corner
 local util = require(ReplicatedStorage.Shared.util)
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
+
+local themes = require(ReplicatedStorage.Client.ui.themes)
+local util_components = require(ReplicatedStorage.Client.ui.util_components)
+local Corner = util_components.Corner
 local ActionButton = require(script.Parent.action_button).ActionButton
+
+type CubicCoordinate = types.CubicCoordinate
+
 local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: RemoteEvent
 
 function BuildingItem(props: { type: string, selected_cells: { CubicCoordinate } })
@@ -19,7 +23,7 @@ function BuildingItem(props: { type: string, selected_cells: { CubicCoordinate }
 			"Frame",
 			themes.theme_solid {
 				ClipsDescendants = true,
-				Size = UDim2.fromScale(1, 1),
+				Size = UDim2.new(1, 0, 1, 0),
 			},
 			{
 				Padding = React.createElement("UIPadding", {
@@ -93,7 +97,7 @@ function BuildingsFrame(props: { Visible: boolean, selected_cells: CubicCoordina
 			AutomaticSize = Enum.AutomaticSize.XY,
 			BackgroundTransparency = 1,
 			LayoutOrder = 2,
-			Position = UDim2.fromScale(0, 0.12),
+			Position = UDim2.new(0, 0, 0.12, 0),
 		}, {
 			HorizontalLayout = React.createElement("UIListLayout", {
 				FillDirection = Enum.FillDirection.Horizontal,

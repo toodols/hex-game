@@ -9,6 +9,7 @@ type System = server_types.System
 type ActionState = server_types.ActionState
 type Item = types.Item
 type Entity = types.Entity
+type Inventory = types.Inventory
 
 -- consume items from inventories, prioritizing overflow_items
 function system_consume_item_type(grid: HexGrid, action_state: ActionState, system: System, request_item, difference)
@@ -99,7 +100,7 @@ end
 
 -- add items to inventories in the system, then add overflow to overflow_items
 function system_add_items(grid: HexGrid, action_state: ActionState, system: System, items: { Item })
-	local open_inventory_entities: { Entity } = util.table_filter_map(
+	local open_inventory_entities: { Entity & { inventory: Inventory } } = util.table_filter_map(
 		util.table_keys(system.entities),
 		function(entity_id)
 			local inventory = grid.entities[entity_id].inventory
@@ -110,7 +111,7 @@ function system_add_items(grid: HexGrid, action_state: ActionState, system: Syst
 	)
 	-- attempt to put as many of these items in inventories first
 	while #open_inventory_entities > 0 and #items > 0 do
-		local target: Entity = open_inventory_entities[#open_inventory_entities]
+		local target = open_inventory_entities[#open_inventory_entities]
 		if items_mod.inventory_deposit(target.inventory, items) then
 			action_state.dirty_entities[target.id] = action_state.dirty_entities[target.id] or {}
 			action_state.dirty_entities[target.id].everyone = true

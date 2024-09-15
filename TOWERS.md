@@ -1,11 +1,9 @@
-# Scout
+# Scout (scout)
 
-Grants visibility and can also defend
+# Vertex (wires)
 
-# Vertex
+# Catalyst (generator)
 
-Supplies power and items to connected buildings
+# Visionary (laboratory)
 
-# Visionary
-
-Provides 
+# Monarch (heart)

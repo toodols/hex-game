@@ -37,8 +37,32 @@ function theme_description(props)
 	return props
 end
 
+function theme_label(props)
+	props.BackgroundTransparency = props.BackgroundTransparency or 1
+	props.FontFace =
+		Font.fromName("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+	props.AutomaticSize = Enum.AutomaticSize.X
+	props.RichText = true
+	props.TextColor3 = Color3.fromRGB(255, 255, 255)
+end
+
 function theme_button(props)
 	props.FontFace = Font.fromName("Oswald", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+	props.TextColor3 = Color3.fromRGB(255, 255, 255)
+	props.RichText = true
+	return props
+end
+
+function theme_vertical_container(props)
+	props.Size = UDim2.new(1, 0, 0, 0)
+	props.AutomaticSize = Enum.AutomaticSize.Y
+	props.BackgroundTransparency = 1
+	return props
+end
+
+function theme_container(props)
+	props.Size = UDim2.new(1, 0, 1, 0)
+	props.BackgroundTransparency = 1
 	return props
 end
 
@@ -48,4 +72,7 @@ return {
 	theme_title = theme_title,
 	theme_description = theme_description,
 	theme_button = theme_button,
+	theme_container = theme_container,
+	theme_vertical_container = theme_vertical_container,
+	theme_label = theme_label,
 }
