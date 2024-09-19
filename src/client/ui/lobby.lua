@@ -387,6 +387,9 @@ function Room(props: { room: Room })
 							room_id = props.room.id,
 						}
 					end,
+				},
+				{
+					Corner = React.createElement(Corner),
 				}
 			),
 			ImageLabel = React.createElement("ImageLabel", {
@@ -462,6 +465,7 @@ function Lobby()
 		end
 	end, {})
 	return React.createElement("ScreenGui", {
+		ResetOnSpawn = false,
 		IgnoreGuiInset = true,
 		ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets,
 		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,

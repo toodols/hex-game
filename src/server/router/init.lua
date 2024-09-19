@@ -45,8 +45,8 @@ function on_decision(grid: HexGrid, plr: Player, data: { Decision })
 						end),
 						function(entity)
 							if entity.owner == player_team.id then
-								return shared_entity_mod.registry[entity.type].layer
-									== shared_entity_mod.registry[entry.entity_type].layer
+								return grid.entity_configurations[entity.type].layer
+									== grid.entity_configurations[entry.entity_type].layer
 							end
 						end
 					)
@@ -100,7 +100,7 @@ function on_decision(grid: HexGrid, plr: Player, data: { Decision })
 					-- error_type.mistake
 					continue
 				end
-				local shared_behavior = shared_entity_mod.registry[entity.type]
+				local shared_behavior = grid.entity_configurations[entity.type]
 				local ability = shared_behavior.abilities[entry.ability_type]
 				if not ability then
 					continue

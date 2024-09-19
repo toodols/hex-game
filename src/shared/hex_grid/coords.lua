@@ -24,11 +24,12 @@ function coords_sub(c1: CubicCoordinate, c2: CubicCoordinate): CubicCoordinate
 	}
 end
 
+-- Encodes a CubicCoordinate into a string
 function encode_coord(coord: CubicCoordinate): EncodedCoordinate
 	return table.concat(coord, ",")
 end
 
--- Helper function: Decodes a string back into a CubicCoordinate
+--  Decodes a string back into a CubicCoordinate
 function decode_coord(s: EncodedCoordinate): CubicCoordinate
 	local coord = {}
 	for i, frag in s:split "," do
@@ -87,6 +88,24 @@ function coords_dist(c1: CubicCoordinate, c2: CubicCoordinate): number
 	return math.max(math.abs(c1[1] - c2[1]), math.abs(c1[2] - c2[2]), math.abs(c1[3] - c2[3]))
 end
 
+-- Converts position into vec3 at y=0
+function into_vec3(coord: CubicCoordinate): Vector3
+	local x, z = coord[1], coord[3]
+	-- Pointy top hex calculations
+	local fx = (3 ^ 0.5) * x + ((3 ^ 0.5) / 2) * z
+	local fz = 1.5 * z
+	return Vector3.new(fz, 0, fx)
+end
+
+function into_cframe(coord: CubicCoordinate): CFrame
+	return CFrame.new(into_vec3(coord))
+end
+
+function from_vec3(_vec: Vector3): CubicCoordinate
+	error "todo"
+	return 0 :: any
+end
+
 return {
 	coords_eq = coords_eq,
 	coords_sub = coords_sub,
@@ -96,4 +115,7 @@ return {
 	neighbors_eq = neighbors_eq,
 	neighbors_leq = neighbors_leq,
 	coords_dist = coords_dist,
+	into_vec3 = into_vec3,
+	into_cframe = into_cframe,
+	from_vec3 = from_vec3,
 }

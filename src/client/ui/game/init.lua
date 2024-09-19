@@ -48,6 +48,7 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode }, u
 		},
 	}, {
 		MainGui = React.createElement("ScreenGui", {
+			ResetOnSpawn = false,
 			ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 			IgnoreGuiInset = true,
 		}, {

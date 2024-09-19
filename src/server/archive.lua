@@ -1,10 +1,11 @@
 -- module for serializeing and deserializeing game state
 
-local Players = game:GetService "Players"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ServerScriptService = game:GetService "ServerScriptService"
+
+local server_entity_mod = require(ServerScriptService.Server.entity)
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
-local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 
 type HexGrid = types.HexGrid
 type Entity = types.Entity
@@ -327,7 +328,7 @@ local team_data = struct {
 }
 
 local entity_id = aliased "entity_id"
-local entity_types = enum(util.table_keys(shared_entity_mod.registry))
+local entity_types = enum(util.table_keys(server_entity_mod.registry))
 local entity_server_data = struct {}
 
 local statuses = enum {
@@ -374,15 +375,6 @@ local cell_types = enum {
 	"tar_deposit",
 	"rad_deposit",
 	"vit_deposit",
-}
-
-local cell_server_data = struct {
-	-- presence = map(preserve),
-	-- influences = map(preserve),
-	-- visibility = map(create_schema {}),
-	presence = ignore,
-	influences = ignore,
-	visibility = ignore,
 }
 
 local cell_schema = struct {

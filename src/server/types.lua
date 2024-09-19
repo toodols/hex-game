@@ -31,6 +31,12 @@ export type EntityAction =
 	}
 	| Decision
 
+export type DamageResult = {
+	-- whether to propagate damage to the next layer(s)
+	propagate: boolean,
+	-- how much damage was applied
+	effective: number,
+}
 export type ActionState = {
 	queue: { EntityAction },
 	-- read as: entity is dirty for team in dirty_entities[entity.id][team.id]

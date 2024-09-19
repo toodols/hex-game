@@ -67,6 +67,13 @@ export type Researches = {
 	},
 }
 
+export type EffectType = string
+export type Effect = {
+	type: "shield",
+	health: number,
+	turns_left: number,
+}
+
 export type Entity = {
 	type: string,
 	coordinates: { CubicCoordinate },
@@ -77,6 +84,8 @@ export type Entity = {
 	health: number,
 	max_health: number,
 	inventory: Inventory?,
+
+	effects: { [EffectType]: Effect },
 
 	-- factory only
 	current_recipe: string?,
@@ -342,6 +351,40 @@ export type Schedule = {
 	skip: () -> (),
 }
 
+export type EntityConfiguration = {
+	type: string,
+	init: ((self: Entity, grid: HexGrid) -> ())?,
+	name: string,
+	description: string,
+	max_health: number,
+	build_time: number,
+	abilities: {
+		[string]: {
+			range: number,
+			cost: { [Item]: number },
+			damage: number,
+		},
+	},
+	can_disable: boolean,
+	required_research: { ResearchId }?,
+
+	-- stockpile only
+	inventory_capacity: number?,
+
+	power_input: number?,
+	output_power: number?,
+
+	range: number?,
+
+	-- list of offsets in addition to entity.primary_coordinate
+	offsets: { CubicCoordinate },
+	layer: number,
+	cost: { [Item]: number },
+
+	-- factory only
+	recipes: { Recipe }?,
+}
+
 export type HexGrid = {
 	-- instances are always nil on the server, while always a table on the client
 	entity_instance_map: InstanceMap<EntityId>,
@@ -361,6 +404,8 @@ export type HexGrid = {
 			[EntityId]: boolean,
 		}
 	},
+
+	entity_configurations: { [string]: EntityConfiguration },
 
 	-- extents: Extents,
 	get_cell: (self: HexGrid, coordinate: CubicCoordinate) -> HexCell?,
@@ -419,6 +464,9 @@ export type PartialHexGrid = {
 	turn_end_time: number,
 	current_skips: number,
 	needed_skips: number,
+	entity_configurations: { [string]: EntityConfiguration },
+	neutral_team: TeamId,
+	spectator_team: TeamId,
 	-- phase: "decision" | "action",
 }
 return {}

@@ -28,11 +28,11 @@ function best_uncompressed_entity(grid: HexGrid, entities: { EntityId })
 			continue
 		end
 		if
-			shared_entity_mod.registry[entity.type].layer == shared_entity_mod.layer.building
+			grid.entity_configurations[entity.type].layer == shared_entity_mod.layer.building
 			or not candidate_uncompressed_entity_layer
 		then
 			candidate_uncompressed_entity = entity_id
-			candidate_uncompressed_entity_layer = shared_entity_mod.registry[entity.type].layer
+			candidate_uncompressed_entity_layer = grid.entity_configurations[entity.type].layer
 		end
 	end
 	return candidate_uncompressed_entity

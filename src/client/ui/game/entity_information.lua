@@ -4,7 +4,6 @@ local TweenService = game:GetService "TweenService"
 
 local types = require(ReplicatedStorage.Shared.types)
 local React = require(ReplicatedStorage.Packages.react)
-local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local util = require(ReplicatedStorage.Shared.util)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local formatting = require(ReplicatedStorage.Shared.formatting)
@@ -63,7 +62,7 @@ function EntityInformation(props: {
 	end, { props.compressed })
 
 	local entity = hooks.use_synced_entity(props.entity_id)
-	local shared_behavior = shared_entity_mod.registry[entity.type]
+	local shared_behavior = grid.entity_configurations[entity.type]
 
 	React.useEffect(function()
 		TweenService:Create(ref.current, TweenInfo.new(0.2), {
@@ -253,7 +252,7 @@ function EntityInformation(props: {
 							AutomaticSize = Enum.AutomaticSize.Y,
 							LayoutOrder = 2,
 							Size = UDim2.new(1, 0, 0, 30),
-							Text = formatting.format_text(shared_behavior.description),
+							Text = formatting.format_text(grid, shared_behavior.description),
 						}
 					),
 					-- Rotation = React.createElement(

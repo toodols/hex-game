@@ -2,8 +2,6 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
-local remotes_mod = require(ServerScriptService.Server.remotes)
 
 type Damage = types.Damage
 type HexCell = types.HexCell
@@ -14,13 +12,8 @@ type ActionState = server_types.ActionState
 type CellType = types.CellType
 type TeamId = types.TeamId
 type CubicCoordinate = types.CubicCoordinate
+type DamageResult = server_types.DamageResult
 
-export type DamageResult = {
-	-- whether to propagate damage to the next layer(s)
-	propagate: boolean,
-	-- how much damage was applied
-	effective: number,
-}
 
 export type ServerEntityBehavior = {
 	type: string,
@@ -54,7 +47,7 @@ end
 
 local registry: { [string]: ServerEntityBehavior } = {}
 
-function with_defaults(behavior: table): ServerEntityBehavior
+function with_defaults(behavior: any): ServerEntityBehavior
 	behavior.take_damage = behavior.take_damage or default_take_damage
 	behavior.init = behavior.init or function(self) end
 	behavior.neighbor_changed = behavior.neighbor_changed or function(...) end

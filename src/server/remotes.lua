@@ -1,7 +1,5 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local Players = game:GetService "Players"
 local types = require(ReplicatedStorage.Shared.types)
-local util = require(ReplicatedStorage.Shared.util)
 
 type GridUpdate = types.GridUpdate
 type HexGrid = types.HexGrid

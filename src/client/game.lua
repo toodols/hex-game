@@ -1,5 +1,4 @@
 local Debris = game:GetService "Debris"
-local Players = game:GetService "Players"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local TweenService = game:GetService "TweenService"
 
@@ -36,7 +35,7 @@ type Item = types.Item
 
 function color_tile(grid: HexGrid, cell: HexCell)
 	local instance = grid.cell_instance_map[hex_grid_mod.encode_coord(cell.coordinate)]
-	local player_team = grid:get_player_team(Players.LocalPlayer)
+	-- local player_team = grid:get_player_team(Players.LocalPlayer)
 	local function tween_color(color: Color3)
 		TweenService:Create(instance:FindFirstChild "Base", TweenInfo.new(), {
 			Color = color,

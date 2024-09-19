@@ -1,5 +1,7 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
+local util = require(ReplicatedStorage.Shared.util)
+
 type HexCell = types.HexCell
 type HexGrid = types.HexGrid
 type Entity = types.Entity
@@ -7,40 +9,7 @@ type CubicCoordinate = types.CubicCoordinate
 type Item = types.Item
 type Recipe = types.Recipe
 type ResearchId = types.ResearchId
-
-export type SharedEntityBehavior = {
-	type: string,
-	init: ((self: Entity, grid: HexGrid) -> ())?,
-	name: string,
-	description: string,
-	max_health: number,
-	build_time: number,
-	abilities: {
-		[string]: {
-			range: number,
-			cost: { [Item]: number },
-			damage: number,
-		},
-	},
-	can_disable: boolean,
-	required_research: { ResearchId }?,
-
-	-- stockpile only
-	inventory_capacity: number?,
-
-	power_input: number?,
-	output_power: number?,
-
-	range: number?,
-
-	-- list of offsets in addition to entity.primary_coordinate
-	offsets: { CubicCoordinate },
-	layer: number,
-	cost: { [Item]: number },
-
-	-- factory only
-	recipes: { Recipe }?,
-}
+type EntityConfiguration = types.EntityConfiguration
 
 -- a higher layer indicates that damage will be passed to it first before the others
 local layer = {
@@ -49,7 +18,7 @@ local layer = {
 	shield = 2,
 }
 
-function with_defaults(t: table): SharedEntityBehavior
+function with_defaults(t: any): EntityConfiguration
 	t.type = t.type or error "no type"
 	t.init = t.init or function() end
 	t.build_time = t.build_time or 0
@@ -65,5 +34,6 @@ function with_defaults(t: table): SharedEntityBehavior
 	return t
 end
 
-local registry: { [string]: SharedEntityBehavior } = {}
+local registry: { [string]: EntityConfiguration } = {}
+
 return { layer = layer, registry = registry, with_defaults = with_defaults }

@@ -2,11 +2,10 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
-local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local items_mod = require(ReplicatedStorage.Shared.items)
-local Cost = require(script.Parent.cost).Cost
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
-local factory_behavior = shared_entity_mod.registry.factory
+local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
+local Cost = require(script.Parent.cost).Cost
 local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: RemoteEvent
 
 type Item = types.Item
@@ -73,6 +72,8 @@ end
 
 function Recipes(props: { entity_id: EntityId, on_close: () -> () })
 	local entity = hooks.use_synced_entity(props.entity_id)
+	local grid = React.useContext(MainContext).grid
+	local config = grid.entity_configurations["factory"]
 	return React.createElement("Frame", {
 		Active = true,
 		AnchorPoint = Vector2.new(0, 1),
@@ -140,7 +141,7 @@ function Recipes(props: { entity_id: EntityId, on_close: () -> () })
 					SortOrder = Enum.SortOrder.LayoutOrder,
 				}),
 			},
-			util.table_map(factory_behavior.recipes, function(v, k)
+			util.table_map(config.recipes, function(v, k)
 				return React.createElement(RecipeItem, {
 					on_click = function()
 						decision_remote:FireServer {

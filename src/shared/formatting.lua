@@ -1,16 +1,15 @@
-local entity_mod = require(script.Parent.entity)
 local researches_mod = require(script.Parent.researches)
 local items_mod = require(script.Parent.items)
 local cells = require(script.Parent.cells)
+local types = require(script.Parent.types)
 
-local namespaces = {
-	entity = entity_mod.registry,
-	research = researches_mod.researches,
-	item = items_mod.item_names,
-	cell = cells.cell_models,
-}
-
-function format_text(text: string)
+function format_text(grid: types.HexGrid, text: string)
+	local namespaces = {
+		research = researches_mod.researches,
+		item = items_mod.item_names,
+		cell = cells.cell_models,
+		entity = grid.entity_configurations,
+	}
 	local result, _ = text:gsub("{[^}]+}", function(match)
 		local inner = match:sub(2, -2):split "."
 		local start = namespaces

@@ -1,4 +1,7 @@
 local registry = require(script.registry)
+local util = require(script.Parent.util)
+local types = require(script.Parent.types)
+type EntityConfiguration = types.EntityConfiguration
 
 require(script.wires)
 require(script.stockpile)
@@ -16,4 +19,8 @@ require(script.heart)
 require(script.vault)
 require(script.solution)
 
-return { registry = registry.registry, layer = registry.layer }
+function create_configuration(): { [string]: EntityConfiguration }
+	return util.deep_copy(registry.registry)
+end
+
+return { create_configuration = create_configuration, layer = registry.layer }

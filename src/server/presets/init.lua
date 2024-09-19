@@ -62,13 +62,6 @@ function testing_map(): HexGrid
 		owner = team1.id,
 	}, grid)
 
-	-- local shootable = entity_mod.new_entity({
-	-- 	type = "scout",
-	-- 	status = "complete",
-	-- 	primary_coordinate = { magic - 4, -magic + 4, 0 },
-	-- 	owner = team2.id,
-	-- }, grid)
-
 	local portals = { { { 4, -2, -2 }, { -4, 5, -1 } } }
 	for _, portal_group in portals do
 		for _, portal in portal_group do

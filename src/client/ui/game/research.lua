@@ -11,9 +11,10 @@ local formatting = require(ReplicatedStorage.Shared.formatting)
 
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
+local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
+local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local ActionButton = require(script.Parent.action_button).ActionButton
 local Cost = require(script.Parent.cost).Cost
-local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local Corner = util_components.Corner
 
 local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: RemoteEvent
@@ -75,6 +76,7 @@ function Icon(props: {
 end
 
 function Aside(props: { state: ResearchState, on_add: () -> (), on_remove: () -> () })
+	local grid = React.useContext(MainContext).grid
 	return React.createElement(
 		"Frame",
 		themes.theme_solid {
@@ -119,7 +121,7 @@ function Aside(props: { state: ResearchState, on_add: () -> (), on_remove: () ->
 					Description = React.createElement(
 						"TextLabel",
 						themes.theme_description {
-							Text = formatting.format_text(props.state.description),
+							Text = formatting.format_text(grid, props.state.description),
 							Size = UDim2.new(1, 0, 0, 40),
 							LayoutOrder = 2,
 						}

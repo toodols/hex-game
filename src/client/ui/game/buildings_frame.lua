@@ -4,7 +4,6 @@ local TweenService = game:GetService "TweenService"
 
 local React = require(ReplicatedStorage.Packages.react)
 local util = require(ReplicatedStorage.Shared.util)
-local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local types = require(ReplicatedStorage.Shared.types)
 local formatting = require(ReplicatedStorage.Shared.formatting)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
@@ -81,7 +80,8 @@ local PAGES = {
 }
 
 function BuildingItem(props: { type: string, cell: CubicCoordinate, researches: { [ResearchId]: boolean } })
-	local shared_behavior = shared_entity_mod.registry[props.type]
+	local grid: HexGrid = React.useContext(MainContext).grid
+	local entity_config = grid.entity_configurations[props.type]
 	local button_ref = React.useRef(nil :: any)
 	local viewport_ref = React.useRef(nil :: any)
 	React.useEffect(function()
@@ -156,7 +156,7 @@ function BuildingItem(props: { type: string, cell: CubicCoordinate, researches: 
 							BackgroundTransparency = 1,
 							LayoutOrder = 1,
 							Size = UDim2.new(1, 0, 0, 25),
-							Text = shared_behavior.name,
+							Text = entity_config.name,
 							TextSize = 18,
 							TextXAlignment = Enum.TextXAlignment.Left,
 						}
@@ -172,12 +172,12 @@ function BuildingItem(props: { type: string, cell: CubicCoordinate, researches: 
 							BackgroundTransparency = 1,
 							LayoutOrder = 3,
 							Size = UDim2.new(1, 0, 0, 0),
-							Text = formatting.format_text(shared_behavior.description),
+							Text = formatting.format_text(grid, entity_config.description),
 							TextWrapped = true,
 							TextSize = 13,
 						}
 					),
-					RequiredResearch = shared_behavior.required_research and React.createElement(
+					RequiredResearch = entity_config.required_research and React.createElement(
 						"TextLabel",
 						themes.theme_description {
 							BackgroundTransparency = 1,
@@ -185,7 +185,7 @@ function BuildingItem(props: { type: string, cell: CubicCoordinate, researches: 
 							AutomaticSize = Enum.AutomaticSize.Y,
 							Size = UDim2.new(1, 0, 0, 0),
 							Text = "Requires Research: " .. table.concat(
-								util.table_map(shared_behavior.required_research, function(research_id)
+								util.table_map(entity_config.required_research, function(research_id)
 									local name = researches_mod.researches[research_id].name
 									if props.researches[name] then
 										return `<font color="rgb(50, 155, 50)">{name}</font>`
@@ -199,7 +199,7 @@ function BuildingItem(props: { type: string, cell: CubicCoordinate, researches: 
 						}
 					),
 					Cost = React.createElement(Cost, {
-						cost = shared_behavior.cost,
+						cost = entity_config.cost,
 						LayoutOrder = 5,
 					}),
 					VerticalLayout = React.createElement("UIListLayout", {
@@ -253,7 +253,10 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 	local page_layout_ref = React.useRef(nil :: any)
 	local page_refs = React.useRef({} :: any)
 	local ref = React.useRef(nil :: any)
-	local researches = researches_mod.get_cell_researches(grid, grid:get_cell(props.cell), player_team.id)
+
+	local cell = grid:get_cell(props.cell)
+	assert(cell, "cell is nil")
+	local researches = researches_mod.get_cell_researches(grid, cell, player_team.id)
 
 	React.useEffect(function()
 		page_layout_ref.current:GetPropertyChangedSignal("CurrentPage"):Connect(function()

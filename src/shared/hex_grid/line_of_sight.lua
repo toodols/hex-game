@@ -13,7 +13,7 @@ type TeamId = types.TeamId
 function blocked(grid: HexGrid, cell: HexCell, team: TeamId?)
 	local visible = if RunService:IsClient()
 		then cell.visible_for_team
-		else effective_visibility(cell.server_data.visibility[team])
+		else effective_visibility(team and cell.server_data.visibility[team])
 	if team ~= nil and not visible then
 		return true
 	end
@@ -34,7 +34,7 @@ function coords_lerp(a, b, t): { number }
 	}
 end
 
-function coords_round(coord: { number }): CubicCoordinate
+function coords_round(coord: { number }): { CubicCoordinate }
 	local q = math.floor(coord[1] + 0.5)
 	local r = math.floor(coord[2] + 0.5)
 	local s = math.floor(coord[3] + 0.5)
@@ -67,16 +67,6 @@ function coords_round(coord: { number }): CubicCoordinate
 	table.insert(results, { q == -0 and 0 or q, r == -0 and 0 or r, s == -0 and 0 or s })
 
 	return results
-end
-
-function sign(val)
-	if val > 0 then
-		return 1
-	elseif val < 0 then
-		return -1
-	else
-		return 0
-	end
 end
 
 function hex_line(start, finish)

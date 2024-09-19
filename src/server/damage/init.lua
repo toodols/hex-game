@@ -61,7 +61,7 @@ function apply_damage_on_cells(grid: HexGrid, targets: { CubicCoordinate }, dama
 		end
 
 		table.sort(entities, function(a, b)
-			return shared_entity_mod.registry[a.type].layer > shared_entity_mod.registry[b.type].layer
+			return grid.entity_configurations[a.type].layer > grid.entity_configurations[b.type].layer
 		end)
 
 		for _, entity in entities do

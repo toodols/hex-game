@@ -2,7 +2,6 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 
 local types = require(ReplicatedStorage.Shared.types)
-local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local util = require(ReplicatedStorage.Shared.util)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local items_mod = require(ReplicatedStorage.Shared.items)
@@ -234,7 +233,7 @@ function run_action_phase(grid: HexGrid)
 						and table.find(util.table_keys(system.entities), value.entity_id) ~= nil
 				end)
 			do
-				local shared_behavior = shared_entity_mod.registry[grid.entities[ability.entity_id].type]
+				local shared_behavior = grid.entity_configurations[grid.entities[ability.entity_id].type]
 				local cost = shared_behavior.abilities[ability.ability_type].cost
 
 				mark_dirty_for_everyone(action_state, ability.entity_id)
@@ -280,14 +279,15 @@ function run_action_phase(grid: HexGrid)
 			for _, action in try_promote_actions do
 				local entity = grid.entities[action.entity_id]
 				local server_behavior = server_entity_mod.registry[entity.type]
-				local shared_behavior = shared_entity_mod.registry[entity.type]
+				local shared_config = grid.entity_configurations[entity.type]
 
 				if action.type == "try_promote_blueprint" then
-					local cell_researches =
-						researches_mod.get_cell_researches(grid, grid:get_cell(entity.primary_coordinate), entity.owner)
+					local cell = grid:get_cell(entity.primary_coordinate)
+					assert(cell, "cell not found")
+					local cell_researches = researches_mod.get_cell_researches(grid, cell, entity.owner)
 					if
-						shared_behavior.required_research
-						and not util.table_every(shared_behavior.required_research, function(research_id)
+						shared_config.required_research
+						and not util.table_every(shared_config.required_research, function(research_id)
 							return cell_researches[research_id]
 						end)
 					then
@@ -414,6 +414,7 @@ function run_action_phase(grid: HexGrid)
 					if inventory and inventory.capacity > #inventory.items then
 						return grid.entities[entity_id]
 					end
+					return nil
 				end)
 			do
 				if #system.overflow_items == 0 then
@@ -467,7 +468,6 @@ function run_action_phase(grid: HexGrid)
 		end
 
 		for entity_id in entities do
-			local entity = grid.entities[entity_id]
 			if has_heart then
 				action_state.decayable_entities[entity_id] = false
 			end
@@ -513,6 +513,7 @@ function run_action_phase(grid: HexGrid)
 					if team ~= entity.owner then
 						return true
 					end
+					return false
 				end)
 			then
 				server_entity_mod.remove_entity(grid, entity, action_state)
