@@ -39,24 +39,25 @@ end
 
 function theme_label(props)
 	props.BackgroundTransparency = props.BackgroundTransparency or 1
-	props.FontFace =
-		Font.fromName("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-	props.AutomaticSize = Enum.AutomaticSize.X
+	props.FontFace = Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+	props.AutomaticSize = props.AutomaticSize or Enum.AutomaticSize.X
 	props.RichText = true
-	props.TextColor3 = Color3.fromRGB(255, 255, 255)
+	props.TextColor3 = props.TextColor3 or Color3.fromRGB(255, 255, 255)
+	return props
 end
 
 function theme_button(props)
 	props.FontFace = Font.fromName("Oswald", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-	props.TextColor3 = Color3.fromRGB(255, 255, 255)
+	props.TextColor3 = props.TextColor3 or Color3.fromRGB(255, 255, 255)
 	props.RichText = true
+	props.TextSize = props.TextSize or 18
 	return props
 end
 
 function theme_vertical_container(props)
-	props.Size = UDim2.new(1, 0, 0, 0)
-	props.AutomaticSize = Enum.AutomaticSize.Y
-	props.BackgroundTransparency = 1
+	props.Size = props.Size or UDim2.new(1, 0, 0, 0)
+	props.AutomaticSize = props.AutomaticSize or Enum.AutomaticSize.Y
+	props.BackgroundTransparency = props.BackgroundTransparency or 1
 	return props
 end
 

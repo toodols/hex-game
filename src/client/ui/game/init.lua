@@ -70,6 +70,7 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode }, u
 				AnchorPoint = Vector2.new(0.5, 1),
 				BackgroundTransparency = 1,
 				Position = UDim2.new(0.5, 0, 1, -20),
+				ZIndex = 2,
 			}, {
 				BuildingsFrame = submenu.type == "build" and React.createElement(BuildingsFrame, {
 					cell = submenu.cell,
@@ -88,8 +89,8 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode }, u
 				}),
 			}, {
 				SelectedCellFrame = selection_mode.type == "select_cells" and React.createElement(SelectedCellFrame, {
-					selected_cells = util.table_map(util.table_keys(selection_mode.selected), function(instance)
-						return hex_grid_mod.decode_coord(props.grid.instance_cell_map[instance])
+					selected_cells = util.table_map(util.table_keys(selection_mode.selected), function(k)
+						return hex_grid_mod.decode_coord(props.grid.instance_cell_map[k])
 					end),
 					toggle_submenu = function(menu)
 						set_submenu(function(current)

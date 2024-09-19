@@ -1,3 +1,20 @@
+-- lobby types
+export type Room = {
+	id: string,
+	teams: { [string]: { name: string, color: Color3, is_spectator_team: boolean? } },
+	players: {
+		-- tostring(Player.UserId)
+		[string]: {
+			team: string,
+		},
+	},
+	map: {
+		type: string,
+	},
+	starting_at: number?,
+}
+
+-- game types
 export type CubicCoordinate = { number } -- A cubic coordinate is {x, y, z} where x+y+z = 0
 export type EncodedCoordinate = string
 
@@ -11,7 +28,7 @@ export type Signal<T> = {
 export type Item = "vit" | "rad" | "pow" | "bar" | "tar" | "dew" | "dye" | "tek"
 
 export type Inventory = {
-	filter_item_type: Item | "solid" | "liquid" | "all",
+	filter_item_type: Item | "all",
 	-- true if all items are of the same type
 	homogeneous: boolean,
 	items: { Item },
@@ -346,10 +363,10 @@ export type HexGrid = {
 	},
 
 	-- extents: Extents,
-	get_cell: (self: HexGrid, coordinate: CubicCoordinate) -> HexCell,
+	get_cell: (self: HexGrid, coordinate: CubicCoordinate) -> HexCell?,
 	-- returns table of entities that fit the criteria
 	query_entity: (self: HexGrid, props: any) -> { Entity },
-	get_player_team: (self: HexGrid, player: Player) -> TeamData,
+	get_player_team: (self: HexGrid, player: Player) -> TeamData?,
 	new_team: (self: HexGrid, players: { Player }, color: TeamColor?, name: string?) -> TeamData,
 	purge_dead_entities: (self: HexGrid) -> nil,
 	get_allies: (self: HexGrid, team: TeamId) -> { TeamId },
@@ -360,8 +377,8 @@ export type HexGrid = {
 	coalitions: { CoalitionData },
 	teams: { TeamData },
 
-	neutral_team: TeamId?,
-	spectator_team: TeamId?,
+	neutral_team: TeamId,
+	spectator_team: TeamId,
 
 	-- player teams can grant or revoke visibility to spectators
 	-- use userid so visibility is preserved even after the spectator leaves

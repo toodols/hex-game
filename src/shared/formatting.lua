@@ -11,7 +11,7 @@ local namespaces = {
 }
 
 function format_text(text: string)
-	local result, _ = text:gsub("%{[^}]+%}", function(match)
+	local result, _ = text:gsub("{[^}]+}", function(match)
 		local inner = match:sub(2, -2):split "."
 		local start = namespaces
 		for _, prop in inner do

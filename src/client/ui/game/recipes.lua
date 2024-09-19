@@ -140,22 +140,21 @@ function Recipes(props: { entity_id: EntityId, on_close: () -> () })
 					SortOrder = Enum.SortOrder.LayoutOrder,
 				}),
 			},
-			util.table_map(util.table_keys(factory_behavior.recipes), function(recipe_id)
-				local recipe = factory_behavior.recipes[recipe_id]
+			util.table_map(factory_behavior.recipes, function(v, k)
 				return React.createElement(RecipeItem, {
 					on_click = function()
 						decision_remote:FireServer {
 							{
 								type = "set_recipe",
-								recipe_id = recipe_id,
+								recipe_id = k,
 								entity_id = props.entity_id,
 							},
 						}
 						-- props.on_close()
 					end,
 					current_recipe = entity.current_recipe,
-					recipe = recipe,
-					recipe_id = recipe_id,
+					recipe = v,
+					recipe_id = k,
 				})
 			end)
 		),

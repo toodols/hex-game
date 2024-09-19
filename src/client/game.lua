@@ -82,7 +82,9 @@ function update_neighbors(grid: HexGrid, coordinates: { CubicCoordinate })
 end
 -- update deconstruct gui for entities on this tile
 function update_tile_deconstructs(grid: HexGrid, coordinate: CubicCoordinate)
-	local thingy = util.table_fold(grid:get_cell(coordinate).entities, { deconstructs = 0 }, function(acc, cur)
+	local cell = grid:get_cell(coordinate)
+	assert(cell, "cell not found")
+	local thingy = util.table_fold(cell.entities, { deconstructs = 0 }, function(acc, cur)
 		acc.deconstructs += if util.table_any(grid.entities[cur].queued_decisions, function(action)
 				return action.type == "deconstruct"
 			end)

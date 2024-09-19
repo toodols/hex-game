@@ -351,12 +351,11 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 					TileSize = UDim2.new(0.139, 0, 0.145, 0),
 				})
 			end),
-			util.table_map(util.table_keys(entity.researches.states), function(id)
-				local state = entity.researches.states[id]
+			util.table_map(entity.researches.states, function(v, k)
 				return React.createElement(Node, {
-					state = state,
+					state = v,
 					on_click = function()
-						set_selected_node(id)
+						set_selected_node(k)
 					end,
 				})
 			end)

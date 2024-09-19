@@ -22,8 +22,7 @@ function Cost(props: { LayoutOrder: number?, cost: { [Item]: number | string } }
 				SortOrder = Enum.SortOrder.LayoutOrder,
 			}),
 		},
-		util.table_map(util.table_keys(props.cost), function(k)
-			local amount = props.cost[k]
+		util.table_map(props.cost, function(v, k)
 			return React.createElement("Frame", {
 				AutomaticSize = Enum.AutomaticSize.X,
 				BackgroundTransparency = 1,
@@ -34,7 +33,7 @@ function Cost(props: { LayoutOrder: number?, cost: { [Item]: number | string } }
 					BackgroundTransparency = 1,
 					FontFace = Font.new "rbxasset://fonts/families/SourceSansPro.json",
 					Size = UDim2.new(0, 0, 1, 0),
-					Text = amount,
+					Text = v,
 					TextColor3 = Color3.fromRGB(255, 255, 255),
 					TextSize = 18,
 				}),

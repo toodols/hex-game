@@ -10,11 +10,11 @@ use full_moon::{
         self,
         punctuated::{Pair, Punctuated},
         span::ContainedSpan,
-        Call, Expression, Field, FunctionArgs, FunctionCall, Prefix, Suffix, TableConstructor,
+        Call, Expression, Field, FunctionArgs, FunctionCall, Suffix,
     },
     print,
     tokenizer::{Symbol, Token, TokenReference, TokenType},
-    visitors::{Visitor, VisitorMut},
+    visitors::VisitorMut,
 };
 
 use if_chain::if_chain;

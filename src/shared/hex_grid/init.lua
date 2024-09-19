@@ -51,7 +51,7 @@ end
 
 function from_vec3(_vec: Vector3): CubicCoordinate
 	error "todo"
-	return 0 :: CubicCoordinate
+	return 0 :: any
 end
 
 function new_grid_empty(): HexGrid
@@ -114,7 +114,7 @@ function new_grid_empty(): HexGrid
 			-- no coalition found, ally is itself
 			return { team }
 		end,
-		query_entity = function(self, props: table): { Entity }
+		query_entity = function(self, props: any): { Entity }
 			local results = {}
 			local function pred(entity: Entity)
 				props.is_destroyed = false
@@ -158,6 +158,8 @@ function new_grid_empty(): HexGrid
 		skipped = {},
 		current_skips = 0,
 		needed_skips = 0,
+		neutral_team = nil :: any,
+		spectator_team = nil :: any,
 	}
 	-- neutral team
 	-- does not impose presence on its neighbors

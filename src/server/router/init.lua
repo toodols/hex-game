@@ -18,7 +18,7 @@ type TeamData = types.TeamData
 
 function on_decision(grid: HexGrid, plr: Player, data: { Decision })
 	server_util.catch(function()
-		local player_team: TeamData = grid:get_player_team(plr)
+		local player_team = grid:get_player_team(plr)
 		if not player_team then
 			return
 		end

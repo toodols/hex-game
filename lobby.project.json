@@ -16,6 +16,9 @@
 		"ServerScriptService": {
 			"Server": {
 				"$path": "src/server"
+			},
+			"server_init": {
+				"$path": "src/init/lobby.server.lua"
 			}
 		},
 		"StarterPlayer": {

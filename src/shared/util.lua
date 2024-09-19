@@ -9,10 +9,11 @@ function set_transparency(instance_tree: Instance, transparency: number)
 	end
 end
 
-function table_map<K, In, Out>(tab: { [K]: In }, fn: (v: In) -> Out): { [K]: Out }
+function table_map<K, In, Out>(tab: { [K]: In }, fn: (v: In, k: K) -> Out): { [K]: Out }
 	local new_table = {}
 	for k, v in tab do
-		new_table[k] = fn(v)
+		local v2, k2 = fn(v, k)
+		new_table[k2 or k] = v2
 	end
 	return new_table
 end
@@ -62,7 +63,7 @@ function table_flat<T>(tab: { { T } }): { T }
 end
 
 -- returns the first value, if any, that satisfies `pred`
-function table_find_pred<T>(tab: { T }, pred: (value: T) -> boolean): T?
+function table_find_pred<K, T>(tab: { [K]: T }, pred: (value: T) -> boolean): T?
 	for _, value in tab do
 		if pred(value) then
 			return value
@@ -125,18 +126,18 @@ function table_fold<T, O>(tab: { T }, init: O, fun: (acc: O, cur: T) -> O): O
 	return init
 end
 
-function table_any<T>(tab: { T }, pred: (value: T) -> boolean): boolean
-	for _, v in tab do
-		if pred(v) then
+function table_any<K, T>(tab: { [K]: T }, pred: (value: T, key: K) -> boolean): boolean
+	for k, v in tab do
+		if pred(v, k) then
 			return true
 		end
 	end
 	return false
 end
 
-function table_every<T>(tab: { T }, pred: (value: T) -> boolean): boolean
-	for _, v in tab do
-		if not pred(v) then
+function table_every<K, T>(tab: { [K]: T }, pred: (value: T, key: K) -> boolean): boolean
+	for k, v in tab do
+		if not pred(v, k) then
 			return false
 		end
 	end
@@ -207,6 +208,26 @@ function range(n: number)
 	return t
 end
 
+function timer(amount: number, callback: () -> ())
+	local inst = 0
+	local value = {
+		reset = function(new_amount: number?)
+			inst += 1
+			local target = inst
+			task.delay(new_amount or amount, function()
+				if inst == target then
+					callback()
+				end
+			end)
+		end,
+		stop = function()
+			inst += 1
+		end,
+	}
+	value.reset()
+	return value
+end
+
 return {
 	table_from_entries = table_from_entries,
 	table_filter = table_filter,
@@ -226,4 +247,5 @@ return {
 	table_any = table_any,
 	table_keys = table_keys,
 	range = range,
+	timer = timer,
 }

@@ -30,7 +30,11 @@ end
 
 -- Helper function: Decodes a string back into a CubicCoordinate
 function decode_coord(s: EncodedCoordinate): CubicCoordinate
-	return util.table_map(s:split ",", tonumber :: any)
+	local coord = {}
+	for i, frag in s:split "," do
+		coord[i] = tonumber(frag)
+	end
+	return coord
 end
 
 -- returns neighbors at a radius. can give neighbors that are out of bounds
