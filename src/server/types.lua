@@ -7,6 +7,40 @@ type Item = types.Item
 type Decision = types.Decision
 type HexGrid = types.HexGrid
 type TeamId = types.TeamId
+type EffectiveDamage = types.EffectiveDamage
+
+export type EntityEvent = {
+	type: "dealt_damage",
+	damage: EffectiveDamage,
+	entity_id: EntityId,
+} | {
+	type: "took_damage",
+	damage: EffectiveDamage,
+	entity_id: EntityId,
+} | {
+	type: "consumed_items",
+	items: { [Item]: number },
+	entity_id: EntityId,
+} | {
+	type: "produced_items",
+	items: { [Item]: number },
+	entity_id: EntityId,
+} | {
+	type: "status_changed",
+	entity_id: EntityId,
+} | {
+	type: "removed",
+	entity_id: EntityId,
+} | {
+	type: "created",
+	entity_id: EntityId,
+} | {
+	type: "update",
+	entity_id: EntityId,
+} | {
+	type: "research_completed",
+	entity_id: EntityId,
+}
 
 export type EntityAction =
 	-- attempt to fill as much of the blueprint as possible from inventories and overflow

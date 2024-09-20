@@ -10,7 +10,7 @@ local placeids = require(ReplicatedStorage.Shared.placeids).placeids
 
 type Room = types.Room
 
-local START_TIME = if RunService:IsStudio() then 5 else 5
+local START_TIME = if RunService:IsStudio() then 5 else 30
 local REQUIRES_FILLED_TEAMS = if RunService:IsStudio() then true else true
 
 local rooms_remote = Instance.new "RemoteEvent"
@@ -77,6 +77,11 @@ type Props = {
 	room_id: string,
 } | {
 	type: "new_room",
+	-- max players in this room
+	max_players: number,
+	-- Teams can have at most 1 more member than every other team
+	balanced_teams: boolean,
+	friends_only: boolean,
 } | {
 	type: "set_team",
 	player: Player?,

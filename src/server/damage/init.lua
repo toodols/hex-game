@@ -1,8 +1,7 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local server_entity_mod = require(script.Parent.entity)
-local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
-local remotes_mod = require(script.Parent.remotes)
+local server_util = require(script.Parent.util)
 local server_types = require(script.Parent.types)
 
 type Damage = types.Damage
@@ -43,8 +42,24 @@ type ActionState = server_types.ActionState
 -- A(0)  A(0)
 -- B(0)  C(5)
 
-function apply_damage(grid: HexGrid, target: CubicCoordinate, damage: Damage, action_state: ActionState?)
-	
+function damage_entity(entity: Entity, damage: number)
+	for effect_type, effect in entity.effects do
+		if damage == 0 then
+			return
+		end
+		if effect_type == "shield" then
+			local effective = math.min(damage, effect.health)
+			effect.health -= effective
+			damage -= effective
+			if effect.health <= 0 then
+				entity.effects[effect_type] = nil
+			end
+		end
+	end
+
+	if damage > 0 then
+		entity.health = math.max(entity.health - damage, 0)
+	end
 end
 
 function apply_damage_on_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damage, action_state: ActionState?)
@@ -83,10 +98,10 @@ function apply_damage_on_cells(grid: HexGrid, targets: { CubicCoordinate }, dama
 	end
 	for entity_id, value in damage_values do
 		local entity = grid.entities[entity_id]
-		entity.health -= value
+		damage_entity(entity, value)
+
 		if action_state then
-			action_state.dirty_entities[entity_id] = action_state.dirty_entities[entity_id] or {}
-			action_state.dirty_entities[entity_id].everyone = true
+			server_util.mark_dirty_for_everyone(action_state, entity_id)
 
 			table.insert(grid.updates_buffer[#grid.updates_buffer], {
 				type = "entity_damage",

@@ -355,8 +355,8 @@ function tests.archive_grid()
 	local grid = presets.my_map()
 	local compressed = archive.compress_grid(grid)
 	local original = HttpService:JSONEncode(grid)
-	print(`Compression ratio: {math.floor(100 * compressed:len() / original:len())}%`)
 	local decompressed = archive.decompress_grid(compressed)
+	return `Compression ratio: {math.floor(100 * compressed:len() / original:len())}%`
 end
 
 return tests

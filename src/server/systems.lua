@@ -4,6 +4,8 @@ local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
 local items_mod = require(ReplicatedStorage.Shared.items)
+local server_util = require(ServerScriptService.Server.util)
+
 type HexGrid = types.HexGrid
 type System = server_types.System
 type ActionState = server_types.ActionState
@@ -40,6 +42,7 @@ function system_consume_item_type(grid: HexGrid, action_state: ActionState, syst
 				if inventory and #inventory.items > 0 then
 					return grid.entities[entity_id]
 				end
+				return nil
 			end
 		)
 		for _, inventory_entity in nonempty_inventory_entities do
@@ -49,8 +52,7 @@ function system_consume_item_type(grid: HexGrid, action_state: ActionState, syst
 			end)
 			difference -= #extracted
 			net += #extracted
-			action_state.dirty_entities[inventory_entity.id] = action_state.dirty_entities[inventory_entity.id] or {}
-			action_state.dirty_entities[inventory_entity.id].everyone = true
+			server_util.mark_dirty_for_everyone(action_state, inventory_entity.id)
 		end
 	end
 	return net
@@ -113,8 +115,7 @@ function system_add_items(grid: HexGrid, action_state: ActionState, system: Syst
 	while #open_inventory_entities > 0 and #items > 0 do
 		local target = open_inventory_entities[#open_inventory_entities]
 		if items_mod.inventory_deposit(target.inventory, items) then
-			action_state.dirty_entities[target.id] = action_state.dirty_entities[target.id] or {}
-			action_state.dirty_entities[target.id].everyone = true
+			server_util.mark_dirty_for_everyone(action_state, target.id)
 		else
 			open_inventory_entities[#open_inventory_entities] = nil
 		end

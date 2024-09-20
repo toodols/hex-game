@@ -9,31 +9,21 @@ local items_mod = require(ReplicatedStorage.Shared.items)
 local server_types = require(ServerScriptService.Server.types)
 local server_entity_mod = require(ServerScriptService.Server.entity)
 local server_util = require(ServerScriptService.Server.util)
-local damage_mod = require(ServerScriptService.Server.damage)
-local serialize_mod = require(ServerScriptService.Server.serialize)
 local updates_mod = require(ServerScriptService.Server.updates)
-local systems_mod = require(ServerScriptService.Server.systems)
-local researches_mod = require(ReplicatedStorage.Shared.researches)
 local computed_mod = require(ServerScriptService.Server.computed)
+local publish_event = require(ServerScriptService.Server.event).publish_event
+
+local handle_exchange_actions = require(script.exchange_actions).handle_exchange_actions
+local handle_ability_actions = require(script.ability_actions).handle_ability_actions
+local handle_try_promote_actions = require(script.try_promote_actions).handle_try_promote_actions
+local handle_advance_research_actions = require(script.advance_research_actions).handle_advance_research_actions
 
 type HexGrid = types.HexGrid
-type Entity = types.Entity
 type EntityId = types.EntityId
-type GridUpdate = types.GridUpdate
-type CubicCoordinate = types.CubicCoordinate
-type EncodedCoordinate = types.EncodedCoordinate
 type ActionState = server_types.ActionState
-type Inventory = types.Inventory
 type EntityAction = server_types.EntityAction
-type Item = types.Item
-type HexCell = types.HexCell
 type TeamId = types.TeamId
 type System = server_types.System
-
-function mark_dirty_for_everyone(action_state: ActionState, entity_id: EntityId)
-	action_state.dirty_entities[entity_id] = action_state.dirty_entities[entity_id] or {}
-	action_state.dirty_entities[entity_id].everyone = true
-end
 
 function run_action_phase(grid: HexGrid)
 	local t0 = tick()
@@ -54,7 +44,7 @@ function run_action_phase(grid: HexGrid)
 
 		for _, decision in entity.queued_decisions do
 			table.insert(action_state.queue, decision)
-			mark_dirty_for_everyone(action_state, entity.id)
+			server_util.mark_dirty_for_everyone(action_state, entity.id)
 		end
 		entity.queued_decisions = {}
 		local server_behavior = server_entity_mod.registry[entity.type]
@@ -80,7 +70,6 @@ function run_action_phase(grid: HexGrid)
 		else
 			updates_mod.push_buffer(grid)
 			server_entity_mod.remove_entity(grid, entity, action_state)
-			server_entity_mod.trigger_neighbors(grid, entity.primary_coordinate, action_state)
 			updates_mod.pop_buffer(grid)
 		end
 	end
@@ -189,223 +178,10 @@ function run_action_phase(grid: HexGrid)
 				table.insert(old_queue, action)
 			end
 
-			for _, exchange_action: any in
-				util.table_extract(action_state.queue, function(action)
-					return (action.type == "exchange" or action.type == "exchange_promise")
-						and table.find(util.table_keys(system.entities), action.entity_id) ~= nil
-				end)
-			do
-				local input_items = exchange_action.input_items
-				local output_items = exchange_action.output_items
-				local input_power = exchange_action.input_power or 0
-				local output_power = exchange_action.output_power or 0
-				if
-					(input_items and not systems_mod.system_has_items(grid, action_state, system, input_items))
-					or (system.power < input_power)
-				then
-					table.insert(action_state.queue, exchange_action)
-					continue
-				end
-				if input_items then
-					for item_type, amount in input_items do
-						systems_mod.system_consume_item_type(grid, action_state, system, item_type, amount)
-					end
-				end
-				system.power -= input_power
-				if exchange_action.on_success then
-					exchange_action.on_success(grid, action_state, system)
-				end
-				if output_items then
-					local out = {}
-					for _, item_type in output_items do
-						table.insert(out, item_type)
-					end
-
-					systems_mod.system_add_items(grid, action_state, system, out)
-				end
-				system.power += output_power
-				table.insert(grid.updates_buffer[#grid.updates_buffer], exchange_action)
-			end
-
-			for _, ability in
-				util.table_extract(action_state.queue, function(value)
-					return (value.type == "ability")
-						and table.find(util.table_keys(system.entities), value.entity_id) ~= nil
-				end)
-			do
-				local shared_behavior = grid.entity_configurations[grid.entities[ability.entity_id].type]
-				local cost = shared_behavior.abilities[ability.ability_type].cost
-
-				mark_dirty_for_everyone(action_state, ability.entity_id)
-				if not systems_mod.system_has_items(grid, action_state, system, cost :: any) then
-					continue
-				end
-
-				for item_type, amount in cost do
-					systems_mod.system_consume_item_type(grid, action_state, system, item_type, amount)
-				end
-				table.insert(grid.updates_buffer[#grid.updates_buffer], {
-					type = "exchange",
-					input_items = cost,
-					entity_id = ability.entity_id,
-					target = grid:get_allies(grid.entities[ability.entity_id].owner),
-				})
-
-				local entity = grid.entities[ability.entity_id]
-
-				local cell = grid:get_cell(ability.coordinate)
-				if not cell then
-					return
-				end
-				table.insert(grid.updates_buffer[#grid.updates_buffer], ability)
-				damage_mod.apply_damage_on_cells(grid, { cell.coordinate }, {
-					type = "flat",
-					amount = if ability.ability_type == "scout_attack" then 1 else 3,
-					from = entity.id,
-					lethal = true,
-					friendly_fire = false,
-				}, action_state)
-			end
-
-			local try_promote_actions: { EntityAction } = util.table_extract(action_state.queue, function(action)
-				return (action.type == "try_promote_blueprint" or action.type == "try_promote_scaffold")
-					and grid.entities[action.entity_id] ~= nil
-			end)
-			table.sort(try_promote_actions, function(a, b)
-				local entity_a = grid.entities[a.entity_id]
-				local entity_b = grid.entities[b.entity_id]
-				return entity_a.server_data.requested_at < entity_b.server_data.requested_at
-			end)
-			for _, action in try_promote_actions do
-				local entity = grid.entities[action.entity_id]
-				local server_behavior = server_entity_mod.registry[entity.type]
-				local shared_config = grid.entity_configurations[entity.type]
-
-				if action.type == "try_promote_blueprint" then
-					local cell = grid:get_cell(entity.primary_coordinate)
-					assert(cell, "cell not found")
-					local cell_researches = researches_mod.get_cell_researches(grid, cell, entity.owner)
-					if
-						shared_config.required_research
-						and not util.table_every(shared_config.required_research, function(research_id)
-							return cell_researches[research_id]
-						end)
-					then
-						-- this blueprint is not researched and therefore cannot be promoted
-						table.insert(action_state.queue, action)
-						continue
-					end
-
-					local consumed = {}
-					-- attempt to satisfy entity.cost_fulfilled as much as possible
-					for request_item_type, request_amount in entity.cost do
-						if not entity.cost_fulfilled[request_item_type] then
-							entity.cost_fulfilled[request_item_type] = 0
-						end
-						local difference = request_amount - entity.cost_fulfilled[request_item_type]
-						local net = systems_mod.system_consume_item_type(
-							grid,
-							action_state,
-							system,
-							request_item_type,
-							difference
-						)
-						entity.cost_fulfilled[request_item_type] += net
-						if net > 0 then
-							mark_dirty_for_everyone(action_state, entity.id)
-							consumed[request_item_type] = net
-						end
-					end
-					table.insert(grid.updates_buffer[#grid.updates_buffer], {
-						type = "exchange",
-						input_items = consumed,
-						entity_id = entity.id,
-						-- todo: include coalitions
-						target = { entity.owner },
-					})
-					if util.deep_equal(entity.cost, entity.cost_fulfilled) then
-						entity.status = "scaffold"
-						mark_dirty_for_everyone(action_state, entity.id)
-						if server_behavior.autogenerate_wires then
-							local wires = grid:query_entity({
-								primary_coordinate = entity.primary_coordinate,
-								type = "wires",
-								owner = entity.owner,
-							})[1]
-							wires.status = "scaffold"
-							mark_dirty_for_everyone(action_state, wires.id)
-						end
-					else
-						-- put this action back in the queue
-						table.insert(action_state.queue, action)
-					end
-					-- if entity.cost_fulfilled deep_equal entity.cost then entity can promote to
-				elseif action.type == "try_promote_scaffold" and entity.build_time > 0 then
-					entity.build_time -= 1
-					mark_dirty_for_everyone(action_state, entity.id)
-				end
-				if entity.status == "scaffold" and entity.build_time == 0 then
-					entity.status = "complete"
-					server_behavior.on_completed(entity, grid, action_state)
-					mark_dirty_for_everyone(action_state, entity.id)
-					local wires = grid:query_entity({
-						primary_coordinate = entity.primary_coordinate,
-						type = "wires",
-						owner = entity.owner,
-					})[1]
-					if wires then
-						wires.status = "complete"
-						mark_dirty_for_everyone(action_state, wires.id)
-					end
-				end
-			end
-
-			local advance_research_actions: { EntityAction } = util.table_extract(action_state.queue, function(action)
-				return action.type == "advance_research"
-					and table.find(util.table_keys(system.entities), action.entity_id) ~= nil
-			end)
-			for _, action in advance_research_actions do
-				local entity = grid.entities[action.entity_id]
-				if not entity or entity.is_destroyed then
-					error "advance_research error"
-				end
-
-				for _, research_id in entity.researches.queue do
-					local research_state = entity.researches.states[research_id]
-					if not research_state.cost_is_paid then
-						if not systems_mod.system_has_items(grid, action_state, system, research_state.cost) then
-							break
-						end
-
-						for item_type, amount in research_state.cost do
-							systems_mod.system_consume_item_type(grid, action_state, system, item_type, amount)
-						end
-						table.insert(grid.updates_buffer[#grid.updates_buffer], {
-							type = "exchange",
-							input_items = research_state.cost,
-							entity_id = entity.id,
-							target = grid:get_allies(entity.owner),
-						})
-						research_state.cost_is_paid = true
-						mark_dirty_for_everyone(action_state, entity.id)
-					else
-						research_state.progress += 1
-						mark_dirty_for_everyone(action_state, entity.id)
-					end
-
-					if research_state.progress == research_state.time then
-						research_state.status = "complete"
-						-- TODO: handle research completion -- ?
-						mark_dirty_for_everyone(action_state, entity.id)
-					else
-						break
-					end
-				end
-
-				local _finished = util.table_extract(entity.researches.queue, function(research_id)
-					return entity.researches.states[research_id].status == "complete"
-				end)
-			end
+			handle_exchange_actions(grid, action_state, system)
+			handle_ability_actions(grid, action_state, system)
+			handle_try_promote_actions(grid, action_state, system)
+			handle_advance_research_actions(grid, action_state, system)
 
 			-- add overflow items to inventory
 			for _, open_inventory_entity in
@@ -440,6 +216,7 @@ function run_action_phase(grid: HexGrid)
 
 	computed_mod.compute_systems(grid)
 
+	-- entity decaying
 	for _, entities in grid.systems do
 		local has_heart = false
 		for entity_id in entities do
@@ -474,6 +251,22 @@ function run_action_phase(grid: HexGrid)
 		end
 	end
 
+	-- status effect decay
+	for entity_id, entity in grid.entities do
+		if next(entity.effects) == nil then
+			continue
+		end
+		for _, effect in entity.effects do
+			if effect.type == "shield" then
+				effect.duration -= 1
+				if effect.duration <= 0 then
+					entity.effects[effect.type] = nil
+				end
+			end
+		end
+		server_util.mark_dirty_for_everyone(action_state, entity_id)
+	end
+
 	updates_mod.push_buffer(grid)
 	for entity_id, should_decay in action_state.decayable_entities do
 		local entity = grid.entities[entity_id]
@@ -485,7 +278,7 @@ function run_action_phase(grid: HexGrid)
 		if should_decay then
 			entity.is_decaying = true
 			entity.decay += 1
-			mark_dirty_for_everyone(action_state, entity_id)
+			server_util.mark_dirty_for_everyone(action_state, entity_id)
 			if entity.decay >= 3 then
 				if entity.type == "wires" then
 					server_entity_mod.remove_entity(grid, entity, action_state)
@@ -498,7 +291,7 @@ function run_action_phase(grid: HexGrid)
 			if entity.is_decaying then
 				entity.is_decaying = false
 				entity.decay = 0
-				mark_dirty_for_everyone(action_state, entity_id)
+				server_util.mark_dirty_for_everyone(action_state, entity_id)
 			end
 		end
 	end
@@ -572,5 +365,4 @@ end
 
 return {
 	run_action_phase = run_action_phase,
-	serialize_grid_for_team = serialize_mod.serialize_grid_for_team,
 }

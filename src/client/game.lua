@@ -208,36 +208,36 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 			for _, cell in grid.cells do
 				color_tile(grid, cell)
 			end
-		elseif update.type == "exchange" then
-			-- local entity = grid.entities[update.entity_id]
-			local entity_instance = grid.entity_instance_map[update.entity_id]
-			local template = asset_server.load "Billboards/Exchange"
-			local instance = template:Clone()
-			instance.Parent = workspace
-			instance.Adornee = entity_instance
+		elseif update.type == "entity_event" then
+			local event = update.event
+			if event.type == "produced_items" or event.type == "consumed_items" then
+				local entity_instance = grid.entity_instance_map[event.entity_id]
+				local template = asset_server.load "Billboards/Exchange"
+				local instance = template:Clone()
+				instance.Parent = workspace
+				instance.Adornee = entity_instance
 
-			local function display(symbol: "+" | "-", items: { [Item]: number? }): string
-				return table.concat(
-					util.table_map(util.table_keys(items), function(k)
-						return `{symbol}{items[k]} {items_mod.item_names[k]}`
-					end),
-					"\n"
-				)
+				local function display(symbol: "+" | "-", items: { [Item]: number? }): string
+					return table.concat(
+						util.table_map(util.table_keys(items), function(k)
+							return `{symbol}{items[k]} {items_mod.item_names[k]}`
+						end),
+						"\n"
+					)
+				end
+				if event.type == "produced_items" then
+					instance.Amount.Text = `<font color="#a3e5a0">{display("+", event.items)}</font>`
+				elseif event.type == "consumed_items" then
+					instance.Amount.Text = `<font color="#e56b6b">{display("-", event.items)}</font>`
+				end
+				TweenService:Create(instance, TweenInfo.new(4), {
+					StudsOffsetWorldSpace = Vector3.new(0, 4, 0),
+				}):Play()
+				TweenService:Create(instance.Amount, TweenInfo.new(4), {
+					TextTransparency = 1,
+				}):Play()
+				Debris:AddItem(instance, 5)
 			end
-			instance.Amount.Text = table.concat((util.table_filter_nil {
-				update.output_items
-					and `<font color="#a3e5a0">{display("+", items_mod.into_counted_items(update.output_items))}</font>`,
-				update.output_power and `<font color = "#a3e5a0">+{update.output_power} power</font>`,
-				update.input_items and `<font color = "#e56b6b">{display("-", update.input_items)}</font>`,
-				update.input_power and `<font color = "#e56b6b">-{update.input_power} power</font>`,
-			}), "\n")
-			TweenService:Create(instance, TweenInfo.new(4), {
-				StudsOffsetWorldSpace = Vector3.new(0, 4, 0),
-			}):Play()
-			TweenService:Create(instance.Amount, TweenInfo.new(4), {
-				TextTransparency = 1,
-			}):Play()
-			Debris:AddItem(instance, 5)
 		elseif update.type == "ability" then
 			if update.ability_type == "scout_attack" or update.ability_type == "turret_attack" then
 				local cell_instance = grid.cell_instance_map[hex_grid_mod.encode_coord(update.coordinate)]

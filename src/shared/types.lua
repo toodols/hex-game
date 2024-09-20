@@ -67,11 +67,11 @@ export type Researches = {
 	},
 }
 
-export type EffectType = string
+export type EffectType = "shield"
 export type Effect = {
 	type: "shield",
 	health: number,
-	turns_left: number,
+	duration: number,
 }
 
 export type AnimationState = {
@@ -422,6 +422,7 @@ export type HexGrid = {
 	new_team: (self: HexGrid, players: { Player }, color: TeamColor?, name: string?) -> TeamData,
 	purge_dead_entities: (self: HexGrid) -> nil,
 	get_allies: (self: HexGrid, team: TeamId) -> { TeamId },
+
 	-- get_team_coalition: (self: HexGrid, team: TeamId) -> CoalitionData,
 
 	-- these fields are more convenient inlined

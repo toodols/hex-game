@@ -10,6 +10,7 @@ local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 type TeamData = types.TeamData
 type Decision = types.Decision
+type HexGrid = types.HexGrid
 
 -- Copy assets for client use
 local destination = Instance.new "Folder"
@@ -33,7 +34,7 @@ clone_assets({
 local tests = require(ServerScriptService.Server.tests)
 local remotes_mod = require(ServerScriptService.Server.remotes)
 local router_mod = require(ServerScriptService.Server.router)
-local action_phase_mod = require(ServerScriptService.Server.action_phase)
+local serialize_mod = require(ServerScriptService.Server.serialize)
 local presets = require(ServerScriptService.Server.presets)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 
@@ -48,8 +49,18 @@ remotes_mod.get_hex_grid_data_remote.OnServerInvoke = function(player)
 		task.wait()
 	end
 	local player_team = grid:get_player_team(player)
-	return action_phase_mod.serialize_grid_for_team(grid, player_team.id)
+	return serialize_mod.serialize_grid_for_team(grid, player_team.id)
 end :: any
+
+function republish_teams(grid: HexGrid)
+	table.insert(grid.updates_buffer[#grid.updates_buffer], {
+		type = "teams",
+		teams = util.table_map(grid.teams, function(team)
+			return serialize_mod.serialize_team(grid, team)
+		end),
+		coalitions = grid.coalitions,
+	})
+end
 
 function start_game(teleport_data: { room: types.Room }?)
 	local players_config = teleport_data and teleport_data.room and teleport_data.room.players
@@ -90,6 +101,7 @@ function start_game(teleport_data: { room: types.Room }?)
 	Players.PlayerAdded:Connect(function(plr)
 		auto_add_player(plr)
 		turn_scheduler.recalculate_skips(grid)
+		republish_teams(grid)
 	end)
 	Players.PlayerRemoving:Connect(function(plr)
 		for _, team in grid.teams do
@@ -98,6 +110,7 @@ function start_game(teleport_data: { room: types.Room }?)
 		util.table_remove_needle(grid.skipped, plr)
 
 		turn_scheduler.recalculate_skips(grid)
+		republish_teams(grid)
 	end)
 
 	turn_scheduler.init(grid)

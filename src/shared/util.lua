@@ -164,6 +164,14 @@ function table_join<K, V>(a: { [K]: V }, b: { [K]: V }): { [K]: V }
 	return result
 end
 
+function table_reverse<T>(tab: { T }): { T }
+	local result = {}
+	for i = #tab, 1, -1 do
+		table.insert(result, tab[i])
+	end
+	return result
+end
+
 function deep_equal(a, b)
 	if a == b then
 		return true
@@ -246,6 +254,7 @@ return {
 	table_fold = table_fold,
 	table_any = table_any,
 	table_keys = table_keys,
+	table_reverse = table_reverse,
 	range = range,
 	timer = timer,
 }

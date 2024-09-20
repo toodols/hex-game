@@ -26,5 +26,4 @@ return {
 	autogenerate_wires = methods.autogenerate_wires,
 	remove_entity = methods.remove_entity,
 	-- entity_can_deconstruct = methods.entity_can_deconstruct,
-	trigger_neighbors = methods.trigger_neighbors,
 }

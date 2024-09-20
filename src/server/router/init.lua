@@ -205,7 +205,8 @@ function on_decision(grid: HexGrid, plr: Player, data: { Decision })
 					updates_mod.flush_updates(grid)
 				else
 					server_entity_mod.remove_entity(grid, entity)
-					entity_mod.trigger_neighbors(grid, grid.entities[entity.id].primary_coordinate)
+					
+					
 				end
 			elseif entry.type == "set_entity_enabled" then
 				local entity = grid.entities[entry.entity_id]

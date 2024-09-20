@@ -12,7 +12,6 @@ type CubicCoordinate = types.CubicCoordinate
 type HexCell = types.HexCell
 type ActionState = server_types.ActionState
 
--- todo: change this to use action_state
 function compute_visibility(grid: HexGrid, action_state: ActionState?)
 	local changed_to_visible: { [TeamId]: { [EncodedCoordinate]: boolean } } = {}
 	local old_vis: { [EncodedCoordinate]: { [TeamId]: any } } = {}

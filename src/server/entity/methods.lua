@@ -2,23 +2,25 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
-local remotes_mod = require(ServerScriptService.Server.remotes)
 local shared_registry_mod = require(ReplicatedStorage.Shared.entity.registry)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local registry = require(script.Parent.registry).registry
 local server_util = require(ServerScriptService.Server.util)
 local server_types = require(ServerScriptService.Server.types)
+local publish_event = require(ServerScriptService.Server.event).publish_event
 
 type HexGrid = types.HexGrid
 type Entity = types.Entity
 type CubicCoordinate = types.CubicCoordinate
-type ActionState = server_types.ActionState
 type GridUpdate = types.GridUpdate
+type ActionState = server_types.ActionState
 
 function entity_can_deconstruct(entity: Entity, grid: HexGrid)
+	local cell = grid:get_cell(entity.primary_coordinate)
+	assert(cell, "cell not found")
 	if
 		entity.type == "wires"
-		and not util.table_any(grid:get_cell(entity.primary_coordinate).entities, function(entity_id)
+		and not util.table_any(cell.entities, function(entity_id)
 			return shared_registry_mod.registry[grid.entities[entity_id].type].layer > shared_registry_mod.layer.wire
 		end)
 	then
@@ -26,18 +28,7 @@ function entity_can_deconstruct(entity: Entity, grid: HexGrid)
 	end
 	return true
 end
-function trigger_neighbors(grid: HexGrid, origin: CubicCoordinate, action_state: ActionState?)
-	for _, coord in hex_grid_mod.neighbors_leq(origin, 1) do
-		local cell = grid:get_cell(coord)
-		if not cell then
-			continue
-		end
-		for _, entity_id in cell.entities do
-			local neighbor_entity = grid.entities[entity_id]
-			registry[neighbor_entity.type].neighbor_changed(neighbor_entity, grid, action_state)
-		end
-	end
-end
+
 function autogenerate_wires(grid: HexGrid, host: Entity, action_state: ActionState?)
 	if #grid:query_entity { primary_coordinate = host.primary_coordinate, type = "wires", owner = host.owner } == 0 then
 		-- the status is the highest status among buildings that come with wires
@@ -67,7 +58,8 @@ end
 
 -- Creates a new entity on a grid
 -- And adds relevant events to the updates buffer
-function new_entity(entity: table, grid: HexGrid, action_state: ActionState?): Entity
+function new_entity(entity_: any, grid: HexGrid, action_state: ActionState?): Entity
+	local entity = entity_ :: Entity
 	if not grid then
 		error "argument 2 not provided"
 	end
@@ -98,6 +90,7 @@ function new_entity(entity: table, grid: HexGrid, action_state: ActionState?): E
 	entity.cost = entity.cost or shared_behavior.cost
 	entity.is_destroyed = entity.is_destroyed or false
 	entity.cost_fulfilled = entity.cost_fulfilled or {}
+	entity.effects = entity.effects or {}
 	-- quickly catch when i use TeamData for owner instead of TeamId
 	assert(not entity.owner or typeof(entity.owner) == "number", "Entity owner is not a number")
 	entity.owner = entity.owner or grid.neutral_team
@@ -121,9 +114,9 @@ function new_entity(entity: table, grid: HexGrid, action_state: ActionState?): E
 	end
 
 	if action_state then
-		action_state.dirty_entities[entity.id] = action_state.dirty_entities[entity.id] or {}
-		action_state.dirty_entities[entity.id].everyone = true
+		server_util.mark_dirty_for_everyone(action_state, entity.id)
 	end
+
 	table.insert(grid.updates_buffer[#grid.updates_buffer], { type = "entity_update", entity = entity })
 	table.insert(grid.updates_buffer[#grid.updates_buffer], {
 		type = "entity_created",
@@ -135,18 +128,19 @@ end
 -- Marks an entity as destroyed, removing it from the cells it occupies
 -- Does not remove it from grid.entities
 function remove_entity(grid: HexGrid, entity: Entity, action_state: ActionState?)
+	local cell = grid:get_cell(entity.primary_coordinate)
+	assert(cell, "cell not found")
 	for _, coord in entity.coordinates do
-		util.table_remove_needle(grid:get_cell(coord).entities, entity.id)
+		util.table_remove_needle(cell.entities, entity.id)
 	end
 	entity.is_destroyed = true
 	table.insert(grid.updates_buffer[#grid.updates_buffer], { type = "entity_update", entity = entity })
-	table.insert(grid.updates_buffer[#grid.updates_buffer], {
-		type = "entity_destroyed",
-		entity_id = entity.id,
-	})
 	if action_state then
-		action_state.dirty_entities[entity.id] = action_state.dirty_entities[entity.id] or {}
-		action_state.dirty_entities[entity.id].everyone = true
+		server_util.mark_dirty_for_everyone(action_state, entity.id)
+		publish_event(grid, {
+				type = "removed",
+				entity_id = entity.id,
+		}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
 	end
 end
 
@@ -154,5 +148,4 @@ return {
 	remove_entity = remove_entity,
 	autogenerate_wires = autogenerate_wires,
 	new_entity = new_entity,
-	trigger_neighbors = trigger_neighbors,
 }
