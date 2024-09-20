@@ -27,24 +27,18 @@ registry_mod.registry["vault"] = registry_mod.with_defaults {
 	update = function(self: Entity, grid: HexGrid, old: Entity)
 		update_model(self, grid)
 	end,
+	animate = function(self: Entity, grid: HexGrid, animation_state: types.AnimationState)
+		if not self.inventory then
+			return
+		end
+		local instance_root = grid.entity_instance_map[self.id]
+		local t = (animation_state.step / 100) % (math.pi * 2)
+		local instance = instance_root:FindFirstChild "crystal" :: BasePart
+		local start = instance.Position
+		instance:PivotTo(CFrame.Angles(0, t, 0) + start)
+	end,
 	init = function(self: Entity, grid: HexGrid)
 		update_model(self, grid)
-		task.spawn(function()
-			local t = 0
-			while task.wait() do
-				local entity = grid.entities[self.id]
-				if not entity then
-					return
-				end
-				if not entity.inventory then
-					continue
-				end
-				local instance = grid.entity_instance_map[self.id]:FindFirstChild "crystal" :: BasePart
-				local start = instance.Position
-				instance:PivotTo(CFrame.Angles(0, t, 0) + start)
-				t = (t + 0.01) % (math.pi * 2)
-			end
-		end)
 	end,
 }
 

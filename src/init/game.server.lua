@@ -8,13 +8,8 @@ local StarterGui = game:GetService "StarterGui"
 local clone_assets = require(ReplicatedStorage.Shared.asset_server).clone
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
-
-local tests = require(ServerScriptService.Server.tests)
-local remotes_mod = require(ServerScriptService.Server.remotes)
-local router_mod = require(ServerScriptService.Server.router)
-local action_phase_mod = require(ServerScriptService.Server.action_phase)
-local presets = require(ServerScriptService.Server.presets)
-local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
+type TeamData = types.TeamData
+type Decision = types.Decision
 
 -- Copy assets for client use
 local destination = Instance.new "Folder"
@@ -35,8 +30,12 @@ clone_assets({
 	Effects = true,
 }, server_assets, destination)
 
-type TeamData = types.TeamData
-type Decision = types.Decision
+local tests = require(ServerScriptService.Server.tests)
+local remotes_mod = require(ServerScriptService.Server.remotes)
+local router_mod = require(ServerScriptService.Server.router)
+local action_phase_mod = require(ServerScriptService.Server.action_phase)
+local presets = require(ServerScriptService.Server.presets)
+local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 
 if RunService:IsStudio() then
 	tests.run_tests()

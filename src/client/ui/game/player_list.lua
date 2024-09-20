@@ -5,6 +5,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
+local RunService = game:GetService "RunService"
 
 type TeamData = types.TeamData
 type HexGrid = types.HexGrid
@@ -141,16 +142,19 @@ function PlayerList()
 				end
 			end
 		end)
-
-		ContextActionService:BindAction("player_list", function(actionName, inputState, inputObject)
-			if inputState == Enum.UserInputState.Begin then
-				set_visible(true)
-			elseif inputState == Enum.UserInputState.End then
-				set_visible(false)
-			end
-		end, false, Enum.KeyCode.T)
+		if RunService:IsClient() then
+			ContextActionService:BindAction("player_list", function(actionName, inputState, inputObject)
+				if inputState == Enum.UserInputState.Begin then
+					set_visible(true)
+				elseif inputState == Enum.UserInputState.End then
+					set_visible(false)
+				end
+			end, false, Enum.KeyCode.T)
+		end
 		return function()
-			ContextActionService:UnbindAction "player_list"
+			if RunService:IsClient() then
+				ContextActionService:UnbindAction "player_list"
+			end
 		end
 	end, {})
 

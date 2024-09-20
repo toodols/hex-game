@@ -74,6 +74,11 @@ export type Effect = {
 	turns_left: number,
 }
 
+export type AnimationState = {
+	type: "idle",
+	step: number,
+}
+
 export type Entity = {
 	type: string,
 	coordinates: { CubicCoordinate },
@@ -86,6 +91,8 @@ export type Entity = {
 	inventory: Inventory?,
 
 	effects: { [EffectType]: Effect },
+
+	animation_state: AnimationState?,
 
 	-- factory only
 	current_recipe: string?,

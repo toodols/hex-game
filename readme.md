@@ -2,6 +2,10 @@
 
 A simultaneous turn-based strategy game on a hexagon grid with an emphasis on logistics, symmetry, and determinism in Roblox.
 
+## Buildings
+
+[Current Buildings](./buildings.md)
+
 ## System
 
 Vertices (`wires`) on the same team connect with other Vertices on neighbor cells to form a system. A system shares production and inventory.

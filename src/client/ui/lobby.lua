@@ -327,19 +327,19 @@ function Room(props: { room: Room })
 				})
 			end)
 		),
-		ClickToJoinLabel = React.createElement("TextLabel", {
-			AnchorPoint = Vector2.new(1, 0.5),
-			BackgroundTransparency = 1,
-			FontFace = Font.new "rbxasset://fonts/families/SourceSansPro.json",
-			Position = UDim2.new(1, -15, 0.5, 0),
-			Size = UDim2.new(0, 200, 0, 50),
-			Text = "Click To Join",
-			TextColor3 = Color3.fromRGB(255, 255, 255),
-			TextSize = 16,
-			TextTransparency = 0.6,
-			TextXAlignment = Enum.TextXAlignment.Right,
-			Visible = not is_expanded,
-		}),
+		ClickToJoinLabel = React.createElement(
+			"TextLabel",
+			themes.theme_label {
+				AnchorPoint = Vector2.new(1, 0.5),
+				Position = UDim2.new(1, -15, 0.5, 0),
+				Size = UDim2.new(0, 200, 0, 50),
+				Text = "Click To Join",
+				TextSize = 16,
+				TextTransparency = 0.6,
+				TextXAlignment = Enum.TextXAlignment.Right,
+				Visible = not is_expanded,
+			}
+		),
 		Corner = React.createElement(Corner),
 		Hitbox = React.createElement(
 			"TextButton",

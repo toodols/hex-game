@@ -1,5 +1,6 @@
 {
 	"files.exclude": {
 		"**/Packages": true,
-	}
+	},
+	"luau-lsp.sourcemap.rojoProjectFile": "game.project.json"
 }

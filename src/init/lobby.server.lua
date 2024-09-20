@@ -6,10 +6,10 @@ local RunService = game:GetService "RunService"
 
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
+local placeids = require(ReplicatedStorage.Shared.placeids).placeids
 
 type Room = types.Room
 
-local GAME_PLACEID = "96418171483264"
 local START_TIME = if RunService:IsStudio() then 5 else 5
 local REQUIRES_FILLED_TEAMS = if RunService:IsStudio() then true else true
 
@@ -54,7 +54,7 @@ function room_membership_changed(room: Room)
 				teleport_options:SetTeleportData {
 					room = room,
 				}
-				TeleportService:TeleportAsync(GAME_PLACEID, party, teleport_options)
+				TeleportService:TeleportAsync(placeids.game, party, teleport_options)
 			end)
 		else
 			if room_timers[room.id] then

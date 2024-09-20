@@ -1,20 +1,17 @@
 local Debris = game:GetService "Debris"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local TweenService = game:GetService "TweenService"
+local RunService = game:GetService "RunService"
 
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local asset_server = require(ReplicatedStorage.Shared.asset_server)
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local items_mod = require(ReplicatedStorage.Shared.items)
-
-local init_game_ui = require(script.Parent.ui.game).init_ui
 local client_entity_mod = require(script.Parent.entity)
 local cells_mod = require(ReplicatedStorage.Shared.cells)
 
 -- apparently local x: RemoteEvent is the same as local x: Instance. Nice.
-local get_hex_grid_data_remote = ReplicatedStorage:FindFirstChild "GetHexGridDataRemote" :: RemoteFunction
-local grid_updates_remote = ReplicatedStorage:FindFirstChild "GridUpdatesRemote" :: RemoteEvent
 
 local into_vec3 = hex_grid_mod.into_vec3
 local encode_coord = hex_grid_mod.encode_coord
@@ -109,10 +106,8 @@ function update_tile_deconstructs(grid: HexGrid, coordinate: CubicCoordinate)
 	end
 end
 
-function init()
-	local grid_data = get_hex_grid_data_remote:InvokeServer()
-	local grid = hex_grid_mod.new_grid_from_data(grid_data)
-
+function render_grid(grid: HexGrid)
+	destroy_grid_instances(grid)
 	local entity_folder = Instance.new "Folder"
 	entity_folder.Parent = workspace
 	grid.entity_instance_root = entity_folder
@@ -139,132 +134,158 @@ function init()
 	for _, entity in grid.entities do
 		client_entity_mod.update_entity_client(grid, nil, entity)
 	end
+end
 
-	grid_updates_remote.OnClientEvent:Connect(function(updates: { GridUpdate })
-		table.sort(updates, function(a, b)
-			local order = {
-				turn_timer = 1,
-				turn = 1,
-				cell_update = 1,
-				cells = 1,
-				entity_update = 3,
-				exchange = 4,
-				scout_attack = 4,
-			}
-			return (order[a.type] or 5) < (order[b.type] or 5)
-		end)
-		local updated_entities = {}
-
-		for _, update in updates do
-			if update.type == "entity_update" then
-				-- should be fine if single threaded
-				local old_entity = grid.entities[update.entity.id]
-				grid.entities[update.entity.id] = update.entity
-				table.insert(updated_entities, { old = old_entity, new = update.entity })
-			elseif update.type == "turn_timer" then
-				grid.turn_end_time = update.turn_end_time
-				grid.turn_start_time = update.turn_start_time
-			elseif update.type == "turn" then
-				grid.highest_turn = update.turn
-				grid.turn = update.turn
-			elseif update.type == "cell_update" then
-				grid.cells[hex_grid_mod.encode_coord(update.cell.coordinate)] = update.cell
-			elseif update.type == "cells" then
-				for encoded_coord, cell in update.cells do
-					if grid.cells[encoded_coord].visible_for_team and not cell.visible_for_team then
-						for _, entity_id in grid.cells[encoded_coord].entities do
-							local entity = grid.entities[entity_id]
-							local client_behavior = client_entity_mod.registry[entity.type]
-							if client_behavior.on_hidden then
-								client_behavior.on_hidden(entity, grid)
-							end
-							entity.is_destroyed = true
-						end
-					end
-					grid.cells[encoded_coord] = cell
+function start_animations(grid: HexGrid)
+	return RunService.Heartbeat:Connect(function()
+		for _, entity in grid.entities do
+			local behavior = client_entity_mod.registry[entity.type]
+			if behavior.animate then
+				if not entity.animation_state then
+					entity.animation_state = { type = "idle", step = 0 }
 				end
-				for _, cell in grid.cells do
-					color_tile(grid, cell)
-				end
-			elseif update.type == "exchange" then
-				-- local entity = grid.entities[update.entity_id]
-				local entity_instance = grid.entity_instance_map[update.entity_id]
-				local template = asset_server.load "Billboards/Exchange"
-				local instance = template:Clone()
-				instance.Parent = workspace
-				instance.Adornee = entity_instance
-
-				local function display(symbol: "+" | "-", items: { [Item]: number? }): string
-					return table.concat(
-						util.table_map(util.table_keys(items), function(k)
-							return `{symbol}{items[k]} {items_mod.item_names[k]}`
-						end),
-						"\n"
-					)
-				end
-				instance.Amount.Text = table.concat((util.table_filter_nil {
-					update.output_items
-						and `<font color="#a3e5a0">{display("+", items_mod.into_counted_items(update.output_items))}</font>`,
-					update.output_power and `<font color = "#a3e5a0">+{update.output_power} power</font>`,
-					update.input_items and `<font color = "#e56b6b">{display("-", update.input_items)}</font>`,
-					update.input_power and `<font color = "#e56b6b">-{update.input_power} power</font>`,
-				}), "\n")
-				TweenService:Create(instance, TweenInfo.new(4), {
-					StudsOffsetWorldSpace = Vector3.new(0, 4, 0),
-				}):Play()
-				TweenService:Create(instance.Amount, TweenInfo.new(4), {
-					TextTransparency = 1,
-				}):Play()
-				Debris:AddItem(instance, 5)
-			elseif update.type == "ability" then
-				if update.ability_type == "scout_attack" or update.ability_type == "turret_attack" then
-					local cell_instance = grid.cell_instance_map[hex_grid_mod.encode_coord(update.coordinate)]
-					local entity_instance = grid.entity_instance_map[update.entity_id]
-					local bullet = Instance.new "Part"
-					bullet.Size = Vector3.new(0.5, 0.5, 0.5)
-					bullet.CanCollide = false
-					bullet.Anchored = true
-					bullet.Material = Enum.Material.Neon
-					bullet.Parent = workspace
-					bullet:PivotTo(entity_instance:GetPivot())
-					bullet.Anchored = true
-					TweenService:Create(bullet, TweenInfo.new(0.1, Enum.EasingStyle.Linear), {
-						Position = cell_instance:FindFirstChild("Base").Position + Vector3.new(0, 2, 0),
-					}):Play()
-					Debris:AddItem(bullet, 0.3)
-				end
-			-- elseif update.type == "grid" then
-			elseif update.type == "turn_skips" then
-				grid.needed_skips = update.needed_skips
-				grid.current_skips = update.current_skips
-			elseif update.type == "teams" then
-				grid.teams = update.teams
-				grid.coalitions = update.coalitions
+				entity.animation_state.step += 1
+				behavior.animate(entity, grid, entity.animation_state)
 			end
 		end
-
-		-- second pass: create instances for these things
-		for _, entry in updated_entities do
-			local old_entity = entry.old
-			local new_entity = entry.new
-			client_entity_mod.update_entity_client(grid, old_entity, new_entity)
-		end
-
-		-- third pass: update neighbors and other stuff
-		for _, entry in updated_entities do
-			local new_entity = entry.new
-			update_neighbors(grid, new_entity.coordinates)
-			update_tile_deconstructs(grid, new_entity.primary_coordinate)
-		end
-		grid.grid_update_signal.send(updates)
-
-		grid:purge_dead_entities()
 	end)
-	--
-	init_game_ui(grid)
-	return grid
+end
+
+function destroy_grid_instances(grid: HexGrid)
+	grid.cell_instance_map = {}
+	grid.entity_instance_map = {}
+	if grid.cell_instance_root then
+		grid.cell_instance_root:Destroy()
+	end
+	if grid.entity_instance_root then
+		grid.entity_instance_root:Destroy()
+	end
+end
+
+function handle_updates(grid: HexGrid, updates: { GridUpdate })
+	table.sort(updates, function(a, b)
+		local order = {
+			turn_timer = 1,
+			turn = 1,
+			cell_update = 1,
+			cells = 1,
+			entity_update = 3,
+			exchange = 4,
+			scout_attack = 4,
+		}
+		return (order[a.type] or 5) < (order[b.type] or 5)
+	end)
+	local updated_entities = {}
+
+	for _, update in updates do
+		if update.type == "entity_update" then
+			-- should be fine if single threaded
+			local old_entity = grid.entities[update.entity.id]
+			grid.entities[update.entity.id] = update.entity
+			table.insert(updated_entities, { old = old_entity, new = update.entity })
+		elseif update.type == "turn_timer" then
+			grid.turn_end_time = update.turn_end_time
+			grid.turn_start_time = update.turn_start_time
+		elseif update.type == "turn" then
+			grid.highest_turn = update.turn
+			grid.turn = update.turn
+		elseif update.type == "cell_update" then
+			grid.cells[hex_grid_mod.encode_coord(update.cell.coordinate)] = update.cell
+		elseif update.type == "cells" then
+			for encoded_coord, cell in update.cells do
+				if grid.cells[encoded_coord].visible_for_team and not cell.visible_for_team then
+					for _, entity_id in grid.cells[encoded_coord].entities do
+						local entity = grid.entities[entity_id]
+						local client_behavior = client_entity_mod.registry[entity.type]
+						if client_behavior.on_hidden then
+							client_behavior.on_hidden(entity, grid)
+						end
+						entity.is_destroyed = true
+					end
+				end
+				grid.cells[encoded_coord] = cell
+			end
+			for _, cell in grid.cells do
+				color_tile(grid, cell)
+			end
+		elseif update.type == "exchange" then
+			-- local entity = grid.entities[update.entity_id]
+			local entity_instance = grid.entity_instance_map[update.entity_id]
+			local template = asset_server.load "Billboards/Exchange"
+			local instance = template:Clone()
+			instance.Parent = workspace
+			instance.Adornee = entity_instance
+
+			local function display(symbol: "+" | "-", items: { [Item]: number? }): string
+				return table.concat(
+					util.table_map(util.table_keys(items), function(k)
+						return `{symbol}{items[k]} {items_mod.item_names[k]}`
+					end),
+					"\n"
+				)
+			end
+			instance.Amount.Text = table.concat((util.table_filter_nil {
+				update.output_items
+					and `<font color="#a3e5a0">{display("+", items_mod.into_counted_items(update.output_items))}</font>`,
+				update.output_power and `<font color = "#a3e5a0">+{update.output_power} power</font>`,
+				update.input_items and `<font color = "#e56b6b">{display("-", update.input_items)}</font>`,
+				update.input_power and `<font color = "#e56b6b">-{update.input_power} power</font>`,
+			}), "\n")
+			TweenService:Create(instance, TweenInfo.new(4), {
+				StudsOffsetWorldSpace = Vector3.new(0, 4, 0),
+			}):Play()
+			TweenService:Create(instance.Amount, TweenInfo.new(4), {
+				TextTransparency = 1,
+			}):Play()
+			Debris:AddItem(instance, 5)
+		elseif update.type == "ability" then
+			if update.ability_type == "scout_attack" or update.ability_type == "turret_attack" then
+				local cell_instance = grid.cell_instance_map[hex_grid_mod.encode_coord(update.coordinate)]
+				local entity_instance = grid.entity_instance_map[update.entity_id]
+				local bullet = Instance.new "Part"
+				bullet.Size = Vector3.new(0.5, 0.5, 0.5)
+				bullet.CanCollide = false
+				bullet.Anchored = true
+				bullet.Material = Enum.Material.Neon
+				bullet.Parent = workspace
+				bullet:PivotTo(entity_instance:GetPivot())
+				bullet.Anchored = true
+				TweenService:Create(bullet, TweenInfo.new(0.1, Enum.EasingStyle.Linear), {
+					Position = cell_instance:FindFirstChild("Base").Position + Vector3.new(0, 2, 0),
+				}):Play()
+				Debris:AddItem(bullet, 0.3)
+			end
+			-- elseif update.type == "grid" then
+		elseif update.type == "turn_skips" then
+			grid.needed_skips = update.needed_skips
+			grid.current_skips = update.current_skips
+		elseif update.type == "teams" then
+			grid.teams = update.teams
+			grid.coalitions = update.coalitions
+		end
+	end
+
+	-- second pass: create instances for these things
+	for _, entry in updated_entities do
+		local old_entity = entry.old
+		local new_entity = entry.new
+		client_entity_mod.update_entity_client(grid, old_entity, new_entity)
+	end
+
+	-- third pass: update neighbors and other stuff
+	for _, entry in updated_entities do
+		local new_entity = entry.new
+		update_neighbors(grid, new_entity.coordinates)
+		update_tile_deconstructs(grid, new_entity.primary_coordinate)
+	end
+	grid.grid_update_signal.send(updates)
+
+	grid:purge_dead_entities()
 end
 
 return {
-	init = init,
+	start_animations = start_animations,
+	handle_updates = handle_updates,
+	render_grid = render_grid,
+	destroy_grid_instances = destroy_grid_instances,
 }

@@ -24,7 +24,7 @@ function TopCenter()
 				end
 			end
 		end)
-		local connection = RunService.RenderStepped:Connect(function()
+		local connection = RunService.Heartbeat:Connect(function()
 			if not bar_ref.current then
 				return
 			end

@@ -5,6 +5,7 @@ local util = require(ReplicatedStorage.Shared.util)
 type Entity = types.Entity
 type HexGrid = types.HexGrid
 type HexCell = types.HexCell
+type AnimationState = types.AnimationState
 
 local registry: { [string]: ClientEntityBehavior } = {}
 type ClientEntityBehavior = {
@@ -23,6 +24,8 @@ type ClientEntityBehavior = {
 
 	on_destroy: (self: Entity, grid: HexGrid) -> (),
 	on_hidden: (self: Entity, grid: HexGrid) -> (),
+
+	animate: ((self: Entity, grid: HexGrid, animation_state: AnimationState) -> ())?,
 
 	-- turn_start: (self: Entity, grid: HexGrid, cell: HexCell) -> (),
 }
@@ -60,6 +63,7 @@ function with_defaults(t: any)
 				instance:Destroy()
 			end
 		end,
+		animate = t.animate,
 		update = t.update or function(self: Entity, grid: HexGrid, old: Entity)
 			if self.type ~= self.type then
 				-- oh no

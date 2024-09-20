@@ -117,6 +117,9 @@ function serialize_grid_for_team(grid: HexGrid, team: TeamId): PartialHexGrid
 		turn_end_time = grid.turn_end_time,
 		turn_start_time = grid.turn_start_time,
 		entities = entities,
+		entity_configurations = grid.entity_configurations,
+		neutral_team = grid.neutral_team,
+		spectator_team = grid.spectator_team,
 	}
 	return partial_grid
 end

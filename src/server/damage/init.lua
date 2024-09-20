@@ -43,6 +43,10 @@ type ActionState = server_types.ActionState
 -- A(0)  A(0)
 -- B(0)  C(5)
 
+function apply_damage(grid: HexGrid, target: CubicCoordinate, damage: Damage, action_state: ActionState?)
+	
+end
+
 function apply_damage_on_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damage, action_state: ActionState?)
 	damage.lethal = damage.lethal or true
 	damage.friendly_fire = damage.friendly_fire or false

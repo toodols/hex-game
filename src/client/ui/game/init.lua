@@ -148,9 +148,9 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode }, u
 	})
 end
 
-function init_ui(grid)
+function init_ui(grid, root_instance: Instance?)
 	local nonce = 0
-	local root = ReactRoblox.createRoot(Players.LocalPlayer.PlayerGui)
+	local root = ReactRoblox.createRoot(root_instance or Players.LocalPlayer.PlayerGui)
 	local selection_mode_stack: { SelectionMode } = {
 		{
 			type = "select_cells",
@@ -179,7 +179,6 @@ function init_ui(grid)
 	selected_highlight.OutlineTransparency = 0.5
 	selected_highlight.FillColor = Color3.fromRGB(0, 255, 0)
 
-	local mouse = Players.LocalPlayer:GetMouse()
 	local cursor_instance: Instance? = nil
 	local old_cursor_instance = nil
 	local shift_select_type: "drag-include" | "drag-exclude" | "drag-unknown" | "off" = "off"
@@ -277,56 +276,73 @@ function init_ui(grid)
 		end
 	end
 
-	-- on render
-	local render_stepped_connection = RunService.RenderStepped:Connect(function()
-		local raycast_params = RaycastParams.new()
-		raycast_params.FilterType = Enum.RaycastFilterType.Include
-		raycast_params.FilterDescendantsInstances = { grid.cell_instance_root }
-		local unit_ray = mouse.UnitRay
+	local render_stepped_connection
+	if RunService:IsClient() then
+		local mouse = Players.LocalPlayer:GetMouse()
+		-- on render
+		render_stepped_connection = RunService.RenderStepped:Connect(function()
+			local raycast_params = RaycastParams.new()
+			raycast_params.FilterType = Enum.RaycastFilterType.Include
+			raycast_params.FilterDescendantsInstances = { grid.cell_instance_root }
+			local unit_ray = mouse.UnitRay
 
-		local raycast_result = workspace:Raycast(unit_ray.Origin, unit_ray.Direction * 1000, raycast_params)
+			local raycast_result = workspace:Raycast(unit_ray.Origin, unit_ray.Direction * 1000, raycast_params)
 
-		hover_highlight.Adornee = nil :: any
-		old_cursor_instance = cursor_instance
-		cursor_instance = nil
+			hover_highlight.Adornee = nil :: any
+			old_cursor_instance = cursor_instance
+			cursor_instance = nil
 
-		if raycast_result then
-			cursor_instance = raycast_result.Instance
-			while cursor_instance and not grid.instance_cell_map[cursor_instance] do
-				cursor_instance = cursor_instance.Parent
-			end
-			if cursor_instance then
-				update()
-			else
-				error "unexpected"
-			end
-		else
-			refresh_highlight(hover_highlight, {})
-		end
-	end)
-
-	-- on select
-	ContextActionService:BindAction("select_cell", function(_action_name, input_state, _input_object)
-		if input_state == Enum.UserInputState.Begin then
-			local selection_mode = selection_mode_stack[#selection_mode_stack]
-			if selection_mode.type == "select_cells" then
-				shift_select_type = "drag-unknown"
+			if raycast_result then
+				cursor_instance = raycast_result.Instance
+				while cursor_instance and not grid.instance_cell_map[cursor_instance] do
+					cursor_instance = cursor_instance.Parent
+				end
 				if cursor_instance then
-					if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-						if selection_mode.selected[cursor_instance] then
-							shift_select_type = "drag-exclude"
+					update()
+				else
+					error "unexpected"
+				end
+			else
+				refresh_highlight(hover_highlight, {})
+			end
+		end)
+
+		-- on select
+		ContextActionService:BindAction("select_cell", function(_action_name, input_state, _input_object)
+			if input_state == Enum.UserInputState.Begin then
+				local selection_mode = selection_mode_stack[#selection_mode_stack]
+				if selection_mode.type == "select_cells" then
+					shift_select_type = "drag-unknown"
+					if cursor_instance then
+						if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+							if selection_mode.selected[cursor_instance] then
+								shift_select_type = "drag-exclude"
+							else
+								shift_select_type = "drag-include"
+							end
+							if selection_mode.selected[cursor_instance] then
+								selection_mode.selected[cursor_instance] = nil
+							else
+								selection_mode.selected[cursor_instance] = true
+							end
 						else
-							shift_select_type = "drag-include"
+							selection_mode.selected = { [cursor_instance] = true }
 						end
-						if selection_mode.selected[cursor_instance] then
-							selection_mode.selected[cursor_instance] = nil
-						else
-							selection_mode.selected[cursor_instance] = true
-						end
-					else
-						selection_mode.selected = { [cursor_instance] = true }
+						-- update selected
+						nonce += 1
+						root:render(React.createElement(Main, {
+							nonce = nonce,
+							grid = grid,
+							update_highlights = update,
+							selection_mode_stack = selection_mode_stack,
+						}))
+						refresh_highlight(selected_highlight, selection_mode.selected)
 					end
-					-- update selected
+				elseif selection_mode.type == "select_direction" or selection_mode.type == "select_some_cell" then
+					if selection_mode.candidates[cursor_instance] then
+						selection_mode.on_selected(cursor_instance)
+						selection_mode_stack[#selection_mode_stack] = nil
+					end
 					nonce += 1
 					root:render(React.createElement(Main, {
 						nonce = nonce,
@@ -334,25 +350,12 @@ function init_ui(grid)
 						update_highlights = update,
 						selection_mode_stack = selection_mode_stack,
 					}))
-					refresh_highlight(selected_highlight, selection_mode.selected)
 				end
-			elseif selection_mode.type == "select_direction" or selection_mode.type == "select_some_cell" then
-				if selection_mode.candidates[cursor_instance] then
-					selection_mode.on_selected(cursor_instance)
-					selection_mode_stack[#selection_mode_stack] = nil
-				end
-				nonce += 1
-				root:render(React.createElement(Main, {
-					nonce = nonce,
-					grid = grid,
-					update_highlights = update,
-					selection_mode_stack = selection_mode_stack,
-				}))
+			elseif input_state == Enum.UserInputState.End then
+				shift_select_type = "off"
 			end
-		elseif input_state == Enum.UserInputState.End then
-			shift_select_type = "off"
-		end
-	end, false, Enum.UserInputType.MouseButton1)
+		end, false, Enum.UserInputType.MouseButton1)
+	end
 	root:render(React.createElement(Main, {
 		grid = grid,
 		selection_mode_stack = selection_mode_stack,
@@ -362,8 +365,11 @@ function init_ui(grid)
 
 	return {
 		destroy = function()
-			render_stepped_connection:Disconnect()
-			ContextActionService:UnbindAction "select_cell"
+			if RunService:IsClient() then
+				render_stepped_connection:Disconnect()
+				ContextActionService:UnbindAction "select_cell"
+				root:unmount()
+			end
 		end,
 	}
 end

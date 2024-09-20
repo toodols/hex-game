@@ -18,6 +18,7 @@ require(script.proxy)
 require(script.heart)
 require(script.vault)
 require(script.solution)
+require(script.scribe)
 
 function create_configuration(): { [string]: EntityConfiguration }
 	return util.deep_copy(registry.registry)
