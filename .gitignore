@@ -10,3 +10,5 @@
 /Packages
 
 codemod/target
+
+sourcemap.json
