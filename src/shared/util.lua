@@ -217,19 +217,18 @@ function range(n: number)
 end
 
 function timer(amount: number, callback: () -> ())
-	local inst = 0
+	local inst: thread
 	local value = {
 		reset = function(new_amount: number?)
-			inst += 1
-			local target = inst
-			task.delay(new_amount or amount, function()
-				if inst == target then
-					callback()
-				end
+			if inst then
+				task.cancel(inst)
+			end
+			inst = task.delay(new_amount or amount, function()
+				callback()
 			end)
 		end,
 		stop = function()
-			inst += 1
+			task.cancel(inst)
 		end,
 	}
 	value.reset()

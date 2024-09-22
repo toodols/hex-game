@@ -16,7 +16,6 @@ type ActionState = server_types.ActionState
 registry["proxy"] = with_defaults {
 	autogenerate_wires = true,
 	on_completed = function(self: Entity, grid: HexGrid) end,
-	on_research_complete = function(self: Entity, grid: HexGrid, research_id: string) end,
 	influences = function(self: Entity, grid: HexGrid)
 		local config = grid.entity_configurations[self.type]
 		local neighbors = hex_grid_mod.neighbors_leq(self.primary_coordinate, config.range)

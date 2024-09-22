@@ -21,6 +21,7 @@ local PlayerList = require(script.player_list).PlayerList
 local Research = require(script.research).Research
 local TopCenter = require(script.top_center).TopCenter
 local SelectedCellFrame = require(script.selected_cell_frame).SelectedCellFrame
+local TileAlerts = require(script.tile_alerts).TileAlerts
 
 local util_components = require(script.Parent.util_components)
 local Corner = util_components.Corner
@@ -47,6 +48,7 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode }, u
 			update_highlights = props.update_highlights,
 		},
 	}, {
+		TileAlerts = React.createElement(TileAlerts),
 		MainGui = React.createElement("ScreenGui", {
 			ResetOnSpawn = false,
 			ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
@@ -200,9 +202,6 @@ function init_ui(grid, root_instance: Instance?)
 	end
 
 	local function update()
-		if not cursor_instance then
-			return
-		end
 		refresh_highlight(hover_highlight, {})
 		local selection_mode = selection_mode_stack[#selection_mode_stack]
 		if selection_mode.type == "select_cells" then
@@ -239,8 +238,9 @@ function init_ui(grid, root_instance: Instance?)
 				-- selected_highlight.Adornee = cell_instances_select
 				refresh_highlight(selected_highlight, selection_mode.selected)
 			end
-
-			refresh_highlight(hover_highlight, { [cursor_instance] = true })
+			if cursor_instance then
+				refresh_highlight(hover_highlight, { [cursor_instance] = true })
+			end
 
 			if selection_mode.selected[cursor_instance] then
 				hover_highlight.FillTransparency = 0.92
@@ -262,7 +262,7 @@ function init_ui(grid, root_instance: Instance?)
 			}))
 		elseif selection_mode.type == "select_some_cell" then
 			refresh_highlight(selected_highlight, selection_mode.candidates :: any)
-			if selection_mode.candidates[cursor_instance] then
+			if cursor_instance and selection_mode.candidates[cursor_instance] then
 				hover_highlight.FillTransparency = 0.92
 				refresh_highlight(hover_highlight, { [cursor_instance] = true })
 			end
@@ -273,6 +273,8 @@ function init_ui(grid, root_instance: Instance?)
 				update_highlights = update,
 				selection_mode_stack = selection_mode_stack,
 			}))
+		elseif selection_mode.type == "show_cells" then
+			refresh_highlight(selected_highlight, selection_mode.cells :: any)
 		end
 	end
 
@@ -297,14 +299,8 @@ function init_ui(grid, root_instance: Instance?)
 				while cursor_instance and not grid.instance_cell_map[cursor_instance] do
 					cursor_instance = cursor_instance.Parent
 				end
-				if cursor_instance then
-					update()
-				else
-					error "unexpected"
-				end
-			else
-				refresh_highlight(hover_highlight, {})
 			end
+			update()
 		end)
 
 		-- on select

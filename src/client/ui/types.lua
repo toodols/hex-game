@@ -11,5 +11,8 @@ export type SelectionMode = {
 	origin: CubicCoordinate,
 	candidates: { [Instance]: { [Instance]: true } },
 	on_selected: (instance: Instance) -> (),
+} | {
+	type: "show_cells",
+	cells: { [Instance]: true },
 }
 return {}

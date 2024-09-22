@@ -81,7 +81,9 @@ function compute_systems(grid: HexGrid)
 	for _, system in systems do
 		local entities_map = {}
 		for _, coord in system do
-			for _, entity_id in grid:get_cell(coord).entities do
+			local cell = grid:get_cell(coord)
+			assert(cell, "cell not found")
+			for _, entity_id in cell.entities do
 				if grid.entities[entity_id].status == "complete" then
 					entities_map[entity_id] = true
 				end

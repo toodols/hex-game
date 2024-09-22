@@ -198,6 +198,9 @@ export type HexCell = {
 export type TeamColor = {
 	type: "color3",
 	color: Color3,
+} | {
+	type: "color_sequence",
+	color_sequence: ColorSequence,
 }
 
 export type TeamId = number

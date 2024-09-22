@@ -1,0 +1,168 @@
+local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local React = require(ReplicatedStorage.Packages.react)
+local ReactRoblox = require(ReplicatedStorage.Packages["react-roblox"])
+local util = require(ReplicatedStorage.Shared.util)
+local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
+local types = require(ReplicatedStorage.Shared.types)
+local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+
+type HexGrid = types.HexGrid
+type EncodedCoordinate = types.EncodedCoordinate
+
+local INDICATORS = {
+	attacked = { icon = "http://www.roblox.com/asset/?id=6031071053", color = Color3.new(0.898039, 0, 0) },
+	missing = { icon = "http://www.roblox.com/asset/?id=6031154859", color = Color3.new(0.898039, 0.823529, 0) },
+	researching = { icon = "http://www.roblox.com/asset/?id=6034230640", color = Color3.new(0.0588235, 0.898039, 0) },
+	disconnected = { icon = "http://www.roblox.com/asset/?id=6035056484", color = Color3.new(0.898039, 0, 0) },
+	deconstruction = { icon = "rbxassetid://11768918600", color = Color3.new(0.898039, 0.211765, 0.211765) },
+	construction = { icon = "http://www.roblox.com/asset/?id=6034275725", color = Color3.new(0, 0.584314, 0.898039) },
+	disabled = { icon = "http://www.roblox.com/asset/?id=6031084743", color = Color3.new(0.898039, 0.823529, 0) },
+}
+
+function IconAndNumber(props: {
+	type: string,
+	number: number,
+})
+	return React.createElement("Frame", {
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, 0, 1, 0),
+	}, {
+		UIListLayout = React.createElement("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			SortOrder = Enum.SortOrder.LayoutOrder,
+		}),
+		ImageLabel = React.createElement("ImageLabel", {
+			BackgroundTransparency = 1,
+			Image = INDICATORS[props.type].icon,
+			ImageColor3 = INDICATORS[props.type].color,
+			Size = UDim2.new(1, 0, 1, 0),
+			LayoutOrder = 1,
+		}, {
+			UIAspectRatioConstraint = React.createElement "UIAspectRatioConstraint",
+			UIGradient = React.createElement("UIGradient", {
+				Rotation = 90,
+				Transparency = NumberSequence.new {
+					NumberSequenceKeypoint.new(0, 0),
+					NumberSequenceKeypoint.new(0.625, 0),
+					NumberSequenceKeypoint.new(0.777, 0.456),
+					NumberSequenceKeypoint.new(0.839, 0.694),
+					NumberSequenceKeypoint.new(0.887, 0.812),
+					NumberSequenceKeypoint.new(0.922, 0.881),
+					NumberSequenceKeypoint.new(0.98, 0.944),
+					NumberSequenceKeypoint.new(1, 1),
+				},
+			}),
+		}),
+		Amount = React.createElement("TextLabel", {
+			AnchorPoint = Vector2.new(1, 0),
+			BackgroundTransparency = 1,
+			FontFace = Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+			Position = UDim2.new(1, 0, 0, 0),
+			Size = UDim2.new(1, 0, 1, 0),
+			Text = tostring(props.number),
+			TextColor3 = INDICATORS[props.type].color,
+			TextScaled = true,
+			TextSize = 100,
+			TextWrapped = true,
+			LayoutOrder = 2,
+		}, {
+			UIAspectRatioConstraint = React.createElement "UIAspectRatioConstraint",
+		}),
+		UIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint", {
+			AspectRatio = 2,
+		}),
+	})
+end
+
+function TileAlert(props: { adornee: Instance, indicators: { [string]: number } })
+	return ReactRoblox.createPortal(
+		React.createElement("BillboardGui", {
+			Active = true,
+			AlwaysOnTop = true,
+			ExtentsOffsetWorldSpace = Vector3.new(0, 3, 0),
+			Size = UDim2.new(2, 0, 20, 0),
+			ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+			Adornee = props.adornee,
+		}, {
+			Frame = React.createElement(
+				"Frame",
+				{
+					BackgroundTransparency = 1,
+					Size = UDim2.new(1, 0, 0.5, 0),
+					Transparency = 1,
+				},
+				{
+					UIListLayout = React.createElement("UIListLayout", {
+						SortOrder = Enum.SortOrder.LayoutOrder,
+						VerticalAlignment = Enum.VerticalAlignment.Bottom,
+					}),
+				},
+				util.table_map(props.indicators, function(v, k)
+					return React.createElement(IconAndNumber, { type = k, number = v })
+				end)
+			),
+		}),
+		props.adornee
+	)
+end
+
+function TileAlerts()
+	local grid: HexGrid = React.useContext(MainContext).grid
+	local cells: { [EncodedCoordinate]: {
+		[string]: number,
+	} }, set_cells = React.useState {}
+	React.useEffect(function()
+		return grid.grid_update_signal.listen(function(updates)
+			if not util.table_any(updates, function(update)
+				return update.type == "entity_update"
+			end) then
+				return
+			end
+			local new_cells = {}
+			for _, cell in grid.cells do
+				local indicators = {}
+				for _, entity_id in cell.entities do
+					local entity = grid.entities[entity_id]
+					local is_deconstructing = false
+					for _, decision in entity.queued_decisions do
+						if decision.type == "deconstruct" then
+							is_deconstructing = true
+							indicators.deconstruction = (indicators.deconstruction or 0) + 1
+						end
+					end
+
+					if entity.status == "scaffold" and not is_deconstructing and not entity.autogenerated then
+						indicators.construction = (indicators.construction or 0) + 1
+					end
+
+					if entity.researches and #entity.researches.queue > 0 then
+						indicators.researching = #entity.researches.queue
+					end
+					if entity.enabled == false then
+						indicators.disabled = (indicators.disabled or 0) + 1
+					end
+					if entity.is_decaying then
+						indicators.disconnected = entity.decay
+					end
+				end
+				if next(indicators) then
+					new_cells[hex_grid_mod.encode_coord(cell.coordinate)] = indicators
+				end
+			end
+			set_cells(new_cells)
+		end)
+	end, {})
+
+	return React.createElement(
+		React.Fragment,
+		{},
+		util.table_map(cells, function(v, k)
+			local cell_instance = grid.cell_instance_map[k]
+			return TileAlert { adornee = cell_instance, indicators = v }
+		end)
+	)
+end
+
+return {
+	TileAlerts = TileAlerts,
+}

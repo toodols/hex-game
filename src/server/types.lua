@@ -8,6 +8,7 @@ type Decision = types.Decision
 type HexGrid = types.HexGrid
 type TeamId = types.TeamId
 type EffectiveDamage = types.EffectiveDamage
+type ResearchId = types.ResearchId
 
 export type EntityEvent = {
 	type: "dealt_damage",
@@ -40,6 +41,7 @@ export type EntityEvent = {
 } | {
 	type: "research_completed",
 	entity_id: EntityId,
+	research_id: ResearchId,
 }
 
 export type EntityAction =

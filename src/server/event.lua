@@ -16,6 +16,10 @@ function publish_event(grid: HexGrid, event: EntityEvent, coords: { CubicCoordin
 			continue
 		end
 		for _, entity_id in cell.entities do
+			-- don't send event to self
+			if entity_id == event.entity_id then
+				continue
+			end
 			local entity = grid.entities[entity_id]
 			local behavior = server_entity_registry.registry[entity.type]
 			if behavior.on_event then

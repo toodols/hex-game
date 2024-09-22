@@ -21,6 +21,7 @@ local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: Rem
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local Corner = util_components.Corner
 local Separator = util_components.Separator
+local HighlightOnHover = require(script.Parent.highlight_on_hover).HighlightOnHover
 
 type EntityId = types.EntityId
 type GridUpdate = types.GridUpdate
@@ -368,6 +369,15 @@ function EntityInformation(props: {
 							})
 						end)()
 					),
+					Range = if entity.type == "laboratory"
+						then React.createElement(HighlightOnHover, {
+							Text = `Range: {grid.entity_configurations.laboratory.range}`,
+							coords = hex_grid_mod.neighbors_leq(
+								entity.primary_coordinate,
+								grid.entity_configurations.laboratory.range :: number
+							),
+						})
+						else nil,
 				}),
 
 				VerticalLayout = React.createElement("UIListLayout", {

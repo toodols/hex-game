@@ -27,7 +27,6 @@ type System = server_types.System
 
 function run_action_phase(grid: HexGrid)
 	local t0 = tick()
-
 	local action_state = {
 		queue = {},
 		dirty_entities = {},
@@ -285,6 +284,7 @@ function run_action_phase(grid: HexGrid)
 				else
 					entity.owner = grid.neutral_team
 					entity.decay = 0
+					entity.is_decaying = false
 				end
 			end
 		else

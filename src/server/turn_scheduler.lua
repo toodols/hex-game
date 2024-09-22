@@ -9,11 +9,11 @@ function init(grid: HexGrid)
 	if grid.turn_schedule then
 		return
 	end
-	local co
+	local co: thread
+
+	local wait_thread: thread
 	co = coroutine.create(function()
-		local iter = 0
 		while true do
-			iter += 1
 			local count_entities = 0
 			for _ in grid.entities do
 				count_entities += 1
@@ -32,18 +32,24 @@ function init(grid: HexGrid)
 			grid.skipped = {}
 			recalculate_skips(grid)
 			updates_mod.flush_updates(grid)
-			task.delay(wait_time, function(target_iter)
-				if iter == target_iter then
-					coroutine.resume(co)
-				end
-			end, iter)
+			wait_thread = task.delay(wait_time, function()
+				coroutine.resume(co)
+			end)
 			coroutine.yield(wait_time)
-			action_phase_mod.run_action_phase(grid)
+			local success, err = pcall(function()
+				action_phase_mod.run_action_phase(grid)
+			end)
+			if not success then
+				warn(err)
+			end
 		end
 	end)
 
 	grid.turn_schedule = {
 		skip = function()
+			if wait_thread then
+				task.cancel(wait_thread)
+			end
 			coroutine.resume(co)
 		end,
 	}

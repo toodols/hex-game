@@ -15,8 +15,6 @@ type ActionState = server_types.ActionState
 
 registry["laboratory"] = with_defaults {
 	autogenerate_wires = true,
-	on_completed = function(self: Entity, grid: HexGrid) end,
-	on_research_complete = function(self: Entity, grid: HexGrid, research_id: string) end,
 	tick = function(self: Entity, grid: HexGrid, action_state: ActionState)
 		if self.status == "complete" and self.owner ~= grid.neutral_team then
 			table.insert(action_state.queue, {

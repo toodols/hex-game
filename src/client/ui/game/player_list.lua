@@ -82,7 +82,7 @@ function TeamSection(props: {
 				LayoutOrder = 1,
 				Size = UDim2.new(1, 0, 0, 0),
 				Text = props.team.name,
-				TextColor3 = props.team.color.color,
+				TextColor3 = (props.team.color :: any).color,
 				TextSize = 20,
 				TextWrapped = true,
 				TextXAlignment = Enum.TextXAlignment.Left,

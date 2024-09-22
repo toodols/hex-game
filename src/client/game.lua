@@ -17,8 +17,6 @@ local into_vec3 = hex_grid_mod.into_vec3
 local encode_coord = hex_grid_mod.encode_coord
 local decode_coord = hex_grid_mod.decode_coord
 
-local billboard_template = asset_server.load "Billboards/TileActionsIndicator"
-
 type Entity = types.Entity
 type HexGrid = types.HexGrid
 type HexCell = types.HexCell
@@ -44,7 +42,8 @@ function color_tile(grid: HexGrid, cell: HexCell)
 	end
 	-- tiles that are r=1 of a friendly tile and do not have an enemy presence
 	if cell.owner then
-		tween_color(grid.teams[cell.owner].color.color)
+		local color = (grid.teams[cell.owner].color :: any).color
+		tween_color(color)
 	else
 		if cell.buildable_for_team then
 			tween_color(Color3.fromRGB(202, 202, 202))
@@ -74,35 +73,6 @@ function update_neighbors(grid: HexGrid, coordinates: { CubicCoordinate })
 				client_behavior.neighbor_changed(neighbor_entity, grid)
 			end
 		end
-	end
-end
--- update deconstruct gui for entities on this tile
-function update_tile_deconstructs(grid: HexGrid, coordinate: CubicCoordinate)
-	local cell = grid:get_cell(coordinate)
-	assert(cell, "cell not found")
-	local thingy = util.table_fold(cell.entities, { deconstructs = 0 }, function(acc, cur)
-		acc.deconstructs += if util.table_any(grid.entities[cur].queued_decisions, function(action)
-				return action.type == "deconstruct"
-			end)
-			then 1
-			else 0
-		return acc
-	end)
-
-	local instance = grid.cell_instance_map[encode_coord(coordinate)]
-	if thingy.deconstructs == 0 then
-		local billboard = instance:FindFirstChild "TileActionsIndicator" :: any
-		if billboard then
-			billboard.Deconstruction.Visible = false
-		end
-	else
-		local billboard = instance:FindFirstChild "TileActionsIndicator" :: any
-		if not billboard then
-			billboard = billboard_template:Clone()
-			billboard.Parent = instance
-		end
-		billboard.Deconstruction.Visible = true
-		billboard.Deconstruction.Amount.Text = tostring(thingy.deconstructs)
 	end
 end
 
@@ -137,15 +107,22 @@ function render_grid(grid: HexGrid)
 end
 
 function start_animations(grid: HexGrid)
+	local animation_states = {}
 	return RunService.Heartbeat:Connect(function()
-		for _, entity in grid.entities do
+		-- remove animation states for entities that are gone
+		local new_animation_states = {}
+		for entity_id in grid.entities do
+			new_animation_states[entity_id] = animation_states[entity_id]
+		end
+		animation_states = new_animation_states
+		for entity_id, entity in grid.entities do
 			local behavior = client_entity_mod.registry[entity.type]
 			if behavior.animate then
-				if not entity.animation_state then
-					entity.animation_state = { type = "idle", step = 0 }
+				if not animation_states[entity_id] then
+					animation_states[entity_id] = { type = "idle", step = 0 }
 				end
-				entity.animation_state.step += 1
-				behavior.animate(entity, grid, entity.animation_state)
+				animation_states[entity_id].step += 1
+				behavior.animate(entity, grid, animation_states[entity_id])
 			end
 		end
 	end)
@@ -276,7 +253,6 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 	for _, entry in updated_entities do
 		local new_entity = entry.new
 		update_neighbors(grid, new_entity.coordinates)
-		update_tile_deconstructs(grid, new_entity.primary_coordinate)
 	end
 	grid.grid_update_signal.send(updates)
 

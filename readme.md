@@ -6,9 +6,13 @@ A simultaneous turn-based strategy game on a hexagon grid with an emphasis on lo
 
 [Current Buildings](./buildings.md)
 
+## Power
+
+Unlike items, power cannot accumulate. Some buildings require power to run.
+
 ## System
 
-Vertices (`wires`) on the same team connect with other Vertices on neighbor cells to form a system. A system shares production and inventory.
+Vertices on the same team connect with other Vertices on neighbor cells to form a system. A system shares production (item and power), inventory, and monarchs.
 
 ## Entity Promotion
 

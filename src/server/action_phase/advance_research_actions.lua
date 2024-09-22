@@ -51,13 +51,16 @@ function handle_advance_research_actions(grid: HexGrid, action_state: ActionStat
 
 			if research_state.progress == research_state.time then
 				research_state.status = "complete"
-				-- TODO: handle research completion -- ?
 				server_util.mark_dirty_for_everyone(action_state, entity.id)
+				publish_event(grid, {
+					type = "research_completed",
+					entity_id = entity.id,
+					research_id = research_id,
+				}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
 			else
 				break
 			end
 		end
-
 		local _finished = util.table_extract(entity.researches.queue, function(research_id)
 			return entity.researches.states[research_id].status == "complete"
 		end)
