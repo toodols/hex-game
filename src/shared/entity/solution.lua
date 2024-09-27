@@ -10,7 +10,11 @@ registry_mod.registry["solution"] = registry_mod.with_defaults {
 		vit = 3,
 	},
 	abilities = {
-		solution_use = {},
+		solution_use = {
+			shield_health = 2,
+			shield_duration = 3,
+			heal_amount = 3,
+		},
 	},
 	layer = registry_mod.layer.building,
 }

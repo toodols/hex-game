@@ -32,7 +32,7 @@ registry_mod.registry["extractor"] = registry_mod.with_defaults {
 
 			-- prevent extractor from missing out on output because there is no power
 			local function ok()
-				self.should_output = (self.should_output + 1) % (if is_boosted then 1 else 2)
+				self.should_output = ((self.should_output :: any) + 1) % (if is_boosted then 1 else 2)
 			end
 			if self.should_output == 0 then
 				local items

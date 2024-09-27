@@ -25,7 +25,7 @@ registry["infinite_source"] = with_defaults {
 				type = "exchange",
 				output_power = 999,
 				output_items = util.table_flat(util.table_map({ "bar", "rad", "vit" }, function(item)
-					return util.table_map(util.table_range(1, 10), function()
+					return util.table_map(util.range(10), function()
 						return item
 					end)
 				end)),

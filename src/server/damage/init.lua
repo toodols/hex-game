@@ -72,7 +72,7 @@ function apply_damage_on_cells(grid: HexGrid, targets: { CubicCoordinate }, dama
 		local gauge = damage.amount
 		local entities = {}
 
-		for _, entity_id in cell.entities do
+		for entity_id in cell.entities do
 			local entity = grid.entities[entity_id]
 			if not entity.is_destroyed and entity.status ~= "blueprint" then
 				table.insert(entities, entity)

@@ -121,7 +121,7 @@ function TileAlerts()
 			local new_cells = {}
 			for _, cell in grid.cells do
 				local indicators = {}
-				for _, entity_id in cell.entities do
+				for entity_id in cell.entities do
 					local entity = grid.entities[entity_id]
 					local is_deconstructing = false
 					for _, decision in entity.queued_decisions do

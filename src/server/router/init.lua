@@ -1,16 +1,13 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
-local server_util = require(script.Parent.util)
 local util = require(ReplicatedStorage.Shared.util)
-local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
+local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local effective_visibility = require(ReplicatedStorage.Shared.effective_visibility).effective_visibility
+
+local server_util = require(script.Parent.util)
 local server_entity_mod = require(script.Parent.entity)
 local entity_mod = require(script.Parent.entity)
 local updates_mod = require(script.Parent.updates)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
-local action_phase_mod = require(script.Parent.action_phase)
-local effective_visibility = require(ReplicatedStorage.Shared.effective_visibility).effective_visibility
-local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 
 type HexGrid = types.HexGrid
 type Decision = types.Decision
@@ -40,7 +37,7 @@ function on_decision(grid: HexGrid, plr: Player, data: { Decision })
 
 				if
 					util.table_any(
-						util.table_map(cell.entities, function(id)
+						util.table_map(cell.entities, function(_, id)
 							return grid.entities[id]
 						end),
 						function(entity)
@@ -105,16 +102,27 @@ function on_decision(grid: HexGrid, plr: Player, data: { Decision })
 				if not ability then
 					continue
 				end
-
-				local in_range = hex_grid_mod.coords_dist(entity.primary_coordinate, entry.coordinate) <= ability.range
-					and hex_grid_mod.line_of_sight(grid, entity.primary_coordinate, entry.coordinate, player_team.id)
-				if not in_range then
-					continue
+				print(entry.ability_type)
+				if entry.ability_type == "scout_attack" or entry.ability_type == "turret_attack" then
+					local in_range = hex_grid_mod.coords_dist(entity.primary_coordinate, entry.coordinate)
+							<= ability.range
+						and hex_grid_mod.line_of_sight(
+							grid,
+							entity.primary_coordinate,
+							entry.coordinate,
+							player_team.id
+						)
+					if not in_range then
+						continue
+					end
+				elseif entry.ability_type == "solution_use" then
+					--ok
 				end
-				util.table_extract(entity.queued_decisions, function(action)
-					return action.type == "ability"
+				util.table_extract(entity.queued_decisions, function(decision)
+					return decision.type == "ability" and decision.ability_type == entry.ability_type
 				end)
 				table.insert(entity.queued_decisions, entry)
+				print(entity)
 				dirty_entities[entity.id] = true
 			elseif entry.type == "rotate_entity" then
 				local entity = grid.entities[entry.entity_id]
@@ -130,8 +138,8 @@ function on_decision(grid: HexGrid, plr: Player, data: { Decision })
 					-- error_type.mistake
 					continue
 				end
-				util.table_extract(entity.queued_decisions, function(action)
-					return action.type == entry.decision_type
+				util.table_extract(entity.queued_decisions, function(decision)
+					return decision.type == entry.decision_type
 				end)
 				dirty_entities[entity.id] = true
 			elseif entry.type == "add_research" then
@@ -205,8 +213,6 @@ function on_decision(grid: HexGrid, plr: Player, data: { Decision })
 					updates_mod.flush_updates(grid)
 				else
 					server_entity_mod.remove_entity(grid, entity)
-					
-					
 				end
 			elseif entry.type == "set_entity_enabled" then
 				local entity = grid.entities[entry.entity_id]
@@ -228,7 +234,9 @@ function on_decision(grid: HexGrid, plr: Player, data: { Decision })
 			elseif entry.type == "skip" then
 				if table.find(grid.skipped, plr) == nil then
 					table.insert(grid.skipped, plr)
-					turn_scheduler.recalculate_skips(grid)
+					if grid.turn_schedule then
+						grid.turn_schedule.recalculate_skips()
+					end
 				end
 			else
 				error("unknown action type: " .. entry.type)

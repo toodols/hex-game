@@ -62,8 +62,8 @@ function update_entity_client(grid: HexGrid, old: Entity?, new: Entity)
 			end
 			for _, coord in new.coordinates do
 				local cell = grid:get_cell(coord)
-				if not table.find(cell.entities, new.id) then
-					table.insert(cell.entities, new.id)
+				if cell.entities[new.id] == nil then
+					cell.entities[new.id] = true
 				end
 			end
 			client_behavior.init(new, grid)
@@ -78,7 +78,7 @@ function update_entity_client(grid: HexGrid, old: Entity?, new: Entity)
 		client_behavior.on_destroy(new, grid)
 		for _, coord in new.coordinates do
 			local cell = grid:get_cell(coord)
-			util.table_remove_needle(cell.entities, new.id)
+			cell.entities[new.id] = nil
 		end
 	end
 end

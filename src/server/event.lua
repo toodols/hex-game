@@ -15,7 +15,7 @@ function publish_event(grid: HexGrid, event: EntityEvent, coords: { CubicCoordin
 		if not cell then
 			continue
 		end
-		for _, entity_id in cell.entities do
+		for entity_id in cell.entities do
 			-- don't send event to self
 			if entity_id == event.entity_id then
 				continue

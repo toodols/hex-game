@@ -77,26 +77,33 @@ function compute_systems(grid: HexGrid)
 	end
 
 	-- convert system from a collection of connected coordinates to a collection of connected entities
+	local entities_set = {}
 	local result = {}
 	for _, system in systems do
-		local entities_map = {}
+		local system_entities_set = {}
 		for _, coord in system do
 			local cell = grid:get_cell(coord)
 			assert(cell, "cell not found")
-			for _, entity_id in cell.entities do
+			for entity_id in cell.entities do
 				if grid.entities[entity_id].status == "complete" then
-					entities_map[entity_id] = true
+					entities_set[entity_id] = true
+					system_entities_set[entity_id] = true
 				end
 			end
 		end
 		local entities = {}
-		for entity_id in entities_map do
+		for entity_id in system_entities_set do
 			entities[entity_id] = grid.entities[entity_id]
 		end
 		table.insert(result, entities)
 	end
 
-	-- TODO: entities that are not connected to any system will be treated as its own independent system
+	for entity_id in grid.entities do
+		if not entities_set[entity_id] then
+			table.insert(result, { [entity_id] = true })
+		end
+	end
+
 	grid.systems = result
 	return result
 end

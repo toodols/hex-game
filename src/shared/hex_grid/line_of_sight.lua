@@ -17,7 +17,7 @@ function blocked(grid: HexGrid, cell: HexCell, team: TeamId?)
 	if team ~= nil and not visible then
 		return true
 	end
-	for _, entity_id in cell.entities do
+	for entity_id in cell.entities do
 		local entity = grid.entities[entity_id]
 		if entity and entity.owner ~= team then
 			return true

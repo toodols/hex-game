@@ -5,7 +5,7 @@ local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local Corner = util_components.Corner
-
+local QuestDialogue = require(script.Parent.quest_dialogue).QuestDialogue
 local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: RemoteEvent
 
 function TopCenter()
@@ -47,191 +47,177 @@ function TopCenter()
 		BackgroundTransparency = 1,
 		Position = UDim2.new(0.5, 0, 0, 20),
 	}, {
-		HorizontalLayout = React.createElement("UIListLayout", {
-			FillDirection = Enum.FillDirection.Horizontal,
-			HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			Padding = UDim.new(0, 10),
-			SortOrder = Enum.SortOrder.LayoutOrder,
-		}),
-
-		TurnIndicator = React.createElement("Frame", {
-			BackgroundColor3 = Color3.fromRGB(13, 13, 13),
-			BackgroundTransparency = 0.2,
-			BorderSizePixel = 0,
-			LayoutOrder = 1,
-			Size = UDim2.fromOffset(120, 80),
-			Transparency = 0.2,
+		Top = React.createElement("Frame", {
+			Size = UDim2.new(0, 0, 0, 40),
+			BackgroundTransparency = 1,
 		}, {
-			Gradient = React.createElement("UIGradient", {
-				Color = ColorSequence.new {
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)),
-				},
-				Rotation = 90,
+			HorizontalLayout = React.createElement("UIListLayout", {
+				FillDirection = Enum.FillDirection.Horizontal,
+				HorizontalAlignment = Enum.HorizontalAlignment.Center,
+				Padding = UDim.new(0, 10),
+				SortOrder = Enum.SortOrder.LayoutOrder,
 			}),
-
-			Turns = React.createElement("TextLabel", {
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				RichText = true,
-				BackgroundTransparency = 1,
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
+			TurnIndicator = React.createElement("Frame", {
+				BackgroundColor3 = Color3.fromRGB(13, 13, 13),
+				BackgroundTransparency = 0.2,
 				BorderSizePixel = 0,
-				FontFace = Font.new(
-					"rbxasset://fonts/families/SourceSansPro.json",
-					Enum.FontWeight.Bold,
-					Enum.FontStyle.Normal
-				),
-				Position = UDim2.new(0, 0, 0.325, 0),
-				Size = UDim2.new(1, 0, 0.4, 0),
-				Text = tostring(grid.turn) .. '<font color="#00FF00" size="30"></font>',
-				TextColor3 = Color3.fromRGB(255, 255, 255),
-				TextSize = 50,
-			}),
-
-			Corner = React.createElement(Corner),
-
-			Title = React.createElement(
-				"TextLabel",
-				themes.theme_title {
-					AutomaticSize = Enum.AutomaticSize.X,
+				LayoutOrder = 1,
+				Size = UDim2.new(0, 120, 0, 40),
+			}, {
+				Turns = React.createElement("TextLabel", {
+					RichText = true,
 					BackgroundTransparency = 1,
 					FontFace = Font.new(
-						"rbxasset://fonts/families/Oswald.json",
+						"rbxasset://fonts/families/SourceSansPro.json",
 						Enum.FontWeight.Bold,
 						Enum.FontStyle.Normal
 					),
-					Position = UDim2.fromOffset(0, 5),
-					Size = UDim2.new(1, 0, 0, 25),
-					Text = "Turn",
+					AnchorPoint = Vector2.new(0, 0.5),
+					Position = UDim2.new(0, 0, 0.5, 0),
+					Size = UDim2.new(1, 0, 0, 30),
+					Text = tostring(grid.turn) .. '<font color="#00FF00" size="30"></font>',
 					TextColor3 = Color3.fromRGB(255, 255, 255),
-					TextSize = 18,
-					TextXAlignment = Enum.TextXAlignment.Left,
-				},
-				{
-					PaddingLeft = React.createElement("UIPadding", {
-						PaddingLeft = UDim.new(0, 10),
-					}),
-				}
-			),
-		}),
-
-		Timer = React.createElement("Frame", {
-			BackgroundColor3 = Color3.fromRGB(13, 13, 13),
-			BackgroundTransparency = 0.2,
-			BorderColor3 = Color3.fromRGB(0, 0, 0),
-			BorderSizePixel = 0,
-			ClipsDescendants = true,
-			LayoutOrder = 2,
-			Size = UDim2.fromOffset(500, 40),
-			Transparency = 0.2,
-		}, {
-			Corner = React.createElement("UICorner", {
-				CornerRadius = UDim.new(0, 4),
+					TextSize = 50,
+				}),
+				Title = React.createElement(
+					"TextLabel",
+					themes.theme_title {
+						AutomaticSize = Enum.AutomaticSize.X,
+						BackgroundTransparency = 1,
+						FontFace = Font.new(
+							"rbxasset://fonts/families/Oswald.json",
+							Enum.FontWeight.Bold,
+							Enum.FontStyle.Normal
+						),
+						Position = UDim2.fromOffset(0, 5),
+						Size = UDim2.new(1, 0, 0, 25),
+						Text = "Turn",
+						TextColor3 = Color3.fromRGB(255, 255, 255),
+						TextSize = 18,
+						TextXAlignment = Enum.TextXAlignment.Left,
+					},
+					{
+						PaddingLeft = React.createElement("UIPadding", {
+							PaddingLeft = UDim.new(0, 10),
+						}),
+					}
+				),
+				Corner = React.createElement(Corner),
 			}),
-
-			Bar = React.createElement("Frame", {
-				BackgroundColor3 = Color3.fromRGB(57, 57, 57),
+			Timer = React.createElement("Frame", {
+				BackgroundColor3 = Color3.fromRGB(13, 13, 13),
+				BackgroundTransparency = 0.2,
 				BorderColor3 = Color3.fromRGB(0, 0, 0),
 				BorderSizePixel = 0,
-				Size = UDim2.new(0, 0, 1, 0),
-				ref = bar_ref,
+				ClipsDescendants = true,
+				LayoutOrder = 2,
+				Size = UDim2.new(0, 500, 0, 40),
 			}, {
-				Corner = React.createElement("UICorner", {
-					CornerRadius = UDim.new(0, 4),
+				Bar = React.createElement("Frame", {
+					BackgroundColor3 = Color3.fromRGB(57, 57, 57),
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					BorderSizePixel = 0,
+					Size = UDim2.new(0, 0, 1, 0),
+					ref = bar_ref,
+				}, {
+					Corner = React.createElement(Corner),
+				}),
+				Display = React.createElement("TextLabel", {
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					AutomaticSize = Enum.AutomaticSize.X,
+					BackgroundTransparency = 1,
+					ref = display_ref,
+					FontFace = Font.new(
+						"rbxasset://fonts/families/SourceSansPro.json",
+						Enum.FontWeight.Bold,
+						Enum.FontStyle.Normal
+					),
+					Position = UDim2.new(0.5, 0, 0.5, 0),
+					Size = UDim2.new(0, 0, 0, 20),
+					Text = "Next Turn: 0.0s",
+					TextColor3 = Color3.fromRGB(255, 255, 255),
+					TextSize = 20,
+					ZIndex = 2,
 				}),
 			}),
-
-			Display = React.createElement("TextLabel", {
-				AnchorPoint = Vector2.new(0.5, 0.5),
+			SkipButton = React.createElement("TextButton", {
 				AutomaticSize = Enum.AutomaticSize.X,
-				BackgroundTransparency = 1,
-				ref = display_ref,
-				FontFace = Font.new(
-					"rbxasset://fonts/families/SourceSansPro.json",
-					Enum.FontWeight.Bold,
-					Enum.FontStyle.Normal
-				),
-				Position = UDim2.new(0.5, 0, 0.5, 0),
-				Size = UDim2.fromOffset(0, 20),
-				Text = "Next Turn: 0.0s",
+				BackgroundColor3 = Color3.fromRGB(13, 13, 13),
+				BackgroundTransparency = 0.2,
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BorderSizePixel = 0,
+				FontFace = Font.new "rbxasset://fonts/families/SourceSansPro.json",
+				LayoutOrder = 3,
+				Size = UDim2.new(0, 70, 0, 40),
+				Text = "",
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 20,
-				ZIndex = 2,
+				[React.Event.MouseButton1Click] = function()
+					decision_remote:FireServer { {
+						type = "skip",
+					} }
+				end,
+			}, {
+				Corner = React.createElement(Corner),
+				ImageLabel = React.createElement("ImageLabel", {
+					AnchorPoint = Vector2.new(0, 0.5),
+					BackgroundTransparency = 1,
+					Image = "http://www.roblox.com/asset/?id=6026667005",
+					LayoutOrder = 1,
+					Position = UDim2.new(0, 0, 0.5, 0),
+					Size = UDim2.fromOffset(20, 20),
+				}),
+				SkipLabel = React.createElement("TextLabel", {
+					AutomaticSize = Enum.AutomaticSize.X,
+					BackgroundTransparency = 1,
+					FontFace = Font.new "rbxasset://fonts/families/SourceSansPro.json",
+					LayoutOrder = 2,
+					Size = UDim2.new(0, 0, 1, 0),
+					Text = "Skip",
+					TextColor3 = Color3.fromRGB(255, 255, 255),
+					TextSize = 20,
+				}),
+				HorizontalLayout = React.createElement("UIListLayout", {
+					FillDirection = Enum.FillDirection.Horizontal,
+					Padding = UDim.new(0, 5),
+					SortOrder = Enum.SortOrder.LayoutOrder,
+					VerticalAlignment = Enum.VerticalAlignment.Center,
+				}),
+				SidePad = React.createElement("UIPadding", {
+					PaddingLeft = UDim.new(0, 5),
+					PaddingRight = UDim.new(0, 10),
+				}),
+				AmountLabel = React.createElement("TextLabel", {
+					AutomaticSize = Enum.AutomaticSize.X,
+					BackgroundTransparency = 1,
+					FontFace = Font.new "rbxasset://fonts/families/SourceSansPro.json",
+					LayoutOrder = 2,
+					Size = UDim2.new(0, 0, 1, 0),
+					Text = `{grid.current_skips}/{grid.needed_skips}`,
+					TextColor3 = Color3.fromRGB(190, 190, 190),
+					TextSize = 15,
+				}),
 			}),
 		}),
 
-		SkipButton = React.createElement("TextButton", {
-			AutomaticSize = Enum.AutomaticSize.X,
-			BackgroundColor3 = Color3.fromRGB(13, 13, 13),
-			BackgroundTransparency = 0.2,
-			BorderColor3 = Color3.fromRGB(0, 0, 0),
-			BorderSizePixel = 0,
-			FontFace = Font.new "rbxasset://fonts/families/SourceSansPro.json",
-			LayoutOrder = 3,
-			Size = UDim2.fromOffset(70, 30),
-			Text = "",
-			TextColor3 = Color3.fromRGB(255, 255, 255),
-			TextSize = 20,
-			[React.Event.MouseButton1Click] = function()
-				decision_remote:FireServer { {
-					type = "skip",
-				} }
-			end,
+		DialogueContainer = React.createElement("Frame", {
+			Position = UDim2.new(0.5, 0, 0, 50),
+			BackgroundTransparency = 1,
 		}, {
-			Corner = React.createElement("UICorner", {
-				CornerRadius = UDim.new(0, 4),
-			}),
-
-			ImageLabel = React.createElement("ImageLabel", {
-				AnchorPoint = Vector2.new(0, 0.5),
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundTransparency = 1,
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
-				BorderSizePixel = 0,
-				Image = "http://www.roblox.com/asset/?id=6026667005",
-				LayoutOrder = 1,
-				Position = UDim2.new(0, 0, 0.5, 0),
-				Size = UDim2.fromOffset(20, 20),
-			}),
-
-			SkipLabel = React.createElement("TextLabel", {
-				AutomaticSize = Enum.AutomaticSize.X,
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundTransparency = 1,
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
-				BorderSizePixel = 0,
-				FontFace = Font.new "rbxasset://fonts/families/SourceSansPro.json",
-				LayoutOrder = 2,
-				Size = UDim2.new(0, 0, 1, 0),
-				Text = "Skip",
-				TextColor3 = Color3.fromRGB(255, 255, 255),
-				TextSize = 20,
-			}),
-
-			HorizontalLayout = React.createElement("UIListLayout", {
-				FillDirection = Enum.FillDirection.Horizontal,
-				Padding = UDim.new(0, 5),
+			VerticalLayout = React.createElement("UIListLayout", {
+				FillDirection = Enum.FillDirection.Vertical,
+				HorizontalAlignment = Enum.HorizontalAlignment.Center,
+				Padding = UDim.new(0, 10),
 				SortOrder = Enum.SortOrder.LayoutOrder,
-				VerticalAlignment = Enum.VerticalAlignment.Center,
 			}),
-
-			SidePad = React.createElement("UIPadding", {
-				PaddingLeft = UDim.new(0, 5),
-				PaddingRight = UDim.new(0, 10),
-			}),
-
-			AmountLabel = React.createElement("TextLabel", {
-				AutomaticSize = Enum.AutomaticSize.X,
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundTransparency = 1,
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
-				BorderSizePixel = 0,
-				FontFace = Font.new "rbxasset://fonts/families/SourceSansPro.json",
-				LayoutOrder = 2,
-				Size = UDim2.new(0, 0, 1, 0),
-				Text = `{grid.current_skips}/{grid.needed_skips}`,
-				TextColor3 = Color3.fromRGB(190, 190, 190),
-				TextSize = 15,
+			QuestDialogue = React.createElement(QuestDialogue, {
+				messages = {
+					"Hello",
+					"World",
+				},
+				title = "Tutorial",
+				can_advance = false,
+				advance = function() end,
 			}),
 		}),
 	})

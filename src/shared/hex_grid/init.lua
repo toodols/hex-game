@@ -98,7 +98,7 @@ function grid_query_entity(self: HexGrid, props: any): { Entity }
 			return {}
 		end
 		local entities = cell.entities
-		for _, entity_id in entities do
+		for entity_id in entities do
 			if not self.entities[entity_id] then
 				error(`{entity_id} not found for {encode_coord(cell.coordinate)}`)
 			end

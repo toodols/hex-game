@@ -369,6 +369,7 @@ function EntityInformation(props: {
 							})
 						end)()
 					),
+
 					Range = if entity.type == "laboratory"
 						then React.createElement(HighlightOnHover, {
 							Text = `Range: {grid.entity_configurations.laboratory.range}`,
@@ -442,7 +443,7 @@ function EntityInformation(props: {
 						and entity.type == "solution"
 						and React.createElement(ActionButton, {
 							color = Color3.fromRGB(255, 255, 120),
-							Text = "Use",
+							Text = "Activate",
 							LayoutOrder = 1,
 							on_click = function()
 								decision_remote:FireServer {

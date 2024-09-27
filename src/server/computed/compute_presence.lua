@@ -9,7 +9,7 @@ function compute_presence(grid: HexGrid)
 	local neutral_team = grid.neutral_team
 	for _, cell in grid.cells do
 		local owner
-		for _, entity_id in cell.entities do
+		for entity_id in cell.entities do
 			local entity = grid.entities[entity_id]
 			if entity.owner ~= neutral_team and entity.status ~= "blueprint" and not entity.is_destroyed then
 				owner = entity.owner

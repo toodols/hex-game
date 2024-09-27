@@ -64,9 +64,8 @@ end
 
 function start_game(teleport_data: { room: types.Room }?)
 	local players_config = teleport_data and teleport_data.room and teleport_data.room.players
-	grid = presets.my_map()
-	-- local grid = tests.extractor_filling_stockpile()
-	-- local grid = presets.testing_map()
+	-- grid = presets.my_map()
+	grid = presets.testing_map()
 
 	_G.grid = grid
 
@@ -100,7 +99,7 @@ function start_game(teleport_data: { room: types.Room }?)
 
 	Players.PlayerAdded:Connect(function(plr)
 		auto_add_player(plr)
-		turn_scheduler.recalculate_skips(grid)
+		grid.turn_schedule.recalculate_skips()
 		republish_teams(grid)
 	end)
 	Players.PlayerRemoving:Connect(function(plr)
@@ -109,11 +108,11 @@ function start_game(teleport_data: { room: types.Room }?)
 		end
 		util.table_remove_needle(grid.skipped, plr)
 
-		turn_scheduler.recalculate_skips(grid)
+		grid.turn_schedule.recalculate_skips()
 		republish_teams(grid)
 	end)
 
-	turn_scheduler.init(grid)
+	grid.turn_schedule = turn_scheduler.turn_schedule(grid)
 end
 
 local join_data = if #Players:GetPlayers() > 0

@@ -82,10 +82,10 @@ function table_from_entries<K, V>(tab: { { K | V } }): { [K]: V }
 end
 
 -- filters out T which fails cond
-function table_filter<K, T>(tab: { [K]: T }, cond: (T) -> boolean): { [K]: T }
+function table_filter<K, T>(tab: { [K]: T }, cond: (T, K) -> boolean): { [K]: T }
 	local result: any = {}
 	for idx, value in tab do
-		if cond(value) then
+		if cond(value, idx) then
 			if type(idx) == "number" then
 				table.insert(result, value)
 			else
@@ -97,10 +97,10 @@ function table_filter<K, T>(tab: { [K]: T }, cond: (T) -> boolean): { [K]: T }
 end
 
 -- maps I to O, excluding nil
-function table_filter_map<K, I, O>(tab: { [K]: I }, fn: (I) -> O?): { [K]: O }
+function table_filter_map<K, I, O>(tab: { [K]: I }, fn: (I, K) -> O?): { [K]: O }
 	local result: any = {}
 	for idx, value in tab do
-		local v = fn(value)
+		local v = fn(value, idx)
 		if v then
 			if type(idx) == "number" then
 				table.insert(result, v)

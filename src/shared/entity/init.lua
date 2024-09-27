@@ -23,8 +23,8 @@ require(script.scribe)
 
 function get_effective_health(entity: Entity): number
 	local health = entity.health
-	for _, effect in pairs(entity.effects) do
-		if effect.type == "shield" then
+	for effect_type, effect in pairs(entity.effects) do
+		if effect_type == "shield" then
 			health += effect.health
 		end
 	end

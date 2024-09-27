@@ -44,6 +44,7 @@ impl VisitorMut for FirstPass {
 
                 // use Corner component in place of UICorner intrinsic
                 if component.to_string() == "\"UICorner\"" {
+                    println!("Replacing UICorner with Corner");
                     let mut arguments = Punctuated::new();
                     arguments.push(Pair::new(Expression::Var(ast::Var::Name(TokenReference::new(
                         vec![],
@@ -90,6 +91,7 @@ impl VisitorMut for FirstPass {
                                 }
                             } else if background_transparency_is_1 {
                                 if matches!(key_string.as_str(), "BackgroundColor3" | "BorderColor3" | "BorderSizePixel") {
+                                    println!("Removing Key: {}", key_string);
                                     continue
                                 }
                             }
@@ -113,7 +115,9 @@ impl VisitorMut for FirstPass {
                             let key_string = key.token().to_string();
                             let pat = Regex::new("([a-zA-Z]+)\\d*").unwrap();
                             let new_name = pat.captures(&key_string).map(|c| c[1].to_string()).unwrap_or(key_string.clone());
-                            println!("{} -> {}", key_string, new_name);
+                            if key_string != new_name {
+                                println!("Renaming {} -> {}", key_string, new_name);
+                            }
                             if pat.is_match(&key_string) {
                                 match new_field {
                                     Field::NameKey { ref mut key, .. } => {

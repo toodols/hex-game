@@ -21,13 +21,13 @@ function catch(fn, plr, data)
 	local success, err = pcall(fn)
 	if not success then
 		print "failure"
-		-- warn(
-		-- 	("Data %s from %s produced an error %s. This incident will be reported"):format(
-		-- 		HttpService:JSONEncode(data),
-		-- 		plr.Name,
-		-- 		err
-		-- 	)
-		-- )
+		warn(
+			("Data %s from %s produced an error %s. This incident will be reported"):format(
+				HttpService:JSONEncode(data),
+				plr.Name,
+				err
+			)
+		)
 	end
 end
 

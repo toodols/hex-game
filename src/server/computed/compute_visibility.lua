@@ -88,7 +88,7 @@ function compute_visibility(grid: HexGrid, action_state: ActionState?)
 		for team, changes in changed_to_visible do
 			for encoded_coord, visible in changes do
 				if visible then
-					for _, entity_id in grid.cells[encoded_coord].entities do
+					for entity_id in grid.cells[encoded_coord].entities do
 						action_state.dirty_entities[entity_id] = action_state.dirty_entities[entity_id] or {}
 						for _, ally in grid:get_allies(team) do
 							action_state.dirty_entities[entity_id][ally] = true

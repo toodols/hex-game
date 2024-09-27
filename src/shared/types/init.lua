@@ -155,7 +155,7 @@ type Portal = {
 
 export type HexCell = {
 	type: CellType,
-	entities: { EntityId },
+	entities: { [EntityId]: boolean },
 	coordinate: CubicCoordinate,
 
 	owner: TeamId?,
@@ -185,7 +185,7 @@ export type HexCell = {
 				-- visible by virtue of contact (r=2)
 				contact: boolean?,
 
-				-- visible by virtue of having full visibility on the map (all tiles)
+				-- visible by virtue of having full visibility on the map (all cells)
 				full: boolean?,
 
 				-- visible by virtue of occupying a portal
@@ -265,11 +265,11 @@ export type Decision = {
 } | {
 	type: "add_research",
 	entity_id: EntityId,
-	research_id: string,
+	research_id: ResearchId,
 } | {
 	type: "remove_research",
 	entity_id: EntityId,
-	research_id: string,
+	research_id: ResearchId,
 } | {
 	type: "set_entity_enabled",
 	enabled: boolean,
@@ -278,6 +278,9 @@ export type Decision = {
 	type: "set_recipe",
 	recipe_id: string,
 	entity_id: EntityId,
+} | {
+	type: "advance_quest",
+	quest_id: string,
 }
 
 export type Damage = {
@@ -355,10 +358,17 @@ export type GridUpdate =
 		-- 	type: "grid",
 		-- 	grid: PartialHexGrid,
 	}
--- other update types for tiles
+	| {
+		type: "quest",
+		quest_id: string,
+		messages: { string },
+		effects: { QuestEffect },
+		can_advance: boolean,
+	}
 
-export type Schedule = {
+export type TurnSchedule = {
 	skip: () -> (),
+	recalculate_skips: () -> (),
 }
 
 export type EntityConfiguration = {
@@ -447,7 +457,7 @@ export type HexGrid = {
 
 	updates_buffer: { { GridUpdate } },
 
-	turn_schedule: Schedule?,
+	turn_schedule: TurnSchedule?,
 
 	turn: number,
 	highest_turn: number,
@@ -480,4 +490,47 @@ export type PartialHexGrid = {
 	spectator_team: TeamId,
 	-- phase: "decision" | "action",
 }
+
+-- Questing types
+export type QuestEffect = {
+	type: "highlight_cell",
+	coordinate: CubicCoordinate,
+} | {
+	type: "highlight_build_button",
+} | {
+	type: "highlight_buildable",
+	entity_type: string,
+}
+
+export type QuestStage = {
+	-- list of messages for this stage
+	messages: { string }?,
+	-- id of the next stage
+	next: string?,
+	-- list of effects/restrictions for the client for this stage
+	effects: { QuestEffect }?,
+	-- whether the client can click to advance
+	can_advance: boolean,
+}
+
+export type QuestMessage = {
+	quest_id: string,
+	title: string,
+	messages: { string },
+	effects: { QuestEffect }?,
+	can_advance: boolean,
+}
+
+export type ServerQuestStageBehavior = {
+	progression_requisite: (Quest, HexGrid) -> boolean,
+	stage_start: (Quest, HexGrid) -> (),
+}
+
+export type Quest = {
+	stage: string,
+	message_change_signal: Signal<QuestMessage>,
+	advance: () -> (),
+	update: (HexGrid) -> (),
+}
+
 return {}

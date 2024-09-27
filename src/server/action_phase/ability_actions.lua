@@ -20,36 +20,64 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState, system
 			return (value.type == "ability") and table.find(util.table_keys(system.entities), value.entity_id) ~= nil
 		end)
 	do
-		local entity = grid.entities[ability.entity_id]
-		local shared_behavior = grid.entity_configurations[entity.type]
-		local cost = shared_behavior.abilities[ability.ability_type].cost
+		if ability.ability_type == "scout_attack" or ability.ability_type == "turret_attack" then
+			local entity = grid.entities[ability.entity_id]
+			local config = grid.entity_configurations[entity.type]
+			local cost = config.abilities[ability.ability_type].cost
 
-		server_util.mark_dirty_for_everyone(action_state, ability.entity_id)
-		if not systems_mod.system_has_items(grid, action_state, system, cost) then
-			continue
+			server_util.mark_dirty_for_everyone(action_state, ability.entity_id)
+			if not systems_mod.system_has_items(grid, action_state, system, cost) then
+				continue
+			end
+
+			for item_type, amount in cost do
+				systems_mod.system_consume_item_type(grid, action_state, system, item_type, amount)
+			end
+
+			publish_event(grid, {
+				type = "consumed_items",
+				entity_id = ability.entity_id,
+				items = cost,
+			}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
+
+			local cell = grid:get_cell(ability.coordinate)
+			assert(cell, "cell not found")
+
+			table.insert(grid.updates_buffer[#grid.updates_buffer], ability)
+			damage_mod.apply_damage_on_cells(grid, { cell.coordinate }, {
+				type = "flat",
+				amount = if ability.ability_type == "scout_attack" then 1 else 3,
+				from = entity.id,
+				lethal = true,
+				friendly_fire = false,
+			}, action_state)
+		elseif ability.ability_type == "solution_use" then
+			print "solution use"
+			local solution_entity = grid.entities[ability.entity_id]
+			local solution_config = grid.entity_configurations[solution_entity.type]
+
+			for _, cell in
+				util.table_filter_map(hex_grid_mod.neighbors_leq(solution_entity.primary_coordinate, 1), function(coord)
+					return grid:get_cell(coord)
+				end)
+			do
+				for entity_id in cell.entities do
+					local entity = grid.entities[entity_id]
+					-- TODO: convert this to use damage_mod
+					entity.health =
+						math.max(entity.max_health, entity.health + solution_config.abilities.solution_use.heal_amount)
+					entity.effects.shield = {
+						type = "shield",
+						health = solution_config.abilities.solution_use.shield_health,
+						duration = solution_config.abilities.solution_use.shield_duration,
+					}
+
+					server_util.mark_dirty_for_everyone(action_state, entity_id)
+				end
+			end
+
+			action_state.dead_entities[solution_entity.id] = true
 		end
-
-		for item_type, amount in cost do
-			systems_mod.system_consume_item_type(grid, action_state, system, item_type, amount)
-		end
-
-		publish_event(grid, {
-			type = "consumed_items",
-			entity_id = ability.entity_id,
-			items = cost,
-		}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
-
-		local cell = grid:get_cell(ability.coordinate)
-		assert(cell, "cell not found")
-
-		table.insert(grid.updates_buffer[#grid.updates_buffer], ability)
-		damage_mod.apply_damage_on_cells(grid, { cell.coordinate }, {
-			type = "flat",
-			amount = if ability.ability_type == "scout_attack" then 1 else 3,
-			from = entity.id,
-			lethal = true,
-			friendly_fire = false,
-		}, action_state)
 	end
 end
 

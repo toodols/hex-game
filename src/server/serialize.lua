@@ -66,7 +66,7 @@ function serialize_cell_for_team(grid: HexGrid, cell: HexCell, team: TeamId): He
 			end
 		end
 		return {
-			entities = util.table_filter(cell.entities, function(entity_id)
+			entities = util.table_filter(cell.entities, function(_, entity_id)
 				local entity = grid.entities[entity_id]
 				return entity.owner == team or entity.status ~= "blueprint"
 			end),
@@ -80,7 +80,7 @@ function serialize_cell_for_team(grid: HexGrid, cell: HexCell, team: TeamId): He
 		}
 	else
 		return {
-			entities = util.table_filter(cell.entities, function(entity_id)
+			entities = util.table_filter(cell.entities, function(_, entity_id)
 				local entity = grid.entities[entity_id]
 				-- if one of its coordinates is visible or it is .server_data.always_visible
 				return entity.server_data.always_visible

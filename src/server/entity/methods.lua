@@ -20,7 +20,7 @@ function entity_can_deconstruct(entity: Entity, grid: HexGrid)
 	assert(cell, "cell not found")
 	if
 		entity.type == "wires"
-		and not util.table_any(cell.entities, function(entity_id)
+		and not util.table_any(cell.entities, function(_, entity_id)
 			return shared_registry_mod.registry[grid.entities[entity_id].type].layer > shared_registry_mod.layer.wire
 		end)
 	then
@@ -104,7 +104,7 @@ function new_entity(entity_: any, grid: HexGrid, action_state: ActionState?): En
 
 	server_behavior.init(entity, grid)
 	grid.entities[entity.id] = entity
-	table.insert(cell.entities, entity.id)
+	cell.entities[entity.id] = true
 
 	if entity.status == "complete" then
 		server_behavior.on_completed(entity, grid)
@@ -131,15 +131,15 @@ function remove_entity(grid: HexGrid, entity: Entity, action_state: ActionState?
 	local cell = grid:get_cell(entity.primary_coordinate)
 	assert(cell, "cell not found")
 	for _, coord in entity.coordinates do
-		util.table_remove_needle(cell.entities, entity.id)
+		cell.entities[entity.id] = nil
 	end
 	entity.is_destroyed = true
 	table.insert(grid.updates_buffer[#grid.updates_buffer], { type = "entity_update", entity = entity })
 	if action_state then
 		server_util.mark_dirty_for_everyone(action_state, entity.id)
 		publish_event(grid, {
-				type = "removed",
-				entity_id = entity.id,
+			type = "removed",
+			entity_id = entity.id,
 		}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
 	end
 end

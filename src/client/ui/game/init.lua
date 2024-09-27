@@ -211,6 +211,7 @@ function init_ui(grid, root_instance: Instance?)
 				shift_select_type ~= "off"
 				and UserInputService:IsKeyDown(Enum.KeyCode.LeftShift)
 				and cursor_instance ~= old_cursor_instance
+				and cursor_instance ~= nil
 			then
 				if shift_select_type == "drag-unknown" then
 					if selection_mode.selected[cursor_instance] then
@@ -233,9 +234,6 @@ function init_ui(grid, root_instance: Instance?)
 					selection_mode_stack = selection_mode_stack,
 				}))
 
-				-- selected_highlight.Adornee = nil :: any
-				-- swap_out_children(cell_instances_select, grid.cell_instance_root, selected)
-				-- selected_highlight.Adornee = cell_instances_select
 				refresh_highlight(selected_highlight, selection_mode.selected)
 			end
 			if cursor_instance then

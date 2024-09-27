@@ -28,7 +28,7 @@ type GridUpdate = types.GridUpdate
 type PartialHexGrid = types.PartialHexGrid
 type Item = types.Item
 
-function color_tile(grid: HexGrid, cell: HexCell)
+function color_cell(grid: HexGrid, cell: HexCell)
 	local instance = grid.cell_instance_map[hex_grid_mod.encode_coord(cell.coordinate)]
 	-- local player_team = grid:get_player_team(Players.LocalPlayer)
 	local function tween_color(color: Color3)
@@ -64,7 +64,7 @@ function update_neighbors(grid: HexGrid, coordinates: { CubicCoordinate })
 	for encoded_neighbor_coord, coord in neighbor_set do
 		local neighbor_cell = grid:get_cell(decode_coord(encoded_neighbor_coord))
 		if neighbor_cell then
-			for _, neighbor_entity_id in neighbor_cell.entities do
+			for neighbor_entity_id in neighbor_cell.entities do
 				local neighbor_entity = grid.entities[neighbor_entity_id]
 				if not neighbor_entity then
 					print("missing", neighbor_entity_id)
@@ -82,21 +82,21 @@ function render_grid(grid: HexGrid)
 	entity_folder.Parent = workspace
 	grid.entity_instance_root = entity_folder
 	entity_folder.Name = "Entities"
-	local tile_folder = Instance.new "Folder"
-	tile_folder.Parent = workspace
-	tile_folder.Name = "Tiles"
-	grid.cell_instance_root = tile_folder
+	local cell_folder = Instance.new "Folder"
+	cell_folder.Parent = workspace
+	cell_folder.Name = "Cells"
+	grid.cell_instance_root = cell_folder
 
 	-- create cell instances
 	for _, cell in grid.cells do
 		local instance = cells_mod.cell_models[cell.type]:Clone()
-		instance.Parent = tile_folder
+		instance.Parent = cell_folder
 		instance:PivotTo(CFrame.new(into_vec3(cell.coordinate) * 4.542 / 2))
 		-- for debugging purposes
 		instance.Name = hex_grid_mod.encode_coord(cell.coordinate)
 		grid.cell_instance_map[hex_grid_mod.encode_coord(cell.coordinate)] = instance
 
-		color_tile(grid, cell)
+		color_cell(grid, cell)
 		grid.instance_cell_map[instance] = hex_grid_mod.encode_coord(cell.coordinate)
 	end
 
@@ -171,7 +171,7 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 		elseif update.type == "cells" then
 			for encoded_coord, cell in update.cells do
 				if grid.cells[encoded_coord].visible_for_team and not cell.visible_for_team then
-					for _, entity_id in grid.cells[encoded_coord].entities do
+					for entity_id in grid.cells[encoded_coord].entities do
 						local entity = grid.entities[entity_id]
 						local client_behavior = client_entity_mod.registry[entity.type]
 						if client_behavior.on_hidden then
@@ -183,7 +183,7 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 				grid.cells[encoded_coord] = cell
 			end
 			for _, cell in grid.cells do
-				color_tile(grid, cell)
+				color_cell(grid, cell)
 			end
 		elseif update.type == "entity_event" then
 			local event = update.event
