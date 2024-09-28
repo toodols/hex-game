@@ -9,6 +9,7 @@ local util = require(ReplicatedStorage.Shared.util)
 local systems_mod = require(ServerScriptService.Server.systems)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local damage_mod = require(ServerScriptService.Server.damage)
+local updates_mod = require(ServerScriptService.Server.updates)
 
 type HexGrid = types.HexGrid
 type System = server_types.System
@@ -43,7 +44,7 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState, system
 			local cell = grid:get_cell(ability.coordinate)
 			assert(cell, "cell not found")
 
-			table.insert(grid.updates_buffer[#grid.updates_buffer], ability)
+			updates_mod.add_update(grid, ability)
 			damage_mod.apply_damage_on_cells(grid, { cell.coordinate }, {
 				type = "flat",
 				amount = if ability.ability_type == "scout_attack" then 1 else 3,
@@ -52,7 +53,6 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState, system
 				friendly_fire = false,
 			}, action_state)
 		elseif ability.ability_type == "solution_use" then
-			print "solution use"
 			local solution_entity = grid.entities[ability.entity_id]
 			local solution_config = grid.entity_configurations[solution_entity.type]
 

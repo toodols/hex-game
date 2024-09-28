@@ -5,6 +5,8 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local server_entity_registry = require(script.Parent.entity.registry)
 local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(script.Parent.types)
+local updates_mod = require(script.Parent.updates)
+
 type HexGrid = types.HexGrid
 type CubicCoordinate = types.CubicCoordinate
 type EntityEvent = server_types.EntityEvent
@@ -27,7 +29,7 @@ function publish_event(grid: HexGrid, event: EntityEvent, coords: { CubicCoordin
 			end
 		end
 	end
-	table.insert(grid.updates_buffer[#grid.updates_buffer], {
+	updates_mod.add_update(grid, {
 		type = "entity_event",
 		event = event,
 	})

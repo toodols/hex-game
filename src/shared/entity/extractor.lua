@@ -9,6 +9,7 @@ registry["extractor"] = with_defaults {
 	max_health = 2,
 	build_time = 1,
 	power_input = 2,
+	cycles_to_output = 2,
 	cost = {
 		bar = 3,
 	},

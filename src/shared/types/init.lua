@@ -274,7 +274,7 @@ export type Interaction = {
 	recipe_id: string,
 	entity_id: EntityId,
 } | {
-	type: "advance_quest",
+	type: "quest_advance",
 	quest_id: string,
 } | {
 	type: "tutorial_report_selection",
@@ -404,6 +404,10 @@ export type EntityConfiguration = {
 	recipes: { Recipe }?,
 }
 
+export type GlobalConfiguration = {
+	decaying_enabled: boolean,
+}
+
 export type HexGrid = {
 	-- instances are always nil on the server, while always a table on the client
 	entity_instance_map: InstanceMap<EntityId>,
@@ -425,6 +429,7 @@ export type HexGrid = {
 	},
 
 	entity_configurations: { [string]: EntityConfiguration },
+	global_configuration: GlobalConfiguration,
 
 	-- extents: Extents,
 	get_cell: (self: HexGrid, coordinate: CubicCoordinate) -> HexCell?,
@@ -454,7 +459,7 @@ export type HexGrid = {
 		},
 	} },
 
-	updates_buffer: { { GridUpdate } },
+	updates_buffer: { GridUpdate },
 
 	turn_schedule: TurnSchedule?,
 
@@ -487,6 +492,7 @@ export type PartialHexGrid = {
 	current_skips: number,
 	needed_skips: number,
 	entity_configurations: { [string]: EntityConfiguration },
+	global_configuration: GlobalConfiguration,
 	neutral_team: TeamId,
 	spectator_team: TeamId,
 	quests: { [string]: Quest },
@@ -511,12 +517,12 @@ export type QuestStage = {
 	-- list of effects/restrictions for the client for this stage
 	effects: { QuestEffect }?,
 	-- whether the client can click to advance
-	can_advance: boolean,
+	can_advance: boolean?,
 }
 
 export type ServerQuestStageBehavior = {
-	progression_requisite: (Quest, HexGrid) -> boolean,
-	stage_start: (Quest, HexGrid) -> (),
+	progression_requisite: ((Quest, HexGrid) -> boolean)?,
+	stage_start: ((Quest, HexGrid) -> ())?,
 }
 
 export type Quest = {

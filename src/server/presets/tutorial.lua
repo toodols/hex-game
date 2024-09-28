@@ -21,7 +21,12 @@ function tutorial_map()
 			max = 1,
 		},
 	}
+	grid.entity_configurations.extractor.power_input = 0
+	grid.entity_configurations.extractor.cycles_to_output = 1
+	grid.global_configuration.decaying_enabled = false
+
 	local player_team = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Player")
+	grid:get_cell({ -1, 0, 1 }).type = "bar_deposit"
 	local extractor = entity_mod.new_entity({
 		type = "extractor",
 		status = "complete",

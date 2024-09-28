@@ -7,14 +7,34 @@ local remotes_mod = require(script.Parent.remotes)
 type HexGrid = types.HexGrid
 type GridUpdate = types.GridUpdate
 
+-- Removes all but the last "entity_update" for each entity_id from a list of updates.
+function filter_duplicate_entity_updates(updates)
+	local last_occurrences = {}
+	local result = {}
+
+	for i, update in updates do
+		if update.type == "entity_update" then
+			last_occurrences[update.entity.id] = i
+		end
+	end
+
+	for i, update in updates do
+		if update.type ~= "entity_update" or last_occurrences[update.entity.id] == i then
+			table.insert(result, update)
+		end
+	end
+
+	return result
+end
+
 function flush_updates(grid: HexGrid)
-	local buffer = grid.updates_buffer[#grid.updates_buffer]
+	local buffer = grid.updates_buffer
 	if #buffer > 0 then
 		for _, team in grid.teams do
 			if #team.players == 0 then
 				continue
 			end
-			local mapped = util.table_filter_map(buffer, function(update: GridUpdate)
+			local mapped = filter_duplicate_entity_updates(util.table_filter_map(buffer, function(update: GridUpdate)
 				local target = (update :: any).target or "everyone"
 				if
 					team.server_data.visibility ~= "full"
@@ -57,8 +77,7 @@ function flush_updates(grid: HexGrid)
 				else
 					return update
 				end
-			end)
-
+			end))
 			if #mapped > 0 then
 				for _, player in team.players do
 					remotes_mod.grid_updates_remote:FireClient(player, mapped)
@@ -66,19 +85,20 @@ function flush_updates(grid: HexGrid)
 			end
 		end
 	end
-	grid.updates_buffer[#grid.updates_buffer] = {}
+	grid.updates_buffer = {}
 end
 
--- allows unwanted events to be discarded
-function push_buffer(grid: HexGrid)
-	table.insert(grid.updates_buffer, {})
+function add_update(grid: HexGrid, event: GridUpdate)
+	table.insert(grid.updates_buffer, event)
 end
-function pop_buffer(grid: HexGrid)
-	grid.updates_buffer[#grid.updates_buffer] = nil
+
+function add_update_and_flush(grid: HexGrid, event: GridUpdate)
+	add_update(grid, event)
+	flush_updates(grid)
 end
 
 return {
 	flush_updates = flush_updates,
-	push_buffer = push_buffer,
-	pop_buffer = pop_buffer,
+	add_update = add_update,
+	add_update_and_flush = add_update_and_flush,
 }

@@ -1,7 +1,3 @@
-local ReplicatedStorage = game:GetService "ReplicatedStorage"
-
-local util = require(ReplicatedStorage.Shared.util)
-
 local client_tests = require(script.client)
 local server_tests = require(script.server)
 
@@ -17,13 +13,13 @@ function run_tests()
 				run_tests_recursive(test, full_name)
 			else
 				local test_t0 = DateTime.now().UnixTimestampMillis
-				local success, err = pcall(test)
+				local success, err_or_val = pcall(test)
 				total += 1
 				if success then
 					print("Test", full_name, "passed in", DateTime.now().UnixTimestampMillis - test_t0, "ms")
 					successes += 1
 				else
-					warn("Test", full_name, "failed:", err)
+					warn("Test", full_name, "failed:", err_or_val)
 				end
 			end
 		end

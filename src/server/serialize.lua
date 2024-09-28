@@ -126,6 +126,7 @@ function serialize_grid_for_team(grid: HexGrid, team: TeamId): PartialHexGrid
 		turn_start_time = grid.turn_start_time,
 		entities = entities,
 		entity_configurations = grid.entity_configurations,
+		global_configuration = grid.global_configuration,
 		neutral_team = grid.neutral_team,
 		spectator_team = grid.spectator_team,
 	}

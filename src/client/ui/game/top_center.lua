@@ -226,17 +226,26 @@ function TopCenter()
 			},
 			util.table_map(grid.quests, function(quest)
 				local stage_data = quest.stages_data[quest.current_stage]
-				return React.createElement(
-					React.Fragment,
-					{
-						key = quest.current_stage,
-					},
-					React.createElement(QuestDialogue, {
-						messages = stage_data.messages,
-						title = quest.id,
-						can_advance = stage_data.can_advance,
-					})
-				)
+				return stage_data.messages
+					and React.createElement(
+						React.Fragment,
+						{
+							key = quest.current_stage,
+						},
+						React.createElement(QuestDialogue, {
+							messages = stage_data.messages,
+							title = quest.id,
+							can_advance = stage_data.can_advance,
+							advance = function()
+								client_interaction_remote:FireServer {
+									{
+										type = "quest_advance",
+										quest_id = quest.id,
+									},
+								}
+							end,
+						})
+					)
 			end)
 		),
 	})

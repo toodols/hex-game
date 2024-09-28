@@ -5,11 +5,9 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerStorage = game:GetService "ServerStorage"
 local StarterGui = game:GetService "StarterGui"
 
-local questing = require(ServerScriptService.Server.questing)
 local clone_assets = require(ReplicatedStorage.Shared.asset_server).clone
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
-local action_phase_mod = require(ServerScriptService.Server.action_phase)
 
 type TeamData = types.TeamData
 type Interaction = types.Interaction
@@ -58,7 +56,7 @@ remotes_mod.get_hex_grid_data_remote.OnServerInvoke = function(player)
 end :: any
 
 function republish_teams(grid: HexGrid)
-	table.insert(grid.updates_buffer[#grid.updates_buffer], {
+	updates_mod.add_update(grid, {
 		type = "teams",
 		teams = util.table_map(grid.teams, function(team)
 			return serialize_mod.serialize_team(grid, team)
@@ -73,13 +71,6 @@ function start_game(teleport_data: { room: types.Room }?)
 	grid = presets.tutorial_map()
 
 	_G.grid = grid
-
-	turn_scheduler.reset_turn_time(grid)
-	grid.turn_schedule = turn_scheduler.new_turn_schedule(grid.turn_end_time)
-	grid.turn_schedule.turn_signal.listen(function()
-		action_phase_mod.run_action_phase(grid)
-		turn_scheduler.reset_turn_time(grid)
-	end)
 
 	remotes_mod.client_interaction_remote.OnServerEvent:Connect(function(plr: Player, data: { Interaction })
 		router_mod.on_client_interaction(grid, plr, data)

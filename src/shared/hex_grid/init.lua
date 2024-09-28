@@ -21,6 +21,7 @@ type TeamId = types.TeamId
 type TeamColor = types.TeamColor
 type TeamData = types.TeamData
 type EntityConfiguration = types.EntityConfiguration
+type GlobalConfiguration = types.GlobalConfiguration
 
 -- Filters all values that are inside the grid
 function coords_filter(grid: HexGrid, values: { CubicCoordinate }): { CubicCoordinate }
@@ -120,7 +121,7 @@ function grid_get_cell(self: HexGrid, coord: CubicCoordinate): HexCell?
 	return self.cells[encode_coord(coord)]
 end
 
-function new_grid_empty(config: { [string]: EntityConfiguration }?): HexGrid
+function new_grid_empty(entity_config: { [string]: EntityConfiguration }?, global_config: GlobalConfiguration?): HexGrid
 	local grid: HexGrid
 	grid = {
 		cells = {},
@@ -140,13 +141,16 @@ function new_grid_empty(config: { [string]: EntityConfiguration }?): HexGrid
 		speed_multiplier = 0.15,
 		speed_base = 5,
 		spectator_visibilities = {},
-		updates_buffer = { {} },
+		updates_buffer = {},
 		skipped = {},
 		current_skips = 0,
 		needed_skips = 0,
 		neutral_team = nil :: any,
 		spectator_team = nil :: any,
-		entity_configurations = config or shared_entity_mod.create_configuration(),
+		entity_configurations = entity_config or shared_entity_mod.create_configuration(),
+		global_configuration = global_config or {
+			decaying_enabled = true,
+		},
 		quests = {},
 		new_team = grid_new_team,
 		purge_dead_entities = grid_purge_dead_entities,
@@ -175,7 +179,7 @@ end
 
 -- hydrates a grid from a serialized grid
 function new_grid_from_data(data: PartialHexGrid): HexGrid
-	local grid = new_grid_empty(data.entity_configurations)
+	local grid = new_grid_empty(data.entity_configurations, data.global_configuration)
 	grid.coalitions = data.coalitions
 	grid.teams = data.teams
 	grid.turn = data.turn

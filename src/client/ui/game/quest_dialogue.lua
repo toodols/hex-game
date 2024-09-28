@@ -17,7 +17,7 @@ function QuestDialogue(props: {
 
 	return React.createElement("TextButton", {
 		BackgroundColor3 = Color3.fromRGB(13, 13, 13),
-		BackgroundTransparency = 0.5,
+		BackgroundTransparency = 0.4,
 		Text = "",
 		BorderSizePixel = 0,
 		LayoutOrder = 1,
@@ -37,7 +37,7 @@ function QuestDialogue(props: {
 			Position = UDim2.new(0, 0, 0, 5),
 			RichText = true,
 			Size = UDim2.new(1, 0, 0, 25),
-			Text = `{props.title}: {message_num}/{#props.messages}`,
+			Text = `{props.title}`,
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			TextSize = 18,
 			TextXAlignment = Enum.TextXAlignment.Left,
@@ -55,7 +55,7 @@ function QuestDialogue(props: {
 			RichText = true,
 			Size = UDim2.new(1, 0, 0, 0),
 			Text = format_text(grid, props.messages[message_num]),
-			TextColor3 = Color3.fromRGB(170, 170, 170),
+			TextColor3 = Color3.fromRGB(200, 200, 200),
 			TextSize = 13,
 			TextWrapped = true,
 			TextXAlignment = Enum.TextXAlignment.Left,

@@ -16,6 +16,7 @@ registry_mod.registry["extractor"] = registry_mod.with_defaults {
 		self.should_output = 0
 	end,
 	tick = function(self: Entity, grid: HexGrid, action_state: ActionState)
+		local config = grid.entity_configurations[self.type]
 		if self.status == "complete" and self.enabled and self.owner ~= grid.neutral_team then
 			local cell = grid:get_cell(self.primary_coordinate)
 
@@ -32,7 +33,8 @@ registry_mod.registry["extractor"] = registry_mod.with_defaults {
 
 			-- prevent extractor from missing out on output because there is no power
 			local function ok()
-				self.should_output = ((self.should_output :: any) + 1) % (if is_boosted then 1 else 2)
+				self.should_output = ((self.should_output :: any) + 1)
+					% (if is_boosted then 1 else config.cycles_to_output)
 			end
 			if self.should_output == 0 then
 				local items
@@ -44,11 +46,13 @@ registry_mod.registry["extractor"] = registry_mod.with_defaults {
 					items = { "rad" }
 				elseif cell.type == "tar_deposit" then
 					items = { "tar" }
+				elseif cell.type == "basic" then
+					warn "Extractor is placed on a basic cell. This might be a bug"
 				end
 				if items then
 					table.insert(action_state.queue, {
 						type = "exchange",
-						input_power = 2,
+						input_power = config.input_power,
 						output_items = items,
 						entity_id = self.id,
 						on_success = function()

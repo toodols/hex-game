@@ -3,14 +3,16 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local action_phase_mod = require(ServerScriptService.Server.action_phase)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
-local new_quest = require(script.Parent.quest).new_quest
+local quest_methods = require(script.Parent.quest)
 local updates_mod = require(ServerScriptService.Server.updates)
 
 type HexGrid = types.HexGrid
 type Quest = types.Quest
 type CubicCoordinate = types.CubicCoordinate
+type ServerQuestStageBehavior = types.ServerQuestStageBehavior
+type QuestStage = types.QuestStage
 
-local stages_behavior = {
+local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 	init = {
 		progression_requisite = function(self: Quest, grid: HexGrid)
 			for _, selections in self.tutorial_player_selection :: { [Player]: { CubicCoordinate } } do
@@ -26,14 +28,37 @@ local stages_behavior = {
 			return #grid:query_entity { primary_coordinate = { 0, 0, 0 }, type = "wires" } == 1
 		end,
 	},
-	complete_wires_blueprint = {
+	build_wires_blueprint = {
 		stage_start = function(self: Quest, grid: HexGrid)
-			action_phase_mod.run_action_phase(grid)
+			task.delay(1, function()
+				action_phase_mod.run_action_phase(grid)
+				wait(1)
+				quest_methods.quest_advance(self, grid)
+			end)
+		end,
+	},
+	advance_until_stockpile_is_filled = {
+		stage_start = function(self: Quest, grid: HexGrid)
+			task.delay(1, function()
+				while true do
+					local stockpile = (grid:query_entity { type = "stockpile" })[1]
+					if not stockpile then
+						quest_methods.quest_change_state(self, "error", grid)
+					end
+
+					action_phase_mod.run_action_phase(grid)
+					wait(1)
+					if #stockpile.inventory.items == 5 then
+						break
+					end
+				end
+				quest_methods.quest_advance(self, grid)
+			end)
 		end,
 	},
 }
 
-local stages_data = {
+local stages_data: { [string]: QuestStage } = {
 	init = {
 		messages = {
 			"Welcome to the tutorial.",
@@ -70,6 +95,9 @@ local stages_data = {
 			"Let's advance a few turns so the stockpile fills up.",
 		},
 		can_advance = true,
+		next = "advance_until_stockpile_is_filled",
+	},
+	advance_until_stockpile_is_filled = {
 		next = "resource_is_bar",
 	},
 	resource_is_bar = {
@@ -78,10 +106,15 @@ local stages_data = {
 			"But it isn't the only resource. Let's obtain {item.rad}",
 		},
 	},
+	error = {
+		messages = {
+			"Something went wrong and the tutorial can no longer function.",
+		},
+	},
 }
 
 function tutorial(grid: HexGrid): Quest
-	local quest = new_quest {
+	local quest = quest_methods.new_quest {
 		id = "tutorial",
 		title = "Tutorial",
 		stages_data = stages_data,
@@ -89,7 +122,7 @@ function tutorial(grid: HexGrid): Quest
 	}
 	quest.tutorial_player_selection = {}
 	quest.quest_update_signal.listen(function()
-		table.insert(grid.updates_buffer[#grid.updates_buffer], {
+		updates_mod.add_update(grid, {
 			type = "quest_update",
 			quest_id = quest.id,
 			current_stage = quest.current_stage,

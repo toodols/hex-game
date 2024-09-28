@@ -47,11 +47,13 @@ function handle_exchange_actions(grid: HexGrid, action_state: ActionState, syste
 			exchange_action.on_success(grid, action_state, system)
 		end
 		if output_items then
+			-- system_add_items mutates output_items so count it beforehand
+			local counted_output_items = items_mod.into_counted_items(output_items)
 			systems_mod.system_add_items(grid, action_state, system, output_items)
 			publish_event(grid, {
 				type = "produced_items",
 				entity_id = exchange_action.entity_id,
-				items = items_mod.into_counted_items(output_items),
+				items = counted_output_items,
 			}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
 		end
 		system.power += output_power

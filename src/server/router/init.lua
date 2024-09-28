@@ -77,7 +77,6 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 						return
 					end
 				end
-				updates_mod.push_buffer(grid)
 				local entity = entity_mod.new_entity(
 					{
 						type = entry.entity_type,
@@ -91,7 +90,6 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 						dirty_entities = dirty_entities,
 					} :: any
 				)
-				updates_mod.pop_buffer(grid)
 				dirty_entities[entity.id] = true
 			elseif entry.type == "ability" then
 				local entity = grid.entities[entry.entity_id]
@@ -240,9 +238,14 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 						turn_scheduler.recalculate_skips(grid)
 					end
 				end
-			elseif entry.type == "advance_quest" then
-				if grid.quests[entry.quest_id] ~= nil then
-					questing.quest_advance(grid.quests[entry.quest_id])
+			elseif entry.type == "quest_advance" then
+				local quest = grid.quests[entry.quest_id]
+				if
+					quest
+					and quest.stages_data[quest.current_stage]
+					and quest.stages_data[quest.current_stage].can_advance
+				then
+					questing.quest_advance(grid.quests[entry.quest_id], grid)
 				end
 			elseif entry.type == "tutorial_report_selection" then
 				local tutorial = grid.quests.tutorial
@@ -283,11 +286,16 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 		end
 
 		for entity_id in dirty_entities do
-			table.insert(grid.updates_buffer[#grid.updates_buffer], {
+			updates_mod.add_update(grid, {
 				type = "entity_update",
 				entity = grid.entities[entity_id],
 			})
 		end
+
+		for _, quest in grid.quests do
+			questing.quest_update(quest, grid)
+		end
+
 		updates_mod.flush_updates(grid)
 
 		grid:purge_dead_entities()

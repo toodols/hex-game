@@ -8,6 +8,7 @@ local registry = require(script.Parent.registry).registry
 local server_util = require(ServerScriptService.Server.util)
 local server_types = require(ServerScriptService.Server.types)
 local publish_event = require(ServerScriptService.Server.event).publish_event
+local updates_mod = require(ServerScriptService.Server.updates)
 
 type HexGrid = types.HexGrid
 type Entity = types.Entity
@@ -117,8 +118,8 @@ function new_entity(entity_: any, grid: HexGrid, action_state: ActionState?): En
 		server_util.mark_dirty_for_everyone(action_state, entity.id)
 	end
 
-	table.insert(grid.updates_buffer[#grid.updates_buffer], { type = "entity_update", entity = entity })
-	table.insert(grid.updates_buffer[#grid.updates_buffer], {
+	updates_mod.add_update(grid, { type = "entity_update", entity = entity })
+	updates_mod.add_update(grid, {
 		type = "entity_created",
 		entity_id = entity.id,
 	})
@@ -134,7 +135,7 @@ function remove_entity(grid: HexGrid, entity: Entity, action_state: ActionState?
 		cell.entities[entity.id] = nil
 	end
 	entity.is_destroyed = true
-	table.insert(grid.updates_buffer[#grid.updates_buffer], { type = "entity_update", entity = entity })
+	updates_mod.add_update(grid, { type = "entity_update", entity = entity })
 	if action_state then
 		server_util.mark_dirty_for_everyone(action_state, entity.id)
 		publish_event(grid, {

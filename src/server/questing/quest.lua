@@ -9,7 +9,7 @@ type QuestStage = types.QuestStage
 type Quest = types.Quest
 type ServerQuestStageBehavior = types.ServerQuestStageBehavior
 
-local function quest_change_state(quest: Quest, stage: string)
+local function quest_change_state(quest: Quest, stage: string, grid: HexGrid)
 	if not stage then
 		print "end state"
 		return
@@ -18,22 +18,27 @@ local function quest_change_state(quest: Quest, stage: string)
 		return
 	end
 	quest.current_stage = stage
+	local behavior = quest.stages_behavior[stage]
+	if behavior and behavior.stage_start then
+		behavior.stage_start(quest, grid)
+	end
 	quest.quest_update_signal.send(quest)
 end
 
-local function quest_advance(quest: Quest)
+local function quest_advance(quest: Quest, grid: HexGrid)
 	local stage_data = quest.stages_data[quest.current_stage]
-	if stage_data.can_advance then
-		quest_change_state(quest, stage_data.next)
-	end
+	quest_change_state(quest, stage_data.next, grid)
 end
 
 local function quest_update(quest: Quest, grid: HexGrid)
 	local stage_data = quest.stages_data[quest.current_stage]
 	local stage_behavior = quest.stages_behavior[quest.current_stage]
-	print(stage_behavior)
-	if stage_behavior.progression_requisite and stage_behavior.progression_requisite(quest, grid) then
-		quest_change_state(quest, stage_data.next)
+	if
+		stage_behavior
+		and stage_behavior.progression_requisite
+		and stage_behavior.progression_requisite(quest, grid)
+	then
+		quest_change_state(quest, stage_data.next, grid)
 	end
 end
 
@@ -42,6 +47,7 @@ function new_quest(props: {
 	stages_data: { [string]: QuestStage },
 	stages_behavior: { [string]: ServerQuestStageBehavior },
 }): Quest
+	print(props)
 	local quest = {
 		current_stage = "init",
 		stages_data = props.stages_data,

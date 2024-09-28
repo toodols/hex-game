@@ -17,8 +17,20 @@ function turn_schedule_skip(schedule: TurnSchedule, end_time: number?)
 	coroutine.resume(schedule.loop_thread)
 end
 
+function turn_schedule_stop(schedule: TurnSchedule)
+	schedule.turn_end_time = math.huge
+	if schedule.wait_thread then
+		task.cancel(schedule.wait_thread)
+	end
+	coroutine.resume(schedule.loop_thread)
+end
+
+function kill_turn_schedule(schedule: TurnSchedule)
+	task.cancel(schedule.wait_thread)
+	coroutine.close(schedule.loop_thread)
+end
+
 function recalculate_skips(grid: HexGrid)
-	assert(grid.turn_schedule, "turn_schedule is nil")
 	local needed_skips = 0
 	for _, team in grid.teams do
 		needed_skips += #team.players
@@ -28,12 +40,12 @@ function recalculate_skips(grid: HexGrid)
 		return
 	end
 
-	if #grid.skipped >= needed_skips then
+	if #grid.skipped >= needed_skips and grid.turn_schedule ~= nil then
 		turn_schedule_skip(grid.turn_schedule)
 	else
 		grid.needed_skips = needed_skips
 		grid.current_skips = #grid.skipped
-		table.insert(grid.updates_buffer[#grid.updates_buffer], {
+		updates_mod.add_update(grid, {
 			type = "turn_skips",
 			current_skips = #grid.skipped,
 			needed_skips = needed_skips,
@@ -52,7 +64,7 @@ function reset_turn_time(grid: HexGrid)
 	end
 	grid.turn_start_time = DateTime.now().UnixTimestampMillis
 	grid.turn_end_time = DateTime.now().UnixTimestampMillis + wait_time * 1000
-	table.insert(grid.updates_buffer[#grid.updates_buffer], {
+	updates_mod.add_update(grid, {
 		type = "turn_timer",
 		turn_start_time = grid.turn_start_time,
 		turn_end_time = grid.turn_end_time,
@@ -65,17 +77,20 @@ function reset_turn_time(grid: HexGrid)
 end
 
 function new_turn_schedule(turn_end_time: number): TurnSchedule
-	local schedule
+	local schedule = {
+		turn_signal = new_signal(),
+		wait_thread = nil,
+		loop_thread = nil,
+		turn_end_time = turn_end_time,
+	}
 
-	local wait_thread: thread
-	local loop_thread: thread
-	loop_thread = coroutine.create(function()
+	schedule.loop_thread = coroutine.create(function()
 		while true do
 			while DateTime.now().UnixTimestampMillis < schedule.turn_end_time do
-				wait_thread = task.delay(
+				schedule.wait_thread = task.delay(
 					(schedule.turn_end_time - DateTime.now().UnixTimestampMillis) / 1000,
 					function()
-						coroutine.resume(loop_thread)
+						coroutine.resume(schedule.loop_thread)
 					end
 				)
 				coroutine.yield()
@@ -86,14 +101,7 @@ function new_turn_schedule(turn_end_time: number): TurnSchedule
 		end
 	end)
 
-	schedule = {
-		turn_signal = new_signal(),
-		wait_thread = wait_thread,
-		loop_thread = loop_thread,
-		turn_end_time = turn_end_time,
-	}
-
-	coroutine.resume(loop_thread)
+	coroutine.resume(schedule.loop_thread)
 	return schedule
 end
 
@@ -102,4 +110,6 @@ return {
 	reset_turn_time = reset_turn_time,
 	turn_schedule_skip = turn_schedule_skip,
 	recalculate_skips = recalculate_skips,
+	turn_schedule_stop = turn_schedule_stop,
+	kill_turn_schedule = kill_turn_schedule,
 }

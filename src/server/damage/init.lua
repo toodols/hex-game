@@ -3,6 +3,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local server_entity_mod = require(script.Parent.entity)
 local server_util = require(script.Parent.util)
 local server_types = require(script.Parent.types)
+local updates_mod = require(script.Parent.updates)
 
 type Damage = types.Damage
 type Entity = types.Entity
@@ -103,7 +104,7 @@ function apply_damage_on_cells(grid: HexGrid, targets: { CubicCoordinate }, dama
 		if action_state then
 			server_util.mark_dirty_for_everyone(action_state, entity_id)
 
-			table.insert(grid.updates_buffer[#grid.updates_buffer], {
+			updates_mod.add_update(grid, {
 				type = "entity_damage",
 				effective_damage = {
 					source = damage,

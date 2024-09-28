@@ -11,6 +11,7 @@ local server_entity_mod = require(ServerScriptService.Server.entity)
 local server_util = require(ServerScriptService.Server.util)
 local updates_mod = require(ServerScriptService.Server.updates)
 local computed_mod = require(ServerScriptService.Server.computed)
+local quest_methods = require(ServerScriptService.Server.questing.quest)
 
 local handle_exchange_actions = require(script.exchange_actions).handle_exchange_actions
 local handle_ability_actions = require(script.ability_actions).handle_ability_actions
@@ -36,7 +37,12 @@ function run_action_phase(grid: HexGrid)
 	computed_mod.compute_influences(grid)
 
 	for _, entity in grid.entities do
-		if entity.status ~= "blueprint" and entity.owner ~= grid.neutral_team and entity.decayable then
+		if
+			grid.global_configuration.decaying_enabled
+			and entity.status ~= "blueprint"
+			and entity.owner ~= grid.neutral_team
+			and entity.decayable
+		then
 			action_state.decayable_entities[entity.id] = true
 		end
 
@@ -66,9 +72,7 @@ function run_action_phase(grid: HexGrid)
 		if entity.is_decaying then
 			table.insert(action_state.queue, action)
 		else
-			updates_mod.push_buffer(grid)
 			server_entity_mod.remove_entity(grid, entity, action_state)
-			updates_mod.pop_buffer(grid)
 		end
 	end
 
@@ -207,7 +211,6 @@ function run_action_phase(grid: HexGrid)
 		end)
 	end
 
-	updates_mod.push_buffer(grid)
 	for entity_id in action_state.dead_entities do
 		server_entity_mod.remove_entity(grid, grid.entities[entity_id], action_state)
 	end
@@ -265,7 +268,6 @@ function run_action_phase(grid: HexGrid)
 		server_util.mark_dirty_for_everyone(action_state, entity_id)
 	end
 
-	updates_mod.push_buffer(grid)
 	for entity_id, should_decay in action_state.decayable_entities do
 		local entity = grid.entities[entity_id]
 		if entity == nil then
@@ -294,7 +296,6 @@ function run_action_phase(grid: HexGrid)
 			end
 		end
 	end
-	updates_mod.pop_buffer(grid)
 
 	computed_mod.compute_presence(grid)
 	for _, entity in grid.entities do
@@ -312,11 +313,10 @@ function run_action_phase(grid: HexGrid)
 			end
 		end
 	end
-	updates_mod.pop_buffer(grid)
 
 	computed_mod.compute_visibility(grid, action_state)
 
-	table.insert(grid.updates_buffer[#grid.updates_buffer], {
+	updates_mod.add_update(grid, {
 		type = "cells",
 		cells = grid.cells,
 	})
@@ -328,7 +328,7 @@ function run_action_phase(grid: HexGrid)
 			continue
 		end
 		if values.everyone then
-			table.insert(grid.updates_buffer[#grid.updates_buffer], {
+			updates_mod.add_update(grid, {
 				type = "entity_update",
 				entity = entity,
 			})
@@ -337,7 +337,7 @@ function run_action_phase(grid: HexGrid)
 			for _, team_id in util.table_keys(values) do
 				table.insert(targets, team_id)
 			end
-			table.insert(grid.updates_buffer[#grid.updates_buffer], {
+			updates_mod.add_update(grid, {
 				type = "entity_update",
 				entity = entity,
 				targets = targets,
@@ -346,19 +346,21 @@ function run_action_phase(grid: HexGrid)
 	end
 
 	grid.turn += 1
-	table.insert(grid.updates_buffer[#grid.updates_buffer], {
+	updates_mod.add_update(grid, {
 		type = "turn",
 		turn = grid.turn,
 		highest_turn = grid.highest_turn,
 	})
-	local updates_copy = table.clone(grid.updates_buffer[#grid.updates_buffer])
+
+	for _, quest in grid.quests do
+		quest_methods.quest_update(quest, grid)
+	end
 
 	updates_mod.flush_updates(grid)
 	grid:purge_dead_entities()
 
 	return {
 		elapsed = tick() - t0,
-		updates = updates_copy,
 	}
 end
 

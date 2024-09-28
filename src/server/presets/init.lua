@@ -4,6 +4,8 @@ local entity_mod = require(script.Parent.entity)
 local computed_mod = require(script.Parent.computed)
 local types = require(ReplicatedStorage.Shared.types)
 local updates_mod = require(script.Parent.updates)
+local turn_scheduler = require(script.Parent.turn_scheduler)
+local action_phase_mod = require(script.Parent.action_phase)
 local tutorial_map = require(script.tutorial).tutorial_map
 
 type HexGrid = types.HexGrid
@@ -18,6 +20,14 @@ function testing_map(): HexGrid
 	}
 	grid.speed_multiplier = 0
 	grid.speed_base = 3
+
+	turn_scheduler.reset_turn_time(grid)
+	grid.turn_schedule = turn_scheduler.new_turn_schedule(grid.turn_end_time)
+	grid.turn_schedule.turn_signal.listen(function()
+		action_phase_mod.run_action_phase(grid)
+		turn_scheduler.reset_turn_time(grid)
+	end)
+
 	local team1 = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Red")
 	team1.server_data.visibility = "full"
 	local team2 = grid:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "Blue")
@@ -92,6 +102,13 @@ function my_map(): HexGrid
 	}
 	local team1 = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Red")
 	local team2 = grid:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "Blue")
+
+	turn_scheduler.reset_turn_time(grid)
+	grid.turn_schedule = turn_scheduler.new_turn_schedule(grid.turn_end_time)
+	grid.turn_schedule.turn_signal.listen(function()
+		action_phase_mod.run_action_phase(grid)
+		turn_scheduler.reset_turn_time(grid)
+	end)
 
 	for _, cell in grid.cells do
 		if math.random() < 0.0015 then
