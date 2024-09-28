@@ -125,7 +125,7 @@ export type Entity = {
 	build_time: number,
 
 	owner: TeamId,
-	queued_decisions: { Interaction },
+	queued_decisions: { Decision },
 
 	server_data: {
 		-- whether this entity is always visible regardless of whether the cell it is on is visible
@@ -234,7 +234,7 @@ export type TeamData = {
 	-- is_ai: boolean -- not confident i am capable of implementing ai
 }
 
-export type Interaction = {
+export type Decision = {
 	type: "construct",
 	entity_type: string,
 	coordinate: CubicCoordinate,
@@ -244,15 +244,17 @@ export type Interaction = {
 	entity_id: EntityId,
 } | {
 	type: "rotate_entity",
-	rotation: number,
 	entity_id: EntityId,
-} | {
-	type: "skip",
+	rotation: number,
 } | {
 	type: "ability",
 	ability_type: string,
 	entity_id: EntityId,
 	coordinate: CubicCoordinate,
+}
+
+export type Interaction = Decision | {
+	type: "skip",
 } | {
 	type: "cancel_decision",
 	entity_id: EntityId,

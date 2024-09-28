@@ -4,7 +4,7 @@ local types = require(ReplicatedStorage.Shared.types)
 type Entity = types.Entity
 type EntityId = types.EntityId
 type Item = types.Item
-type Interaction = types.Interaction
+type Decision = types.Decision
 type HexGrid = types.HexGrid
 type TeamId = types.TeamId
 type EffectiveDamage = types.EffectiveDamage
@@ -65,7 +65,7 @@ export type EntityAction =
 		output_power: number?,
 		on_success: (grid: HexGrid, action_state: ActionState, system: System) -> (),
 	}
-	| Interaction
+	| Decision
 
 export type DamageResult = {
 	-- whether to propagate damage to the next layer(s)
