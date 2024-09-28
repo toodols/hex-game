@@ -9,8 +9,10 @@ local questing = require(ServerScriptService.Server.questing)
 local clone_assets = require(ReplicatedStorage.Shared.asset_server).clone
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
+local action_phase_mod = require(ServerScriptService.Server.action_phase)
+
 type TeamData = types.TeamData
-type Decision = types.Decision
+type Interaction = types.Interaction
 type HexGrid = types.HexGrid
 
 -- Copy assets for client use
@@ -51,7 +53,8 @@ remotes_mod.get_hex_grid_data_remote.OnServerInvoke = function(player)
 		task.wait()
 	end
 	local player_team = grid:get_player_team(player)
-	return serialize_mod.serialize_grid_for_team(grid, player_team.id)
+	local serialized = serialize_mod.serialize_grid_for_team(grid, player_team.id)
+	return serialized
 end :: any
 
 function republish_teams(grid: HexGrid)
@@ -67,23 +70,19 @@ end
 function start_game(teleport_data: { room: types.Room }?)
 	local players_config = teleport_data and teleport_data.room and teleport_data.room.players
 	-- grid = presets.my_map()
-	grid = presets.testing_map()
+	grid = presets.tutorial_map()
 
 	_G.grid = grid
 
-	grid.quests.tutorial = questing.tutorial()
-	grid.quests.tutorial.quest_update_signal.listen(function(quest)
-		table.insert(grid.updates_buffer[#grid.updates_buffer], {
-			type = "quest_update",
-			quest_id = quest.id,
-			current_stage = quest.current_stage,
-			details = quest.details,
-		})
-		updates_mod.flush_updates(grid)
+	turn_scheduler.reset_turn_time(grid)
+	grid.turn_schedule = turn_scheduler.new_turn_schedule(grid.turn_end_time)
+	grid.turn_schedule.turn_signal.listen(function()
+		action_phase_mod.run_action_phase(grid)
+		turn_scheduler.reset_turn_time(grid)
 	end)
 
-	remotes_mod.decision_remote.OnServerEvent:Connect(function(plr: Player, data: { Decision })
-		router_mod.on_decision(grid, plr, data)
+	remotes_mod.client_interaction_remote.OnServerEvent:Connect(function(plr: Player, data: { Interaction })
+		router_mod.on_client_interaction(grid, plr, data)
 	end)
 
 	local function auto_add_player(plr: Player)
@@ -110,9 +109,11 @@ function start_game(teleport_data: { room: types.Room }?)
 		auto_add_player(plr)
 	end
 
+	turn_scheduler.recalculate_skips(grid)
+
 	Players.PlayerAdded:Connect(function(plr)
 		auto_add_player(plr)
-		grid.turn_schedule.recalculate_skips()
+		turn_scheduler.recalculate_skips(grid)
 		republish_teams(grid)
 	end)
 	Players.PlayerRemoving:Connect(function(plr)
@@ -121,11 +122,9 @@ function start_game(teleport_data: { room: types.Room }?)
 		end
 		util.table_remove_needle(grid.skipped, plr)
 
-		grid.turn_schedule.recalculate_skips()
+		turn_scheduler.recalculate_skips(grid)
 		republish_teams(grid)
 	end)
-
-	grid.turn_schedule = turn_scheduler.turn_schedule(grid)
 end
 
 local join_data = if #Players:GetPlayers() > 0

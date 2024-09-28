@@ -10,7 +10,7 @@ local QuestDialogue = require(script.Parent.quest_dialogue).QuestDialogue
 local types = require(ReplicatedStorage.Shared.types)
 
 local Corner = util_components.Corner
-local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: RemoteEvent
+local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
 type HexGrid = types.HexGrid
 
@@ -163,7 +163,7 @@ function TopCenter()
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 20,
 				[React.Event.MouseButton1Click] = function()
-					decision_remote:FireServer { {
+					client_interaction_remote:FireServer { {
 						type = "skip",
 					} }
 				end,
@@ -226,11 +226,17 @@ function TopCenter()
 			},
 			util.table_map(grid.quests, function(quest)
 				local stage_data = quest.stages_data[quest.current_stage]
-				return React.createElement(QuestDialogue, {
-					messages = stage_data.messages,
-					title = quest.id,
-					can_advance = stage_data.can_advance,
-				})
+				return React.createElement(
+					React.Fragment,
+					{
+						key = quest.current_stage,
+					},
+					React.createElement(QuestDialogue, {
+						messages = stage_data.messages,
+						title = quest.id,
+						can_advance = stage_data.can_advance,
+					})
+				)
 			end)
 		),
 	})

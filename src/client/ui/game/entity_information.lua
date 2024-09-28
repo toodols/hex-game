@@ -17,7 +17,7 @@ local themes = require(ReplicatedStorage.Client.ui.themes)
 local ActionButton = require(script.Parent.action_button).ActionButton
 local Cost = require(script.Parent.cost).Cost
 local MainContext = context_mod.MainContext
-local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: RemoteEvent
+local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local Corner = util_components.Corner
 local Separator = util_components.Separator
@@ -116,7 +116,6 @@ function EntityInformation(props: {
 	local context = React.useContext(MainContext)
 	local grid: HexGrid = context.grid
 	local selection_mode_stack = context.selection_mode_stack
-	local update_highlights = context.update_highlights
 
 	local viewport_ref = React.useRef(nil :: any)
 	local header_ref = React.useRef(nil :: any)
@@ -423,7 +422,7 @@ function EntityInformation(props: {
 										type = "select_some_cell",
 										candidates = candidates,
 										on_selected = function(instance)
-											decision_remote:FireServer {
+											client_interaction_remote:FireServer {
 												{
 													type = "ability",
 													ability_type = if entity.type == "scout"
@@ -435,7 +434,6 @@ function EntityInformation(props: {
 											}
 										end,
 									})
-									update_highlights()
 								end
 							end,
 						}),
@@ -446,7 +444,7 @@ function EntityInformation(props: {
 							Text = "Activate",
 							LayoutOrder = 1,
 							on_click = function()
-								decision_remote:FireServer {
+								client_interaction_remote:FireServer {
 									{
 										type = "ability",
 										ability_type = "solution_use",
@@ -461,7 +459,7 @@ function EntityInformation(props: {
 						LayoutOrder = 1,
 						on_click = function()
 							if is_deconstructing then
-								decision_remote:FireServer {
+								client_interaction_remote:FireServer {
 									{
 										type = "cancel_decision",
 										entity_id = entity.id,
@@ -469,7 +467,7 @@ function EntityInformation(props: {
 									},
 								}
 							else
-								decision_remote:FireServer {
+								client_interaction_remote:FireServer {
 									{
 										type = "deconstruct",
 										entity_id = entity.id,
@@ -485,7 +483,7 @@ function EntityInformation(props: {
 							Text = if entity.enabled then "Disable" else "Enable",
 							LayoutOrder = 2,
 							on_click = function()
-								decision_remote:FireServer {
+								client_interaction_remote:FireServer {
 									{
 										type = "set_entity_enabled",
 										entity_id = entity.id,

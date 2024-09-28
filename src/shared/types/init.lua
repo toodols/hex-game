@@ -125,7 +125,7 @@ export type Entity = {
 	build_time: number,
 
 	owner: TeamId,
-	queued_decisions: { Decision },
+	queued_decisions: { Interaction },
 
 	server_data: {
 		-- whether this entity is always visible regardless of whether the cell it is on is visible
@@ -234,8 +234,8 @@ export type TeamData = {
 	-- is_ai: boolean -- not confident i am capable of implementing ai
 }
 
-export type Decision = {
-	type: "build",
+export type Interaction = {
+	type: "construct",
 	entity_type: string,
 	coordinate: CubicCoordinate,
 	rotation: number,
@@ -246,13 +246,8 @@ export type Decision = {
 	type: "rotate_entity",
 	rotation: number,
 	entity_id: EntityId,
-	-- } | {
-	-- 	type: "use_entity_ability",
-	-- 	entity_id: EntityId,
-	-- 	ability: string,
-	-- 	args: any,
 } | {
-	type: "vote_skip",
+	type: "skip",
 } | {
 	type: "ability",
 	ability_type: string,
@@ -281,6 +276,9 @@ export type Decision = {
 } | {
 	type: "advance_quest",
 	quest_id: string,
+} | {
+	type: "tutorial_report_selection",
+	selected: { CubicCoordinate },
 }
 
 export type Damage = {
@@ -366,8 +364,10 @@ export type GridUpdate =
 	}
 
 export type TurnSchedule = {
-	skip: () -> (),
-	recalculate_skips: () -> (),
+	wait_thread: thread,
+	loop_thread: thread,
+	turn_end_time: number,
+	turn_signal: Signal<nil>,
 }
 
 export type EntityConfiguration = {
@@ -525,6 +525,8 @@ export type Quest = {
 	stages_data: { [string]: QuestStage },
 	stages_behavior: { [string]: ServerQuestStageBehavior },
 	quest_update_signal: Signal<Quest>,
+	-- tutorial only, keeps track of which cells the player is selecting
+	tutorial_player_selection: { [Player]: { CubicCoordinate } }?,
 	details: any,
 }
 

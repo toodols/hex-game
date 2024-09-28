@@ -6,7 +6,7 @@ local items_mod = require(ReplicatedStorage.Shared.items)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local Cost = require(script.Parent.cost).Cost
-local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: RemoteEvent
+local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
 type Item = types.Item
 type Entity = types.Entity
@@ -144,7 +144,7 @@ function Recipes(props: { entity_id: EntityId, on_close: () -> () })
 			util.table_map(config.recipes, function(v, k)
 				return React.createElement(RecipeItem, {
 					on_click = function()
-						decision_remote:FireServer {
+						client_interaction_remote:FireServer {
 							{
 								type = "set_recipe",
 								recipe_id = k,

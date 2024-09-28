@@ -17,7 +17,7 @@ local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local Corner = util_components.Corner
 local Separator = util_components.Separator
 
-local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: RemoteEvent
+local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
 type CubicCoordinate = types.CubicCoordinate
 type Item = types.Item
@@ -104,7 +104,7 @@ function BuildingItem(props: { type: string, cell: CubicCoordinate, researches: 
 				TextSize = 14,
 				ref = button_ref,
 				[React.Event.MouseButton1Click] = function()
-					decision_remote:FireServer {
+					client_interaction_remote:FireServer {
 						{
 							type = "construct",
 							entity_type = props.type,

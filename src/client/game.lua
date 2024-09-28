@@ -244,6 +244,7 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 				id = update.quest_id,
 				current_stage = update.current_stage,
 				details = update.details,
+				stages_data = update.stages_data,
 			} :: any
 		end
 	end

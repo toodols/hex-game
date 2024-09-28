@@ -186,6 +186,8 @@ function new_grid_from_data(data: PartialHexGrid): HexGrid
 	grid.neutral_team = data.neutral_team
 	grid.spectator_team = data.spectator_team
 	grid.quests = data.quests
+	grid.needed_skips = data.needed_skips
+	grid.current_skips = data.current_skips
 	for cell_coords_encoded, cell in data.cells do
 		grid.cells[cell_coords_encoded] = cell
 	end

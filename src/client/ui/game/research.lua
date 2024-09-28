@@ -17,7 +17,7 @@ local ActionButton = require(script.Parent.action_button).ActionButton
 local Cost = require(script.Parent.cost).Cost
 local Corner = util_components.Corner
 
-local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: RemoteEvent
+local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
 type CubicCoordinate = types.CubicCoordinate
 type Entity = types.Entity
@@ -368,7 +368,7 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 				set_selected_node(nil)
 			end,
 			on_add = function()
-				decision_remote:FireServer {
+				client_interaction_remote:FireServer {
 					{
 						type = "add_research",
 						entity_id = entity.id,
@@ -377,7 +377,7 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 				}
 			end,
 			on_remove = function()
-				decision_remote:FireServer {
+				client_interaction_remote:FireServer {
 					{
 						type = "remove_research",
 						entity_id = entity.id,

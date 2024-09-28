@@ -2,15 +2,28 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local action_phase_mod = require(ServerScriptService.Server.action_phase)
-local quest_from_stages = require(script.Parent.quest).quest_from_stages
+local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local new_quest = require(script.Parent.quest).new_quest
+local updates_mod = require(ServerScriptService.Server.updates)
 
 type HexGrid = types.HexGrid
 type Quest = types.Quest
+type CubicCoordinate = types.CubicCoordinate
 
-local tutorial_stages_server = {
+local stages_behavior = {
+	init = {
+		progression_requisite = function(self: Quest, grid: HexGrid)
+			for _, selections in self.tutorial_player_selection :: { [Player]: { CubicCoordinate } } do
+				if #selections == 1 and hex_grid_mod.coords_eq(selections[1], { 0, 0, 0 }) then
+					return true
+				end
+			end
+			return false
+		end,
+	},
 	build_wires_on_tile = {
 		progression_requisite = function(self: Quest, grid: HexGrid)
-			return #grid:query_entity { primary_coordinate = { 0, 0, 0 }, type = "wires" } == 0
+			return #grid:query_entity { primary_coordinate = { 0, 0, 0 }, type = "wires" } == 1
 		end,
 	},
 	complete_wires_blueprint = {
@@ -20,13 +33,10 @@ local tutorial_stages_server = {
 	},
 }
 
-local tutorial_stages = {
+local stages_data = {
 	init = {
 		messages = {
 			"Welcome to the tutorial.",
-			"Before you are two buildings, a {entity.extractor} and a {entity.stockpile}.",
-			"The {entity.extractor} creates items while the {entity.stockpile} stores items",
-			"You can connect them with a {entity.wires}.",
 			"Select (0, 0, 0) by clicking on the tile.",
 		},
 		next = "build_wires_on_tile",
@@ -70,8 +80,25 @@ local tutorial_stages = {
 	},
 }
 
-function tutorial(): Quest
-	return quest_from_stages("tutorial", tutorial_stages, tutorial_stages_server)
+function tutorial(grid: HexGrid): Quest
+	local quest = new_quest {
+		id = "tutorial",
+		title = "Tutorial",
+		stages_data = stages_data,
+		stages_behavior = stages_behavior,
+	}
+	quest.tutorial_player_selection = {}
+	quest.quest_update_signal.listen(function()
+		table.insert(grid.updates_buffer[#grid.updates_buffer], {
+			type = "quest_update",
+			quest_id = quest.id,
+			current_stage = quest.current_stage,
+			stages_data = quest.stages_data,
+			details = quest.details,
+		})
+		updates_mod.flush_updates(grid)
+	end)
+	return quest
 end
 
 return {

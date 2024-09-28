@@ -11,6 +11,13 @@ function new_signal<T>(): Signal<T>
 				listeners[listener] = nil
 			end
 		end,
+		-- wait = function()
+		-- 	local listener = function()
+		-- 		coroutine.resume(coroutine.running(), true)
+		-- 	end
+		-- 	listeners[listener] = true
+		-- 	return coroutine.yield()
+		-- end,
 		send = function(message: T)
 			for listener in listeners do
 				listener(message)

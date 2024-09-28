@@ -4,17 +4,16 @@ local RunService = game:GetService "RunService"
 local ContextActionService = game:GetService "ContextActionService"
 local UserInputService = game:GetService "UserInputService"
 
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local React = require(ReplicatedStorage.Packages.react)
+local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local ReactRoblox = require(ReplicatedStorage.Packages["react-roblox"])
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
-
 local ui_types = require(ReplicatedStorage.Client.ui.types)
+
 local themes = require(script.Parent.themes)
 local hooks = require(script.Parent.hooks)
 local context_mod = require(script.Parent.context)
-local MainContext = context_mod.MainContext
 local Recipes = require(script.recipes).Recipes
 local BuildingsFrame = require(script.buildings_frame).BuildingsFrame
 local PlayerList = require(script.player_list).PlayerList
@@ -22,9 +21,12 @@ local Research = require(script.research).Research
 local TopCenter = require(script.top_center).TopCenter
 local SelectedCellFrame = require(script.selected_cell_frame).SelectedCellFrame
 local TileAlerts = require(script.tile_alerts).TileAlerts
-
 local util_components = require(script.Parent.util_components)
+
+local MainContext = context_mod.MainContext
 local Corner = util_components.Corner
+
+local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
 type HexGrid = types.HexGrid
 type CubicCoordinate = types.CubicCoordinate
@@ -33,7 +35,7 @@ type EntityId = types.EntityId
 type GridUpdate = types.GridUpdate
 type SelectionMode = ui_types.SelectionMode
 
-function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode }, update_highlights: () -> () })
+function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode } })
 	local submenu, set_submenu = React.useState {}
 	hooks.use_immediate_effect(function()
 		set_submenu {}
@@ -41,11 +43,16 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode }, u
 
 	local selection_mode = props.selection_mode_stack[#props.selection_mode_stack]
 
+	local quest_effects = util.table_flat(util.table_map(util.table_keys(props.grid.quests), function(quest_id)
+		local quest = props.grid.quests[quest_id]
+		return quest.stages_data[quest.current_stage].effects
+	end))
+
 	return React.createElement(MainContext.Provider, {
 		value = {
 			grid = props.grid,
 			selection_mode_stack = props.selection_mode_stack,
-			update_highlights = props.update_highlights,
+			quest_effects = quest_effects,
 		},
 	}, {
 		TileAlerts = React.createElement(TileAlerts),
@@ -150,7 +157,7 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode }, u
 	})
 end
 
-function init_ui(grid, root_instance: Instance?)
+function init_ui(grid: HexGrid, root_instance: Instance?)
 	local root = ReactRoblox.createRoot(root_instance or Players.LocalPlayer.PlayerGui)
 	local selection_mode_stack: { SelectionMode } = {
 		{
@@ -227,7 +234,6 @@ function init_ui(grid, root_instance: Instance?)
 
 				root:render(React.createElement(Main, {
 					grid = grid,
-					update_highlights = update,
 					selection_mode_stack = selection_mode_stack,
 				}))
 
@@ -250,7 +256,6 @@ function init_ui(grid, root_instance: Instance?)
 			end
 			root:render(React.createElement(Main, {
 				grid = grid,
-				update_highlights = update,
 				selection_mode_stack = selection_mode_stack,
 			}))
 		elseif selection_mode.type == "select_some_cell" then
@@ -261,7 +266,6 @@ function init_ui(grid, root_instance: Instance?)
 			end
 			root:render(React.createElement(Main, {
 				grid = grid,
-				update_highlights = update,
 				selection_mode_stack = selection_mode_stack,
 			}))
 		elseif selection_mode.type == "show_cells" then
@@ -318,10 +322,17 @@ function init_ui(grid, root_instance: Instance?)
 						-- update selected
 						root:render(React.createElement(Main, {
 							grid = grid,
-							update_highlights = update,
 							selection_mode_stack = selection_mode_stack,
 						}))
 						refresh_highlight(selected_highlight, selection_mode.selected)
+						client_interaction_remote:FireServer {
+							{
+								type = "tutorial_report_selection",
+								selected = util.table_map(util.table_keys(selection_mode.selected), function(instance)
+									return hex_grid_mod.decode_coord(grid.instance_cell_map[instance])
+								end),
+							},
+						}
 					end
 				elseif selection_mode.type == "select_direction" or selection_mode.type == "select_some_cell" then
 					if selection_mode.candidates[cursor_instance] then
@@ -330,7 +341,6 @@ function init_ui(grid, root_instance: Instance?)
 					end
 					root:render(React.createElement(Main, {
 						grid = grid,
-						update_highlights = update,
 						selection_mode_stack = selection_mode_stack,
 					}))
 				end
@@ -343,7 +353,6 @@ function init_ui(grid, root_instance: Instance?)
 	root:render(React.createElement(Main, {
 		grid = grid,
 		selection_mode_stack = selection_mode_stack,
-		update_highlights = update,
 	}))
 
 	return {

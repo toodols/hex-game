@@ -2,18 +2,19 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local questing = require(script.Parent.questing)
 local effective_visibility = require(ReplicatedStorage.Shared.effective_visibility).effective_visibility
-
+local turn_scheduler = require(script.Parent.turn_scheduler)
 local server_util = require(script.Parent.util)
 local server_entity_mod = require(script.Parent.entity)
 local entity_mod = require(script.Parent.entity)
 local updates_mod = require(script.Parent.updates)
 
 type HexGrid = types.HexGrid
-type Decision = types.Decision
+type Interaction = types.Interaction
 type TeamData = types.TeamData
 
-function on_decision(grid: HexGrid, plr: Player, data: { Decision })
+function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction })
 	server_util.catch(function()
 		local player_team = grid:get_player_team(plr)
 		if not player_team then
@@ -236,8 +237,18 @@ function on_decision(grid: HexGrid, plr: Player, data: { Decision })
 				if table.find(grid.skipped, plr) == nil then
 					table.insert(grid.skipped, plr)
 					if grid.turn_schedule then
-						grid.turn_schedule.recalculate_skips()
+						turn_scheduler.recalculate_skips(grid)
 					end
+				end
+			elseif entry.type == "advance_quest" then
+				if grid.quests[entry.quest_id] ~= nil then
+					questing.quest_advance(grid.quests[entry.quest_id])
+				end
+			elseif entry.type == "tutorial_report_selection" then
+				local tutorial = grid.quests.tutorial
+				if tutorial then
+					(tutorial.tutorial_player_selection :: any)[plr] = entry.selected
+					questing.quest_update(tutorial, grid)
 				end
 			else
 				error("unknown action type: " .. entry.type)
@@ -285,5 +296,5 @@ function on_decision(grid: HexGrid, plr: Player, data: { Decision })
 end
 
 return {
-	on_decision = on_decision,
+	on_client_interaction = on_client_interaction,
 }

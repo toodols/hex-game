@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local React = require(ReplicatedStorage.Packages.react)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
+local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local format_text = require(ReplicatedStorage.Shared.formatting).format_text
 local Corner = util_components.Corner
 

@@ -4,6 +4,7 @@ local entity_mod = require(script.Parent.entity)
 local computed_mod = require(script.Parent.computed)
 local types = require(ReplicatedStorage.Shared.types)
 local updates_mod = require(script.Parent.updates)
+local tutorial_map = require(script.tutorial).tutorial_map
 
 type HexGrid = types.HexGrid
 
@@ -240,6 +241,7 @@ function prepare_preset(fn: (...any) -> HexGrid): (...any) -> HexGrid
 end
 
 return {
+	tutorial_map = prepare_preset(tutorial_map),
 	my_map = prepare_preset(my_map),
 	testing_map = prepare_preset(testing_map),
 }
