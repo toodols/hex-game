@@ -45,6 +45,7 @@ function on_decision(grid: HexGrid, plr: Player, data: { Decision })
 								return grid.entity_configurations[entity.type].layer
 									== grid.entity_configurations[entry.entity_type].layer
 							end
+							return nil
 						end
 					)
 				then

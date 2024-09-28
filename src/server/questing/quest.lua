@@ -7,60 +7,55 @@ type CubicCoordinate = types.CubicCoordinate
 
 type QuestStage = types.QuestStage
 type Quest = types.Quest
-type QuestMessage = types.QuestMessage
 type ServerQuestStageBehavior = types.ServerQuestStageBehavior
+
+local function quest_change_state(quest: Quest, stage: string)
+	if not stage then
+		print "end state"
+		return
+	end
+	if not quest.stages_data[stage] or quest.current_stage == stage then
+		return
+	end
+	quest.current_stage = stage
+	quest.quest_update_signal.send(quest)
+end
+
+local function quest_advance(quest: Quest)
+	local stage_data = quest.stages_data[quest.current_stage]
+	if stage_data.can_advance then
+		quest_change_state(quest, stage_data.next)
+	end
+end
+
+local function quest_update(quest: Quest, grid: HexGrid)
+	local stage_data = quest.stages_data[quest.current_stage]
+	local stage_behavior = quest.stages_behavior[quest.current_stage]
+	if stage_behavior.progression_requisite then
+		if stage_behavior.progression_requisite(quest, grid) then
+			quest_change_state(quest, stage_data.next)
+		end
+	end
+end
 
 function quest_from_stages(
 	quest_id: string,
 	stages_data: { [string]: QuestStage },
 	server_stages_behavior: { [string]: ServerQuestStageBehavior }
-): (Quest, QuestMessage)
-	local quest
-
-	local function to_message(): QuestMessage
-		return {
-			quest_id = quest_id,
-			title = quest_id,
-			messages = stages_data[quest.stage].messages,
-			effects = stages_data[quest.stage].effects or {},
-			can_advance = stages_data[quest.stage].can_advance or false,
-		}
-	end
-	local function change_stage(stage: string)
-		if stage == "end" then
-		end
-		if not stages_data[stage] or quest.stage == stage then
-			return
-		end
-		quest.stage = stage
-		quest.message_change_signal.send(to_message())
-	end
-
-	quest = {
-		stage = "init",
-		message_change_signal = new_signal(),
-		advance = function()
-			local stage_data = stages_data[quest.stage]
-			if stage_data.can_advance then
-				if stage_data.next then
-					change_stage(stage_data.next)
-				else
-					change_stage "end"
-				end
-			end
-		end,
-		update = function(grid: HexGrid)
-			local stage_data = stages_data[quest.stage]
-			local stage_behavior = server_stages_behavior[quest.stage]
-			if stage_behavior.progression_requisite then
-				stage_behavior.progression_requisite(quest, grid)
-			end
-		end,
+): Quest
+	local quest = {
+		current_stage = "init",
+		id = quest_id,
+		stages_data = stages_data,
+		stages_behavior = server_stages_behavior,
+		quest_update_signal = new_signal(),
 	}
-
-	return quest, to_message()
+	return quest
 end
 
 return {
 	quest_from_stages = quest_from_stages,
+	quest_advance = quest_advance,
+	quest_update = quest_update,
+	quest_change_state = quest_change_state,
 }

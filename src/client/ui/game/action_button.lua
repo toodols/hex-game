@@ -1,5 +1,4 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local ReactRoblox = require(ReplicatedStorage.Packages["react-roblox"])
 local React = require(ReplicatedStorage.Packages.react)
 local TweenService = game:GetService "TweenService"
 

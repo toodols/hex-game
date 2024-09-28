@@ -151,7 +151,6 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode }, u
 end
 
 function init_ui(grid, root_instance: Instance?)
-	local nonce = 0
 	local root = ReactRoblox.createRoot(root_instance or Players.LocalPlayer.PlayerGui)
 	local selection_mode_stack: { SelectionMode } = {
 		{
@@ -226,9 +225,7 @@ function init_ui(grid, root_instance: Instance?)
 					selection_mode.selected[cursor_instance] = nil
 				end
 
-				nonce += 1
 				root:render(React.createElement(Main, {
-					nonce = nonce,
 					grid = grid,
 					update_highlights = update,
 					selection_mode_stack = selection_mode_stack,
@@ -251,9 +248,7 @@ function init_ui(grid, root_instance: Instance?)
 				hover_highlight.FillTransparency = 0.92
 				refresh_highlight(hover_highlight, selection_mode.candidates[cursor_instance])
 			end
-			nonce += 1
 			root:render(React.createElement(Main, {
-				nonce = nonce,
 				grid = grid,
 				update_highlights = update,
 				selection_mode_stack = selection_mode_stack,
@@ -264,9 +259,7 @@ function init_ui(grid, root_instance: Instance?)
 				hover_highlight.FillTransparency = 0.92
 				refresh_highlight(hover_highlight, { [cursor_instance] = true })
 			end
-			nonce += 1
 			root:render(React.createElement(Main, {
-				nonce = nonce,
 				grid = grid,
 				update_highlights = update,
 				selection_mode_stack = selection_mode_stack,
@@ -323,9 +316,7 @@ function init_ui(grid, root_instance: Instance?)
 							selection_mode.selected = { [cursor_instance] = true }
 						end
 						-- update selected
-						nonce += 1
 						root:render(React.createElement(Main, {
-							nonce = nonce,
 							grid = grid,
 							update_highlights = update,
 							selection_mode_stack = selection_mode_stack,
@@ -337,9 +328,7 @@ function init_ui(grid, root_instance: Instance?)
 						selection_mode.on_selected(cursor_instance)
 						selection_mode_stack[#selection_mode_stack] = nil
 					end
-					nonce += 1
 					root:render(React.createElement(Main, {
-						nonce = nonce,
 						grid = grid,
 						update_highlights = update,
 						selection_mode_stack = selection_mode_stack,
@@ -350,11 +339,11 @@ function init_ui(grid, root_instance: Instance?)
 			end
 		end, false, Enum.UserInputType.MouseButton1)
 	end
+
 	root:render(React.createElement(Main, {
 		grid = grid,
 		selection_mode_stack = selection_mode_stack,
 		update_highlights = update,
-		key = nonce,
 	}))
 
 	return {

@@ -239,6 +239,12 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 		elseif update.type == "teams" then
 			grid.teams = update.teams
 			grid.coalitions = update.coalitions
+		elseif update.type == "quest_update" then
+			grid.quests[update.quest_id] = {
+				id = update.quest_id,
+				current_stage = update.current_stage,
+				details = update.details,
+			} :: any
 		end
 	end
 

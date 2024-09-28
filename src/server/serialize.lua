@@ -110,6 +110,14 @@ function serialize_grid_for_team(grid: HexGrid, team: TeamId): PartialHexGrid
 		teams = util.table_map(grid.teams, function(other_team)
 			return serialize_team(grid, other_team)
 		end),
+		quests = util.table_map(grid.quests, function(quest)
+			return {
+				id = quest.id,
+				current_stage = quest.current_stage,
+				details = quest.details,
+				stages_data = quest.stages_data,
+			}
+		end),
 		turn = grid.turn,
 		current_skips = grid.current_skips,
 		needed_skips = grid.needed_skips,

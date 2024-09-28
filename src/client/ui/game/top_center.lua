@@ -1,25 +1,35 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local React = require(ReplicatedStorage.Packages.react)
 local RunService = game:GetService "RunService"
+
+local React = require(ReplicatedStorage.Packages.react)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
-local Corner = util_components.Corner
+local util = require(ReplicatedStorage.Shared.util)
 local QuestDialogue = require(script.Parent.quest_dialogue).QuestDialogue
+local types = require(ReplicatedStorage.Shared.types)
+
+local Corner = util_components.Corner
 local decision_remote = ReplicatedStorage:FindFirstChild "DecisionRemote" :: RemoteEvent
 
+type HexGrid = types.HexGrid
+
 function TopCenter()
-	local grid = React.useContext(MainContext).grid
+	local grid: HexGrid = React.useContext(MainContext).grid
 	local _, force_update = React.useReducer(function(x)
 		return x + 1
 	end, 0)
 	local bar_ref = React.useRef(nil)
 	local display_ref = React.useRef(nil)
-
 	React.useEffect(function()
 		local cleanup = grid.grid_update_signal.listen(function(updates)
 			for _, update in updates do
-				if update.type == "turn_timer" or update.type == "turn" or update.type == "turn_skips" then
+				if
+					update.type == "turn_timer"
+					or update.type == "turn"
+					or update.type == "turn_skips"
+					or update.type == "quest_update"
+				then
 					force_update(nil)
 				end
 			end
@@ -200,26 +210,29 @@ function TopCenter()
 			}),
 		}),
 
-		DialogueContainer = React.createElement("Frame", {
-			Position = UDim2.new(0.5, 0, 0, 50),
-			BackgroundTransparency = 1,
-		}, {
-			VerticalLayout = React.createElement("UIListLayout", {
-				FillDirection = Enum.FillDirection.Vertical,
-				HorizontalAlignment = Enum.HorizontalAlignment.Center,
-				Padding = UDim.new(0, 10),
-				SortOrder = Enum.SortOrder.LayoutOrder,
-			}),
-			QuestDialogue = React.createElement(QuestDialogue, {
-				messages = {
-					"Hello",
-					"World",
-				},
-				title = "Tutorial",
-				can_advance = false,
-				advance = function() end,
-			}),
-		}),
+		DialogueContainer = React.createElement(
+			"Frame",
+			{
+				Position = UDim2.new(0.5, 0, 0, 50),
+				BackgroundTransparency = 1,
+			},
+			{
+				VerticalLayout = React.createElement("UIListLayout", {
+					FillDirection = Enum.FillDirection.Vertical,
+					HorizontalAlignment = Enum.HorizontalAlignment.Center,
+					Padding = UDim.new(0, 10),
+					SortOrder = Enum.SortOrder.LayoutOrder,
+				}),
+			},
+			util.table_map(grid.quests, function(quest)
+				local stage_data = quest.stages_data[quest.current_stage]
+				return React.createElement(QuestDialogue, {
+					messages = stage_data.messages,
+					title = quest.id,
+					can_advance = stage_data.can_advance,
+				})
+			end)
+		),
 	})
 end
 

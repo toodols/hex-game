@@ -16,7 +16,8 @@ function get_cell_researches(grid: HexGrid, cell: HexCell, team: TeamId)
 			continue
 		end
 		if entity.type == "proxy" then
-			for _, proxy_influence_id in grid:get_cell(entity.primary_coordinate).entities do
+			local proxy_cell = grid:get_cell(entity.primary_coordinate)
+			for proxy_influence_id in proxy_cell.entities do
 				if proxy_influence_id ~= entity.id then
 					local proxy_influence = grid.entities[proxy_influence_id]
 					if proxy_influence.researches then

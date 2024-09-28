@@ -1,6 +1,3 @@
-local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local ServerScriptService = game:GetService "ServerScriptService"
-local types = require(ReplicatedStorage.Shared.types)
 local registry = require(script.registry).registry
 local methods = require(script.methods)
 

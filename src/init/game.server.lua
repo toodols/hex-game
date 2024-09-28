@@ -5,6 +5,7 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerStorage = game:GetService "ServerStorage"
 local StarterGui = game:GetService "StarterGui"
 
+local questing = require(ServerScriptService.Server.questing)
 local clone_assets = require(ReplicatedStorage.Shared.asset_server).clone
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
@@ -37,6 +38,7 @@ local router_mod = require(ServerScriptService.Server.router)
 local serialize_mod = require(ServerScriptService.Server.serialize)
 local presets = require(ServerScriptService.Server.presets)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
+local updates_mod = require(ServerScriptService.Server.updates)
 
 if RunService:IsStudio() then
 	tests.run_tests()
@@ -68,6 +70,17 @@ function start_game(teleport_data: { room: types.Room }?)
 	grid = presets.testing_map()
 
 	_G.grid = grid
+
+	grid.quests.tutorial = questing.tutorial()
+	grid.quests.tutorial.quest_update_signal.listen(function(quest)
+		table.insert(grid.updates_buffer[#grid.updates_buffer], {
+			type = "quest_update",
+			quest_id = quest.id,
+			current_stage = quest.current_stage,
+			details = quest.details,
+		})
+		updates_mod.flush_updates(grid)
+	end)
 
 	remotes_mod.decision_remote.OnServerEvent:Connect(function(plr: Player, data: { Decision })
 		router_mod.on_decision(grid, plr, data)

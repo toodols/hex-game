@@ -147,7 +147,7 @@ function new_grid_empty(config: { [string]: EntityConfiguration }?): HexGrid
 		neutral_team = nil :: any,
 		spectator_team = nil :: any,
 		entity_configurations = config or shared_entity_mod.create_configuration(),
-
+		quests = {},
 		new_team = grid_new_team,
 		purge_dead_entities = grid_purge_dead_entities,
 		get_player_team = grid_get_player_team,
@@ -185,6 +185,7 @@ function new_grid_from_data(data: PartialHexGrid): HexGrid
 	grid.entities = data.entities
 	grid.neutral_team = data.neutral_team
 	grid.spectator_team = data.spectator_team
+	grid.quests = data.quests
 	for cell_coords_encoded, cell in data.cells do
 		grid.cells[cell_coords_encoded] = cell
 	end

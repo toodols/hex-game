@@ -359,11 +359,10 @@ export type GridUpdate =
 		-- 	grid: PartialHexGrid,
 	}
 	| {
-		type: "quest",
+		type: "quest_update",
 		quest_id: string,
-		messages: { string },
-		effects: { QuestEffect },
-		can_advance: boolean,
+		current_stage: string,
+		details: any,
 	}
 
 export type TurnSchedule = {
@@ -470,9 +469,11 @@ export type HexGrid = {
 	current_skips: number,
 	needed_skips: number,
 
+	-- Amount of time between each turn is calculated as speed_multiplier * num_teams + speed_base
 	speed_multiplier: number,
 	speed_base: number,
-	-- phase: "decision" | "action",
+
+	quests: { [string]: Quest },
 }
 export type PartialHexGrid = {
 	cells: { [EncodedCoordinate]: HexCell },
@@ -488,7 +489,7 @@ export type PartialHexGrid = {
 	entity_configurations: { [string]: EntityConfiguration },
 	neutral_team: TeamId,
 	spectator_team: TeamId,
-	-- phase: "decision" | "action",
+	quests: { [string]: Quest },
 }
 
 -- Questing types
@@ -513,24 +514,18 @@ export type QuestStage = {
 	can_advance: boolean,
 }
 
-export type QuestMessage = {
-	quest_id: string,
-	title: string,
-	messages: { string },
-	effects: { QuestEffect }?,
-	can_advance: boolean,
-}
-
 export type ServerQuestStageBehavior = {
 	progression_requisite: (Quest, HexGrid) -> boolean,
 	stage_start: (Quest, HexGrid) -> (),
 }
 
 export type Quest = {
-	stage: string,
-	message_change_signal: Signal<QuestMessage>,
-	advance: () -> (),
-	update: (HexGrid) -> (),
+	id: string,
+	current_stage: string,
+	stages_data: { [string]: QuestStage },
+	stages_behavior: { [string]: ServerQuestStageBehavior },
+	quest_update_signal: Signal<Quest>,
+	details: any,
 }
 
 return {}
