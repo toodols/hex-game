@@ -5,7 +5,7 @@ type HexGrid = types.HexGrid
 
 function cleanup(grid: HexGrid)
 	if grid.turn_schedule then
-		turn_scheduler.kill_turn_schedule(grid.turn_schedule)
+		turn_scheduler.turn_schedule_kill(grid.turn_schedule)
 	end
 end
 

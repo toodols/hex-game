@@ -5,18 +5,18 @@ function run_tests()
 	local total = 0
 	local successes = 0
 
-	local tests_t0 = DateTime.now().UnixTimestampMillis
+	local tests_t0 = os.clock()
 	local function run_tests_recursive(tests, namespace)
 		for name, test in tests do
 			local full_name = if namespace then namespace .. "/" .. name else name
 			if type(test) == "table" then
 				run_tests_recursive(test, full_name)
 			else
-				local test_t0 = DateTime.now().UnixTimestampMillis
+				local test_t0 = os.clock()
 				local success, err_or_val = pcall(test)
 				total += 1
 				if success then
-					print("Test", full_name, "passed in", DateTime.now().UnixTimestampMillis - test_t0, "ms")
+					print("Test", full_name, "passed in", math.floor((os.clock() - test_t0) * 1000), "ms")
 					successes += 1
 				else
 					warn("Test", full_name, "failed:", err_or_val)
@@ -30,7 +30,9 @@ function run_tests()
 	}
 
 	print(
-		`{successes} / {total} tests passed. {math.floor(100 * successes / total)}% success rate. Completed in {DateTime.now().UnixTimestampMillis - tests_t0}ms`
+		`{successes} / {total} tests passed. {math.floor(100 * successes / total)}% success rate. Completed in {math.floor(
+			(os.clock() - tests_t0) * 1000
+		)}ms`
 	)
 end
 

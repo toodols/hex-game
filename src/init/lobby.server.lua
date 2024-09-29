@@ -68,7 +68,7 @@ function room_membership_changed(room: Room)
 				return v
 			end)
 		then
-			room.starting_at = DateTime.now().UnixTimestampMillis + START_TIME * 1000
+			room.starting_at = os.clock() + START_TIME
 			room_timers[room.id] = util.timer(START_TIME, function()
 				local party = {}
 				for player_id, data in room.players do

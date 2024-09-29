@@ -11,8 +11,6 @@ local items_mod = require(ReplicatedStorage.Shared.items)
 local client_entity_mod = require(script.Parent.entity)
 local cells_mod = require(ReplicatedStorage.Shared.cells)
 
--- apparently local x: RemoteEvent is the same as local x: Instance. Nice.
-
 local into_vec3 = hex_grid_mod.into_vec3
 local encode_coord = hex_grid_mod.encode_coord
 local decode_coord = hex_grid_mod.decode_coord

@@ -14,7 +14,6 @@ local Corner = util_components.Corner
 type Room = types.Room
 
 local rooms_remote = ReplicationStorage:FindFirstChild "Rooms" :: RemoteEvent
-
 function Room(props: { room: Room })
 	local is_expanded = props.room.players[tostring(Players.LocalPlayer.UserId)] ~= nil
 	local start_time_label_ref = React.useRef(nil)
@@ -23,9 +22,8 @@ function Room(props: { room: Room })
 	React.useEffect(function()
 		local connection = RunService.RenderStepped:Connect(function()
 			if start_time_label_ref.current and props_ref.current and props_ref.current.room.starting_at then
-				start_time_label_ref.current.Text = `Starting in {math.floor(
-					(props_ref.current.room.starting_at - DateTime.now().UnixTimestampMillis) / 100
-				) / 10}s`
+				start_time_label_ref.current.Text =
+					`Starting in {("%.1f"):format((props_ref.current.room.starting_at - os.clock()))}s`
 			end
 		end)
 

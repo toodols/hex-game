@@ -38,14 +38,14 @@ function TopCenter()
 			if not bar_ref.current then
 				return
 			end
-			local current_time = DateTime.now().UnixTimestampMillis
+			local current_time = os.clock()
 			local schedule = grid.turn_schedule
 			if schedule and schedule.end_time ~= math.huge and schedule.end_time ~= 0 then
 				bar_ref.current.Size =
 					UDim2.new((current_time - schedule.start_time) / (schedule.end_time - schedule.start_time), 0, 1, 0)
 				local t = schedule.end_time - current_time
 				t = math.max(0, t)
-				display_ref.current.Text = "Next Turn: " .. math.floor(t / 100) / 10 .. "s"
+				display_ref.current.Text = `Next turn: {("%.1f"):format(t)}s`
 			else
 				bar_ref.current.Size = UDim2.new(0, 0, 1, 0)
 				display_ref.current.Text = "--"

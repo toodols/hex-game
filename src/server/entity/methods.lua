@@ -96,7 +96,7 @@ function new_entity(entity_: any, grid: HexGrid, action_state: ActionState?): En
 	assert(not entity.owner or typeof(entity.owner) == "number", "Entity owner is not a number")
 	entity.owner = entity.owner or grid.neutral_team
 	entity.server_data = entity.server_data or {}
-	entity.server_data.requested_at = entity.server_data.requested_at or DateTime.now().UnixTimestampMillis
+	entity.server_data.requested_at = entity.server_data.requested_at or os.clock()
 
 	-- todo: rotate the offsets by the rotation
 	for _, offset in shared_behavior.offsets do
