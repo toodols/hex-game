@@ -8,9 +8,7 @@ export type Room = {
 			team: string,
 		},
 	},
-	map: {
-		type: string,
-	},
+	map: string,
 	starting_at: number?,
 }
 

@@ -10,12 +10,40 @@ local placeids = require(ReplicatedStorage.Shared.placeids).placeids
 
 type Room = types.Room
 
-local START_TIME = if RunService:IsStudio() then 5 else 30
+local START_TIME = if RunService:IsStudio() then 5 else 10
 local REQUIRES_FILLED_TEAMS = if RunService:IsStudio() then true else true
 
 local rooms_remote = Instance.new "RemoteEvent"
 rooms_remote.Name = "Rooms"
 rooms_remote.Parent = ReplicatedStorage
+
+local maps = {
+	my_map = {
+		teams = {
+			["2"] = {
+				color = Color3.fromRGB(97, 97, 97),
+				name = "Spectator",
+				is_spectator_team = true,
+			},
+			["3"] = {
+				color = Color3.fromRGB(255, 49, 49),
+				name = "Red",
+			},
+			["4"] = {
+				color = Color3.fromRGB(48, 48, 255),
+				name = "Blue",
+			},
+		},
+	},
+	tutorial_map = {
+		teams = {
+			["3"] = {
+				color = Color3.fromRGB(255, 49, 49),
+				name = "Red",
+			},
+		},
+	},
+}
 
 local rooms: { [string]: Room } = {}
 
@@ -74,7 +102,6 @@ type Props = {
 	room_id: string,
 } | {
 	type: "leave_room",
-	room_id: string,
 } | {
 	type: "new_room",
 	-- max players in this room
@@ -82,6 +109,7 @@ type Props = {
 	-- Teams can have at most 1 more member than every other team
 	balanced_teams: boolean,
 	friends_only: boolean,
+	map_type: "my_map" | "tutorial_map",
 } | {
 	type: "set_team",
 	player: Player?,
@@ -98,25 +126,12 @@ rooms_remote.OnServerEvent:Connect(function(plr: Player, props: Props)
 				room_membership_changed(room)
 			end
 		end
+		props.map_type = props.map_type or "my_map"
 		local room: Room = {
-			teams = {
-				["2"] = {
-					color = Color3.fromRGB(97, 97, 97),
-					name = "Spectator",
-					is_spectator_team = true,
-				},
-				["3"] = {
-					color = Color3.fromRGB(255, 49, 49),
-					name = "Red",
-				},
-				["4"] = {
-					color = Color3.fromRGB(48, 48, 255),
-					name = "Blue",
-				},
-			},
+			teams = maps[props.map_type].teams,
 			id = HttpService:GenerateGUID(false),
 			players = {},
-			map = { type = "my_map" },
+			map = props.map_type,
 		}
 		room.players[tostring(plr.UserId)] = {
 			team = "3",
@@ -142,12 +157,16 @@ rooms_remote.OnServerEvent:Connect(function(plr: Player, props: Props)
 			}
 		end
 	elseif props.type == "leave_room" then
-		if props.room_id and rooms[props.room_id] then
-			rooms[props.room_id].players[tostring(plr.UserId)] = nil
-			room_membership_changed(rooms[props.room_id])
-			rooms_remote:FireAllClients {
-				rooms = rooms,
-			}
+		for _, room in rooms do
+			if room.players[tostring(plr.UserId)] ~= nil then
+				room.players[tostring(plr.UserId)] = nil
+
+				room_membership_changed(room)
+				rooms_remote:FireAllClients {
+					rooms = rooms,
+				}
+				break
+			end
 		end
 	elseif props.type == "set_team" then
 		local room = util.table_find_pred(rooms, function(room_)
@@ -170,6 +189,7 @@ end)
 task.spawn(function()
 	while true do
 		task.wait(5)
+		-- get ongoing servers
 	end
 end)
 

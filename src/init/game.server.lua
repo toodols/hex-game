@@ -66,9 +66,9 @@ function republish_teams(grid: HexGrid)
 end
 
 function start_game(teleport_data: { room: types.Room }?)
-	local players_config = teleport_data and teleport_data.room and teleport_data.room.players
-	-- grid = presets.my_map()
-	grid = presets.tutorial_map()
+	local room = teleport_data and teleport_data.room
+	local players_config = room and room.players
+	grid = presets[room.map or "my_map"]()
 
 	_G.grid = grid
 
@@ -118,32 +118,50 @@ function start_game(teleport_data: { room: types.Room }?)
 	end)
 end
 
-local join_data = if #Players:GetPlayers() > 0
-	then Players:GetPlayers()[1]:GetJoinData()
-	else Players.PlayerAdded:Wait():GetJoinData()
+local join_data = (
+	if #Players:GetPlayers() > 0
+		then Players:GetPlayers()[1]:GetJoinData()
+		else Players.PlayerAdded:Wait():GetJoinData()
+)
+-- join_data = {
+-- 	TeleportData = {
+-- 		room = {
+-- 			map = "tutorial_map",
+-- 			players = {
+-- 				["195294332"] = {
+-- 					team = "3",
+-- 				},
+-- 			},
+-- 		},
+-- 	},
+-- }
 
-if join_data.Members then
+if join_data and join_data.TeleportData and join_data.TeleportData.room then
 	local needed_plrs_count = 0
 	local needed_plrs_map = {}
 
-	for _, member_id in join_data.Members do
+	for member_id in join_data.TeleportData.room.players do
 		if not Players:GetPlayerByUserId(member_id) then
 			needed_plrs_map[member_id] = true
 			needed_plrs_count += 1
 		end
 	end
 
-	local connection
-	connection = Players.PlayerAdded:Connect(function(plr)
-		if needed_plrs_map[plr.UserId] then
-			needed_plrs_map[plr.UserId] = nil
-			needed_plrs_count -= 1
-			if needed_plrs_count == 0 then
-				connection:Disconnect()
-				start_game(join_data.TeleportData)
+	if needed_plrs_count == 0 then
+		start_game(join_data.TeleportData)
+	else
+		local connection
+		connection = Players.PlayerAdded:Connect(function(plr)
+			if needed_plrs_map[tostring(plr.UserId)] then
+				needed_plrs_map[tostring(plr.UserId)] = nil
+				needed_plrs_count -= 1
+				if needed_plrs_count == 0 then
+					connection:Disconnect()
+					start_game(join_data.TeleportData)
+				end
 			end
-		end
-	end)
+		end)
+	end
 else
 	start_game()
 end

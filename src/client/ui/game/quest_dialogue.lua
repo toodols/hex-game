@@ -20,6 +20,7 @@ function QuestDialogue(props: {
 		BackgroundTransparency = 0.4,
 		Text = "",
 		BorderSizePixel = 0,
+		AutoButtonColor = false,
 		LayoutOrder = 1,
 		Size = UDim2.new(0, 600, 0, 80),
 		[React.Event.MouseButton1Click] = function()
