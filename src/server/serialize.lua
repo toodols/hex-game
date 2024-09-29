@@ -116,6 +116,7 @@ function serialize_grid_for_team(grid: HexGrid, team: TeamId): PartialHexGrid
 				current_stage = quest.current_stage,
 				details = quest.details,
 				stages_data = quest.stages_data,
+				title = quest.title,
 			}
 		end),
 		turn = grid.turn,

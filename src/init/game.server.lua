@@ -67,8 +67,8 @@ end
 
 function start_game(teleport_data: { room: types.Room }?)
 	local players_config = teleport_data and teleport_data.room and teleport_data.room.players
-	grid = presets.my_map()
-	-- grid = presets.tutorial_map()
+	-- grid = presets.my_map()
+	grid = presets.tutorial_map()
 
 	_G.grid = grid
 

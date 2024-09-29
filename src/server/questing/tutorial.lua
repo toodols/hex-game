@@ -30,7 +30,7 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 			return #grid:query_entity { primary_coordinate = { 0, 0, 0 }, type = "wires" } == 1
 		end,
 	},
-	build_wires_blueprint = {
+	complete_wires_blueprint = {
 		stage_start = function(self: Quest, grid: HexGrid)
 			assert(grid.turn_schedule, "no turn schedule")
 			turn_scheduler.reset_turn_time(grid, grid.turn_schedule)
@@ -46,9 +46,15 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 			end)
 		end,
 	},
+
 	advance_until_stockpile_is_filled = {
 		stage_start = function(self: Quest, grid: HexGrid)
 			assert(grid.turn_schedule, "no turn schedule")
+			if #(grid:query_entity { type = "stockpile" }) == 0 then
+				self.details.error_message = "stockpile not found"
+				quest_methods.quest_change_state(self, "error", grid)
+				return
+			end
 			turn_scheduler.reset_turn_time(grid, grid.turn_schedule)
 			turn_scheduler.turn_schedule_resume(grid.turn_schedule)
 			turn_scheduler.report_turn_time(grid)
@@ -57,9 +63,42 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 			unlisten = grid.turn_schedule.turn_ran_signal.listen(function()
 				local stockpile = (grid:query_entity { type = "stockpile" })[1]
 				if not stockpile then
+					unlisten()
+					self.details.error_message = "stockpile not found"
 					quest_methods.quest_change_state(self, "error", grid)
+					return
 				end
 				if #stockpile.inventory.items == 5 then
+					unlisten()
+					turn_scheduler.turn_schedule_stop(grid.turn_schedule)
+					turn_scheduler.report_turn_time(grid)
+					quest_methods.quest_advance(self, grid)
+				end
+			end)
+		end,
+	},
+	build_scout_blueprint = {
+		progression_requisite = function(self: Quest, grid: HexGrid)
+			return #grid:query_entity { type = "scout", status = "blueprint" } == 1
+		end,
+	},
+	complete_scout_blueprint = {
+		stage_start = function(self: Quest, grid: HexGrid)
+			assert(grid.turn_schedule, "no turn schedule")
+			turn_scheduler.reset_turn_time(grid, grid.turn_schedule)
+			turn_scheduler.turn_schedule_resume(grid.turn_schedule)
+			turn_scheduler.report_turn_time(grid)
+
+			local unlisten
+			unlisten = grid.turn_schedule.turn_ran_signal.listen(function()
+				local scout = (grid:query_entity { type = "scout" })[1]
+				if not scout then
+					unlisten()
+					self.details.error_message = "scout not found"
+					quest_methods.quest_change_state(self, "error", grid)
+					return
+				end
+				if scout.status == "complete" then
 					unlisten()
 					turn_scheduler.turn_schedule_stop(grid.turn_schedule)
 					turn_scheduler.report_turn_time(grid)
@@ -90,12 +129,26 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 			end)
 		end,
 	},
+	error = {
+		stage_start = function(self: Quest, grid: HexGrid)
+			if grid.turn_schedule then
+				turn_scheduler.turn_schedule_stop(grid.turn_schedule)
+				turn_scheduler.report_turn_time(grid)
+			end
+		end,
+	},
+	restart_tutorial = {
+		stage_start = function(self: Quest, grid: HexGrid)
+			-- todo
+		end,
+	},
 }
 
 local stages_data: { [string]: QuestStage } = {
 	init = {
 		messages = {
 			"Welcome to the tutorial.",
+			"First, let's learn how to build.",
 			"Select (0, 0, 0) by clicking on the tile.",
 		},
 		next = "build_wires_on_tile",
@@ -105,39 +158,57 @@ local stages_data: { [string]: QuestStage } = {
 	},
 	build_wires_on_tile = {
 		messages = {
+			"As you can see, there is nothing on this tile yet. Let's change that.",
 			"Press the build button, and select {entity.wires}.",
 		},
 		effects = {
 			{ type = "highlight_build_button" },
 			{ type = "highlight_buildable", entity_type = "wires" },
 		},
-		next = "complete_wires_blueprint",
-	},
-	complete_wires_blueprint = {
-		messages = {
-			"Right now, the {entity.wires} is a blueprint. Let's advance forward 1 turn",
-		},
-		can_advance = true,
 		next = "build_wires_blueprint",
 	},
 	build_wires_blueprint = {
+		messages = {
+			"Well done.",
+			"Right now, the {entity.wires} is blue as it is a blueprint.",
+			"Blueprints require resources and time to be built.",
+			"Thankfully there is a neighboring {entity.extractor} on (-1, 0, 1)",
+			"Let's advance forward 1 turn",
+		},
+		can_advance = true,
+		next = "complete_wires_blueprint",
+	},
+	complete_wires_blueprint = {
 		next = "entities_are_connected",
 	},
 	entities_are_connected = {
 		messages = {
-			"The buildings are now connected. Every turn this extractor will generate one item.",
+			"This {entity.wires} connects the {entity.extractor} to the {entity.stockpile}.",
+			"Every turn this {entity.extractor} will generate one item.",
 			"Let's advance a few turns so the stockpile fills up.",
 		},
 		can_advance = true,
 		next = "advance_until_stockpile_is_filled",
 	},
 	advance_until_stockpile_is_filled = {
-		next = "resource_is_bar",
+		next = "build_scout_blueprint",
 	},
-	resource_is_bar = {
+	build_scout_blueprint = {
 		messages = {
 			"This gray resource is called {item.bar}.",
-			"But it isn't the only resource. Let's obtain {item.rad}",
+			"It can be used to build more buildings.",
+			"One of these buildings is a {entity.scout}.",
+			"Build a {entity.scout} blueprint anywhere. Hint: You don't need to build {entity.wires} beforehand on an empty tile.",
+		},
+		next = "complete_scout_blueprint",
+	},
+	complete_scout_blueprint = {
+		next = "scout_is_complete",
+	},
+	scout_is_complete = {
+		messages = {
+			"The {entity.scout} is complete. This building can attack enemies that get too close.",
+			"But it needs ammunition. For that we need to acquire {item.rad}",
 		},
 		can_advance = true,
 		next = "summon_more_cells",
@@ -147,13 +218,18 @@ local stages_data: { [string]: QuestStage } = {
 	},
 	build_to_rad = {
 		messages = {
-			"Build a series of {entity.wires} onto the {item.rad} deposit",
+			"Build an {entity.extractor} on the {item.rad} deposit",
 		},
 	},
 	error = {
 		messages = {
-			"Something went wrong and the tutorial can no longer function.",
+			"<font color='#ff0000'>Error!!</font> You played my tutorial incorrectly! Reason: {quest.tutorial.details.error_message}.",
 		},
+		next = "restart_tutorial",
+		-- can_advance = true,
+	},
+	restart_tutorial = {
+		next = "init",
 	},
 }
 
@@ -163,6 +239,9 @@ function tutorial(grid: HexGrid): Quest
 		title = "Tutorial",
 		stages_data = stages_data,
 		stages_behavior = stages_behavior,
+		details = {
+			error_message = "<unknown>",
+		},
 	}
 	quest.tutorial_player_selection = {}
 	quest.quest_update_signal.listen(function()

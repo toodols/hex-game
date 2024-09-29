@@ -47,10 +47,12 @@ function new_quest(props: {
 	title: string,
 	stages_data: { [string]: QuestStage },
 	stages_behavior: { [string]: ServerQuestStageBehavior },
+	details: any,
 }): Quest
 	local quest = {
 		title = props.title,
 		current_stage = "init",
+		details = props.details or {},
 		stages_data = props.stages_data,
 		stages_behavior = props.stages_behavior,
 		id = props.id,

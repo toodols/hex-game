@@ -9,6 +9,8 @@ function format_text(grid: types.HexGrid, text: string)
 		item = items_mod.item_names,
 		cell = cells.cell_models,
 		entity = grid.entity_configurations,
+		quest = grid.quests,
+		turn = grid.turn,
 	}
 	local result, _ = text:gsub("{[^}]+}", function(match)
 		local inner = match:sub(2, -2):split "."
