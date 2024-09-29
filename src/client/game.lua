@@ -76,6 +76,18 @@ function update_neighbors(grid: HexGrid, coordinates: { CubicCoordinate })
 	end
 end
 
+function create_cell_instance(grid: HexGrid, cell: HexCell)
+	local instance = cells_mod.cell_models[cell.type]:Clone()
+	instance.Parent = grid.cell_instance_root
+	instance:PivotTo(CFrame.new(into_vec3(cell.coordinate) * 4.542 / 2))
+	-- for debugging purposes
+	instance.Name = hex_grid_mod.encode_coord(cell.coordinate)
+	grid.cell_instance_map[hex_grid_mod.encode_coord(cell.coordinate)] = instance
+	color_cell(grid, cell)
+	grid.instance_cell_map[instance] = hex_grid_mod.encode_coord(cell.coordinate)
+	return instance
+end
+
 function render_grid(grid: HexGrid)
 	destroy_grid_instances(grid)
 	local entity_folder = Instance.new "Folder"
@@ -89,20 +101,33 @@ function render_grid(grid: HexGrid)
 
 	-- create cell instances
 	for _, cell in grid.cells do
-		local instance = cells_mod.cell_models[cell.type]:Clone()
-		instance.Parent = cell_folder
-		instance:PivotTo(CFrame.new(into_vec3(cell.coordinate) * 4.542 / 2))
-		-- for debugging purposes
-		instance.Name = hex_grid_mod.encode_coord(cell.coordinate)
-		grid.cell_instance_map[hex_grid_mod.encode_coord(cell.coordinate)] = instance
-
-		color_cell(grid, cell)
-		grid.instance_cell_map[instance] = hex_grid_mod.encode_coord(cell.coordinate)
+		create_cell_instance(grid, cell)
 	end
 
 	-- first pass for entity update
 	for _, entity in grid.entities do
 		client_entity_mod.update_entity_client(grid, nil, entity)
+	end
+end
+
+function animate_cell_appearance(instance: Model)
+	for _, descendant in instance:GetDescendants() do
+		if descendant:IsA "BasePart" then
+			local old_cf = descendant.CFrame
+			descendant.CFrame = old_cf - Vector3.new(0, 2, 0)
+			TweenService:Create(descendant, TweenInfo.new(0.5), {
+				CFrame = old_cf,
+			}):Play()
+		end
+	end
+end
+function animate_cell_removal(instance: Model)
+	for _, descendant in instance:GetDescendants() do
+		if descendant:IsA "BasePart" then
+			TweenService:Create(descendant, TweenInfo.new(0.5), {
+				CFrame = descendant.CFrame + Vector3.new(0, 3, 0),
+			}):Play()
+		end
 	end
 end
 
@@ -161,15 +186,30 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 			grid.entities[update.entity.id] = update.entity
 			table.insert(updated_entities, { old = old_entity, new = update.entity })
 		elseif update.type == "turn_timer" then
-			grid.turn_end_time = update.turn_end_time
-			grid.turn_start_time = update.turn_start_time
+			grid.turn_schedule = update.schedule
 		elseif update.type == "turn" then
 			grid.highest_turn = update.turn
 			grid.turn = update.turn
 		elseif update.type == "cell_update" then
 			grid.cells[hex_grid_mod.encode_coord(update.cell.coordinate)] = update.cell
 		elseif update.type == "cells" then
+			for old_encoded_coord, old_cell in grid.cells do
+				if not update.cells[old_encoded_coord] then
+					local instance = grid.cell_instance_map[old_encoded_coord]
+					grid.cell_instance_map[old_encoded_coord] = nil
+					grid.instance_cell_map[instance] = nil
+					animate_cell_removal(instance)
+					Debris:AddItem(instance, 2)
+					grid.cells[old_encoded_coord] = nil
+				end
+			end
 			for encoded_coord, cell in update.cells do
+				if not grid.cells[encoded_coord] then
+					grid.cells[encoded_coord] = cell
+					local instance = create_cell_instance(grid, cell)
+					animate_cell_appearance(instance)
+				end
+
 				if grid.cells[encoded_coord].visible_for_team and not cell.visible_for_team then
 					for entity_id in grid.cells[encoded_coord].entities do
 						local entity = grid.entities[entity_id]
@@ -232,10 +272,10 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 				}):Play()
 				Debris:AddItem(bullet, 0.3)
 			end
-			-- elseif update.type == "grid" then
 		elseif update.type == "turn_skips" then
 			grid.needed_skips = update.needed_skips
 			grid.current_skips = update.current_skips
+			-- grid.can_skip = update.can_skip
 		elseif update.type == "teams" then
 			grid.teams = update.teams
 			grid.coalitions = update.coalitions
@@ -243,6 +283,7 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 			grid.quests[update.quest_id] = {
 				id = update.quest_id,
 				current_stage = update.current_stage,
+				title = update.title,
 				details = update.details,
 				stages_data = update.stages_data,
 			} :: any

@@ -38,6 +38,7 @@ function decode_coord(s: EncodedCoordinate): CubicCoordinate
 	return coord
 end
 
+-- i am pretty certain neighbors_eq is broken
 -- returns neighbors at a radius. can give neighbors that are out of bounds
 function neighbors_eq(center: CubicCoordinate, radius: number)
 	local directions = {

@@ -44,11 +44,12 @@ end
 
 function new_quest(props: {
 	id: string,
+	title: string,
 	stages_data: { [string]: QuestStage },
 	stages_behavior: { [string]: ServerQuestStageBehavior },
 }): Quest
-	print(props)
 	local quest = {
+		title = props.title,
 		current_stage = "init",
 		stages_data = props.stages_data,
 		stages_behavior = props.stages_behavior,

@@ -18,15 +18,18 @@ function testing_map(): HexGrid
 		{ min = -magic, max = magic },
 		{ min = -magic, max = magic },
 	}
+
 	grid.speed_multiplier = 0
 	grid.speed_base = 3
 
-	turn_scheduler.reset_turn_time(grid)
-	grid.turn_schedule = turn_scheduler.new_turn_schedule(grid.turn_end_time)
-	grid.turn_schedule.turn_signal.listen(function()
+	grid.turn_schedule = turn_scheduler.new_turn_schedule(function()
+		turn_scheduler.reset_turn_time(grid, grid.turn_schedule)
+		turn_scheduler.report_turn_time(grid)
+	end, function()
 		action_phase_mod.run_action_phase(grid)
-		turn_scheduler.reset_turn_time(grid)
 	end)
+	turn_scheduler.reset_turn_time(grid, grid.turn_schedule)
+	turn_scheduler.turn_schedule_resume(grid.turn_schedule)
 
 	local team1 = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Red")
 	team1.server_data.visibility = "full"
@@ -103,12 +106,14 @@ function my_map(): HexGrid
 	local team1 = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Red")
 	local team2 = grid:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "Blue")
 
-	turn_scheduler.reset_turn_time(grid)
-	grid.turn_schedule = turn_scheduler.new_turn_schedule(grid.turn_end_time)
-	grid.turn_schedule.turn_signal.listen(function()
+	grid.turn_schedule = turn_scheduler.new_turn_schedule(function()
+		turn_scheduler.reset_turn_time(grid, grid.turn_schedule)
+		turn_scheduler.report_turn_time(grid)
+	end, function()
 		action_phase_mod.run_action_phase(grid)
-		turn_scheduler.reset_turn_time(grid)
 	end)
+	turn_scheduler.reset_turn_time(grid, grid.turn_schedule)
+	turn_scheduler.turn_schedule_resume(grid.turn_schedule)
 
 	for _, cell in grid.cells do
 		if math.random() < 0.0015 then

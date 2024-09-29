@@ -6,27 +6,38 @@ local new_signal = require(ReplicatedStorage.Shared.signal).new_signal
 type HexGrid = types.HexGrid
 type TurnSchedule = types.TurnSchedule
 
--- still don't like how tightly coupled TurnSchedule is with HexGrid
--- especially with it depending on the signal listener to reset the end time
+-- don't like how much of a mess this all is
 
-function turn_schedule_skip(schedule: TurnSchedule, end_time: number?)
-	schedule.turn_end_time = end_time or 0
+-- Skips the turn schedule so that it goes to the next turn immediately
+function turn_schedule_skip(schedule: TurnSchedule)
+	schedule.end_time = 0
 	if schedule.wait_thread then
 		task.cancel(schedule.wait_thread)
 	end
 	coroutine.resume(schedule.loop_thread)
 end
 
-function turn_schedule_stop(schedule: TurnSchedule)
-	schedule.turn_end_time = math.huge
+-- Resumes the turn schedule
+function turn_schedule_resume(schedule: TurnSchedule)
+	schedule.running = true
 	if schedule.wait_thread then
 		task.cancel(schedule.wait_thread)
 	end
 	coroutine.resume(schedule.loop_thread)
+end
+
+-- Pauses the turn schedule
+function turn_schedule_stop(schedule: TurnSchedule)
+	schedule.running = false
+	if schedule.wait_thread then
+		task.cancel(schedule.wait_thread)
+	end
 end
 
 function kill_turn_schedule(schedule: TurnSchedule)
-	task.cancel(schedule.wait_thread)
+	if schedule.wait_thread then
+		task.cancel(schedule.wait_thread)
+	end
 	coroutine.close(schedule.loop_thread)
 end
 
@@ -41,6 +52,7 @@ function recalculate_skips(grid: HexGrid)
 	end
 
 	if #grid.skipped >= needed_skips and grid.turn_schedule ~= nil then
+		grid.skipped = {}
 		turn_schedule_skip(grid.turn_schedule)
 	else
 		grid.needed_skips = needed_skips
@@ -53,63 +65,79 @@ function recalculate_skips(grid: HexGrid)
 	end
 end
 
-function reset_turn_time(grid: HexGrid)
+-- Reports the turn time to the players
+function report_turn_time(grid: HexGrid)
+	assert(grid.turn_schedule, "no turn schedule")
+	updates_mod.add_update(grid, {
+		type = "turn_timer",
+		schedule = {
+			start_time = grid.turn_schedule.start_time,
+			end_time = grid.turn_schedule.end_time,
+			running = grid.turn_schedule.running,
+		},
+	})
+	updates_mod.flush_updates(grid)
+end
+
+-- Resets the turn time to the beginning (does not report)
+function reset_turn_time(grid: HexGrid, turn_schedule: TurnSchedule)
 	local count_entities = 0
 	for _ in grid.entities do
 		count_entities += 1
 	end
 	local wait_time = count_entities * grid.speed_multiplier + grid.speed_base
-	if grid.turn == 1 then
-		wait_time *= 2
-	end
-	grid.turn_start_time = DateTime.now().UnixTimestampMillis
-	grid.turn_end_time = DateTime.now().UnixTimestampMillis + wait_time * 1000
-	updates_mod.add_update(grid, {
-		type = "turn_timer",
-		turn_start_time = grid.turn_start_time,
-		turn_end_time = grid.turn_end_time,
-	})
-	grid.skipped = {}
-	updates_mod.flush_updates(grid)
-	if grid.turn_schedule then
-		grid.turn_schedule.turn_end_time = grid.turn_end_time
-	end
+	turn_schedule.start_time = DateTime.now().UnixTimestampMillis
+	turn_schedule.end_time = DateTime.now().UnixTimestampMillis + wait_time * 1000
 end
 
-function new_turn_schedule(turn_end_time: number): TurnSchedule
+function new_turn_schedule(get_end_time: () -> number, run_turn: () -> ()): TurnSchedule
 	local schedule = {
-		turn_signal = new_signal(),
 		wait_thread = nil,
 		loop_thread = nil,
-		turn_end_time = turn_end_time,
-	}
+		running = false,
+		start_time = 0,
+		end_time = 0,
+		get_end_time = get_end_time,
+		run_turn = run_turn,
+		turn_ran_signal = new_signal(),
+	} :: TurnSchedule
 
 	schedule.loop_thread = coroutine.create(function()
 		while true do
-			while DateTime.now().UnixTimestampMillis < schedule.turn_end_time do
-				schedule.wait_thread = task.delay(
-					(schedule.turn_end_time - DateTime.now().UnixTimestampMillis) / 1000,
-					function()
-						coroutine.resume(schedule.loop_thread)
-					end
-				)
+			while DateTime.now().UnixTimestampMillis < schedule.end_time or not schedule.running do
+				if schedule.running then
+					schedule.wait_thread = task.delay(
+						(schedule.end_time - DateTime.now().UnixTimestampMillis) / 1000,
+						function()
+							schedule.wait_thread = nil
+							coroutine.resume(schedule.loop_thread)
+						end
+					)
+				end
 				coroutine.yield()
 			end
-			-- just a precaution so it doesn't go into an infinite loop
-			schedule.turn_end_time = math.huge
-			schedule.turn_signal.send()
+
+			schedule.end_time = math.huge
+			task.spawn(function()
+				schedule.run_turn()
+				schedule.turn_ran_signal.send()
+				if schedule.running then
+					schedule.get_end_time()
+				end
+			end)
 		end
 	end)
 
-	coroutine.resume(schedule.loop_thread)
 	return schedule
 end
 
 return {
 	new_turn_schedule = new_turn_schedule,
+	turn_schedule_resume = turn_schedule_resume,
 	reset_turn_time = reset_turn_time,
 	turn_schedule_skip = turn_schedule_skip,
 	recalculate_skips = recalculate_skips,
 	turn_schedule_stop = turn_schedule_stop,
 	kill_turn_schedule = kill_turn_schedule,
+	report_turn_time = report_turn_time,
 }

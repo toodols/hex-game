@@ -21,6 +21,7 @@ export type EncodedCoordinate = string
 export type Signal<T> = {
 	listen: (listener: (message: T) -> ()) -> (),
 	send: (message: T) -> (),
+	wait: () -> T,
 	-- unlisten: (listener: (message: T) -> ()) -> (),
 	destroy: () -> (),
 }
@@ -362,14 +363,20 @@ export type GridUpdate =
 		type: "quest_update",
 		quest_id: string,
 		current_stage: string,
+		title: string,
+		stages_data: { [string]: QuestStage },
 		details: any,
 	}
 
 export type TurnSchedule = {
 	wait_thread: thread,
 	loop_thread: thread,
-	turn_end_time: number,
-	turn_signal: Signal<nil>,
+	running: boolean,
+	get_end_time: () -> number,
+	start_time: number,
+	end_time: number,
+	run_turn: () -> (),
+	turn_ran_signal: Signal<nil>,
 }
 
 export type EntityConfiguration = {
@@ -467,8 +474,6 @@ export type HexGrid = {
 
 	turn: number,
 	highest_turn: number,
-	turn_start_time: number,
-	turn_end_time: number,
 
 	skipped: { Player },
 
@@ -489,8 +494,11 @@ export type PartialHexGrid = {
 	turn: number,
 	highest_turn: number,
 	entities: { [EntityId]: Entity },
-	turn_start_time: number,
-	turn_end_time: number,
+	turn_schedule: {
+		start_time: number,
+		end_time: number,
+		running: boolean,
+	}?,
 	current_skips: number,
 	needed_skips: number,
 	entity_configurations: { [string]: EntityConfiguration },

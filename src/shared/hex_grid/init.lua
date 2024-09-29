@@ -130,8 +130,6 @@ function new_grid_empty(entity_config: { [string]: EntityConfiguration }?, globa
 		cell_instance_map = {},
 		turn = 1,
 		highest_turn = 1,
-		turn_start_time = 0,
-		turn_end_time = 0,
 		entities = {},
 		instance_cell_map = {},
 		instance_entity_map = {},
@@ -183,8 +181,7 @@ function new_grid_from_data(data: PartialHexGrid): HexGrid
 	grid.coalitions = data.coalitions
 	grid.teams = data.teams
 	grid.turn = data.turn
-	grid.turn_end_time = data.turn_end_time
-	grid.turn_start_time = data.turn_start_time
+	grid.turn_schedule = data.turn_schedule
 	grid.highest_turn = data.highest_turn
 	grid.entities = data.entities
 	grid.neutral_team = data.neutral_team
