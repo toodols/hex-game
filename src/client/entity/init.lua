@@ -22,6 +22,8 @@ require(script.proxy)
 require(script.heart)
 require(script.vault)
 require(script.solution)
+require(script.witness)
+require(script.impression)
 
 function update_entity_client(grid: HexGrid, old: Entity?, new: Entity)
 	local client_behavior = registry_mod.registry[new.type]

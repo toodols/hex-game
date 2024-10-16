@@ -107,6 +107,15 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 			end)
 		end,
 	},
+	build_to_rad = {
+		stage_start = function(self: Quest, grid: HexGrid)
+			assert(grid.turn_schedule, "no turn schedule")
+			grid.speed_base = 6
+			turn_scheduler.reset_turn_time(grid, grid.turn_schedule)
+			turn_scheduler.turn_schedule_resume(grid.turn_schedule)
+			turn_scheduler.report_turn_time(grid)
+		end,
+	},
 	summon_more_cells = {
 		stage_start = function(self: Quest, grid: HexGrid)
 			task.delay(1, function()
@@ -164,6 +173,7 @@ local stages_data: { [string]: QuestStage } = {
 		effects = {
 			{ type = "highlight_build_button" },
 			{ type = "highlight_buildable", entity_type = "wires" },
+			{ type = "whitelist_buildable", entities = { wires = true } },
 		},
 		next = "build_wires_blueprint",
 	},
@@ -198,7 +208,7 @@ local stages_data: { [string]: QuestStage } = {
 			"This gray resource is called {item.bar}.",
 			"It can be used to build more buildings.",
 			"One of these buildings is a {entity.scout}.",
-			"Build a {entity.scout} blueprint anywhere. Hint: You don't need to build {entity.wires} beforehand on an empty tile.",
+			"Build a {entity.scout} blueprint anywhere.",
 		},
 		next = "complete_scout_blueprint",
 	},
@@ -214,11 +224,19 @@ local stages_data: { [string]: QuestStage } = {
 		next = "summon_more_cells",
 	},
 	summon_more_cells = {
+		next = "auto_turns",
+	},
+	auto_turns = {
+		messages = {
+			"Until now, turns have been manually controlled.",
+			"From here on, turns will occur automatically every 6 seconds.",
+		},
+		can_advance = true,
 		next = "build_to_rad",
 	},
 	build_to_rad = {
 		messages = {
-			"Build an {entity.extractor} on the {item.rad} deposit",
+			"Build a {entity.extractor} on the {item.rad} deposit. Connect it to your system with the {entity.wires}.",
 		},
 	},
 	error = {

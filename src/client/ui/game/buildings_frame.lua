@@ -41,6 +41,9 @@ local PAGES = {
 			{
 				type = "solution",
 			},
+			{
+				type = "generator",
+			},
 		},
 	},
 	{
@@ -50,22 +53,25 @@ local PAGES = {
 				type = "factory",
 			},
 			{
-				type = "generator",
-			},
-			{
 				type = "laboratory",
 			},
 			{
 				type = "turret",
 			},
 			{
-				type = "vault",
+				type = "witness",
+			},
+			{
+				type = "impression",
 			},
 		},
 	},
 	{
 		name = "Page 3",
 		items = {
+			{
+				type = "vault",
+			},
 			{
 				type = "obelisk",
 			},

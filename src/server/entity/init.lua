@@ -16,7 +16,8 @@ require(script.proxy)
 require(script.heart)
 require(script.vault)
 require(script.solution)
-require(script.scribe)
+require(script.witness)
+require(script.impression)
 
 return {
 	registry = registry,

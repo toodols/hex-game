@@ -10,7 +10,7 @@ registry["stockpile"] = with_defaults {
 	build_time = 0,
 	inventory_capacity = 5,
 	cost = {
-		bar = 3,
+		bar = 4,
 	},
 	can_capture = true,
 	layer = registry_mod.layer.building,

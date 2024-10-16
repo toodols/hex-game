@@ -189,7 +189,7 @@ function init_ui(grid: HexGrid, root_instance: Instance?)
 
 	local cursor_instance: Instance? = nil
 	local old_cursor_instance = nil
-	local shift_select_type: "drag-include" | "drag-exclude" | "drag-unknown" | "off" = "off"
+	local shift_select_type: "drag_include" | "drag_exclude" | "drag_unknown" | "off" = "off"
 
 	local function refresh_highlight(highlight: Highlight, selected: { [Instance]: true })
 		highlight.Adornee = nil :: any
@@ -219,16 +219,16 @@ function init_ui(grid: HexGrid, root_instance: Instance?)
 				and cursor_instance ~= old_cursor_instance
 				and cursor_instance ~= nil
 			then
-				if shift_select_type == "drag-unknown" then
+				if shift_select_type == "drag_unknown" then
 					if selection_mode.selected[cursor_instance] then
-						shift_select_type = "drag-exclude"
+						shift_select_type = "drag_exclude"
 					else
-						shift_select_type = "drag-include"
+						shift_select_type = "drag_include"
 					end
 				end
-				if shift_select_type == "drag-include" then
+				if shift_select_type == "drag_include" then
 					selection_mode.selected[cursor_instance] = true
-				elseif shift_select_type == "drag-exclude" then
+				elseif shift_select_type == "drag_exclude" then
 					selection_mode.selected[cursor_instance] = nil
 				end
 
@@ -303,13 +303,13 @@ function init_ui(grid: HexGrid, root_instance: Instance?)
 			if input_state == Enum.UserInputState.Begin then
 				local selection_mode = selection_mode_stack[#selection_mode_stack]
 				if selection_mode.type == "select_cells" then
-					shift_select_type = "drag-unknown"
+					shift_select_type = "drag_unknown"
 					if cursor_instance then
 						if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
 							if selection_mode.selected[cursor_instance] then
-								shift_select_type = "drag-exclude"
+								shift_select_type = "drag_exclude"
 							else
-								shift_select_type = "drag-include"
+								shift_select_type = "drag_include"
 							end
 							if selection_mode.selected[cursor_instance] then
 								selection_mode.selected[cursor_instance] = nil

@@ -515,6 +515,11 @@ export type QuestEffect = {
 } | {
 	type: "highlight_buildable",
 	entity_type: string,
+} | {
+	type: "whitelist_buildable",
+	entities: {
+		[string]: true,
+	},
 }
 
 export type QuestStage = {

@@ -10,15 +10,17 @@ type HexGrid = types.HexGrid
 local model = asset_server.load "Entities/Vault"
 
 function update_model(self: Entity, grid: HexGrid)
-	assert(self.inventory ~= nil, "inventory nil")
 	local crystal = grid.entity_instance_map[self.id]:FindFirstChild "crystal" :: BasePart
-	if self.status == "complete" and #self.inventory.items > 0 then
-		local base_size = Vector3.new(0.351, 1.03, 0.351)
-		local size_scale = math.pow(#self.inventory.items, 1 / 3)
-		crystal.Size = base_size * size_scale
-		crystal.Color = items_mod.item_colors[self.inventory.items[1]]
-	else
-		crystal.Transparency = 1
+	if self.status == "complete" then
+		assert(self.inventory ~= nil, "inventory nil")
+		if #self.inventory.items > 0 then
+			local base_size = Vector3.new(0.351, 1.03, 0.351)
+			local size_scale = math.pow(#self.inventory.items, 1 / 3)
+			crystal.Size = base_size * size_scale
+			crystal.Color = items_mod.item_colors[self.inventory.items[1]]
+		else
+			crystal.Transparency = 1
+		end
 	end
 end
 
