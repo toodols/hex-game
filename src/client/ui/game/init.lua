@@ -347,7 +347,7 @@ function init_ui(grid: HexGrid, root_instance: Instance?)
 			elseif input_state == Enum.UserInputState.End then
 				shift_select_type = "off"
 			end
-		end, false, Enum.UserInputType.MouseButton1)
+		end, false, Enum.UserInputType.MouseButton1, Enum.UserInputType.Touch)
 	end
 
 	root:render(React.createElement(Main, {

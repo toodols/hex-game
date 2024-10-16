@@ -7,6 +7,7 @@ local quest_methods = require(script.Parent.quest)
 local updates_mod = require(ServerScriptService.Server.updates)
 local computed_mod = require(ServerScriptService.Server.computed)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
+local util = require(ReplicatedStorage.Shared.util)
 
 type HexGrid = types.HexGrid
 type Quest = types.Quest
@@ -27,7 +28,21 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 	},
 	build_wires_on_tile = {
 		progression_requisite = function(self: Quest, grid: HexGrid)
-			return #grid:query_entity { primary_coordinate = { 0, 0, 0 }, type = "wires" } == 1
+			local entities = grid:query_entity { primary_coordinate = { 0, 0, 0 } }
+			if #entities == 1 then
+				if entities[1].type == "wires" then
+					return true
+				end
+			elseif #entities > 1 then
+				self.details.error_message = `Did not find exactly 1 entity in 0, 0, 0: {table.concat(
+					util.table_map(entities, function(entity)
+						return entity.type
+					end),
+					", "
+				)}`
+				quest_methods.quest_change_state(self, "error", grid)
+				return
+			end
 		end,
 	},
 	complete_wires_blueprint = {
@@ -158,7 +173,7 @@ local stages_data: { [string]: QuestStage } = {
 		messages = {
 			"Welcome to the tutorial.",
 			"First, let's learn how to build.",
-			"Select (0, 0, 0) by clicking on the tile.",
+			"Select (0, 0, 0) by <b>clicking</b> on the tile. (Hint: (0,0,0) is the center tile)",
 		},
 		next = "build_wires_on_tile",
 		effects = {
@@ -167,6 +182,7 @@ local stages_data: { [string]: QuestStage } = {
 	},
 	build_wires_on_tile = {
 		messages = {
+			"Information about this tile shows up on the bottom left",
 			"As you can see, there is nothing on this tile yet. Let's change that.",
 			"Press the build button, and select {entity.wires}.",
 		},

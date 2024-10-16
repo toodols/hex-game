@@ -3,7 +3,11 @@ local items_mod = require(script.Parent.items)
 local cells = require(script.Parent.cells)
 local types = require(script.Parent.types)
 
-function format_text(grid: types.HexGrid, text: string)
+function format_text(grid: types.HexGrid, text: string, depth: number?)
+	if depth and depth > 5 then
+		warn "formatting exceeds max depth"
+		return text
+	end
 	local namespaces = {
 		research = researches_mod.researches,
 		item = items_mod.item_names,
@@ -29,7 +33,7 @@ function format_text(grid: types.HexGrid, text: string)
 				return format_cost
 			end
 		end
-		return tostring(start)
+		return format_text(grid, tostring(start), if depth then depth + 1 else 1)
 	end)
 	return result
 end

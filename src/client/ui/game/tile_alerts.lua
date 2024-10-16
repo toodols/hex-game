@@ -27,7 +27,7 @@ function IconAndNumber(props: {
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, 0, 1, 0),
 	}, {
-		UIListLayout = React.createElement("UIListLayout", {
+		HorizontalLayout = React.createElement("UIListLayout", {
 			FillDirection = Enum.FillDirection.Horizontal,
 			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
@@ -92,7 +92,7 @@ function TileAlert(props: { adornee: Instance, indicators: { [string]: number } 
 					Transparency = 1,
 				},
 				{
-					UIListLayout = React.createElement("UIListLayout", {
+					VerticalLayout = React.createElement("UIListLayout", {
 						SortOrder = Enum.SortOrder.LayoutOrder,
 						VerticalAlignment = Enum.VerticalAlignment.Bottom,
 					}),

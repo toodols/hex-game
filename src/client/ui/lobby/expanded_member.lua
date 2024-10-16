@@ -31,7 +31,7 @@ function ExpandedMember(props: {
 			Size = UDim2.new(1, 0, 1, 0),
 			ZIndex = 2,
 		}, {
-			UIListLayout = React.createElement("UIListLayout", {
+			HorizontalLayout = React.createElement("UIListLayout", {
 				FillDirection = Enum.FillDirection.Horizontal,
 				Padding = UDim.new(0, 10),
 				SortOrder = Enum.SortOrder.LayoutOrder,

@@ -95,7 +95,7 @@ function Lobby()
 			LayoutOrder = 1,
 			Position = UDim2.new(0.5, 0, 0, 0),
 		}, {
-			UIListLayout = React.createElement("UIListLayout", {
+			VerticalLayout = React.createElement("UIListLayout", {
 				HorizontalAlignment = Enum.HorizontalAlignment.Center,
 				Padding = UDim.new(0, 10),
 				SortOrder = Enum.SortOrder.LayoutOrder,
@@ -108,7 +108,7 @@ function Lobby()
 				Position = UDim2.new(0.5, 0, 0, 0),
 				Size = UDim2.new(0, 1000, 0, 0),
 			}, {
-				UIListLayout = React.createElement("UIListLayout", {
+				VerticalLayout = React.createElement("UIListLayout", {
 					HorizontalAlignment = Enum.HorizontalAlignment.Center,
 					Padding = UDim.new(0, 10),
 					SortOrder = Enum.SortOrder.LayoutOrder,
@@ -119,7 +119,7 @@ function Lobby()
 						LayoutOrder = 3,
 					},
 					{
-						UIListLayout = React.createElement("UIListLayout", {
+						VerticalLayout = React.createElement("UIListLayout", {
 							HorizontalAlignment = Enum.HorizontalAlignment.Center,
 							Padding = UDim.new(0, 10),
 							SortOrder = Enum.SortOrder.LayoutOrder,
