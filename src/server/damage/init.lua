@@ -63,9 +63,10 @@ function damage_entity(entity: Entity, damage: number)
 	end
 end
 
-function apply_damage_on_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damage, action_state: ActionState?)
+function apply_damage_on_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damage): { [EntityId]: boolean }
 	damage.lethal = damage.lethal or true
 	damage.friendly_fire = damage.friendly_fire or false
+	local destroyed_entities = {}
 	local team = if damage.from then grid.entities[damage.from].owner else nil
 	local damage_values: { [EntityId]: number } = {}
 	for _, target in targets do
@@ -97,34 +98,40 @@ function apply_damage_on_cells(grid: HexGrid, targets: { CubicCoordinate }, dama
 			end
 		end
 	end
+
 	for entity_id, value in damage_values do
 		local entity = grid.entities[entity_id]
 		damage_entity(entity, value)
 
-		if action_state then
-			server_util.mark_dirty_for_everyone(action_state, entity_id)
-
-			updates_mod.add_update(grid, {
-				type = "entity_damage",
-				effective_damage = {
-					source = damage,
-					amount = value,
-					entity_id = entity_id,
-					lethal = entity.health <= 0,
-				},
-			})
-		end
+		updates_mod.add_update(grid, {
+			type = "entity_update",
+			entity = entity,
+		})
+		updates_mod.add_update(grid, {
+			type = "entity_damage",
+			effective_damage = {
+				source = damage,
+				amount = value,
+				entity_id = entity_id,
+				lethal = entity.health <= 0,
+			},
+		})
 
 		if entity.health <= 0 then
-			if action_state then
-				action_state.dead_entities[entity_id] = true
-			else
-				entity.is_destroyed = true
-			end
+			destroyed_entities[entity_id] = true
 		end
+	end
+
+	return destroyed_entities
+end
+
+function destroy_entities(grid: HexGrid, destroyed_entities: { [EntityId]: boolean })
+	for entity_id in destroyed_entities do
+		server_entity_mod.remove_entity(grid, grid.entities[entity_id])
 	end
 end
 
 return {
 	apply_damage_on_cells = apply_damage_on_cells,
+	destroy_entities = destroy_entities,
 }

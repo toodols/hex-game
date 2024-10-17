@@ -429,12 +429,6 @@ export type HexGrid = {
 	cell_instance_root: Folder?,
 	entity_instance_root: Folder?,
 
-	systems: {
-		{
-			[EntityId]: boolean,
-		}
-	},
-
 	entity_configurations: { [string]: EntityConfiguration },
 	global_configuration: GlobalConfiguration,
 

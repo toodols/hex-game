@@ -235,6 +235,14 @@ function timer(amount: number, callback: () -> ())
 	return value
 end
 
+function table_count_entries(tab: { [any]: any }): number
+	local count = 0
+	for _ in tab do
+		count += 1
+	end
+	return count
+end
+
 return {
 	table_from_entries = table_from_entries,
 	table_filter = table_filter,
@@ -254,6 +262,7 @@ return {
 	table_any = table_any,
 	table_keys = table_keys,
 	table_reverse = table_reverse,
+	table_count_entries = table_count_entries,
 	range = range,
 	timer = timer,
 }

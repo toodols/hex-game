@@ -4,7 +4,7 @@ local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
 local items_mod = require(ReplicatedStorage.Shared.items)
-local server_util = require(ServerScriptService.Server.util)
+local updates_mod = require(ServerScriptService.Server.updates)
 
 type HexGrid = types.HexGrid
 type System = server_types.System
@@ -14,12 +14,18 @@ type Entity = types.Entity
 type Inventory = types.Inventory
 
 -- consume items from inventories, prioritizing overflow_items
-function system_consume_item_type(grid: HexGrid, action_state: ActionState, system: System, request_item, difference)
+function system_consume_item_type(
+	grid: HexGrid,
+	action_state: ActionState,
+	system: System,
+	request_item: Item,
+	amount: number
+)
 	local infinite_source = util.table_any(util.table_keys(system.entities), function(entity_id)
 		return grid.entities[entity_id].type == "infinite_source"
 	end)
 	if infinite_source then
-		return difference
+		return amount
 	end
 
 	local net = 0
@@ -27,14 +33,14 @@ function system_consume_item_type(grid: HexGrid, action_state: ActionState, syst
 
 	-- first using leftovers, then nonempty inventories
 	if overflow_count > 0 then
-		local effective = math.min(difference, overflow_count)
-		difference -= effective
+		local effective = math.min(amount, overflow_count)
+		amount -= effective
 
 		items_mod.consume_items(system.overflow_items, { [request_item] = effective })
 		net += effective
 	end
 
-	if difference > 0 then
+	if amount > 0 then
 		local nonempty_inventory_entities: { Entity } = util.table_filter_map(
 			util.table_keys(system.entities),
 			function(entity_id)
@@ -48,11 +54,14 @@ function system_consume_item_type(grid: HexGrid, action_state: ActionState, syst
 		for _, inventory_entity in nonempty_inventory_entities do
 			-- extract a max of difference of item from inventory_entity.inventory.items
 			local extracted = util.table_extract(inventory_entity.inventory.items, function(item, count)
-				return item == request_item and count < difference
+				return item == request_item and count < amount
 			end)
-			difference -= #extracted
+			amount -= #extracted
 			net += #extracted
-			server_util.mark_dirty_for_everyone(action_state, inventory_entity.id)
+			updates_mod.add_update(grid, {
+				type = "entity_update",
+				entity = inventory_entity,
+			})
 		end
 	end
 	return net
@@ -109,13 +118,17 @@ function system_add_items(grid: HexGrid, action_state: ActionState, system: Syst
 			if inventory and inventory.capacity > #inventory.items then
 				return grid.entities[entity_id]
 			end
+			return nil
 		end
 	)
 	-- attempt to put as many of these items in inventories first
 	while #open_inventory_entities > 0 and #items > 0 do
 		local target = open_inventory_entities[#open_inventory_entities]
 		if items_mod.inventory_deposit(target.inventory, items) then
-			server_util.mark_dirty_for_everyone(action_state, target.id)
+			updates_mod.add_update(grid, {
+				type = "entity_update",
+				entity = target,
+			})
 		else
 			open_inventory_entities[#open_inventory_entities] = nil
 		end

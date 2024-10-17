@@ -91,7 +91,7 @@ function create_researches()
 		extractor_boost = research_state {
 			coord = { 1, 0, -1 },
 			id = "extractor_boost",
-			name = "Boosted Forge",
+			name = "Boosted Fountain",
 			icon = {
 				type = "model",
 				model = "Entities/Extractor",

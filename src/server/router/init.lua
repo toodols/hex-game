@@ -77,19 +77,14 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 						return
 					end
 				end
-				local entity = entity_mod.new_entity(
-					{
-						type = entry.entity_type,
-						owner = player_team.id,
-						rotation = entry.rotation,
-						primary_coordinate = entry.coordinate,
-						status = "blueprint",
-					},
-					grid,
-					{
-						dirty_entities = dirty_entities,
-					} :: any
-				)
+				local entity = entity_mod.new_entity({
+					type = entry.entity_type,
+					owner = player_team.id,
+					rotation = entry.rotation,
+					primary_coordinate = entry.coordinate,
+					status = "blueprint",
+				}, grid
+)
 				dirty_entities[entity.id] = true
 			elseif entry.type == "ability" then
 				local entity = grid.entities[entry.entity_id]

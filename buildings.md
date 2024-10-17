@@ -2,7 +2,7 @@
 
 An early game defense unit that also grants enhanced visibility. Useful for defending outposts.
 
-## Forge
+## Fountain
 
 Primary resource production building. Placed on resource tiles and produces that resource.
 

@@ -4,6 +4,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
 local publish_event = require(ServerScriptService.Server.event).publish_event
 local server_util = require(ServerScriptService.Server.util)
+local updates_mod = require(ServerScriptService.Server.updates)
 
 local util = require(ReplicatedStorage.Shared.util)
 local systems_mod = require(ServerScriptService.Server.systems)
@@ -16,11 +17,14 @@ type System = server_types.System
 type ActionState = server_types.ActionState
 type EntityAction = server_types.EntityAction
 
-function handle_try_promote_actions(grid: HexGrid, action_state: ActionState, system: System)
+function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 	local try_promote_actions: { EntityAction } = util.table_extract(action_state.queue, function(action)
-		return (action.type == "try_promote_blueprint" or action.type == "try_promote_scaffold")
-			and grid.entities[action.entity_id] ~= nil
+		if action.type == "try_promote_blueprint" or action.type == "try_promote_scaffold" then
+			return true
+		end
+		return false
 	end)
+
 	table.sort(try_promote_actions, function(a, b)
 		local entity_a = grid.entities[a.entity_id]
 		local entity_b = grid.entities[b.entity_id]
@@ -32,69 +36,110 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState, sy
 		local shared_config = grid.entity_configurations[entity.type]
 
 		if action.type == "try_promote_blueprint" then
+			local valid_systems = {}
+
+			-- can promote if it is neighboring a system
+			for encoded_neighbor, neighbor in server_util.get_neighbors_set(grid, entity.coordinates) do
+				local system = action_state.system_by_cell[encoded_neighbor]
+				if system ~= nil then
+					table.insert(valid_systems, system)
+				end
+			end
+
+			-- promote this blueprint if it is on a portal connected to a system
 			local cell = grid:get_cell(entity.primary_coordinate)
-			assert(cell, "cell not found")
-			local cell_researches = researches_mod.get_cell_researches(grid, cell, entity.owner)
-			if
-				shared_config.required_research
-				and not util.table_every(shared_config.required_research, function(research_id)
-					return cell_researches[research_id]
-				end)
-			then
-				-- this blueprint is not researched and therefore cannot be promoted
+			if cell.type == "portal" and cell.portal.open then
+				for _, coord in cell.portal.group do
+					local system = action_state.system_by_cell[hex_grid_mod.encode_coord(coord)]
+					if system ~= nil then
+						table.insert(valid_systems, system)
+					end
+				end
+			end
+			if not valid_systems then
 				table.insert(action_state.queue, action)
 				continue
 			end
-
-			local consumed = {}
-			-- attempt to satisfy entity.cost_fulfilled as much as possible
-			for request_item_type, request_amount in entity.cost do
-				if not entity.cost_fulfilled[request_item_type] then
-					entity.cost_fulfilled[request_item_type] = 0
+			for _, system in valid_systems do
+				local cell_researches = researches_mod.get_cell_researches(grid, cell, entity.owner)
+				if
+					shared_config.required_research
+					and not util.table_every(shared_config.required_research, function(research_id)
+						return cell_researches[research_id]
+					end)
+				then
+					-- this blueprint is not researched and therefore cannot be promoted
+					table.insert(action_state.queue, action)
+					continue
 				end
-				local difference = request_amount - entity.cost_fulfilled[request_item_type]
-				local net =
-					systems_mod.system_consume_item_type(grid, action_state, system, request_item_type, difference)
-				entity.cost_fulfilled[request_item_type] += net
-				if net > 0 then
-					server_util.mark_dirty_for_everyone(action_state, entity.id)
-					consumed[request_item_type] = net
+				local consumed = {}
+				-- attempt to satisfy entity.cost_fulfilled as much as possible
+				for request_item_type, request_amount in entity.cost do
+					if not entity.cost_fulfilled[request_item_type] then
+						entity.cost_fulfilled[request_item_type] = 0
+					end
+					local difference = request_amount - entity.cost_fulfilled[request_item_type]
+					local net =
+						systems_mod.system_consume_item_type(grid, action_state, system, request_item_type, difference)
+					entity.cost_fulfilled[request_item_type] += net
+					if net > 0 then
+						updates_mod.add_update(grid, {
+							type = "entity_update",
+							entity = entity,
+						})
+						consumed[request_item_type] = net
+					end
+				end
+
+				publish_event(grid, {
+					type = "consumed_items",
+					entity_id = entity.id,
+					items = consumed,
+				}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
+
+				-- if entity.cost_fulfilled deep_equal entity.cost then entity can promote to
+				if util.deep_equal(entity.cost, entity.cost_fulfilled) then
+					entity.status = "scaffold"
+					updates_mod.add_update(grid, {
+						type = "entity_update",
+						entity = entity,
+					})
+					if server_behavior.autogenerate_wires then
+						local wires = grid:query_entity({
+							primary_coordinate = entity.primary_coordinate,
+							type = "wires",
+							owner = entity.owner,
+						})[1]
+						if wires.autogenerated then
+							wires.status = "scaffold"
+						end
+						updates_mod.add_update(grid, {
+							type = "entity_update",
+							entity = wires,
+						})
+					end
 				end
 			end
 
-			publish_event(grid, {
-				type = "consumed_items",
-				entity_id = entity.id,
-				items = consumed,
-			}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
-
-			if util.deep_equal(entity.cost, entity.cost_fulfilled) then
-				entity.status = "scaffold"
-				server_util.mark_dirty_for_everyone(action_state, entity.id)
-				if server_behavior.autogenerate_wires then
-					local wires = grid:query_entity({
-						primary_coordinate = entity.primary_coordinate,
-						type = "wires",
-						owner = entity.owner,
-					})[1]
-					if wires.autogenerated then
-						wires.status = "scaffold"
-					end
-					server_util.mark_dirty_for_everyone(action_state, wires.id)
-				end
-			else
-				-- put this action back in the queue
+			-- if this blueprint is still not promoted, add it back to the queue
+			if entity.status == "blueprint" then
 				table.insert(action_state.queue, action)
 			end
-			-- if entity.cost_fulfilled deep_equal entity.cost then entity can promote to
 		elseif action.type == "try_promote_scaffold" and entity.build_time > 0 then
 			entity.build_time -= 1
-			server_util.mark_dirty_for_everyone(action_state, entity.id)
+			updates_mod.add_update(grid, {
+				type = "entity_update",
+				entity = entity,
+			})
 		end
+
 		if entity.status == "scaffold" and entity.build_time == 0 then
 			entity.status = "complete"
 			server_behavior.on_completed(entity, grid, action_state)
-			server_util.mark_dirty_for_everyone(action_state, entity.id)
+			updates_mod.add_update(grid, {
+				type = "entity_update",
+				entity = entity,
+			})
 			local wires = grid:query_entity({
 				primary_coordinate = entity.primary_coordinate,
 				type = "wires",
@@ -102,7 +147,10 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState, sy
 			})[1]
 			if wires then
 				wires.status = "complete"
-				server_util.mark_dirty_for_everyone(action_state, wires.id)
+				updates_mod.add_update(grid, {
+					type = "entity_update",
+					entity = wires,
+				})
 			end
 		end
 	end

@@ -43,11 +43,6 @@ function get_neighbors_set(grid: HexGrid, coordinates: { CubicCoordinate }): { [
 	return neighbor_set
 end
 
-function mark_dirty_for_everyone(action_state: ActionState, entity_id: EntityId)
-	action_state.dirty_entities[entity_id] = action_state.dirty_entities[entity_id] or {}
-	action_state.dirty_entities[entity_id].everyone = true
-end
-
 function bind(fn, ...)
 	local arg = { ... }
 	return function()
@@ -70,5 +65,4 @@ return {
 	bind = bind,
 	error_type = error_type,
 	get_neighbors_set = get_neighbors_set,
-	mark_dirty_for_everyone = mark_dirty_for_everyone,
 }

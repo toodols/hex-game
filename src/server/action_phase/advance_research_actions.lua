@@ -2,8 +2,8 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
+local updates_mod = require(ServerScriptService.Server.updates)
 local publish_event = require(ServerScriptService.Server.event).publish_event
-local server_util = require(ServerScriptService.Server.util)
 
 local util = require(ReplicatedStorage.Shared.util)
 local systems_mod = require(ServerScriptService.Server.systems)
@@ -14,13 +14,13 @@ type System = server_types.System
 type ActionState = server_types.ActionState
 type EntityAction = server_types.EntityAction
 
-function handle_advance_research_actions(grid: HexGrid, action_state: ActionState, system: System)
+function handle_advance_research_actions(grid: HexGrid, action_state: ActionState)
 	local advance_research_actions: { EntityAction } = util.table_extract(action_state.queue, function(action)
 		return action.type == "advance_research"
-			and table.find(util.table_keys(system.entities), action.entity_id) ~= nil
 	end)
 	for _, action in advance_research_actions do
 		local entity = grid.entities[action.entity_id]
+		local system = action_state.system_by_entity_id[action.entity_id]
 		if not entity or entity.is_destroyed then
 			error "advance_research error"
 		end
@@ -43,15 +43,24 @@ function handle_advance_research_actions(grid: HexGrid, action_state: ActionStat
 				}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
 
 				research_state.cost_is_paid = true
-				server_util.mark_dirty_for_everyone(action_state, entity.id)
+				updates_mod.add_update(grid, {
+					type = "entity_update",
+					entity = entity,
+				})
 			else
 				research_state.progress += 1
-				server_util.mark_dirty_for_everyone(action_state, entity.id)
+				updates_mod.add_update(grid, {
+					type = "entity_update",
+					entity = entity,
+				})
 			end
 
 			if research_state.progress == research_state.time then
 				research_state.status = "complete"
-				server_util.mark_dirty_for_everyone(action_state, entity.id)
+				updates_mod.add_update(grid, {
+					type = "entity_update",
+					entity = entity,
+				})
 				publish_event(grid, {
 					type = "research_completed",
 					entity_id = entity.id,

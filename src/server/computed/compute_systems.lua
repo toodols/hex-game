@@ -1,6 +1,5 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
-local util = require(ReplicatedStorage.Shared.util)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 
 type HexGrid = types.HexGrid
@@ -81,9 +80,11 @@ function compute_systems(grid: HexGrid)
 	local result = {}
 	for _, system in systems do
 		local system_entities_set = {}
+		local cells = {}
 		for _, coord in system do
 			local cell = grid:get_cell(coord)
 			assert(cell, "cell not found")
+			cells[hex_grid_mod.encode_coord(coord)] = cell
 			for entity_id in cell.entities do
 				if grid.entities[entity_id].status == "complete" then
 					entities_set[entity_id] = true
@@ -95,16 +96,17 @@ function compute_systems(grid: HexGrid)
 		for entity_id in system_entities_set do
 			entities[entity_id] = grid.entities[entity_id]
 		end
-		table.insert(result, entities)
+
+		table.insert(result, { entities = entities, cells = cells })
 	end
 
-	for entity_id in grid.entities do
+	for entity_id, entity in grid.entities do
 		if not entities_set[entity_id] then
-			table.insert(result, { [entity_id] = true })
+			-- cells is empty because individual entities do not have a wire and cells only count wires
+			table.insert(result, { entities = { [entity_id] = true }, cells = {} })
 		end
 	end
 
-	grid.systems = result
 	return result
 end
 

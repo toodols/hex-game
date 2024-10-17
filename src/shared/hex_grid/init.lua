@@ -133,7 +133,6 @@ function new_grid_empty(entity_config: { [string]: EntityConfiguration }?, globa
 		entities = {},
 		instance_cell_map = {},
 		instance_entity_map = {},
-		systems = {},
 		entity_instance_map = {},
 		grid_update_signal = new_signal(),
 		speed_multiplier = 0.15,

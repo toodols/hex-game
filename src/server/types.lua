@@ -9,6 +9,7 @@ type HexGrid = types.HexGrid
 type TeamId = types.TeamId
 type EffectiveDamage = types.EffectiveDamage
 type ResearchId = types.ResearchId
+type EncodedCoordinate = types.EncodedCoordinate
 
 export type EntityEvent = {
 	type: "dealt_damage",
@@ -63,7 +64,7 @@ export type EntityAction =
 		input_power: number?,
 		output_items: { Item }?,
 		output_power: number?,
-		on_success: (grid: HexGrid, action_state: ActionState, system: System) -> (),
+		on_success: (grid: HexGrid, action_state: ActionState) -> (),
 	}
 	| Decision
 
@@ -75,14 +76,16 @@ export type DamageResult = {
 }
 export type ActionState = {
 	queue: { EntityAction },
-	-- read as: entity is dirty for team in dirty_entities[entity.id][team.id]
-	dirty_entities: { [EntityId]: { [EntityId | "everyone"]: true? } },
-	dead_entities: { [EntityId]: true },
+	will_be_destroyed_entities: { [EntityId]: boolean },
 	decayable_entities: { [EntityId]: boolean },
+	systems: { System },
+	system_by_entity_id: { [EntityId]: System },
+	system_by_cell: { [EncodedCoordinate]: System },
 }
 
 export type System = {
 	entities: { [EntityId]: boolean },
+	cells: { [EncodedCoordinate]: boolean },
 	overflow_items: { Item },
 	power: number,
 	has_heart: boolean,

@@ -28,7 +28,7 @@ export type ServerEntityBehavior = {
 	-- actual mutation is handled in `server/damage`
 	take_damage: (self: Entity, grid: HexGrid, damage: Damage, gauge: number) -> DamageResult,
 	get_illumination: (self: Entity, grid: HexGrid) -> { CubicCoordinate },
-	on_completed: (self: Entity, grid: HexGrid, action_state: ActionState?) -> (),
+	on_completed: (self: Entity, grid: HexGrid) -> (),
 	influences: ((self: Entity, grid: HexGrid) -> ())?,
 	-- laboratory only
 	on_research_completed: (self: Entity, grid: HexGrid, research_id: string) -> ()?,

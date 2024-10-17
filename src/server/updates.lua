@@ -6,20 +6,30 @@ local remotes_mod = require(script.Parent.remotes)
 
 type HexGrid = types.HexGrid
 type GridUpdate = types.GridUpdate
+type EntityId = types.EntityId
+type TeamId = types.TeamId
 
 -- Removes all but the last "entity_update" for each entity_id from a list of updates.
 function filter_duplicate_entity_updates(updates)
-	local last_occurrences = {}
+	local last_occurrences: { [EntityId]: number } = {}
+	local target: { [EntityId]: { TeamId } | "everyone" } = {}
 	local result = {}
-
 	for i, update in updates do
 		if update.type == "entity_update" then
 			last_occurrences[update.entity.id] = i
+			if update.target == nil or update.target == "everyone" then
+				target[update.entity.id] = "everyone"
+			elseif target[update.entity.id] == nil then
+				target[update.entity.id] = update.target
+			end
 		end
 	end
 
 	for i, update in updates do
-		if update.type ~= "entity_update" or last_occurrences[update.entity.id] == i then
+		if update.type ~= "entity_update" then
+			table.insert(result, update)
+		elseif last_occurrences[update.entity.id] == i then
+			update.target = if target[update.entity.id] == "everyone" then nil else target[update.entity.id]
 			table.insert(result, update)
 		end
 	end

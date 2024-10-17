@@ -13,13 +13,13 @@ type System = server_types.System
 type ActionState = server_types.ActionState
 type EntityAction = server_types.EntityAction
 
-function handle_exchange_actions(grid: HexGrid, action_state: ActionState, system: System)
+function handle_exchange_actions(grid: HexGrid, action_state: ActionState)
 	for _, exchange_action: any in
 		util.table_extract(action_state.queue, function(action)
 			return (action.type == "exchange" or action.type == "exchange_promise")
-				and table.find(util.table_keys(system.entities), action.entity_id) ~= nil
 		end)
 	do
+		local system = action_state.system_by_entity_id[exchange_action.entity_id]
 		local entity = grid.entities[exchange_action.entity_id]
 		local input_items = exchange_action.input_items
 		local output_items = exchange_action.output_items

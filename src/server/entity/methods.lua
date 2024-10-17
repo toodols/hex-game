@@ -30,7 +30,7 @@ function entity_can_deconstruct(entity: Entity, grid: HexGrid)
 	return true
 end
 
-function autogenerate_wires(grid: HexGrid, host: Entity, action_state: ActionState?)
+function autogenerate_wires(grid: HexGrid, host: Entity)
 	if #grid:query_entity { primary_coordinate = host.primary_coordinate, type = "wires", owner = host.owner } == 0 then
 		-- the status is the highest status among buildings that come with wires
 		local status = "blueprint"
@@ -53,13 +53,13 @@ function autogenerate_wires(grid: HexGrid, host: Entity, action_state: ActionSta
 			owner = host.owner,
 			decayable = host.decayable,
 			cost = {},
-		}, grid, action_state)
+		}, grid)
 	end
 end
 
 -- Creates a new entity on a grid
 -- And adds relevant events to the updates buffer
-function new_entity(entity_: any, grid: HexGrid, action_state: ActionState?): Entity
+function new_entity(entity_: any, grid: HexGrid): Entity
 	local entity = entity_ :: Entity
 	if not grid then
 		error "argument 2 not provided"
@@ -111,11 +111,7 @@ function new_entity(entity_: any, grid: HexGrid, action_state: ActionState?): En
 		server_behavior.on_completed(entity, grid)
 	end
 	if server_behavior.autogenerate_wires then
-		autogenerate_wires(grid, entity, action_state)
-	end
-
-	if action_state then
-		server_util.mark_dirty_for_everyone(action_state, entity.id)
+		autogenerate_wires(grid, entity)
 	end
 
 	updates_mod.add_update(grid, { type = "entity_update", entity = entity })
@@ -128,7 +124,7 @@ end
 
 -- Marks an entity as destroyed, removing it from the cells it occupies
 -- Does not remove it from grid.entities
-function remove_entity(grid: HexGrid, entity: Entity, action_state: ActionState?)
+function remove_entity(grid: HexGrid, entity: Entity)
 	local cell = grid:get_cell(entity.primary_coordinate)
 	assert(cell, "cell not found")
 	for _, coord in entity.coordinates do
@@ -136,13 +132,10 @@ function remove_entity(grid: HexGrid, entity: Entity, action_state: ActionState?
 	end
 	entity.is_destroyed = true
 	updates_mod.add_update(grid, { type = "entity_update", entity = entity })
-	if action_state then
-		server_util.mark_dirty_for_everyone(action_state, entity.id)
-		publish_event(grid, {
-			type = "removed",
-			entity_id = entity.id,
-		}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
-	end
+	publish_event(grid, {
+		type = "removed",
+		entity_id = entity.id,
+	}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
 end
 
 return {
