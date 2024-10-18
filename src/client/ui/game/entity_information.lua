@@ -106,6 +106,12 @@ function Hitpoints(props: { entity: Entity })
 	)
 end
 
+function ShouldOutput(props: { entity: Entity })
+	return React.createElement("Frame", {
+		Size = UDim2.new(1, 0, 0, 40),
+	})
+end
+
 function EntityInformation(props: {
 	entity_id: EntityId,
 	compressed: boolean,
@@ -315,6 +321,9 @@ function EntityInformation(props: {
 							Text = "Turns until built: " .. tostring(entity.build_time),
 						}
 					),
+					ShouldOutput = entity.type == "extractor" and React.createElement(ShouldOutput, {
+						entity = entity,
+					}),
 					Items = entity.inventory and React.createElement(
 						"Frame",
 						{
@@ -347,27 +356,18 @@ function EntityInformation(props: {
 							})
 						end)()
 					),
-					Costs = entity.status == "blueprint" and React.createElement(
-						"Frame",
-						{
-							BackgroundTransparency = 1,
-							LayoutOrder = 6,
-							AutomaticSize = Enum.AutomaticSize.Y,
-							Size = UDim2.new(1, 0, 0, 0),
-						},
-						{},
-
-						-- IIFE IN LUA??? :vomit:
-						(function()
-							local cost = {}
-							for item, amount in entity.cost do
-								cost[item] = `{entity.cost_fulfilled[item] or 0}/{amount}`
-							end
-							return React.createElement(Cost, {
-								cost = cost,
-							})
-						end)()
-					),
+					Costs = entity.status == "blueprint" and React.createElement("Frame", {
+						BackgroundTransparency = 1,
+						LayoutOrder = 6,
+						AutomaticSize = Enum.AutomaticSize.Y,
+						Size = UDim2.new(1, 0, 0, 0),
+					}, {
+						Cost = React.createElement(Cost, {
+							cost = util.table_map(entity.cost, function(v, k)
+								return `{entity.cost_fulfilled[k] or 0}/{v}`
+							end),
+						}),
+					}),
 
 					Range = if entity.type == "laboratory"
 						then React.createElement(HighlightOnHover, {

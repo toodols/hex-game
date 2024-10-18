@@ -73,6 +73,7 @@ function coords_lerp(a, b, t): CubicCoordinate
 		a[3] + (b[3] - a[3]) * t,
 	}
 end
+
 -- All coordinates *within or equal to* a radius
 function neighbors_leq(origin: CubicCoordinate, radius: number): { CubicCoordinate }
 	local results = {}
@@ -83,6 +84,20 @@ function neighbors_leq(origin: CubicCoordinate, radius: number): { CubicCoordina
 		end
 	end
 	return results
+end
+
+function neighbors_many_leq(coords: { CubicCoordinate }, radius: number): { CubicCoordinate }
+	local set = {}
+	for _, coord in coords do
+		for _, neighbor in neighbors_leq(coord, radius) do
+			set[encode_coord(neighbor)] = neighbor
+		end
+	end
+	local result = {}
+	for _, coord in set do
+		table.insert(result, coord)
+	end
+	return result
 end
 
 function coords_dist(c1: CubicCoordinate, c2: CubicCoordinate): number
@@ -115,6 +130,7 @@ return {
 	encode_coord = encode_coord,
 	neighbors_eq = neighbors_eq,
 	neighbors_leq = neighbors_leq,
+	neighbors_many_leq = neighbors_many_leq,
 	coords_dist = coords_dist,
 	into_vec3 = into_vec3,
 	into_cframe = into_cframe,

@@ -18,10 +18,10 @@ function run_tests()
 				local success, err_or_val = pcall(test)
 				total += 1
 				if success then
-					print(`[Test {total}]`, full_name, "passed in", math.floor((os.clock() - test_t0) * 1000), "ms")
+					print(`[Test {total} - {full_name}]`, "passed in", math.floor((os.clock() - test_t0) * 1000), "ms")
 					successes += 1
 				else
-					warn(`[Test {total}]`, full_name, "failed:", err_or_val)
+					warn(`[Test {total} - {full_name}]`, "failed:", err_or_val)
 				end
 			end
 		end

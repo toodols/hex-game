@@ -1,9 +1,10 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local server_entity_mod = require(script.Parent.entity)
-local server_util = require(script.Parent.util)
 local server_types = require(script.Parent.types)
 local updates_mod = require(script.Parent.updates)
+local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local publish_event = require(script.Parent.event).publish_event
 
 type Damage = types.Damage
 type Entity = types.Entity
@@ -107,19 +108,29 @@ function apply_damage_on_cells(grid: HexGrid, targets: { CubicCoordinate }, dama
 			type = "entity_update",
 			entity = entity,
 		})
-		updates_mod.add_update(grid, {
-			type = "entity_damage",
+		publish_event(grid, {
+			type = "took_damage",
+			entity_id = entity_id,
 			effective_damage = {
 				source = damage,
 				amount = value,
 				entity_id = entity_id,
 				lethal = entity.health <= 0,
 			},
-		})
+		}, hex_grid_mod.neighbors_many_leq(entity.coordinates, 1))
 
 		if entity.health <= 0 then
 			destroyed_entities[entity_id] = true
 		end
+	end
+
+	if damage.from then
+		print(grid.entities[damage.from].coordinates)
+		publish_event(grid, {
+			type = "dealt_damage",
+			entity_id = damage.from,
+			damage = damage,
+		}, hex_grid_mod.neighbors_many_leq(grid.entities[damage.from].coordinates, 1))
 	end
 
 	return destroyed_entities

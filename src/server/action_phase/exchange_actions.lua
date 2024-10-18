@@ -40,7 +40,7 @@ function handle_exchange_actions(grid: HexGrid, action_state: ActionState)
 				type = "consumed_items",
 				entity_id = exchange_action.entity_id,
 				items = input_items,
-			}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
+			}, hex_grid_mod.neighbors_many_leq(entity.coordinates, 1))
 		end
 		system.power -= input_power
 		if exchange_action.on_success then
@@ -54,7 +54,7 @@ function handle_exchange_actions(grid: HexGrid, action_state: ActionState)
 				type = "produced_items",
 				entity_id = exchange_action.entity_id,
 				items = counted_output_items,
-			}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
+			}, hex_grid_mod.neighbors_many_leq(entity.coordinates, 1))
 		end
 		system.power += output_power
 	end

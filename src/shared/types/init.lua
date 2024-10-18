@@ -339,10 +339,6 @@ export type GridUpdate =
 		coordinate: CubicCoordinate,
 	}
 	| {
-		type: "entity_damage",
-		effective_damage: EffectiveDamage,
-	}
-	| {
 		type: "exchange",
 		input_items: { [Item]: number }?,
 		input_power: number?,

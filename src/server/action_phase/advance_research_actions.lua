@@ -40,7 +40,7 @@ function handle_advance_research_actions(grid: HexGrid, action_state: ActionStat
 					type = "consumed_items",
 					items = research_state.cost,
 					entity_id = entity.id,
-				}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
+				}, hex_grid_mod.neighbors_many_leq(entity.coordinates, 1))
 
 				research_state.cost_is_paid = true
 				updates_mod.add_update(grid, {
@@ -65,7 +65,7 @@ function handle_advance_research_actions(grid: HexGrid, action_state: ActionStat
 					type = "research_completed",
 					entity_id = entity.id,
 					research_id = research_id,
-				}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
+				}, hex_grid_mod.neighbors_many_leq(entity.coordinates, 1))
 			else
 				break
 			end

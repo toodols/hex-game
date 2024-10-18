@@ -30,7 +30,13 @@ function update_entity_client(grid: HexGrid, old: Entity?, new: Entity)
 	if not client_behavior then
 		error("Unknown entity type: " .. new.type)
 	end
-	if not new.is_destroyed then
+	if new.is_destroyed then
+		client_behavior.on_destroy(new, grid)
+		for _, coord in new.coordinates do
+			local cell = grid:get_cell(coord)
+			cell.entities[new.id] = nil
+		end
+	else
 		if old then
 			local instance = grid.entity_instance_map[new.id]
 			local cell_instance = grid.cell_instance_map[hex_grid.encode_coord(new.primary_coordinate)]
@@ -73,14 +79,6 @@ function update_entity_client(grid: HexGrid, old: Entity?, new: Entity)
 			if instance then
 				instance.Parent = grid.entity_instance_root
 			end
-		end
-	end
-
-	if new.is_destroyed then
-		client_behavior.on_destroy(new, grid)
-		for _, coord in new.coordinates do
-			local cell = grid:get_cell(coord)
-			cell.entities[new.id] = nil
 		end
 	end
 end

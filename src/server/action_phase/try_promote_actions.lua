@@ -95,7 +95,7 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 					type = "consumed_items",
 					entity_id = entity.id,
 					items = consumed,
-				}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
+				}, hex_grid_mod.neighbors_many_leq(entity.coordinates, 1))
 
 				-- if entity.cost_fulfilled deep_equal entity.cost then entity can promote to
 				if util.deep_equal(entity.cost, entity.cost_fulfilled) then

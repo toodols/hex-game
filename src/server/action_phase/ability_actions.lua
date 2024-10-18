@@ -38,7 +38,7 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState)
 				type = "consumed_items",
 				entity_id = ability.entity_id,
 				items = cost,
-			}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
+			}, hex_grid_mod.neighbors_many_leq(entity.coordinates, 1))
 
 			local cell = grid:get_cell(ability.coordinate)
 			assert(cell, "cell not found")
@@ -59,7 +59,7 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState)
 			local solution_config = grid.entity_configurations[entity.type]
 
 			for _, cell in
-				util.table_filter_map(hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1), function(coord)
+				util.table_filter_map(hex_grid_mod.neighbors_many_leq(entity.coordinates, 1), function(coord)
 					return grid:get_cell(coord)
 				end)
 			do

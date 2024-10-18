@@ -98,7 +98,7 @@ end
 
 local item_colors = {
 	tar = Color3.new(0, 0, 0),
-	bar = Color3.new(0.360784, 0.360784, 0.360784),
+	bar = Color3.new(0.188235, 0.266667, 0.360784),
 	dye = Color3.new(1, 1, 1),
 	pow = Color3.new(1, 0, 0),
 	zap = Color3.new(0.913725, 0.901960, 0.301960),

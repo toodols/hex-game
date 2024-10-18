@@ -190,6 +190,12 @@ function BuildingItem(props: {
 							Text = formatting.format_text(grid, entity_config.description),
 							TextWrapped = true,
 							TextSize = 13,
+							TextTruncate = Enum.TextTruncate.AtEnd,
+						},
+						{
+							SizeConstraint = React.createElement("UISizeConstraint", {
+								MaxSize = Vector2.new(math.huge, 60),
+							}),
 						}
 					),
 					RequiredResearch = entity_config.required_research and React.createElement(
@@ -250,6 +256,9 @@ local BuildingPage = React.forwardRef(function(
 				Padding = UDim.new(0, 4),
 				VerticalAlignment = Enum.VerticalAlignment.Bottom,
 				SortOrder = Enum.SortOrder.LayoutOrder,
+			}),
+			Padding = React.createElement("UIPadding", {
+				PaddingLeft = UDim.new(0, 10),
 			}),
 		},
 		util.table_map(props.page.items, function(item)
@@ -360,9 +369,29 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 			Size = UDim2.new(1, 0, 0, 40),
 		}, {
 			Corner = React.createElement(Corner),
+			Left2 = React.createElement(
+				"Frame",
+				themes.theme_container {
+					Visible = is_expanded,
+				},
+				{
+					Padding = React.createElement("UIPadding", {
+						PaddingLeft = UDim.new(0, 10),
+					}),
+					Title = React.createElement(
+						"TextLabel",
+						themes.theme_title {
+							Text = "Buildings",
+							Size = UDim2.new(0, 0, 1, 0),
+						}
+					),
+				}
+			),
 			Left = React.createElement(
 				"Frame",
-				themes.theme_container {},
+				themes.theme_container {
+					Visible = not is_expanded,
+				},
 				{
 					HorizontalLayout = React.createElement("UIListLayout", {
 						FillDirection = Enum.FillDirection.Horizontal,

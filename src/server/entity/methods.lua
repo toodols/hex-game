@@ -135,7 +135,7 @@ function remove_entity(grid: HexGrid, entity: Entity)
 	publish_event(grid, {
 		type = "removed",
 		entity_id = entity.id,
-	}, hex_grid_mod.neighbors_leq(entity.primary_coordinate, 1))
+	}, hex_grid_mod.neighbors_many_leq(entity.coordinates, 1))
 end
 
 return {

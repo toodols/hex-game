@@ -231,9 +231,11 @@ local rotation_to_direction = {
 	[5] = { -1, 0, 1 },
 	[0] = { -1, 1, 0 },
 }
+
 return {
 	neighbors_eq = coords_mod.neighbors_eq,
 	neighbors_leq = coords_mod.neighbors_leq,
+	neighbors_many_leq = coords_mod.neighbors_many_leq,
 	coords_filter = coords_filter,
 	into_cframe = coords_mod.into_cframe,
 	empty_cell = empty_cell,

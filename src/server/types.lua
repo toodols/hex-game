@@ -10,14 +10,15 @@ type TeamId = types.TeamId
 type EffectiveDamage = types.EffectiveDamage
 type ResearchId = types.ResearchId
 type EncodedCoordinate = types.EncodedCoordinate
+type Damage = types.Damage
 
 export type EntityEvent = {
 	type: "dealt_damage",
-	damage: EffectiveDamage,
+	damage: Damage,
 	entity_id: EntityId,
 } | {
 	type: "took_damage",
-	damage: EffectiveDamage,
+	effective_damage: EffectiveDamage,
 	entity_id: EntityId,
 } | {
 	type: "consumed_items",
