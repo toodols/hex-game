@@ -2,18 +2,16 @@ local registry_mod = require(script.Parent.registry)
 local registry = registry_mod.registry
 local with_defaults = registry_mod.with_defaults
 
-registry["laboratory"] = with_defaults {
-	type = "laboratory",
-	name = "Sage",
-	description = "Allows the research of advanced technology. Has a range of {entity.laboratory.range} tiles",
-	range = 4,
+registry["phony"] = with_defaults {
+	type = "phony",
+	name = "Phony",
+	description = "Can disguise as a different building.",
 	max_health = 3,
 	build_time = 1,
 	cost = {
-		bar = 2,
-		rad = 2,
+		bar = 4,
 	},
-	abilities = {},
+	can_capture = true,
 	layer = registry_mod.layer.building,
 }
 

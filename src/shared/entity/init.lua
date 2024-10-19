@@ -21,6 +21,7 @@ require(script.vault)
 require(script.solution)
 require(script.witness)
 require(script.impression)
+require(script.phony)
 
 function get_effective_health(entity: Entity): number
 	local health = entity.health

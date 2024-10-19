@@ -4,7 +4,7 @@ local with_defaults = registry_mod.with_defaults
 
 registry["extractor"] = with_defaults {
 	type = "extractor",
-	name = "Fountain",
+	name = "Spout",
 	description = "At the cost of {entity.extractor.power_input} power, produces an item each turn",
 	max_health = 2,
 	build_time = 1,
