@@ -67,6 +67,9 @@ function process_queue(grid: HexGrid, action_state: ActionState)
 			end
 		end
 	until should_terminate()
+
+	-- clear action queue
+	grid.action_queue = {}
 end
 
 return {

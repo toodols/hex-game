@@ -57,7 +57,6 @@ local all_symbols = enum {
 	"is_decaying",
 	"decayable",
 	"researches",
-	"obituary",
 	"cost",
 	"inventory",
 	"cost_fulfilled",

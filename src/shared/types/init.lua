@@ -109,8 +109,8 @@ export type Entity = {
 	-- laboratory only
 	researches: Researches?,
 
-	-- cause of death
-	obituary: Damage?,
+	-- Witness only
+	charges: number?,
 
 	-- An entity in blueprint phase
 	cost: { [Item]: number },

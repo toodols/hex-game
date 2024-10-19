@@ -83,8 +83,7 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 					rotation = entry.rotation,
 					primary_coordinate = entry.coordinate,
 					status = "blueprint",
-				}, grid
-)
+				}, grid)
 				dirty_entities[entity.id] = true
 			elseif entry.type == "ability" then
 				local entity = grid.entities[entry.entity_id]
@@ -97,7 +96,6 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 				if not ability then
 					continue
 				end
-				print(entry.ability_type)
 				if entry.ability_type == "scout_attack" or entry.ability_type == "turret_attack" then
 					local in_range = hex_grid_mod.coords_dist(entity.primary_coordinate, entry.coordinate)
 							<= ability.range
@@ -117,7 +115,6 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 					return decision.type == "ability" and decision.ability_type == entry.ability_type
 				end)
 				table.insert(entity.queued_decisions, entry)
-				print(entity)
 				dirty_entities[entity.id] = true
 			elseif entry.type == "rotate_entity" then
 				local entity = grid.entities[entry.entity_id]

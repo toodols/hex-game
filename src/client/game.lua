@@ -225,7 +225,7 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 			end
 		elseif update.type == "entity_event" then
 			local event = update.event
-			if event.event_type == "produced_items" or event.type == "consumed_items" then
+			if event.event_type == "produced_items" or event.event_type == "consumed_items" then
 				local entity_instance = grid.entity_instance_map[event.entity_id]
 				local template = asset_server.load "Billboards/Exchange"
 				local instance = template:Clone()
@@ -242,7 +242,7 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 				end
 				if event.event_type == "produced_items" then
 					instance.Amount.Text = `<font color="#a3e5a0">{display("+", event.items)}</font>`
-				elseif event.type == "consumed_items" then
+				elseif event.event_type == "consumed_items" then
 					instance.Amount.Text = `<font color="#e56b6b">{display("-", event.items)}</font>`
 				end
 				TweenService:Create(instance, TweenInfo.new(4), {

@@ -123,9 +123,9 @@ function apply_damage_on_cells(grid: HexGrid, targets: { CubicCoordinate }, dama
 		end
 	end
 
-	if damage.from then
+	if damage.from ~= nil then
 		table.insert(grid.action_queue, {
-			type = "dealt_damage",
+			type = "entity_event",
 			event_type = "dealt_damage",
 			entity_id = damage.from,
 			damage = damage,

@@ -56,10 +56,10 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 				end
 			end
 			if not valid_systems then
-				table.insert(grid.action_queue, action)
 				continue
 			end
 			for _, system in valid_systems do
+				-- is this blueprint researched?
 				local cell_researches = researches_mod.get_cell_researches(grid, cell, entity.owner)
 				if
 					shared_config.required_research
@@ -67,12 +67,11 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 						return cell_researches[research_id]
 					end)
 				then
-					-- this blueprint is not researched and therefore cannot be promoted
-					table.insert(grid.action_queue, action)
 					continue
 				end
-				local consumed = {}
+
 				-- attempt to satisfy entity.cost_fulfilled as much as possible
+				local consumed = {}
 				for request_item_type, request_amount in entity.cost do
 					if not entity.cost_fulfilled[request_item_type] then
 						entity.cost_fulfilled[request_item_type] = 0
@@ -119,11 +118,6 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 					end
 				end
 			end
-
-			-- if this blueprint is still not promoted, add it back to the queue
-			if entity.status == "blueprint" then
-				table.insert(grid.action_queue, action)
-			end
 		elseif action.type == "try_promote_scaffold" and entity.build_time > 0 then
 			entity.build_time -= 1
 			updates_mod.add_update(grid, {
@@ -132,7 +126,11 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 			})
 		end
 
-		if entity.status == "scaffold" and entity.build_time == 0 then
+		-- if this blueprint is still not promoted, add it back to the queue
+		if entity.status == "blueprint" then
+			table.insert(grid.action_queue, action)
+		-- if this blueprint, now a scaffold has a build time of zero, complete it immediately
+		elseif entity.status == "scaffold" and entity.build_time == 0 then
 			entity.status = "complete"
 			server_behavior.on_completed(entity, grid, action_state)
 			updates_mod.add_update(grid, {
