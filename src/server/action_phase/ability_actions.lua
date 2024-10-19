@@ -2,7 +2,6 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
-local publish_event = require(ServerScriptService.Server.event).publish_event
 
 local util = require(ReplicatedStorage.Shared.util)
 local systems_mod = require(ServerScriptService.Server.systems)
@@ -16,7 +15,7 @@ type ActionState = server_types.ActionState
 
 function handle_ability_actions(grid: HexGrid, action_state: ActionState)
 	for _, ability in
-		util.table_extract(action_state.queue, function(value)
+		util.table_extract(grid.action_queue, function(value)
 			return (value.type == "ability")
 		end)
 	do
@@ -34,11 +33,12 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState)
 				systems_mod.system_consume_item_type(grid, action_state, system, item_type, amount)
 			end
 
-			publish_event(grid, {
-				type = "consumed_items",
+			table.insert(grid.action_queue, {
+				type = "entity_event",
+				event_type = "consumed_items",
 				entity_id = ability.entity_id,
 				items = cost,
-			}, hex_grid_mod.neighbors_many_leq(entity.coordinates, 1))
+			})
 
 			local cell = grid:get_cell(ability.coordinate)
 			assert(cell, "cell not found")

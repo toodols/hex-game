@@ -2,7 +2,6 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
-local publish_event = require(ServerScriptService.Server.event).publish_event
 local server_util = require(ServerScriptService.Server.util)
 local updates_mod = require(ServerScriptService.Server.updates)
 
@@ -15,10 +14,10 @@ local researches_mod = require(ReplicatedStorage.Shared.researches)
 type HexGrid = types.HexGrid
 type System = server_types.System
 type ActionState = server_types.ActionState
-type EntityAction = server_types.EntityAction
+type EntityAction = types.EntityAction
 
 function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
-	local try_promote_actions: { EntityAction } = util.table_extract(action_state.queue, function(action)
+	local try_promote_actions: { EntityAction } = util.table_extract(grid.action_queue, function(action)
 		if action.type == "try_promote_blueprint" or action.type == "try_promote_scaffold" then
 			return true
 		end
@@ -57,7 +56,7 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 				end
 			end
 			if not valid_systems then
-				table.insert(action_state.queue, action)
+				table.insert(grid.action_queue, action)
 				continue
 			end
 			for _, system in valid_systems do
@@ -69,7 +68,7 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 					end)
 				then
 					-- this blueprint is not researched and therefore cannot be promoted
-					table.insert(action_state.queue, action)
+					table.insert(grid.action_queue, action)
 					continue
 				end
 				local consumed = {}
@@ -91,12 +90,12 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 					end
 				end
 
-				publish_event(grid, {
-					type = "consumed_items",
+				table.insert(grid.action_queue, {
+					type = "entity_event",
+					event_type = "consumed_items",
 					entity_id = entity.id,
 					items = consumed,
-				}, hex_grid_mod.neighbors_many_leq(entity.coordinates, 1))
-
+				})
 				-- if entity.cost_fulfilled deep_equal entity.cost then entity can promote to
 				if util.deep_equal(entity.cost, entity.cost_fulfilled) then
 					entity.status = "scaffold"
@@ -123,7 +122,7 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 
 			-- if this blueprint is still not promoted, add it back to the queue
 			if entity.status == "blueprint" then
-				table.insert(action_state.queue, action)
+				table.insert(grid.action_queue, action)
 			end
 		elseif action.type == "try_promote_scaffold" and entity.build_time > 0 then
 			entity.build_time -= 1

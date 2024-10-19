@@ -135,4 +135,5 @@ return {
 	into_vec3 = into_vec3,
 	into_cframe = into_cframe,
 	from_vec3 = from_vec3,
+	coords_lerp = coords_lerp,
 }

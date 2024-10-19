@@ -102,13 +102,7 @@ function add_update(grid: HexGrid, event: GridUpdate)
 	table.insert(grid.updates_buffer, event)
 end
 
-function add_update_and_flush(grid: HexGrid, event: GridUpdate)
-	add_update(grid, event)
-	flush_updates(grid)
-end
-
 return {
 	flush_updates = flush_updates,
 	add_update = add_update,
-	add_update_and_flush = add_update_and_flush,
 }

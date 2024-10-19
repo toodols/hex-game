@@ -17,7 +17,7 @@ registry["laboratory"] = with_defaults {
 	autogenerate_wires = true,
 	tick = function(self: Entity, grid: HexGrid, action_state: ActionState)
 		if self.status == "complete" and self.owner ~= grid.neutral_team then
-			table.insert(action_state.queue, {
+			table.insert(grid.action_queue, {
 				type = "advance_research",
 				entity_id = self.id,
 			})

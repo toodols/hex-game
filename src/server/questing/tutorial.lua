@@ -144,10 +144,11 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 				computed_mod.compute_visibility(grid)
 				computed_mod.compute_presence(grid)
 
-				updates_mod.add_update_and_flush(grid, {
+				updates_mod.add_update(grid, {
 					type = "cells",
 					cells = grid.cells,
 				})
+				updates_mod.flush_updates(grid)
 				wait(1)
 				quest_methods.quest_advance(self, grid)
 			end)

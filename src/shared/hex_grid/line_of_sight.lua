@@ -26,14 +26,6 @@ function blocked(grid: HexGrid, cell: HexCell, team: TeamId?)
 	return false
 end
 
-function coords_lerp(a, b, t): { number }
-	return {
-		a[1] + (b[1] - a[1]) * t,
-		a[2] + (b[2] - a[2]) * t,
-		a[3] + (b[3] - a[3]) * t,
-	}
-end
-
 function coords_round(coord: { number }): { CubicCoordinate }
 	local q = math.floor(coord[1] + 0.5)
 	local r = math.floor(coord[2] + 0.5)
@@ -74,7 +66,7 @@ function hex_line(start, finish)
 	local results = {}
 	for i = 0, N do
 		local t = i / N
-		local interpolated = coords_lerp(start, finish, t)
+		local interpolated = coords_mod.coords_lerp(start, finish, t)
 		table.insert(results, coords_round(interpolated))
 	end
 	return results

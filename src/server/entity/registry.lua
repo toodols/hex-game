@@ -14,7 +14,7 @@ type CellType = types.CellType
 type TeamId = types.TeamId
 type CubicCoordinate = types.CubicCoordinate
 type DamageResult = server_types.DamageResult
-type EntityEvent = server_types.EntityEvent
+type EntityEvent = types.EntityEvent
 
 export type ServerEntityBehavior = {
 	type: string,
@@ -33,7 +33,7 @@ export type ServerEntityBehavior = {
 	-- laboratory only
 	on_research_completed: (self: Entity, grid: HexGrid, research_id: string) -> ()?,
 	autogenerate_wires: boolean?,
-	on_event: (self: Entity, grid: HexGrid, event: EntityEvent) -> (),
+	on_event: (self: Entity, grid: HexGrid, event: EntityEvent, action_state: ActionState) -> (),
 }
 
 function default_take_damage(entity: Entity, grid: HexGrid, damage: Damage, gauge: number): DamageResult

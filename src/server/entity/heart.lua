@@ -18,7 +18,7 @@ registry["heart"] = with_defaults {
 	tick = function(self: Entity, grid: HexGrid, action_state: ActionState)
 		local config = grid.entity_configurations[self.type]
 		if self.status == "complete" then
-			table.insert(action_state.queue, {
+			table.insert(grid.action_queue, {
 				entity_id = self.id,
 				type = "exchange",
 				-- output_items = if self.should_output == 0 then { "bar" } else {},

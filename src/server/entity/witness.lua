@@ -8,13 +8,15 @@ local with_defaults = registry_mod.with_defaults
 
 type Entity = types.Entity
 type HexGrid = types.HexGrid
-type EntityEvent = server_types.EntityEvent
+type EntityEvent = types.EntityEvent
+type ActionState = server_types.ActionState
 
 registry["witness"] = with_defaults {
 	autogenerate_wires = true,
 	on_completed = function(self: Entity, grid: HexGrid) end,
-	on_event = function(self: Entity, grid: HexGrid, event: EntityEvent)
-		if event.type == "dealt_damage" then
+	on_event = function(self: Entity, grid: HexGrid, event: EntityEvent, action_state: ActionState)
+		if event.event_type == "dealt_damage" then
+
 		end
 	end,
 }

@@ -50,6 +50,7 @@ function grid_new_team(self: HexGrid, players: { Player }?, color: TeamColor?, n
 	return self.teams[#self.teams]
 end
 
+-- Remove entities that are is_destroyed from grid.entities to reclaim memory
 function grid_purge_dead_entities(self: HexGrid)
 	for entity_id, entity in self.entities do
 		if entity.is_destroyed then
@@ -82,6 +83,7 @@ function grid_get_player_team(self: HexGrid, player: Player): TeamData
 	return self.teams[0]
 end
 
+-- Gets a table of entities that fit props
 function grid_query_entity(self: HexGrid, props: any): { Entity }
 	local results = {}
 	local function pred(entity: Entity)
@@ -139,6 +141,7 @@ function new_grid_empty(entity_config: { [string]: EntityConfiguration }?, globa
 		speed_base = 5,
 		spectator_visibilities = {},
 		updates_buffer = {},
+		action_queue = {},
 		skipped = {},
 		current_skips = 0,
 		needed_skips = 0,

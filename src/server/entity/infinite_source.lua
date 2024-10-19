@@ -20,7 +20,7 @@ registry["infinite_source"] = with_defaults {
 	end,
 	tick = function(self: Entity, grid: HexGrid, action_state: ActionState)
 		if self.mode == "active" then
-			table.insert(action_state.queue, {
+			table.insert(grid.action_queue, {
 				entity_id = self.id,
 				type = "exchange",
 				output_power = 999,

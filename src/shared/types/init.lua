@@ -411,6 +411,64 @@ export type GlobalConfiguration = {
 	decaying_enabled: boolean,
 }
 
+export type EntityEvent = {
+	event_type: "dealt_damage",
+	damage: Damage,
+	entity_id: EntityId,
+} | {
+	event_type: "took_damage",
+	effective_damage: EffectiveDamage,
+	entity_id: EntityId,
+} | {
+	event_type: "consumed_items",
+	items: { [Item]: number },
+	entity_id: EntityId,
+} | {
+	event_type: "produced_items",
+	items: { [Item]: number },
+	entity_id: EntityId,
+} | {
+	event_type: "status_changed",
+	entity_id: EntityId,
+} | {
+	event_type: "removed",
+	entity_id: EntityId,
+} | {
+	event_type: "created",
+	entity_id: EntityId,
+} | {
+	event_type: "update",
+	entity_id: EntityId,
+} | {
+	event_type: "research_completed",
+	entity_id: EntityId,
+	research_id: ResearchId,
+}
+
+export type EntityAction =
+	-- attempt to fill as much of the blueprint as possible from inventories and overflow
+	-- if enough items are fulfilled, the blueprint promotes to scaffold. if the build time is 0, it automatically promotes to complete
+	{
+		type: "try_promote_blueprint",
+		entity_id: EntityId,
+	}
+	-- advances scaffold by 1 turn
+	-- if build time is 0, it is promoted to complete
+	| {
+		type: "try_promote_scaffold",
+		entity_id: EntityId,
+	}
+	| {
+		type: "exchange",
+		input_items: { [Item]: number }?,
+		input_power: number?,
+		output_items: { Item }?,
+		output_power: number?,
+		on_success: (grid: HexGrid) -> (),
+	}
+	| (EntityEvent & { type: "entity_event" })
+	| Decision
+
 export type HexGrid = {
 	-- instances are always nil on the server, while always a table on the client
 	entity_instance_map: InstanceMap<EntityId>,
@@ -438,6 +496,9 @@ export type HexGrid = {
 	get_allies: (self: HexGrid, team: TeamId) -> { TeamId },
 
 	-- get_team_coalition: (self: HexGrid, team: TeamId) -> CoalitionData,
+
+	-- server only
+	action_queue: { EntityAction },
 
 	-- these fields are more convenient inlined
 	-- append only

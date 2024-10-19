@@ -50,7 +50,7 @@ registry_mod.registry["extractor"] = registry_mod.with_defaults {
 					warn "Extractor is placed on a basic cell. This might be a bug"
 				end
 				if items then
-					table.insert(action_state.queue, {
+					table.insert(grid.action_queue, {
 						type = "exchange",
 						input_power = config.input_power,
 						output_items = items,

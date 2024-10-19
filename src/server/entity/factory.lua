@@ -20,7 +20,7 @@ registry["factory"] = with_defaults {
 		if self.status == "complete" and self.enabled and self.owner ~= grid.neutral_team then
 			local recipe = config.recipes[self.current_recipe]
 			if recipe then
-				table.insert(action_state.queue, {
+				table.insert(grid.action_queue, {
 					entity_id = self.id,
 					type = "exchange",
 					input_power = recipe.input_power,

@@ -10,18 +10,22 @@ local server_entity_mod = require(ServerScriptService.Server.entity)
 type HexGrid = types.HexGrid
 type ActionState = server_types.ActionState
 
+--- Decays entities that are not connected. Requires systems to be created
 function do_entity_decay(grid: HexGrid, action_state: ActionState)
+	local decayable_entities = {}
+
+	-- initially mark all decayable entities as decayable
 	for _, entity in grid.entities do
-		-- initially mark all decayable entities to decayable
 		if
 			grid.global_configuration.decaying_enabled
 			and entity.status ~= "blueprint"
 			and entity.owner ~= grid.neutral_team
 			and entity.decayable
 		then
-			action_state.decayable_entities[entity.id] = true
+			decayable_entities[entity.id] = true
 		end
 	end
+
 	-- remove connected entities from decay
 	for _, system in action_state.systems do
 		local has_heart = false
@@ -44,7 +48,7 @@ function do_entity_decay(grid: HexGrid, action_state: ActionState)
 				for entity_id in grid.cells[neighbor].entities do
 					local entity = grid.entities[entity_id]
 					if entity.status == "scaffold" then
-						action_state.decayable_entities[entity_id] = false
+						decayable_entities[entity_id] = false
 					end
 				end
 			end
@@ -52,13 +56,13 @@ function do_entity_decay(grid: HexGrid, action_state: ActionState)
 
 		for entity_id in system.entities do
 			if has_heart then
-				action_state.decayable_entities[entity_id] = false
+				decayable_entities[entity_id] = false
 			end
 		end
 	end
 
 	-- make them decay
-	for entity_id, should_decay in action_state.decayable_entities do
+	for entity_id, should_decay in decayable_entities do
 		local entity = grid.entities[entity_id]
 		if entity == nil then
 			warn("entity not found", entity_id)

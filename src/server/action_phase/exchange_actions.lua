@@ -2,20 +2,18 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
-local publish_event = require(ServerScriptService.Server.event).publish_event
 local util = require(ReplicatedStorage.Shared.util)
 local systems_mod = require(ServerScriptService.Server.systems)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local items_mod = require(ReplicatedStorage.Shared.items)
 
 type HexGrid = types.HexGrid
 type System = server_types.System
 type ActionState = server_types.ActionState
-type EntityAction = server_types.EntityAction
+type EntityAction = types.EntityAction
 
 function handle_exchange_actions(grid: HexGrid, action_state: ActionState)
 	for _, exchange_action: any in
-		util.table_extract(action_state.queue, function(action)
+		util.table_extract(grid.action_queue, function(action)
 			return (action.type == "exchange" or action.type == "exchange_promise")
 		end)
 	do
@@ -29,18 +27,19 @@ function handle_exchange_actions(grid: HexGrid, action_state: ActionState)
 			(input_items and not systems_mod.system_has_items(grid, action_state, system, input_items))
 			or (system.power < input_power)
 		then
-			table.insert(action_state.queue, exchange_action)
+			table.insert(grid.action_queue, exchange_action)
 			continue
 		end
 		if input_items then
 			for item_type, amount in input_items do
 				systems_mod.system_consume_item_type(grid, action_state, system, item_type, amount)
 			end
-			publish_event(grid, {
-				type = "consumed_items",
+			table.insert(grid.action_queue, {
+				type = "entity_event",
+				event_type = "consumed_items",
 				entity_id = exchange_action.entity_id,
 				items = input_items,
-			}, hex_grid_mod.neighbors_many_leq(entity.coordinates, 1))
+			})
 		end
 		system.power -= input_power
 		if exchange_action.on_success then
@@ -50,11 +49,12 @@ function handle_exchange_actions(grid: HexGrid, action_state: ActionState)
 			-- system_add_items mutates output_items so count it beforehand
 			local counted_output_items = items_mod.into_counted_items(output_items)
 			systems_mod.system_add_items(grid, action_state, system, output_items)
-			publish_event(grid, {
-				type = "produced_items",
+			table.insert(grid.action_queue, {
+				type = "entity_event",
+				event_type = "produced_items",
 				entity_id = exchange_action.entity_id,
 				items = counted_output_items,
-			}, hex_grid_mod.neighbors_many_leq(entity.coordinates, 1))
+			})
 		end
 		system.power += output_power
 	end

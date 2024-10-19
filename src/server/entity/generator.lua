@@ -15,7 +15,7 @@ registry["generator"] = with_defaults {
 	tick = function(self: Entity, grid: HexGrid, action_state: ActionState)
 		local config = grid.entity_configurations[self.type]
 		if self.status == "complete" and self.owner ~= grid.neutral_team then
-			table.insert(action_state.queue, {
+			table.insert(grid.action_queue, {
 				entity_id = self.id,
 				type = "exchange",
 				output_power = config.output_power,

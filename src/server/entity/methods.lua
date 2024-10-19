@@ -7,7 +7,6 @@ local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local registry = require(script.Parent.registry).registry
 local server_util = require(ServerScriptService.Server.util)
 local server_types = require(ServerScriptService.Server.types)
-local publish_event = require(ServerScriptService.Server.event).publish_event
 local updates_mod = require(ServerScriptService.Server.updates)
 
 type HexGrid = types.HexGrid
@@ -132,10 +131,11 @@ function remove_entity(grid: HexGrid, entity: Entity)
 	end
 	entity.is_destroyed = true
 	updates_mod.add_update(grid, { type = "entity_update", entity = entity })
-	publish_event(grid, {
+	table.insert(grid.action_queue, {
+		event_type = "entity_event",
 		type = "removed",
 		entity_id = entity.id,
-	}, hex_grid_mod.neighbors_many_leq(entity.coordinates, 1))
+	})
 end
 
 return {

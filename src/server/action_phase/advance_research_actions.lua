@@ -3,19 +3,17 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
 local updates_mod = require(ServerScriptService.Server.updates)
-local publish_event = require(ServerScriptService.Server.event).publish_event
 
 local util = require(ReplicatedStorage.Shared.util)
 local systems_mod = require(ServerScriptService.Server.systems)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 
 type HexGrid = types.HexGrid
 type System = server_types.System
 type ActionState = server_types.ActionState
-type EntityAction = server_types.EntityAction
+type EntityAction = types.EntityAction
 
 function handle_advance_research_actions(grid: HexGrid, action_state: ActionState)
-	local advance_research_actions: { EntityAction } = util.table_extract(action_state.queue, function(action)
+	local advance_research_actions: { EntityAction } = util.table_extract(grid.action_queue, function(action)
 		return action.type == "advance_research"
 	end)
 	for _, action in advance_research_actions do
@@ -36,11 +34,12 @@ function handle_advance_research_actions(grid: HexGrid, action_state: ActionStat
 					systems_mod.system_consume_item_type(grid, action_state, system, item_type, amount)
 				end
 
-				publish_event(grid, {
-					type = "consumed_items",
+				table.insert(grid.action_queue, {
+					type = "entity_event",
+					event_type = "consumed_items",
 					items = research_state.cost,
 					entity_id = entity.id,
-				}, hex_grid_mod.neighbors_many_leq(entity.coordinates, 1))
+				})
 
 				research_state.cost_is_paid = true
 				updates_mod.add_update(grid, {
@@ -61,11 +60,12 @@ function handle_advance_research_actions(grid: HexGrid, action_state: ActionStat
 					type = "entity_update",
 					entity = entity,
 				})
-				publish_event(grid, {
-					type = "research_completed",
+				table.insert(grid.action_queue, {
+					type = "entity_event",
+					event_type = "research_completed",
 					entity_id = entity.id,
 					research_id = research_id,
-				}, hex_grid_mod.neighbors_many_leq(entity.coordinates, 1))
+				})
 			else
 				break
 			end
