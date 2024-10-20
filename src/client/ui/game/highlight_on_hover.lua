@@ -53,7 +53,7 @@ function HighlightOnHover(props: { Text: string, coords: { CubicCoordinate }, La
 		},
 		{
 			Corner = React.createElement(Corner),
-			Padding = React.createElement("UIPadding", {
+			SidePad = React.createElement("UIPadding", {
 				PaddingLeft = UDim.new(0, 5),
 				PaddingRight = UDim.new(0, 5),
 			}),

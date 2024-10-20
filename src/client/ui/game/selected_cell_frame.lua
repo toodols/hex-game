@@ -91,7 +91,7 @@ function SelectedCellFrame(props: { toggle_submenu: (submenu: any) -> (), select
 		AnchorPoint = Vector2.new(0, 1),
 		BackgroundTransparency = 1,
 		Position = UDim2.new(-250, 250, 20, -20),
-		Size = UDim2.fromOffset(250, 300),
+		Size = UDim2.new(0, 250, 0, 300),
 	}, {
 		VerticalLayout = React.createElement("UIListLayout", {
 			HorizontalAlignment = Enum.HorizontalAlignment.Center,
@@ -164,7 +164,7 @@ function SelectedCellFrame(props: { toggle_submenu: (submenu: any) -> (), select
 							props.toggle_submenu { type = "build", cell = props.selected_cells[1] }
 						end,
 						Position = UDim2.new(1, 0, 0.5, 0),
-						Size = UDim2.fromOffset(89, 40),
+						Size = UDim2.new(0, 89, 0, 40),
 					}, {
 						Corner = React.createElement(Corner),
 
@@ -199,8 +199,8 @@ function SelectedCellFrame(props: { toggle_submenu: (submenu: any) -> (), select
 							BorderSizePixel = 0,
 							Image = "rbxassetid://6034275725",
 							ImageTransparency = 0.9,
-							Position = UDim2.fromScale(0.135, -0.375),
-							Size = UDim2.fromOffset(100, 100),
+							Position = UDim2.new(0.135, 0, -0.375, 0),
+							Size = UDim2.new(0, 100, 0, 100),
 						}),
 
 						Image2 = React.createElement("ImageLabel", {
@@ -210,7 +210,7 @@ function SelectedCellFrame(props: { toggle_submenu: (submenu: any) -> (), select
 							BorderSizePixel = 0,
 							Image = "rbxassetid://6034275725",
 							Position = UDim2.new(0.292, 0, 0, 0),
-							Size = UDim2.fromOffset(42, 40),
+							Size = UDim2.new(0, 42, 0, 40),
 						}),
 					})
 					else nil,

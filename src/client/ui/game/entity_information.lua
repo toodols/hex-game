@@ -14,11 +14,13 @@ local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local client_entity_mod = require(ReplicatedStorage.Client.ui.Parent.entity)
 local context_mod = require(ReplicatedStorage.Client.ui.context)
 local themes = require(ReplicatedStorage.Client.ui.themes)
-local ActionButton = require(script.Parent.action_button).ActionButton
-local Cost = require(script.Parent.cost).Cost
 local MainContext = context_mod.MainContext
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
+
+local ItemFiltersPreview = require(script.Parent.item_filters).ItemFiltersPreview
+local ActionButton = require(script.Parent.action_button).ActionButton
+local Items = require(script.Parent.items).Items
 local Corner = util_components.Corner
 local Separator = util_components.Separator
 local HighlightOnHover = require(script.Parent.highlight_on_hover).HighlightOnHover
@@ -46,8 +48,8 @@ function Hitpoints(props: { entity: Entity })
 		},
 		{
 			GridLayout = React.createElement("UIGridLayout", {
-				CellPadding = UDim2.fromOffset(7, 7),
-				CellSize = UDim2.fromOffset(6, 6),
+				CellPadding = UDim2.new(0, 7, 0, 7),
+				CellSize = UDim2.new(0, 6, 0, 6),
 				HorizontalAlignment = Enum.HorizontalAlignment.Right,
 				SortOrder = Enum.SortOrder.LayoutOrder,
 				VerticalAlignment = Enum.VerticalAlignment.Center,
@@ -78,7 +80,7 @@ function Hitpoints(props: { entity: Entity })
 				BorderSizePixel = 1,
 				BorderColor3 = Color3.fromRGB(255, 255, 255),
 				BackgroundColor3 = Color3.new(0, 0, 0),
-				Size = UDim2.fromOffset(100, 100),
+				Size = UDim2.new(0, 100, 0, 100),
 			})
 			else util.table_map((util.range(math.max(entity.max_health, shield_health))), function(i)
 				local color
@@ -100,7 +102,7 @@ function Hitpoints(props: { entity: Entity })
 				return React.createElement("Frame", {
 					BackgroundColor3 = color,
 					BorderSizePixel = 0,
-					Size = UDim2.fromOffset(100, 100),
+					Size = UDim2.new(0, 100, 0, 100),
 				})
 			end)
 	)
@@ -192,7 +194,7 @@ function EntityInformation(props: {
 		BorderSizePixel = 0,
 		ClipsDescendants = true,
 		LayoutOrder = -shared_behavior.layer,
-		Position = UDim2.fromScale(1.64, -0.264),
+		Position = UDim2.new(1.64, 0, -0.264, 0),
 		ZIndex = 2,
 		ref = ref,
 	}, {
@@ -277,6 +279,7 @@ function EntityInformation(props: {
 					}),
 					VerticalLayout = React.createElement("UIListLayout", {
 						SortOrder = Enum.SortOrder.LayoutOrder,
+						Padding = UDim.new(0, 5),
 					}),
 
 					Description = React.createElement(
@@ -284,7 +287,7 @@ function EntityInformation(props: {
 						themes.theme_description {
 							AutomaticSize = Enum.AutomaticSize.Y,
 							LayoutOrder = 2,
-							Size = UDim2.new(1, 0, 0, 30),
+							Size = UDim2.new(1, 0, 0, 20),
 							Text = formatting.format_text(grid, shared_behavior.description),
 						}
 					),
@@ -301,7 +304,7 @@ function EntityInformation(props: {
 						themes.theme_description {
 							AutomaticSize = Enum.AutomaticSize.Y,
 							LayoutOrder = 4,
-							Size = UDim2.new(1, 0, 0, 30),
+							Size = UDim2.new(1, 0, 0, 20),
 							Text = "Status: " .. entity.status,
 						}
 					),
@@ -309,7 +312,7 @@ function EntityInformation(props: {
 						"TextLabel",
 						themes.theme_description {
 							LayoutOrder = 5,
-							Size = UDim2.new(1, 0, 0, 30),
+							Size = UDim2.new(1, 0, 0, 20),
 							Text = "Decay: " .. tostring(entity.decay),
 						}
 					),
@@ -317,57 +320,69 @@ function EntityInformation(props: {
 						"TextLabel",
 						themes.theme_description {
 							LayoutOrder = 5,
-							Size = UDim2.new(1, 0, 0, 30),
+							Size = UDim2.new(1, 0, 0, 20),
 							Text = "Turns until built: " .. tostring(entity.build_time),
 						}
 					),
 					ShouldOutput = entity.type == "extractor" and React.createElement(ShouldOutput, {
 						entity = entity,
 					}),
-					Items = entity.inventory and React.createElement(
-						"Frame",
-						{
-							BackgroundTransparency = 1,
-							LayoutOrder = 6,
-							AutomaticSize = Enum.AutomaticSize.Y,
-							Size = UDim2.new(1, 0, 0, 0),
-						},
-						{
-							HorizontalLayout = React.createElement("UIListLayout", {
-								SortOrder = Enum.SortOrder.LayoutOrder,
-								FillDirection = Enum.FillDirection.Horizontal,
-								Padding = UDim.new(0, 8),
-								VerticalAlignment = Enum.VerticalAlignment.Center,
-							}),
-							ItemsLabel = React.createElement(
-								"TextLabel",
-								themes.theme_description {
-									LayoutOrder = 1,
-									Size = UDim2.new(0, 0, 0, 30),
-									Text = "Items",
-								}
-							),
-						},
-						(function()
-							local items = items_mod.into_counted_items(entity.inventory.items)
-							return React.createElement(Cost, {
-								cost = items,
-								LayoutOrder = 2,
-							})
-						end)()
-					),
+					Items = entity.inventory and React.createElement("Frame", {
+						BackgroundTransparency = 1,
+						LayoutOrder = 6,
+						AutomaticSize = Enum.AutomaticSize.Y,
+						Size = UDim2.new(1, 0, 0, 0),
+					}, {
+						HorizontalLayout = React.createElement("UIListLayout", {
+							SortOrder = Enum.SortOrder.LayoutOrder,
+							FillDirection = Enum.FillDirection.Horizontal,
+							Padding = UDim.new(0, 8),
+							VerticalAlignment = Enum.VerticalAlignment.Center,
+						}),
+						ItemsLabel = React.createElement(
+							"TextLabel",
+							themes.theme_description {
+								LayoutOrder = 1,
+								Size = UDim2.new(0, 0, 0, 20),
+								Text = "Items",
+							}
+						),
+						Items = React.createElement(Items, {
+							items = items_mod.into_counted_items(entity.inventory.items),
+							LayoutOrder = 2,
+						}),
+					}),
 					Costs = entity.status == "blueprint" and React.createElement("Frame", {
 						BackgroundTransparency = 1,
 						LayoutOrder = 6,
 						AutomaticSize = Enum.AutomaticSize.Y,
 						Size = UDim2.new(1, 0, 0, 0),
 					}, {
-						Cost = React.createElement(Cost, {
-							cost = util.table_map(entity.cost, function(v, k)
+						Items = React.createElement(Items, {
+							items = util.table_map(entity.cost, function(v, k)
 								return `{entity.cost_fulfilled[k] or 0}/{v}`
 							end),
 						}),
 					}),
+
+					Gap = React.createElement("Frame", {
+						BackgroundTransparency = 1,
+						LayoutOrder = 7,
+						Size = UDim2.new(1, 0, 0, 5),
+					}),
+
+					ItemFiltersPreview = if entity.inventory
+						then React.createElement(ItemFiltersPreview, {
+							LayoutOrder = 8,
+							entity = entity,
+							open = function()
+								props.toggle_submenu {
+									type = "item_filters",
+									entity_id = entity.id,
+								}
+							end,
+						})
+						else nil,
 
 					Range = if entity.type == "laboratory"
 						then React.createElement(HighlightOnHover, {
@@ -512,6 +527,7 @@ function EntityInformation(props: {
 								}
 							end,
 						}),
+
 					OpenResearchButton = entity.owner == player_team.id
 						and (entity.type == "laboratory")
 						and entity.status == "complete"

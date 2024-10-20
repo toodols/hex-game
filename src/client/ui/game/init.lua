@@ -21,6 +21,7 @@ local Research = require(script.research).Research
 local TopCenter = require(script.top_center).TopCenter
 local SelectedCellFrame = require(script.selected_cell_frame).SelectedCellFrame
 local TileAlerts = require(script.tile_alerts).TileAlerts
+local ItemFilters = require(script.item_filters).ItemFilters
 local util_components = require(script.Parent.util_components)
 
 local MainContext = context_mod.MainContext
@@ -67,6 +68,11 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode } })
 					set_submenu {}
 				end,
 			}),
+			ItemFilters = if submenu.type == "item_filters"
+				then React.createElement(ItemFilters, {
+					entity_id = submenu.entity_id,
+				})
+				else nil,
 			Center = React.createElement("Frame", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundTransparency = 1,
@@ -134,7 +140,7 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode } })
 					"Frame",
 					themes.theme_solid {
 						LayoutOrder = 1,
-						Size = UDim2.fromOffset(40, 40),
+						Size = UDim2.new(0, 40, 0, 40),
 					},
 					{
 						ImageButton = React.createElement("ImageButton", {

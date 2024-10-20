@@ -89,7 +89,6 @@ function TileAlert(props: { adornee: Instance, indicators: { [string]: number } 
 				{
 					BackgroundTransparency = 1,
 					Size = UDim2.new(1, 0, 0.5, 0),
-					Transparency = 1,
 				},
 				{
 					VerticalLayout = React.createElement("UIListLayout", {

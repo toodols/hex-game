@@ -7,7 +7,7 @@ local items_mod = require(ReplicatedStorage.Shared.items)
 type Item = types.Item
 
 -- Displays items labeled with numbers
-function Cost(props: { LayoutOrder: number?, cost: { [Item]: number | string } })
+function Items(props: { LayoutOrder: number?, items: { [Item]: number | string } })
 	return React.createElement(
 		"Frame",
 		{
@@ -22,11 +22,11 @@ function Cost(props: { LayoutOrder: number?, cost: { [Item]: number | string } }
 				SortOrder = Enum.SortOrder.LayoutOrder,
 			}),
 		},
-		util.table_map(props.cost, function(v, k)
+		util.table_map(props.items, function(v, k)
 			return React.createElement("Frame", {
 				AutomaticSize = Enum.AutomaticSize.X,
 				BackgroundTransparency = 1,
-				Size = UDim2.fromOffset(0, 20),
+				Size = UDim2.new(0, 0, 0, 20),
 			}, {
 				TextLabel = React.createElement("TextLabel", {
 					AutomaticSize = Enum.AutomaticSize.X,
@@ -40,7 +40,7 @@ function Cost(props: { LayoutOrder: number?, cost: { [Item]: number | string } }
 
 				Icon = React.createElement("Frame", {
 					BackgroundTransparency = 1,
-					Size = UDim2.fromOffset(10, 10),
+					Size = UDim2.new(0, 10, 0, 10),
 				}, {
 					Inner = React.createElement("Frame", {
 						AnchorPoint = Vector2.new(0.5, 0.5),
@@ -49,7 +49,7 @@ function Cost(props: { LayoutOrder: number?, cost: { [Item]: number | string } }
 						BorderSizePixel = 0,
 						Position = UDim2.new(0.5, 0, 0.5, 0),
 						Rotation = 45,
-						Size = UDim2.fromOffset(7, 7),
+						Size = UDim2.new(0, 7, 0, 7),
 					}),
 				}),
 
@@ -60,7 +60,7 @@ function Cost(props: { LayoutOrder: number?, cost: { [Item]: number | string } }
 					VerticalAlignment = Enum.VerticalAlignment.Center,
 				}),
 
-				UIPadding = React.createElement("UIPadding", {
+				SidePad = React.createElement("UIPadding", {
 					PaddingLeft = UDim.new(0, 4),
 					PaddingRight = UDim.new(0, 4),
 				}),
@@ -69,4 +69,4 @@ function Cost(props: { LayoutOrder: number?, cost: { [Item]: number | string } }
 	)
 end
 
-return { Cost = Cost }
+return { Items = Items }

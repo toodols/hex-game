@@ -51,7 +51,6 @@ function ExpandedMember(props: {
 				),
 				Position = UDim2.new(0.5, 0, 0.5, 0),
 				Size = UDim2.new(0, 30, 0, 30),
-				Transparency = 0.5,
 			}, {
 				UICorner = React.createElement(Corner),
 			}),

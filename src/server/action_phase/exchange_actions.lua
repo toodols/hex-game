@@ -18,7 +18,6 @@ function handle_exchange_actions(grid: HexGrid, action_state: ActionState)
 		end)
 	do
 		local system = action_state.system_by_entity_id[exchange_action.entity_id]
-		local entity = grid.entities[exchange_action.entity_id]
 		local input_items = exchange_action.input_items
 		local output_items = exchange_action.output_items
 		local input_power = exchange_action.input_power or 0

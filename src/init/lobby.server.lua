@@ -82,7 +82,8 @@ function room_membership_changed(room: Room)
 				teleport_options:SetTeleportData {
 					room = room,
 				}
-				TeleportService:TeleportAsync(placeids.game, party, teleport_options)
+				local code = TeleportService:ReserveServer(placeids.game)
+				TeleportService:TeleportToPrivateServer(placeids.game, code, party, nil, teleport_options)
 			end)
 		else
 			if room_timers[room.id] then

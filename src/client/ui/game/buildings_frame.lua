@@ -9,7 +9,7 @@ local formatting = require(ReplicatedStorage.Shared.formatting)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
 
 local themes = require(ReplicatedStorage.Client.ui.themes)
-local Cost = require(script.Parent.cost).Cost
+local Items = require(script.Parent.items).Items
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local client_entity_mod = require(ReplicatedStorage.Client.ui.Parent.entity)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
@@ -103,13 +103,12 @@ function BuildingItem(props: {
 
 	return React.createElement("Frame", {
 		BackgroundTransparency = 1,
-		Size = UDim2.fromOffset(160, if props.do_animation then 0 else 200),
-		Transparency = 1,
+		Size = UDim2.new(0, 160, 0, if props.do_animation then 0 else 200),
 	}, {
 		TextButton = React.createElement(
 			"TextButton",
 			themes.theme_solid {
-				Position = if props.do_animation then UDim2.fromOffset(0, -30) else UDim2.fromOffset(0, 0),
+				Position = if props.do_animation then UDim2.new(0, 0, 0, -30) else UDim2.new(0, 0, 0, 0),
 				Size = UDim2.new(1, 0, 0, 200),
 				Text = "",
 				TextSize = 14,
@@ -126,7 +125,7 @@ function BuildingItem(props: {
 				[React.Event.MouseEnter] = function()
 					if props.do_animation then
 						TweenService:Create(button_ref.current, TweenInfo.new(0.3), {
-							Position = UDim2.fromOffset(0, -200),
+							Position = UDim2.new(0, 0, 0, -200),
 							BackgroundColor3 = Color3.fromRGB(30, 30, 30),
 						}):Play()
 					end
@@ -134,7 +133,7 @@ function BuildingItem(props: {
 				[React.Event.MouseLeave] = function()
 					if props.do_animation then
 						TweenService:Create(button_ref.current, TweenInfo.new(0.3), {
-							Position = UDim2.fromOffset(0, -30),
+							Position = UDim2.new(0, 0, 0, -30),
 							BackgroundColor3 = Color3.fromRGB(13, 13, 13),
 						}):Play()
 					end
@@ -219,8 +218,8 @@ function BuildingItem(props: {
 							TextSize = 13,
 						}
 					),
-					Cost = React.createElement(Cost, {
-						cost = entity_config.cost,
+					Items = React.createElement(Items, {
+						items = entity_config.cost,
 						LayoutOrder = 5,
 					}),
 					VerticalLayout = React.createElement("UIListLayout", {
@@ -317,7 +316,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 		BorderColor3 = Color3.fromRGB(27, 42, 53),
 		LayoutOrder = 2,
 		Position = UDim2.new(0.5, 0, 1, 0),
-		Size = UDim2.fromOffset(1000, 300),
+		Size = UDim2.new(0, 1000, 0, 300),
 		ref = ref,
 	}, {
 		VeritcalLayout = React.createElement("UIListLayout", {
@@ -375,7 +374,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 					Visible = is_expanded,
 				},
 				{
-					Padding = React.createElement("UIPadding", {
+					LeftPad = React.createElement("UIPadding", {
 						PaddingLeft = UDim.new(0, 10),
 					}),
 					Title = React.createElement(

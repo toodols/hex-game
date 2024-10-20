@@ -105,7 +105,7 @@ function TopCenter()
 							Enum.FontWeight.Bold,
 							Enum.FontStyle.Normal
 						),
-						Position = UDim2.fromOffset(0, 5),
+						Position = UDim2.new(0, 0, 0, 5),
 						Size = UDim2.new(1, 0, 0, 25),
 						Text = "Turn",
 						TextColor3 = Color3.fromRGB(255, 255, 255),
@@ -181,7 +181,7 @@ function TopCenter()
 					Image = "http://www.roblox.com/asset/?id=6026667005",
 					LayoutOrder = 1,
 					Position = UDim2.new(0, 0, 0.5, 0),
-					Size = UDim2.fromOffset(20, 20),
+					Size = UDim2.new(0, 20, 0, 20),
 				}),
 				SkipLabel = React.createElement("TextLabel", {
 					AutomaticSize = Enum.AutomaticSize.X,

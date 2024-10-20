@@ -14,7 +14,7 @@ local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local ActionButton = require(script.Parent.action_button).ActionButton
-local Cost = require(script.Parent.cost).Cost
+local Items = require(script.Parent.items).Items
 local Corner = util_components.Corner
 
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
@@ -129,8 +129,8 @@ function Aside(props: { state: ResearchState, on_add: () -> (), on_remove: () ->
 				},
 				if props.state.status ~= "complete"
 					then {
-						Cost = React.createElement(Cost, {
-							cost = props.state.cost,
+						Items = React.createElement(Items, {
+							items = props.state.cost,
 							LayoutOrder = 3,
 						}),
 					}
@@ -178,8 +178,8 @@ function Node(props: { state: ResearchState, on_click: () -> () })
 
 	return React.createElement("Frame", {
 		BackgroundTransparency = 1,
-		Position = UDim2.fromScale(offset[1] + y * scale / TRANSFORM_SIZE, offset[2] + x * scale / TRANSFORM_SIZE),
-		Size = UDim2.fromScale(ratio * 100, ratio * 100),
+		Position = UDim2.new(offset[1] + y * scale / TRANSFORM_SIZE, 0, offset[2] + x * scale / TRANSFORM_SIZE, 0),
+		Size = UDim2.new(ratio * 100, 0, ratio * 100, 0),
 		-- ScaleType = Enum.ScaleType.Fit,
 	}, {
 		Icon = React.createElement(Icon, {
@@ -237,8 +237,10 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 					math.clamp(transform_values.current.offset[2], -2000 + visible_extent, 2000 - visible_extent),
 				}
 				TweenService:Create(transform_ref.current, TweenInfo.new(0.1), {
-					Size = UDim2.fromOffset(
+					Size = UDim2.new(
+						0,
 						TRANSFORM_SIZE * transform_values.current.scale,
+						0,
 						TRANSFORM_SIZE * transform_values.current.scale
 					),
 					Position = UDim2.new(
@@ -264,7 +266,8 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 					reset_translation()
 				end
 			elseif input.UserInputType == Enum.UserInputType.MouseWheel then
-				transform_values.current.scale = math.max(0.5, transform_values.current.scale + input.Position.Z * 0.1)
+				transform_values.current.scale =
+					math.clamp(transform_values.current.scale + input.Position.Z * 0.1, 0.5, 2)
 				reset_translation()
 			end
 		end)
@@ -340,14 +343,14 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 				Position = UDim2.new(0.5, 0, 0.4, 0),
 				BackgroundTransparency = 1,
 				ref = transform_ref,
-				Size = UDim2.fromOffset(TRANSFORM_SIZE, TRANSFORM_SIZE),
+				Size = UDim2.new(0, TRANSFORM_SIZE, 0, TRANSFORM_SIZE),
 			},
 			util.table_map({ { 0, 0 }, { -1, 0 }, { 1, 0 } }, function(pos)
 				return React.createElement("ImageLabel", {
 					BackgroundTransparency = 1,
 					Image = "http://www.roblox.com/asset/?id=12685791118",
 					ImageTransparency = 0.9,
-					Position = UDim2.fromScale(pos[1], pos[2]),
+					Position = UDim2.new(pos[1], 0, pos[2], 0),
 					ScaleType = Enum.ScaleType.Tile,
 					Size = UDim2.new(1, 0, 1, 0),
 					TileSize = UDim2.new(0.139, 0, 0.145, 0),
@@ -450,8 +453,8 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 								}
 								else {
 
-									Cost = React.createElement(Cost, {
-										cost = state.cost,
+									Items = React.createElement(Items, {
+										items = state.cost,
 									}),
 								}
 						)

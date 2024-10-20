@@ -13,7 +13,7 @@ function CoordinateLabel(props: { coordinate: CubicCoordinate })
 		themes.theme_description {
 			LayoutOrder = 1,
 			Position = UDim2.new(0, 0, 0.5, 0),
-			Size = UDim2.fromOffset(0, 20),
+			Size = UDim2.new(0, 0, 0, 20),
 			Text = ("%s, %s, %s"):format(unpack(props.coordinate)),
 		},
 		{

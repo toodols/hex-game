@@ -39,7 +39,6 @@ function Room(props: { room: Room })
 		BorderSizePixel = 0,
 		Position = UDim2.new(0, 0, 0, 0),
 		Size = UDim2.new(1, 0, 0, 0),
-		Transparency = 0.3,
 	}, {
 		MemberContainer = React.createElement(
 			"Frame",
@@ -74,7 +73,6 @@ function Room(props: { room: Room })
 					),
 					Position = UDim2.new(0.5, 0, 0.5, 0),
 					Size = UDim2.new(0, 30, 0, 30),
-					Transparency = 0.5,
 				}, {
 					UICorner = React.createElement(Corner),
 				})
