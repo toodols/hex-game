@@ -68,6 +68,7 @@ end
 function start_game(teleport_data: { room: types.Room }?)
 	local room = teleport_data and teleport_data.room
 	local players_config = room and room.players
+	print(game.HttpService:JSONEncode(teleport_data))
 	grid = presets[if room then room.map else "my_map"]()
 
 	_G.grid = grid

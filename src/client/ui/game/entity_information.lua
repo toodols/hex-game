@@ -374,7 +374,7 @@ function EntityInformation(props: {
 					ItemFiltersPreview = if entity.inventory
 						then React.createElement(ItemFiltersPreview, {
 							LayoutOrder = 8,
-							entity = entity,
+							entity_id = entity.id,
 							open = function()
 								props.toggle_submenu {
 									type = "item_filters",

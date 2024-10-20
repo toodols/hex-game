@@ -158,7 +158,18 @@ function run_action_phase(grid: HexGrid)
 	computed_mod.compute_presence(grid)
 	remove_occuluded_blueprints(grid)
 
-	computed_mod.compute_visibility(grid, action_state)
+	for team_id, changed_to_visible in computed_mod.compute_visibility(grid, action_state) do
+		for entity_id in changed_to_visible do
+			updates_mod.add_update(grid, {
+				type = "entity_update",
+				entity = grid.entities[entity_id],
+				targets = {
+					team_id
+				}
+			})
+		end	
+	end
+	
 
 	updates_mod.add_update(grid, {
 		type = "cells",

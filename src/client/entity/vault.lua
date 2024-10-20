@@ -34,6 +34,7 @@ registry_mod.registry["vault"] = registry_mod.with_defaults {
 			return
 		end
 		local instance_root = grid.entity_instance_map[self.id]
+		if not instance_root then warn("no instance found for vault"); return end
 		local t = (animation_state.step / 100) % (math.pi * 2)
 		local instance = instance_root:FindFirstChild "crystal" :: BasePart
 		local start = instance.Position

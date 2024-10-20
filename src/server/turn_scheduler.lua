@@ -71,6 +71,7 @@ function report_turn_time(grid: HexGrid)
 	updates_mod.add_update(grid, {
 		type = "turn_timer",
 		schedule = {
+			start_time_sync = grid.turn_schedule.start_time_sync,
 			start_time = grid.turn_schedule.start_time,
 			end_time = grid.turn_schedule.end_time,
 			running = grid.turn_schedule.running,
@@ -86,6 +87,7 @@ function reset_turn_time(grid: HexGrid, turn_schedule: TurnSchedule)
 		count_entities += 1
 	end
 	local wait_time = count_entities * grid.speed_multiplier + grid.speed_base
+	turn_schedule.start_time_sync = workspace:GetServerTimeNow()
 	turn_schedule.start_time = os.clock()
 	turn_schedule.end_time = os.clock() + wait_time
 end

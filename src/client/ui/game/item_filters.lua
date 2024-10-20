@@ -67,7 +67,6 @@ function ItemFiltersPreview(props: { LayoutOrder: number?, entity_id: EntityId, 
 	local inventory = entity.inventory
 	assert(inventory, "inventory nil")
 	local is_owner = entity.owner == grid:get_player_team(Players.LocalPlayer).id
-	print(is_owner)
 
 	return React.createElement("TextButton", {
 		BackgroundTransparency = 0.9,

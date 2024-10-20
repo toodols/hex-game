@@ -122,6 +122,9 @@ function TileAlerts()
 				local indicators = {}
 				for entity_id in cell.entities do
 					local entity = grid.entities[entity_id]
+					if not entity then warn("no entity for", entity_id)
+						continue
+				 	end
 					local is_deconstructing = false
 					for _, decision in entity.queued_decisions do
 						if decision.type == "deconstruct" then

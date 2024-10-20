@@ -23,7 +23,7 @@ function Room(props: { room: Room })
 		local connection = RunService.RenderStepped:Connect(function()
 			if start_time_label_ref.current and props_ref.current and props_ref.current.room.starting_at then
 				start_time_label_ref.current.Text =
-					`Starting in {("%.1f"):format((props_ref.current.room.starting_at - os.clock()))}s`
+					`Starting in {("%.1f"):format((props_ref.current.room.starting_at - workspace:GetServerTimeNow()))}s`
 			end
 		end)
 
