@@ -1,3 +1,5 @@
+-- lobby.server.lua
+
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local HttpService = game:GetService "HttpService"
 local Players = game:GetService "Players"
@@ -77,13 +79,9 @@ function room_membership_changed(room: Room)
 					table.insert(party, player)
 				end
 
-				local teleport_options = Instance.new "TeleportOptions"
 				-- what if we signed the data to make it tamper proof
-				teleport_options:SetTeleportData {
-					room = room,
-				}
 				local code = TeleportService:ReserveServer(placeids.game)
-				TeleportService:TeleportToPrivateServer(placeids.game, code, party, nil, teleport_options)
+				TeleportService:TeleportToPrivateServer(placeids.game, code, party, nil, { room = room })
 			end)
 		else
 			if room_timers[room.id] then

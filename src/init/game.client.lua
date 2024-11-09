@@ -1,3 +1,4 @@
+-- game.client.lua
 
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local get_hex_grid_data_remote = ReplicatedStorage:FindFirstChild "GetHexGridDataRemote" :: RemoteFunction
@@ -17,7 +18,6 @@ game_mod.render_grid(grid)
 local connection = grid_updates_remote.OnClientEvent:Connect(function(updates: { GridUpdate })
 	game_mod.handle_updates(grid, updates)
 end)
-
 
 local ui = init_game_ui(grid)
 

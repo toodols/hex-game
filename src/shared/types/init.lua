@@ -27,7 +27,7 @@ export type Signal<T> = {
 export type Item = "vit" | "rad" | "pow" | "bar" | "tar" | "dew" | "dye" | "tek"
 
 export type Inventory = {
-	filter_item_type: { Item } | "all",
+	filter_item_type: { type: "blacklist" | "whitelist", items: { Item } },
 	-- true if all items are of the same type
 	homogeneous: boolean,
 	items: { Item },

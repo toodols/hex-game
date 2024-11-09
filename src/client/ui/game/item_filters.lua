@@ -13,16 +13,18 @@ type EntityId = types.EntityId
 type HexGrid = types.HexGrid
 
 function ItemFilters(props: { entity_id: EntityId })
+	print "ItemFilters"
 	local grid = React.useContext(MainContext).grid
 	local entity = hooks.use_synced_entity(props.entity_id)
 	local inventory = entity.inventory
 	assert(inventory, "inventory nil")
 
 	return React.createElement("Frame", {
-		Size = UDim2.new(500, 0, 0, 0),
+		Size = UDim2.new(0, 300, 0, 0),
 		BackgroundTransparency = 1,
 		AutomaticSize = Enum.AutomaticSize.Y,
 	}, {
+		Corner = React.createElement(Corner),
 		VerticalLayout = React.createElement("UIListLayout", {
 			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
@@ -38,7 +40,7 @@ function ItemFilters(props: { entity_id: EntityId })
 					"TextLabel",
 					themes.theme_title {
 						Size = UDim2.new(0, 0, 1, 0),
-						Text = "Item Filters",
+						Text = "Filters",
 					},
 					{
 						SidePad = React.createElement("UIPadding", {
@@ -48,20 +50,63 @@ function ItemFilters(props: { entity_id: EntityId })
 				),
 			}
 		),
-		Content = React.createElement("Frame", {
-			Size = UDim2.new(1, 0, 0, 0),
-			BackgroundTransparency = 1,
-			AutomaticSize = Enum.AutomaticSize.Y,
-		}, {
-			GridLayout = React.createElement("UIGridLayout", {
-				CellPadding = UDim2.new(0, 10, 0, 10),
-				CellSize = UDim2.new(0, 100, 0, 40),
+		Content = React.createElement("Frame", themes.theme_vertical_container {}, {
+			VerticalLayout = React.createElement("UIListLayout", {}),
+			BlacklistWhitelistToggles = React.createElement("Frame", {
+				BackgroundTransparency = 1,
+				Size = UDim2.new(1, 0, 0, 50),
+				LayoutOrder = 1,
+			}, {
+				HorizontalLayout = React.createElement("UIListLayout", {
+					SortOrder = Enum.SortOrder.LayoutOrder,
+					FillDirection = Enum.FillDirection.Horizontal,
+					Padding = UDim.new(0, 8),
+					VerticalAlignment = Enum.VerticalAlignment.Center,
+				}),
+				BlacklistToggle = React.createElement(
+					"TextButton",
+					themes.theme_button {
+						BackgroundTransparency = 0.9,
+						Size = UDim2.new(0, 0, 0, 30),
+						LayoutOrder = 1,
+						Text = "Blacklist",
+						[React.Event.MouseButton1Click] = function()
+							inventory.filter_type = "blacklist"
+						end,
+					},
+					{
+						Corner = React.createElement(Corner),
+						SidePad = React.createElement("UIPadding", {
+							PaddingLeft = UDim.new(0, 5),
+							PaddingRight = UDim.new(0, 5),
+						}),
+					}
+				),
+				WhitelistToggle = React.createElement(
+					"TextButton",
+					themes.theme_button {
+						BackgroundTransparency = 0.9,
+						Size = UDim2.new(0, 0, 0, 30),
+						LayoutOrder = 2,
+						Text = "Whitelist",
+						[React.Event.MouseButton1Click] = function()
+							inventory.filter_type = "whitelist"
+						end,
+					},
+					{
+						Corner = React.createElement(Corner),
+						SidePad = React.createElement("UIPadding", {
+							PaddingLeft = UDim.new(0, 5),
+							PaddingRight = UDim.new(0, 5),
+						}),
+					}
+				),
 			}),
 		}),
 	})
 end
 
-function ItemFiltersPreview(props: { LayoutOrder: number?, entity_id: EntityId, open: () -> () })
+function ItemFiltersPreview(props: { LayoutOrder: number?, entity_id: EntityId, click: () -> () })
 	local grid = React.useContext(MainContext).grid
 	local entity = hooks.use_synced_entity(props.entity_id)
 	local inventory = entity.inventory
@@ -74,6 +119,7 @@ function ItemFiltersPreview(props: { LayoutOrder: number?, entity_id: EntityId, 
 		Text = "",
 		Size = UDim2.new(0, 0, 0, 25),
 		LayoutOrder = props.LayoutOrder,
+		[React.Event.MouseButton1Click] = props.click,
 	}, {
 		Corner = React.createElement(Corner),
 		SidePad = React.createElement("UIPadding", {

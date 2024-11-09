@@ -13,9 +13,9 @@ local INDICATORS = {
 	attacked = { icon = "http://www.roblox.com/asset/?id=6031071053", color = Color3.new(0.898039, 0, 0) },
 	missing = { icon = "http://www.roblox.com/asset/?id=6031154859", color = Color3.new(0.898039, 0.823529, 0) },
 	researching = { icon = "http://www.roblox.com/asset/?id=6034230640", color = Color3.new(0.0588235, 0.898039, 0) },
-	disconnected = { icon = "http://www.roblox.com/asset/?id=6035056484", color = Color3.new(0.898039, 0, 0) },
+	disconnected = { icon = "rbxassetid://6035056484", color = Color3.new(0.898039, 0, 0) },
 	deconstruction = { icon = "rbxassetid://11768918600", color = Color3.new(0.898039, 0.211765, 0.211765) },
-	construction = { icon = "http://www.roblox.com/asset/?id=6034275725", color = Color3.new(0, 0.584314, 0.898039) },
+	construction = { icon = "rbxassetid://6034275725", color = Color3.new(0, 0.584314, 0.898039) },
 	disabled = { icon = "http://www.roblox.com/asset/?id=6031084743", color = Color3.new(0.898039, 0.823529, 0) },
 }
 

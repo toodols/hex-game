@@ -23,7 +23,7 @@
 		},
 		"StarterPlayer": {
 			"StarterPlayerScripts": {
-				"Client": {
+				"client_init": {
 					"$path": "src/init/lobby.client.lua"
 				}
 			}

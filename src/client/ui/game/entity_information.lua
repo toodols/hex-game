@@ -14,16 +14,19 @@ local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local client_entity_mod = require(ReplicatedStorage.Client.ui.Parent.entity)
 local context_mod = require(ReplicatedStorage.Client.ui.context)
 local themes = require(ReplicatedStorage.Client.ui.themes)
-local MainContext = context_mod.MainContext
-local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 
 local ItemFiltersPreview = require(script.Parent.item_filters).ItemFiltersPreview
 local ActionButton = require(script.Parent.action_button).ActionButton
 local Items = require(script.Parent.items).Items
+local HighlightOnHover = require(script.Parent.highlight_on_hover).HighlightOnHover
+local ResearchPreview = require(script.Parent.research).ResearchPreview
+
+local MainContext = context_mod.MainContext
 local Corner = util_components.Corner
 local Separator = util_components.Separator
-local HighlightOnHover = require(script.Parent.highlight_on_hover).HighlightOnHover
+
+local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
 type EntityId = types.EntityId
 type GridUpdate = types.GridUpdate
@@ -299,7 +302,7 @@ function EntityInformation(props: {
 					-- 		Text = "Rotation: " .. entity.rotation,
 					-- 	}
 					-- ),
-					StatusLabel = React.createElement(
+					StatusLabel = if entity.status ~= "complete" then React.createElement(
 						"TextLabel",
 						themes.theme_description {
 							AutomaticSize = Enum.AutomaticSize.Y,
@@ -307,7 +310,7 @@ function EntityInformation(props: {
 							Size = UDim2.new(1, 0, 0, 20),
 							Text = "Status: " .. entity.status,
 						}
-					),
+					) else nil,
 					DecayLabel = entity.is_decaying and React.createElement(
 						"TextLabel",
 						themes.theme_description {
@@ -375,12 +378,27 @@ function EntityInformation(props: {
 						then React.createElement(ItemFiltersPreview, {
 							LayoutOrder = 8,
 							entity_id = entity.id,
-							open = function()
+							click = function()
 								props.toggle_submenu {
 									type = "item_filters",
 									entity_id = entity.id,
 								}
 							end,
+						})
+						else nil,
+
+					ResearchPreview = if entity.owner == player_team.id
+							and (entity.type == "laboratory")
+							and entity.status == "complete"
+						then React.createElement(ResearchPreview, {
+							LayoutOrder = 9,
+							entity_id = entity.id,
+							click = function()
+								props.toggle_submenu {
+									type = "research",
+									entity_id = entity.id,
+								}
+							end
 						})
 						else nil,
 
@@ -507,12 +525,6 @@ function EntityInformation(props: {
 								}
 							end,
 						}),
-					-- RotateButton = entity.owner == player_team.id and React.createElement(ActionButton, {
-					-- 	color = Color3.fromRGB(120, 255, 120),
-					-- 	Text = "Rotate",
-					-- 	LayoutOrder = 2,
-					-- 	on_click = function() end,
-					-- }),
 					OpenRecipeButton = entity.owner == player_team.id
 						and (entity.type == "factory")
 						and entity.status == "complete"
@@ -527,30 +539,6 @@ function EntityInformation(props: {
 								}
 							end,
 						}),
-
-					OpenResearchButton = entity.owner == player_team.id
-						and (entity.type == "laboratory")
-						and entity.status == "complete"
-						and React.createElement(ActionButton, {
-							color = Color3.fromRGB(255, 255, 120),
-							Text = "Open Research",
-							LayoutOrder = 4,
-							on_click = function()
-								props.toggle_submenu {
-									type = "research",
-									entity_id = entity.id,
-								}
-							end,
-						}),
-					-- HideButton = React.createElement(ActionButton, {
-					-- 	color = Color3.fromRGB(255, 255, 255),
-					-- 	Text = "Hide",
-					-- 	LayoutOrder = 10,
-					-- 	on_click = function()
-					-- 		props.on_compress()
-					-- 	end,
-					-- }),
-
 					VerticalLayout = React.createElement("UIListLayout", {
 						Padding = UDim.new(0, 2),
 						SortOrder = Enum.SortOrder.LayoutOrder,

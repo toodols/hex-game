@@ -14,6 +14,8 @@ local ui_types = require(ReplicatedStorage.Client.ui.types)
 local themes = require(script.Parent.themes)
 local hooks = require(script.Parent.hooks)
 local context_mod = require(script.Parent.context)
+local util_components = require(script.Parent.util_components)
+
 local Recipes = require(script.recipes).Recipes
 local BuildingsFrame = require(script.buildings_frame).BuildingsFrame
 local PlayerList = require(script.player_list).PlayerList
@@ -22,7 +24,6 @@ local TopCenter = require(script.top_center).TopCenter
 local SelectedCellFrame = require(script.selected_cell_frame).SelectedCellFrame
 local TileAlerts = require(script.tile_alerts).TileAlerts
 local ItemFilters = require(script.item_filters).ItemFilters
-local util_components = require(script.Parent.util_components)
 
 local MainContext = context_mod.MainContext
 local Corner = util_components.Corner
@@ -68,11 +69,7 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode } })
 					set_submenu {}
 				end,
 			}),
-			ItemFilters = if submenu.type == "item_filters"
-				then React.createElement(ItemFilters, {
-					entity_id = submenu.entity_id,
-				})
-				else nil,
+
 			Center = React.createElement("Frame", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundTransparency = 1,
@@ -120,6 +117,11 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode } })
 						set_submenu {}
 					end,
 				}),
+				ItemFilters = if submenu.type == "item_filters"
+					then React.createElement(ItemFilters, {
+						entity_id = submenu.entity_id,
+					})
+					else nil,
 			}),
 		}, {
 			BottomRight = React.createElement("Frame", {

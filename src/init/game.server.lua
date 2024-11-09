@@ -1,3 +1,5 @@
+-- game.server.lua
+
 local RunService = game:GetService "RunService"
 local ServerScriptService = game:GetService "ServerScriptService"
 local Players = game:GetService "Players"

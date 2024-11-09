@@ -2,12 +2,18 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local React = require(ReplicatedStorage.Packages.react)
 local TweenService = game:GetService "TweenService"
 
-function ActionButton(props: {
-	color: Color3,
-	Text: string,
-	on_click: () -> (),
-	LayoutOrder: number,
-})
+function ActionButton(
+	props: {
+		color: Color3,
+		Text: string,
+		on_click: () -> (),
+		LayoutOrder: number,
+		Position: UDim2?,
+		Size: UDim2?,
+		AnchorPoint: Vector2?,
+	},
+	ref
+)
 	return React.createElement("TextButton", {
 		BackgroundColor3 = props.color,
 		BackgroundTransparency = 1,
@@ -15,19 +21,21 @@ function ActionButton(props: {
 		BorderSizePixel = 0,
 		LayoutOrder = props.LayoutOrder,
 		FontFace = Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+		ref = ref,
 		[React.Event.MouseButton1Click] = props.on_click,
-		[React.Event.MouseEnter] = function(self)
+		[React.Event.MouseEnter] = props[React.Event.MouseEnter] or function(self)
 			TweenService:Create(self, TweenInfo.new(0.2), {
 				BackgroundTransparency = 0.8,
 			}):Play()
 		end,
-		[React.Event.MouseLeave] = function(self)
+		[React.Event.MouseLeave] = props[React.Event.MouseLeave] or function(self)
 			TweenService:Create(self, TweenInfo.new(0.2), {
 				BackgroundTransparency = 1,
 			}):Play()
 		end,
-		Position = UDim2.new(0, 0, 0, 0),
-		Size = UDim2.new(1, 0, 0, 20),
+		Position = props.Position or UDim2.new(0, 0, 0, 0),
+		Size = props.Size or UDim2.new(1, 0, 0, 20),
+		AnchorPoint = props.AnchorPoint or Vector2.new(0, 0),
 		Text = props.Text,
 		TextColor3 = props.color,
 		TextSize = 14,
@@ -35,5 +43,5 @@ function ActionButton(props: {
 end
 
 return {
-	ActionButton = ActionButton,
+	ActionButton = React.forwardRef(ActionButton),
 }

@@ -178,13 +178,18 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 					continue
 				end
 
+				print(entity.researches.queue, entry.research_id)
 				local idx = table.find(entity.researches.queue, entry.research_id)
+				if not idx then
+					continue
+				end
+				print(idx)
 				-- remove all researches at and after idx
 				for i = idx, #entity.researches.queue do
 					entity.researches.states[entity.researches.queue[i]].status = "incomplete"
 					entity.researches.queue[i] = nil
 				end
-
+				print(entity.researches)
 				dirty_entities[entity.id] = true
 			elseif entry.type == "deconstruct" then
 				local entity = grid.entities[entry.entity_id]
@@ -246,7 +251,7 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 					questing.quest_update(tutorial, grid)
 				end
 			else
-				error("unknown action type: " .. entry.type)
+				error("unknown interaction type: " .. entry.type)
 				return 3
 			end
 		end

@@ -20,9 +20,7 @@ function filter_duplicate_entity_updates(updates)
 	end
 
 	for i, update in updates do
-		if update.type ~= "entity_update" then
-			table.insert(result, update)
-		elseif last_occurrences[update.entity.id] == i then
+		if update.type ~= "entity_update" or last_occurrences[update.entity.id] == i then
 			table.insert(result, update)
 		end
 	end
@@ -92,6 +90,11 @@ function flush_updates(grid: HexGrid)
 end
 
 function add_update(grid: HexGrid, event: GridUpdate)
+	if event.type == "entity_update" then
+		if event.entity == nil then
+			error "event.entity is nil"
+		end
+	end
 	table.insert(grid.updates_buffer, event)
 end
 

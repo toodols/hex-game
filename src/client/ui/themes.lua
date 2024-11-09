@@ -28,7 +28,7 @@ function theme_description(props)
 	props.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	props.BorderSizePixel = 0
 	props.FontFace = Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-	props.TextColor3 = Color3.fromRGB(170, 170, 170)
+	props.TextColor3 = props.TextColor3 or Color3.fromRGB(170, 170, 170)
 	props.TextSize = props.TextSize or 13
 	props.TextWrapped = true
 	props.AutomaticSize = props.AutomaticSize or Enum.AutomaticSize.X

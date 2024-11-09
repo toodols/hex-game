@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local TweenService = game:GetService "TweenService"
 local UserInputService = game:GetService "UserInputService"
+local Players = game:GetService "Players"
 
 local asset_server = require(ReplicatedStorage.Shared.asset_server)
 local React = require(ReplicatedStorage.Packages.react)
@@ -92,6 +93,13 @@ function Aside(props: { state: ResearchState, on_add: () -> (), on_remove: () ->
 			VerticalLayout = React.createElement("UIListLayout", {
 				SortOrder = Enum.SortOrder.LayoutOrder,
 			}),
+			Stroke = React.createElement("UIStroke", {
+				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+				Color = Color3.fromRGB(255, 255, 255),
+				LineJoinMode = Enum.LineJoinMode.Round,
+				Thickness = 1,
+				Transparency = 0.9,
+			}),
 			Container = React.createElement(
 				"Frame",
 				{
@@ -152,7 +160,7 @@ function Aside(props: { state: ResearchState, on_add: () -> (), on_remove: () ->
 		if props.state.status == "incomplete"
 			then {
 				AddButton = React.createElement(ActionButton, {
-					Size = UDim2.new(1, 0, 0, 40),
+					Size = UDim2.new(1, 0, 0, 20),
 					Text = "Add Research",
 					LayoutOrder = 3,
 					color = Color3.fromRGB(200, 200, 200),
@@ -379,106 +387,297 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 					},
 				}
 			end,
-			on_remove = function()
-				client_interaction_remote:FireServer {
-					{
-						type = "remove_research",
-						entity_id = entity.id,
-						research_id = selected_node,
-					},
-				}
-			end,
+			-- on_remove = function()
+			-- 	client_interaction_remote:FireServer {
+			-- 		{
+			-- 			type = "remove_research",
+			-- 			entity_id = entity.id,
+			-- 			research_id = selected_node,
+			-- 		},
+			-- 	}
+			-- end,
 		}),
-		Bottom = React.createElement(
+		Bottom = React.createElement(ResearchBottom, {
+			on_close = props.on_close,
+			entity = entity,
+		}),
+	})
+end
+
+function ResearchBottom(props: {
+	on_close: () -> (),
+	entity: Entity,
+})
+	local entity = props.entity
+	local refs = React.useRef {}
+	local tween_refs = React.useRef {}
+	return React.createElement(
+		"Frame",
+		themes.theme_solid {
+			Position = UDim2.new(0.5, 0, 1, 0),
+			AnchorPoint = Vector2.new(0.5, 1),
+			Size = UDim2.new(1, 0, 0, 150),
+		},
+		{
+			Gradient = React.createElement("UIGradient", {
+				Transparency = NumberSequence.new {
+					NumberSequenceKeypoint.new(0, 1),
+					NumberSequenceKeypoint.new(1, 0),
+				},
+				Rotation = 90,
+			}),
+			Container = React.createElement(
+				"Frame",
+				{
+					BackgroundTransparency = 1,
+					Size = UDim2.new(1, 0, 1, 0),
+				},
+				{
+					PaddingBottom = React.createElement("UIPadding", {
+						PaddingBottom = UDim.new(0, 10),
+					}),
+					HorizontalLayout = React.createElement("UIListLayout", {
+						Padding = UDim.new(0, 10),
+						FillDirection = Enum.FillDirection.Horizontal,
+						SortOrder = Enum.SortOrder.LayoutOrder,
+						VerticalAlignment = Enum.VerticalAlignment.Bottom,
+						HorizontalAlignment = Enum.HorizontalAlignment.Center,
+					}),
+				},
+				util.table_map(entity.researches.queue, function(id, idx)
+					local state = entity.researches.states[id]
+					return React.createElement(
+						"Frame",
+						themes.theme_solid {
+							Size = UDim2.new(0, 180, 0, 100),
+							BackgroundTransparency = 1,
+						},
+						{
+							Stroke = React.createElement("UIStroke", {
+								ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+								Color = Color3.fromRGB(255, 255, 255),
+								LineJoinMode = Enum.LineJoinMode.Round,
+								Thickness = 1,
+								Transparency = 0.9,
+							}),
+							Corner = React.createElement(Corner),
+
+							Container = React.createElement(
+								"Frame",
+								themes.theme_container {
+									LayoutOrder = 1,
+								},
+								{
+									Padding = React.createElement("UIPadding", {
+										PaddingLeft = UDim.new(0, 5),
+										PaddingRight = UDim.new(0, 5),
+										PaddingBottom = UDim.new(0, 5),
+										PaddingTop = UDim.new(0, 5),
+									}),
+									Title = React.createElement("TextLabel", {
+										BackgroundTransparency = 1,
+										TextSize = 14,
+										Size = UDim2.new(1, 0, 0, 30),
+										TextColor3 = Color3.fromRGB(255, 255, 255),
+										Text = state.name,
+									}),
+									VerticalLayout = React.createElement("UIListLayout", {
+										Padding = UDim.new(0, 4),
+										SortOrder = Enum.SortOrder.LayoutOrder,
+										FillDirection = Enum.FillDirection.Vertical,
+									}),
+								},
+								if state.cost_is_paid
+									then {
+										Progress = React.createElement(
+											"TextLabel",
+											themes.theme_description {
+												Size = UDim2.new(1, 0, 0, 30),
+												Text = `{state.time - state.progress} turns left`,
+											}
+										),
+									}
+									else {
+										Items = React.createElement(Items, {
+											items = state.cost,
+										}),
+									}
+							),
+							RemoveButton = React.createElement(ActionButton, {
+								color = Color3.fromRGB(200, 0, 0),
+								Size = UDim2.new(1, 0, 0, 20),
+								LayoutOrder = 2,
+								Text = "Remove",
+								ref = function(ref)
+									refs.current[idx] = ref
+								end,
+								[React.Event.MouseEnter] = function()
+									for i = idx, #tween_refs.current do
+										tween_refs.current[i]:Pause()
+									end
+									for i = idx, #refs.current do
+										tween_refs.current[i] =
+											TweenService:Create(refs.current[i], TweenInfo.new(0.2), {
+												BackgroundTransparency = 0.8,
+											})
+										tween_refs.current[i]:Play()
+									end
+								end,
+								[React.Event.MouseLeave] = function()
+									for i = idx, #tween_refs.current do
+										tween_refs.current[i]:Pause()
+									end
+									for i = idx, #refs.current do
+										tween_refs.current[i] =
+											TweenService:Create(refs.current[i], TweenInfo.new(0.2), {
+												BackgroundTransparency = 1,
+											})
+										tween_refs.current[i]:Play()
+									end
+								end,
+								Position = UDim2.new(0, 0, 1, 0),
+								AnchorPoint = Vector2.new(0, 1),
+								on_click = function()
+									client_interaction_remote:FireServer {
+										{
+											type = "remove_research",
+											entity_id = entity.id,
+											research_id = id,
+										},
+									}
+								end,
+							}),
+						}
+					)
+				end)
+			),
+			ExitButton = React.createElement("TextButton", {
+				BackgroundTransparency = 0.5,
+				BorderSizePixel = 0,
+				BackgroundColor3 = Color3.fromRGB(12, 12, 12),
+				TextColor3 = Color3.fromRGB(255, 255, 255),
+				TextSize = 14,
+				Text = "Back",
+				Size = UDim2.new(0, 100, 0, 30),
+				AnchorPoint = Vector2.new(1, 1),
+				Position = UDim2.new(1, 0, 1, 0),
+				[React.Event.MouseButton1Click] = function()
+					props.on_close()
+				end,
+			}),
+		}
+	)
+end
+
+function ResearchPreview(props: {
+	LayoutOrder: number?,
+	entity_id: EntityId,
+	click: () -> (),
+})
+	local grid = React.useContext(MainContext).grid
+	local entity = hooks.use_synced_entity(props.entity_id)
+	local is_owner = entity.owner == grid:get_player_team(Players.LocalPlayer).id
+
+	return React.createElement("TextButton", {
+		BackgroundTransparency = 0.9,
+		Size = UDim2.new(0, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.XY,
+		LayoutOrder = props.LayoutOrder,
+		[React.Event.MouseButton1Click] = props.click,
+		Text = "",
+		AutoButtonColor = false,
+		[React.Event.MouseEnter] = function(current)
+			TweenService:Create(current, TweenInfo.new(0.5), {
+				BackgroundColor3 = Color3.new(0.0588235, 0.898039, 0),
+			}):Play()
+		end,
+		[React.Event.MouseLeave] = function(current)
+			TweenService:Create(current, TweenInfo.new(0.5), {
+				BackgroundColor3 = Color3.fromRGB(163, 162, 165),
+			}):Play()
+		end,
+	}, {
+		Padding = React.createElement("UIPadding", {
+			PaddingLeft = UDim.new(0, 5),
+			PaddingRight = UDim.new(0, 5),
+			PaddingBottom = UDim.new(0, 5),
+		}),
+		VerticalLayout = React.createElement("UIListLayout", {
+			SortOrder = Enum.SortOrder.LayoutOrder,
+		}),
+
+		-- SizeConstraint = React.createElement("UISizeConstraint", {
+		-- 	MinSize = Vector2.new(80, 0),
+		-- }),
+		Stroke = if is_owner
+			then React.createElement("UIStroke", {
+				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+				Color = Color3.fromRGB(255, 255, 255),
+				LineJoinMode = Enum.LineJoinMode.Round,
+				Thickness = 1,
+				Transparency = 0.9,
+			})
+			else nil,
+		Corner = React.createElement(Corner),
+		ResearchLabel = React.createElement(
+			"TextLabel",
+			themes.theme_description {
+				Text = "Research",
+				Size = UDim2.new(1, 0, 0, 20),
+				TextColor3 = Color3.new(0.0588235, 0.898039, 0),
+			}
+		),
+		Container = React.createElement(
 			"Frame",
-			themes.theme_solid {
-				Position = UDim2.new(0.5, 0, 1, 0),
-				AnchorPoint = Vector2.new(0.5, 1),
-				Size = UDim2.new(1, 0, 0, 150),
+			{
+				BackgroundTransparency = 1,
+				Size = UDim2.new(1, 0, 0, 30),
 			},
 			{
-				Gradient = React.createElement("UIGradient", {
-					Transparency = NumberSequence.new {
-						NumberSequenceKeypoint.new(0, 1),
-						NumberSequenceKeypoint.new(1, 0),
-					},
-					Rotation = 90,
+				HorizontalLayout = React.createElement("UIListLayout", {
+					FillDirection = Enum.FillDirection.Horizontal,
+					VerticalAlignment = Enum.VerticalAlignment.Center,
+					Padding = UDim.new(0, 5),
+					SortOrder = Enum.SortOrder.LayoutOrder,
 				}),
-				Container = React.createElement(
-					"Frame",
-					{
+			},
+			if #entity.researches.queue == 0
+				then {
+					TextLabel = React.createElement(
+						"TextLabel",
+						themes.theme_description {
+							LayoutOrder = 2,
+							Text = "<i>No researches in queue</i>",
+							Size = UDim2.new(0, 0, 0, 20),
+						}
+					),
+				}
+				else util.table_map(entity.researches.queue, function(research_id, idx)
+					local state = entity.researches.states[research_id]
+					return React.createElement("Frame", {
+						LayoutOrder = idx + 2,
+						Size = UDim2.new(0, 30, 0, 30),
 						BackgroundTransparency = 1,
-						Size = UDim2.new(1, 0, 1, 0),
-					},
-					{
-						HorizontalLayout = React.createElement("UIListLayout", {
-
-							FillDirection = Enum.FillDirection.Horizontal,
-							SortOrder = Enum.SortOrder.LayoutOrder,
-							VerticalAlignment = Enum.VerticalAlignment.Center,
+					}, {
+						Icon = React.createElement(Icon, {
+							Size = UDim2.new(0, 30, 0, 30),
+							icon = state.icon,
 						}),
-					},
-					util.table_map(entity.researches.queue, function(id)
-						local state = entity.researches.states[id]
-						return React.createElement(
-							"Frame",
-							{
-								Size = UDim2.new(0, 150, 0, 150),
-								BackgroundTransparency = 1,
-							},
-							{
-								VerticalLayout = React.createElement("UIListLayout", {
-									Padding = UDim.new(0, 4),
-									SortOrder = Enum.SortOrder.LayoutOrder,
-									FillDirection = Enum.FillDirection.Vertical,
-									VerticalAlignment = Enum.VerticalAlignment.Center,
-								}),
-								Title = React.createElement("TextLabel", {
-									BackgroundTransparency = 1,
-									TextSize = 14,
-									Size = UDim2.new(1, 0, 0, 30),
-									TextColor3 = Color3.fromRGB(255, 255, 255),
-									Text = state.name,
-								}),
-							},
-							if state.cost_is_paid
-								then {
-									Progress = React.createElement(
-										"TextLabel",
-										themes.theme_description {
-											Size = UDim2.new(1, 0, 0, 30),
-											Text = `{state.time - state.progress} turns left`,
-										}
-									),
-								}
-								else {
-
-									Items = React.createElement(Items, {
-										items = state.cost,
-									}),
-								}
-						)
-					end)
-				),
-				ExitButton = React.createElement("TextButton", {
-					BackgroundTransparency = 0.5,
-					BorderSizePixel = 0,
-					BackgroundColor3 = Color3.fromRGB(12, 12, 12),
-					TextColor3 = Color3.fromRGB(255, 255, 255),
-					TextSize = 14,
-					Text = "Back",
-					Size = UDim2.new(0, 100, 0, 30),
-					AnchorPoint = Vector2.new(1, 1),
-					Position = UDim2.new(1, 0, 1, 0),
-					[React.Event.MouseButton1Click] = function()
-						props.on_close()
-					end,
-				}),
-			}
+						Corner = React.createElement(Corner),
+						Stroke = React.createElement("UIStroke", {
+							ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+							Color = Color3.fromRGB(255, 255, 255),
+							LineJoinMode = Enum.LineJoinMode.Round,
+							Thickness = 1,
+							Transparency = 0.9,
+						}),
+					})
+				end)
 		),
 	})
 end
 
 return {
 	Research = Research,
+	ResearchPreview = ResearchPreview,
 }
