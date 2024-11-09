@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerStorage = game:GetService "ServerStorage"
 
-function load<T>(path: string): T
+function load<T>(path: string): T?
 	local segments = path:split "/"
 	local current_instance = game:GetService("RunService"):IsClient()
 			and ReplicatedStorage:FindFirstChild "ReplicatedAssets"
@@ -11,7 +11,7 @@ function load<T>(path: string): T
 	for _, segment in segments do
 		current_instance = current_instance:FindFirstChild(segment)
 		if not current_instance then
-			error("Instance not found in path: " .. path)
+			warn("Asset not found in path: " .. path)
 		end
 	end
 

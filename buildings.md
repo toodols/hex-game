@@ -1,8 +1,8 @@
-## Scout
+## Sentry
 
 An early game defense unit that also grants enhanced visibility. Useful for defending outposts.
 
-## Fountain
+## Spout
 
 Primary resource production building. Placed on resource tiles and produces that resource.
 
@@ -14,14 +14,20 @@ Connects buildings into a system.
 
 Generates power
 
-## Visionary
+## Sage
+
+Unlocks better buildings
 
 ## Alchemist
 
 ## Monarch
 
-## Scribe
+## Witness
 
 ## Solution
 
+Heals buildings
+
 ## Proxy
+
+Extends the range of certain buildings
