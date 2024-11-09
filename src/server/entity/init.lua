@@ -18,6 +18,9 @@ require(script.vault)
 require(script.solution)
 require(script.witness)
 require(script.impression)
+require(script.phony)
+require(script.suggestion)
+require(script.altar)
 
 return {
 	registry = registry,

@@ -11,7 +11,7 @@ registry["wires"] = with_defaults {
 		bar = 1,
 	},
 	abilities = {},
-	layer = registry_mod.layer.wire,
+	layer = registry_mod.layer.wires,
 }
 
 return {}

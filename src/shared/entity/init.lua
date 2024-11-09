@@ -22,6 +22,10 @@ require(script.solution)
 require(script.witness)
 require(script.impression)
 require(script.phony)
+require(script.suggestion)
+require(script.altar)
+
+
 
 function get_effective_health(entity: Entity): number
 	local health = entity.health

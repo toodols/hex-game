@@ -21,7 +21,7 @@ function entity_can_deconstruct(entity: Entity, grid: HexGrid)
 	if
 		entity.type == "wires"
 		and not util.table_any(cell.entities, function(_, entity_id)
-			return shared_registry_mod.registry[grid.entities[entity_id].type].layer > shared_registry_mod.layer.wire
+			return shared_registry_mod.registry[grid.entities[entity_id].type].layer > shared_registry_mod.layer.wires
 		end)
 	then
 		return false

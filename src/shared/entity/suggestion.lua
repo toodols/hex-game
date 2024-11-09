@@ -2,19 +2,16 @@ local registry_mod = require(script.Parent.registry)
 local registry = registry_mod.registry
 local with_defaults = registry_mod.with_defaults
 
-registry["phony"] = with_defaults {
-	type = "phony",
-	name = "Phony",
-	description = "Can disguise as a different building.",
-	max_health = 3,
+registry["suggestion"] = with_defaults {
+	type = "suggestion",
+	name = "Suggestion",
+	description = "Activate to convert enemies on this tile to this team.",
+	max_health = 1,
 	build_time = 1,
 	cost = {
-		bar = 4,
+		pow = 1,
+		vit = 2,
 	},
-	-- required_research = {
-	-- 	"phony",
-	-- },
-	can_capture = true,
 	layer = registry_mod.layer.building,
 }
 

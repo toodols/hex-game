@@ -13,9 +13,10 @@ type EntityConfiguration = types.EntityConfiguration
 
 -- a higher layer indicates that damage will be passed to it first before the others
 local layer = {
-	wire = 0,
-	building = 1,
-	shield = 2,
+	wires = 0,
+	modifier = 1,
+	building = 2,
+	shield = 3,
 }
 
 function with_defaults(t: any): EntityConfiguration

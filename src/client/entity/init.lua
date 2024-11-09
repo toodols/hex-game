@@ -2,7 +2,6 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local registry_mod = require(script.registry)
 local hex_grid = require(ReplicatedStorage.Shared.hex_grid)
 local types = require(ReplicatedStorage.Shared.types)
-local util = require(ReplicatedStorage.Shared.util)
 
 type Entity = types.Entity
 type HexGrid = types.HexGrid
@@ -24,6 +23,9 @@ require(script.vault)
 require(script.solution)
 require(script.witness)
 require(script.impression)
+require(script.phony)
+require(script.suggestion)
+require(script.altar)
 
 function update_entity_client(grid: HexGrid, old: Entity?, new: Entity)
 	local client_behavior = registry_mod.registry[new.type]
