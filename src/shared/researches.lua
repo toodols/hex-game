@@ -128,7 +128,9 @@ function create_researches()
 				model = "Entities/Vault",
 			},
 			description = "Allows construction of {entity.vault}",
-			cost = {},
+			cost = {
+				tek = 3,
+			},
 			time = 2,
 		},
 	} :: { [string]: ResearchState }

@@ -27,11 +27,16 @@ export type Signal<T> = {
 export type Item = "vit" | "rad" | "pow" | "bar" | "tar" | "dew" | "dye" | "tek"
 
 export type Inventory = {
-	filter_item_type: { type: "blacklist" | "whitelist", items: { Item } },
+	filter: Filter,
 	-- true if all items are of the same type
 	homogeneous: boolean,
 	items: { Item },
 	capacity: number,
+}
+
+export type Filter = {
+	type: "whitelist" | "blacklist",
+	items: { [Item]: boolean },
 }
 
 export type Recipe = {
@@ -280,6 +285,10 @@ export type Interaction = Decision | {
 } | {
 	type: "tutorial_report_selection",
 	selected: { CubicCoordinate },
+} | {
+	type: "set_inventory_filter",
+	entity_id: EntityId,
+	filter: Filter,
 }
 
 export type Damage = {

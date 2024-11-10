@@ -5,6 +5,7 @@ local util = require(ReplicatedStorage.Shared.util)
 
 type Inventory = types.Inventory
 type Item = types.Item
+type Filter = types.Filter
 
 function count_items(tab: { Item }, needle: Item): number
 	local count = 0
@@ -30,17 +31,13 @@ function into_counted_items(items: { Item }): { [Item]: number }
 	return counted
 end
 
-function item_is_a(item: Item, filter: Item | "solid" | "liquid" | "all")
-	if item == filter then
-		return true
-	elseif filter == "solid" then
-		return item == "vit" or item == "rad" or item == "bar" or item == "dye"
-	elseif filter == "liquid" then
-		return item == "tar" or item == "dew"
-	elseif filter == "all" then
-		return true
+-- Returns whether `item` is valid for `filter`
+function item_match_filter(item: Item, filter: Filter): boolean
+	if filter.type == "blacklist" then
+		return not filter.items[item]
+	else
+		return filter.items[item]
 	end
-	return false
 end
 
 -- Puts as many `mut items` as possible into `mut inventory`
@@ -53,7 +50,9 @@ function inventory_deposit(inventory: Inventory, items: { Item }): boolean
 
 		local item_type
 		if #inventory.items == 0 then
-			item_type = items[1]
+			item_type = util.table_find_pred(items, function(item)
+				return item_match_filter(item, inventory.filter)
+			end)
 		else
 			item_type = inventory.items[1]
 		end
@@ -68,11 +67,11 @@ function inventory_deposit(inventory: Inventory, items: { Item }): boolean
 		return #extracted > 0
 	else
 		local spare_capacity = inventory.capacity - #inventory.items
-		for i = 1, spare_capacity do
-			table.insert(inventory.items, items[#items])
-			items[#items] = nil
-		end
-		return spare_capacity > 0
+		local extracted = util.table_extract(items, function(item, count)
+			return item_match_filter(item, inventory.filter) and count < spare_capacity
+		end)
+		table.move(extracted, 1, #extracted, #inventory.items + 1, inventory.items)
+		return #extracted > 0
 	end
 end
 
@@ -123,10 +122,10 @@ local item_names = {
 }
 
 return {
-	item_is_a = item_is_a,
 	count_items = count_items,
 	consume_items = consume_items,
 	into_counted_items = into_counted_items,
+	item_match_filter = item_match_filter,
 	inventory_deposit = inventory_deposit,
 	inventory_sum = inventory_sum,
 	accumulator_satisfies_target = accumulator_satisfies_target,

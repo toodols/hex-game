@@ -13,9 +13,9 @@ registry["stockpile"] = with_defaults {
 		local config = grid.entity_configurations[self.type]
 		if not self.inventory then
 			self.inventory = {
-				filter_item_type = {
+				filter = {
 					type = "blacklist",
-					items = {}
+					items = {},
 				},
 				homogeneous = false,
 				capacity = config.inventory_capacity,

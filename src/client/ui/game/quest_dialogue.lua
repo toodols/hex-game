@@ -9,6 +9,12 @@ local Corner = util_components.Corner
 function QuestDialogue(props: {
 	title: string,
 	messages: { string },
+	choices: {
+		{
+			text: string,
+			id: string,
+		}
+	}?,
 	can_advance: boolean,
 	advance: () -> (),
 })

@@ -64,9 +64,9 @@ end
 
 -- returns the first value, if any, that satisfies `pred`
 function table_find_pred<K, T>(tab: { [K]: T }, pred: (value: T) -> boolean): T?
-	for _, value in tab do
+	for key, value in tab do
 		if pred(value) then
-			return value
+			return value, key
 		end
 	end
 	return nil

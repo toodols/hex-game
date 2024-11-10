@@ -2,8 +2,10 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
-local questing = require(script.Parent.questing)
 local effective_visibility = require(ReplicatedStorage.Shared.effective_visibility).effective_visibility
+local items_mod = require(ReplicatedStorage.Shared.items)
+
+local questing = require(script.Parent.questing)
 local turn_scheduler = require(script.Parent.turn_scheduler)
 local server_util = require(script.Parent.util)
 local server_entity_mod = require(script.Parent.entity)
@@ -178,18 +180,15 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 					continue
 				end
 
-				print(entity.researches.queue, entry.research_id)
 				local idx = table.find(entity.researches.queue, entry.research_id)
 				if not idx then
 					continue
 				end
-				print(idx)
 				-- remove all researches at and after idx
 				for i = idx, #entity.researches.queue do
 					entity.researches.states[entity.researches.queue[i]].status = "incomplete"
 					entity.researches.queue[i] = nil
 				end
-				print(entity.researches)
 				dirty_entities[entity.id] = true
 			elseif entry.type == "deconstruct" then
 				local entity = grid.entities[entry.entity_id]
@@ -227,6 +226,33 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 					continue
 				end
 				entity.current_recipe = entry.recipe_id
+				dirty_entities[entity.id] = true
+			elseif entry.type == "set_inventory_filter" then
+				local entity = grid.entities[entry.entity_id]
+				if
+					not entity
+					or entity.owner ~= player_team.id
+					or entity.status ~= "complete"
+					or entity.inventory == nil
+				then
+					continue
+				end
+
+				entity.inventory.filter = {
+					type = "blacklist",
+					items = {},
+				}
+
+				if entry.filter.type == "whitelist" then
+					entity.inventory.filter.type = "whitelist"
+				end
+
+				for item in entry.filter.items do
+					if items_mod.item_names[item] ~= nil then
+						entity.inventory.filter.items[item] = true
+					end
+				end
+
 				dirty_entities[entity.id] = true
 			elseif entry.type == "skip" then
 				if table.find(grid.skipped, plr) == nil then

@@ -127,7 +127,7 @@ local all_symbols = enum {
 	"speed_base",
 
 	-- Inventory symbols
-	"filter_item_type",
+	"filter",
 	"homogeneous",
 	"items",
 	"capacity",
