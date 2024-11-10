@@ -25,6 +25,11 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 			end
 			return false
 		end,
+		choice_selected = function(self: Quest, grid: HexGrid, choice: string)
+			if choice == "init_hint" then
+				self.details.init_hint = true
+			end
+		end,
 	},
 	build_wires_on_tile = {
 		progression_requisite = function(self: Quest, grid: HexGrid)
@@ -174,9 +179,13 @@ local stages_data: { [string]: QuestStage } = {
 		messages = {
 			"Welcome to the tutorial.",
 			"First, let's learn how to build.",
-			"Select (0, 0, 0) by <b>clicking</b> on the tile. (Hint: (0,0,0) is the center tile)",
+			"Select (0, 0, 0) by <b>clicking</b> on the tile.{this_quest.details.init_hint?this_quest.current_stage_data.init_hint}",
 		},
+		init_hint = "\n<i>Hint: (0, 0, 0) is on the center of the map.</i>",
 		next = "build_wires_on_tile",
+		choices = {
+			{ text = "Hint", id = "init_hint" },
+		},
 		effects = {
 			{ type = "highlight_cell", coordinate = { 0, 0, 0 } },
 		},
@@ -282,11 +291,7 @@ function tutorial(grid: HexGrid): Quest
 	quest.quest_update_signal.listen(function()
 		updates_mod.add_update(grid, {
 			type = "quest_update",
-			quest_id = quest.id,
-			current_stage = quest.current_stage,
-			stages_data = quest.stages_data,
-			details = quest.details,
-			title = quest.title,
+			quest = quest_methods.quest_serialize(quest, grid),
 		})
 		updates_mod.flush_updates(grid)
 	end)

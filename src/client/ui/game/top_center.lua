@@ -44,8 +44,7 @@ function TopCenter()
 			if schedule and schedule.end_time ~= math.huge and schedule.end_time ~= 0 then
 				local diff = schedule.end_time - schedule.start_time
 				local end_time_sync = schedule.start_time_sync + diff
-				bar_ref.current.Size =
-					UDim2.new((current_time - schedule.start_time_sync) / (diff), 0, 1, 0)
+				bar_ref.current.Size = UDim2.new((current_time - schedule.start_time_sync) / diff, 0, 1, 0)
 				local t = end_time_sync - current_time
 				t = math.max(0, t)
 				display_ref.current.Text = `Next turn: {("%.1f"):format(t)}s`
@@ -234,25 +233,14 @@ function TopCenter()
 				}),
 			},
 			util.table_map(grid.quests, function(quest)
-				local stage_data = quest.stages_data[quest.current_stage]
-				return stage_data.messages
+				return quest.current_stage_data.messages
 					and React.createElement(
 						React.Fragment,
 						{
 							key = quest.current_stage,
 						},
 						React.createElement(QuestDialogue, {
-							messages = stage_data.messages,
-							title = quest.title,
-							can_advance = stage_data.can_advance,
-							advance = function()
-								client_interaction_remote:FireServer {
-									{
-										type = "quest_advance",
-										quest_id = quest.id,
-									},
-								}
-							end,
+							quest = quest,
 						})
 					)
 			end)

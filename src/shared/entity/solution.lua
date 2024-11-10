@@ -7,7 +7,7 @@ registry_mod.registry["solution"] = registry_mod.with_defaults {
 	max_health = 0,
 	build_time = 1,
 	cost = {
-		vit = 3,
+		vit = 2,
 	},
 	abilities = {
 		solution_use = {

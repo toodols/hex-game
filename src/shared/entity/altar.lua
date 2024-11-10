@@ -9,8 +9,8 @@ registry["altar"] = with_defaults {
 	max_health = 3,
 	build_time = 1,
 	cost = {
-		pow = 1,
-		bar = 3,
+		pow = 2,
+		bar = 2,
 	},
 	required_research = {
 		"altar",

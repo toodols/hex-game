@@ -13,7 +13,9 @@ registry["proxy"] = with_defaults {
 		"proxy",
 	},
 	cost = {
-		rad = 2,
+		rad = 1,
+		bar = 2,
+		vit = 1,
 	},
 	layer = registry_mod.layer.building,
 }

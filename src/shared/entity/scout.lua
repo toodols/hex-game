@@ -16,7 +16,7 @@ registry["scout"] = with_defaults {
 			range = 3,
 			damage = 1,
 			cost = {
-				rad = 1,
+				bar = 1,
 			},
 		},
 	},

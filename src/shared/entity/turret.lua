@@ -10,8 +10,9 @@ registry["turret"] = with_defaults {
 	max_health = 7,
 	build_time = 2,
 	cost = {
-		bar = 5,
-		rad = 2,
+		bar = 3,
+		rad = 1,
+		pow = 1,
 	},
 	required_research = { "turret" },
 	layer = registry_mod.layer.building,

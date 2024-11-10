@@ -42,6 +42,24 @@ local function quest_update(quest: Quest, grid: HexGrid)
 	end
 end
 
+local function quest_select_choice(quest: Quest, grid: HexGrid, choice: string)
+	local stage_behavior = quest.stages_behavior[quest.current_stage]
+	if stage_behavior and stage_behavior.choice_selected then
+		stage_behavior.choice_selected(quest, grid, choice)
+		quest.quest_update_signal.send(quest)
+	end
+end
+
+local function quest_serialize(quest: Quest, grid: HexGrid)
+	return {
+		id = quest.id,
+		current_stage = quest.current_stage,
+		current_stage_data = quest.stages_data[quest.current_stage],
+		details = quest.details,
+		title = quest.title,
+	}
+end
+
 function new_quest(props: {
 	id: string,
 	title: string,
@@ -54,6 +72,7 @@ function new_quest(props: {
 		current_stage = "init",
 		details = props.details or {},
 		stages_data = props.stages_data,
+		current_stage_data = nil :: any,
 		stages_behavior = props.stages_behavior,
 		id = props.id,
 		quest_update_signal = new_signal(),
@@ -66,4 +85,6 @@ return {
 	quest_advance = quest_advance,
 	quest_update = quest_update,
 	quest_change_state = quest_change_state,
+	quest_select_choice = quest_select_choice,
+	quest_serialize = quest_serialize,
 }

@@ -11,7 +11,8 @@ registry["witness"] = with_defaults {
 	build_time = 1,
 	charges_needed = 3,
 	cost = {
-		bar = 4,
+		bar = 3,
+		vit = 1,
 	},
 	can_capture = true,
 	layer = registry_mod.layer.building,

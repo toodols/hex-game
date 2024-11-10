@@ -1,13 +1,19 @@
 local HttpService = game:GetService "HttpService"
 local ServerScriptService = game:GetService "ServerScriptService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
+
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
-local action_phase_mod = require(ServerScriptService.Server.action_phase)
-local entity_mod = require(ServerScriptService.Server.entity)
-local damage_mod = require(ServerScriptService.Server.damage)
+local util = require(ReplicatedStorage.Shared.util)
+local formatting = require(ReplicatedStorage.Shared.formatting)
 local archive = require(ServerScriptService.Server.archive)
 local presets = require(ServerScriptService.Server.presets)
 local cleanup = require(ServerScriptService.Server.cleanup).cleanup
+
+local action_phase_mod = require(ServerScriptService.Server.action_phase)
+local entity_mod = require(ServerScriptService.Server.entity)
+local damage_mod = require(ServerScriptService.Server.damage)
+
+local assert_eq = util.assert_eq
 
 local tests = {}
 function tests.extractor_filling_stockpile()
@@ -50,20 +56,21 @@ function tests.extractor_filling_stockpile()
 		action_phase_mod.run_action_phase(grid)
 	end
 
-	assert(#stockpile.inventory.items == 1, "expected 1 item in stockpile, got " .. #stockpile.inventory.items)
+	assert_eq(#stockpile.inventory.items, 1, "expected 1 item in stockpile, got " .. #stockpile.inventory.items)
 
 	for i = 1, 2 do
 		action_phase_mod.run_action_phase(grid)
 	end
 
-	assert(#stockpile.inventory.items == 2, "expected 2 items in stockpile, got " .. #stockpile.inventory.items)
+	assert_eq(#stockpile.inventory.items, 2, "expected 2 items in stockpile, got " .. #stockpile.inventory.items)
 
 	for i = 1, 10 do
 		action_phase_mod.run_action_phase(grid)
 	end
 
-	assert(
-		#stockpile.inventory.items == stockpile.inventory.capacity,
+	assert_eq(
+		#stockpile.inventory.items,
+		stockpile.inventory.capacity,
 		"expected all items in stockpile, got " .. #stockpile.inventory.items
 	)
 
@@ -80,7 +87,7 @@ function tests.chatgpt_didnt_grift_me() -- (it did)
 	team1.server_data.visibility = "full"
 
 	local result = hex_grid_mod.line_of_sight(grid, { -2, 0, 2 }, { 2, 0, -2 })
-	assert(result == true, "no blockage: expected true")
+	assert(result, "no blockage: expected true")
 	local barrier_at_origin = entity_mod.new_entity({
 		type = "barrier",
 		primary_coordinate = { 0, 0, 0 },
@@ -89,10 +96,10 @@ function tests.chatgpt_didnt_grift_me() -- (it did)
 	}, grid)
 
 	local result2 = hex_grid_mod.line_of_sight(grid, { -2, 0, 2 }, { 2, 0, -2 })
-	assert(result2 == false, "has blockage: expected false")
+	assert(not result2, "has blockage: expected false")
 
 	local result3 = hex_grid_mod.line_of_sight(grid, { 1, 0, -1 }, { 0, -1, 1 })
-	assert(result3 == true, "expected true")
+	assert(result3, "expected true")
 
 	entity_mod.new_entity({
 		type = "barrier",
@@ -102,11 +109,11 @@ function tests.chatgpt_didnt_grift_me() -- (it did)
 	}, grid)
 
 	local result4 = hex_grid_mod.line_of_sight(grid, { 1, 0, -1 }, { 0, -1, 1 })
-	assert(result4 == false, "expected false")
+	assert(not result4, "expected false")
 	entity_mod.remove_entity(grid, barrier_at_origin)
 
 	local result5 = hex_grid_mod.line_of_sight(grid, { 1, 0, -1 }, { 0, -1, 1 })
-	assert(result5 == true, "expected true")
+	assert(result5, "expected true")
 
 	entity_mod.new_entity({
 		type = "barrier",
@@ -152,7 +159,7 @@ function tests.damage_extractor()
 		})
 	)
 
-	assert(extractor.health == extractor.max_health - 1, "extractor was not damaged")
+	assert_eq(extractor.health, extractor.max_health - 1, "extractor was not damaged")
 
 	damage_mod.destroy_entities(
 		grid,
@@ -196,7 +203,7 @@ function tests.capture_extractor()
 	}, grid)
 
 	action_phase_mod.run_action_phase(grid)
-	assert(extractor.owner == team1.id, "extractor was not captured")
+	assert_eq(extractor.owner, team1.id, "extractor was not captured")
 
 	cleanup(grid)
 end
@@ -225,7 +232,7 @@ function tests.wire_blueprint_builds()
 
 	action_phase_mod.run_action_phase(grid)
 
-	assert(wires.status == "complete", "blueprint was not completed")
+	assert_eq(wires.status, "complete")
 end
 
 function tests.stockpile_blueprint_builds()
@@ -250,11 +257,11 @@ function tests.stockpile_blueprint_builds()
 	}, grid)
 
 	action_phase_mod.run_action_phase(grid)
-	assert(extractor.status == "scaffold", "extractor blueprint did not become scaffold")
+	assert_eq(extractor.status, "scaffold", "extractor blueprint did not become scaffold")
 
 	action_phase_mod.run_action_phase(grid)
 
-	assert((extractor :: any).status == "complete", "extractor scaffold was not completed")
+	assert_eq((extractor :: any).status, "complete", "extractor scaffold was not completed")
 
 	cleanup(grid)
 end
@@ -270,7 +277,7 @@ function tests.deconstruct_stockpile()
 
 	action_phase_mod.run_action_phase(grid)
 
-	assert(#(grid:query_entity { type = "stockpile" }) == 0, "stockpile is not destroyed by deconstruction")
+	assert_eq(#(grid:query_entity { type = "stockpile" }), 0, "stockpile is not destroyed by deconstruction")
 
 	cleanup(grid)
 end
@@ -327,13 +334,13 @@ function tests.deconstruct_building_preserves_wires()
 		primary_coordinate = { -1, 1, 0 },
 		owner = team1.id,
 	}, grid)
-	assert(#grid:query_entity { type = "wires" } == 1, "wires not generated")
+	assert_eq(#grid:query_entity { type = "wires" }, 1, "wires not generated")
 	table.insert(scout.queued_decisions, {
 		type = "deconstruct",
 		entity_id = scout.id,
 	})
 	action_phase_mod.run_action_phase(grid)
-	assert(#grid:query_entity { type = "wires" } == 1, "wires not preserved")
+	assert_eq(#grid:query_entity { type = "wires" }, 1, "wires not preserved")
 
 	cleanup(grid)
 end
@@ -382,7 +389,7 @@ function tests.scout_attack_each_other()
 
 	action_phase_mod.run_action_phase(grid)
 
-	assert(scout2.health == scout2.max_health - 1, "Scout 2 should have been damaged")
+	assert_eq(scout2.health, scout2.max_health - 1, "Scout 2 should have been damaged")
 
 	-- reset scout health to full
 	scout2.health = scout2.max_health
@@ -416,6 +423,38 @@ function tests.archive_grid()
 	local decompressed = archive.decompress_grid(compressed)
 
 	cleanup(grid)
+end
+
+function tests.formatting()
+	assert_eq(
+		formatting.format_text_raw(
+			"I am {state.mood.value} because my hunger is {state.hunger}.",
+			{ state = { hunger = 90, mood = { value = "unhappy" } } }
+		),
+		"I am unhappy because my hunger is 90."
+	)
+	assert_eq(
+		formatting.format_text_raw("I am {condition?value}happy.", { condition = true, value = "NOT " }),
+		"I am NOT happy."
+	)
+	assert_eq(
+		formatting.format_text_raw("I am {condition?value}happy.", { condition = false, value = "NOT " }),
+		"I am happy."
+	)
+	assert_eq(
+		formatting.format_text_raw(
+			"The sky is {condition?then_val:else_val}",
+			{ condition = true, then_val = "blue", else_val = "red" }
+		),
+		"The sky is blue"
+	)
+	assert_eq(
+		formatting.format_text_raw(
+			"The sky is {condition?then_val:else_val}",
+			{ condition = false, then_val = "blue", else_val = "red" }
+		),
+		"The sky is red"
+	)
 end
 
 return tests

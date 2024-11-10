@@ -3,6 +3,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local effective_visibility = require(ReplicatedStorage.Shared.effective_visibility).effective_visibility
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local quest_methods = require(script.Parent.questing.quest)
 
 type Entity = types.Entity
 type HexGrid = types.HexGrid
@@ -111,13 +112,7 @@ function serialize_grid_for_team(grid: HexGrid, team: TeamId): PartialHexGrid
 			return serialize_team(grid, other_team)
 		end),
 		quests = util.table_map(grid.quests, function(quest)
-			return {
-				id = quest.id,
-				current_stage = quest.current_stage,
-				details = quest.details,
-				stages_data = quest.stages_data,
-				title = quest.title,
-			}
+			return quest_methods.quest_serialize(quest, grid)
 		end),
 		turn = grid.turn,
 		current_skips = grid.current_skips,

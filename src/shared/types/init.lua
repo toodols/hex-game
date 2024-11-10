@@ -283,6 +283,10 @@ export type Interaction = Decision | {
 	type: "quest_advance",
 	quest_id: string,
 } | {
+	type: "quest_select_choice",
+	quest_id: string,
+	choice_id: string,
+} | {
 	type: "tutorial_report_selection",
 	selected: { CubicCoordinate },
 } | {
@@ -364,11 +368,7 @@ export type GridUpdate =
 	}
 	| {
 		type: "quest_update",
-		quest_id: string,
-		current_stage: string,
-		title: string,
-		stages_data: { [string]: QuestStage },
-		details: any,
+		quest: Quest,
 	}
 
 export type TurnSchedule = {
@@ -592,16 +592,27 @@ export type QuestStage = {
 	effects: { QuestEffect }?,
 	-- whether the client can click to advance
 	can_advance: boolean?,
+	choices: {
+		{
+			id: string,
+			text: string,
+		}
+	}?,
 }
 
 export type ServerQuestStageBehavior = {
 	progression_requisite: ((Quest, HexGrid) -> boolean)?,
 	stage_start: ((Quest, HexGrid) -> ())?,
+	choice_selected: ((Quest, HexGrid, string) -> ())?,
 }
 
 export type Quest = {
 	id: string,
+	title: string,
 	current_stage: string,
+	-- client only
+	current_stage_data: QuestStage,
+	-- server only
 	stages_data: { [string]: QuestStage },
 	stages_behavior: { [string]: ServerQuestStageBehavior },
 	quest_update_signal: Signal<Quest>,

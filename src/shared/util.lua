@@ -243,6 +243,12 @@ function table_count_entries(tab: { [any]: any }): number
 	return count
 end
 
+function assert_eq(a, b, msg)
+	if a ~= b then
+		error(`	Assertion failed {if msg then " " .. msg else ""}: {a} != {b}`)
+	end
+end
+
 return {
 	table_from_entries = table_from_entries,
 	table_filter = table_filter,
@@ -265,4 +271,5 @@ return {
 	table_count_entries = table_count_entries,
 	range = range,
 	timer = timer,
+	assert_eq = assert_eq,
 }

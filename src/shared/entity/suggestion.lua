@@ -9,7 +9,7 @@ registry["suggestion"] = with_defaults {
 	max_health = 1,
 	build_time = 1,
 	cost = {
-		pow = 1,
+		pow = 2,
 		vit = 2,
 	},
 	layer = registry_mod.layer.building,

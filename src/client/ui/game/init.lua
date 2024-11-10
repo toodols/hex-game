@@ -47,7 +47,7 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode } })
 
 	local quest_effects = util.table_flat(util.table_map(util.table_keys(props.grid.quests), function(quest_id)
 		local quest = props.grid.quests[quest_id]
-		return quest.stages_data[quest.current_stage].effects
+		return quest.current_stage_data.effects
 	end))
 
 	return React.createElement(MainContext.Provider, {

@@ -270,6 +270,11 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 				then
 					questing.quest_advance(grid.quests[entry.quest_id], grid)
 				end
+			elseif entry.type == "quest_select_choice" then
+				local quest = grid.quests[entry.quest_id]
+				if quest then
+					questing.quest_select_choice(quest, grid, entry.choice_id)
+				end
 			elseif entry.type == "tutorial_report_selection" then
 				local tutorial = grid.quests.tutorial
 				if tutorial then
