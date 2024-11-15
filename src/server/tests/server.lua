@@ -153,7 +153,7 @@ function tests.damage_extractor()
 
 	damage_mod.destroy_entities(
 		grid,
-		damage_mod.apply_damage_on_cells(grid, { { 0, 0, 0 } }, {
+		damage_mod.damage_cells(grid, { { 0, 0, 0 } }, {
 			type = "flat",
 			amount = 1,
 		})
@@ -163,7 +163,7 @@ function tests.damage_extractor()
 
 	damage_mod.destroy_entities(
 		grid,
-		damage_mod.apply_damage_on_cells(grid, { { 0, 0, 0 } }, {
+		damage_mod.damage_cells(grid, { { 0, 0, 0 } }, {
 			type = "flat",
 			amount = math.huge,
 		})

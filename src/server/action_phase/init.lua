@@ -9,6 +9,7 @@ local server_entity_mod = require(ServerScriptService.Server.entity)
 local updates_mod = require(ServerScriptService.Server.updates)
 local computed_mod = require(ServerScriptService.Server.computed)
 local quest_methods = require(ServerScriptService.Server.questing.quest)
+local effects = require(ServerScriptService.Server.effect).effects
 
 local do_entity_decay = require(script.entity_decay).do_entity_decay
 local new_action_state = require(script.new_action_state).new_action_state
@@ -90,14 +91,19 @@ function status_effects_tick(grid: HexGrid)
 		if next(entity.effects) == nil then
 			continue
 		end
-		for effect_type, effect in entity.effects do
-			if effect_type == "shield" then
-				effect.duration -= 1
-				if effect.duration <= 0 then
-					entity.effects[effect_type] = nil
+		local new_effects = {}
+		for _, effect in entity.effects do
+			if effects[effect.type] then
+				if effects[effect.type].tick then
+					effects[effect.type].tick(grid, entity, effect)
 				end
 			end
+			effect.duration -= 1
+			if effect.duration > 0 then
+				table.insert(new_effects, effect)
+			end
 		end
+		entity.effects = new_effects
 		updates_mod.add_update(grid, {
 			type = "entity_update",
 			entity = entity,

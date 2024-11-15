@@ -3,6 +3,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local server_entity_mod = require(script.Parent.entity)
 local server_types = require(script.Parent.types)
 local updates_mod = require(script.Parent.updates)
+local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 
 type Damage = types.Damage
 type Entity = types.Entity
@@ -14,7 +15,7 @@ type ActionState = server_types.ActionState
 -- damage is applied independently for each cell
 -- for each cell, damage is a gauge gradually reduced for each entity
 -- entities that occupy multiple cells are treated as multiple entities
--- only the highest damage is applied
+-- only the highest damage to each entity is applied
 
 -- Ex:
 -- 1     2
@@ -42,31 +43,39 @@ type ActionState = server_types.ActionState
 -- A(0)  A(0)
 -- B(0)  C(5)
 
-function damage_entity(entity: Entity, damage: number)
-	for effect_type, effect in entity.effects do
-		if damage == 0 then
-			return
-		end
-		if effect_type == "shield" then
-			local effective = math.min(damage, effect.health)
+function apply_entity_damage(entity: Entity, amount: number): number
+	local total = 0
+	if amount == 0 then
+		return total
+	end
+	for _, effect in entity.effects do
+		if effect.type == "shield" then
+			local effective = math.min(amount, effect.health)
+			total += effective
 			effect.health -= effective
-			damage -= effective
+			amount -= effective
 			if effect.health <= 0 then
-				entity.effects[effect_type] = nil
+				entity.effects[effect.type] = nil
 			end
 		end
+		if amount == 0 then
+			return total
+		end
 	end
 
-	if damage > 0 then
-		entity.health = math.max(entity.health - damage, 0)
-	end
+	local effective = math.min(amount, entity.health)
+	total += effective
+	entity.health = entity.health - effective
+	return total
 end
 
-function apply_damage_on_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damage): { [EntityId]: boolean }
+function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damage): { [EntityId]: boolean }
 	damage.lethal = damage.lethal or true
 	damage.friendly_fire = damage.friendly_fire or false
 	local destroyed_entities = {}
 	local team = if damage.from then grid.entities[damage.from].owner else nil
+
+	-- calculate the damage each entity should take
 	local damage_values: { [EntityId]: number } = {}
 	for _, target in targets do
 		local cell = grid:get_cell(target)
@@ -88,11 +97,11 @@ function apply_damage_on_cells(grid: HexGrid, targets: { CubicCoordinate }, dama
 			if not damage.friendly_fire and entity.owner == team then
 				continue
 			end
-			local behavior = server_entity_mod.registry[entity.type]
-			local result = behavior.take_damage(entity, grid, damage, gauge)
-			gauge -= result.effective
-			damage_values[entity.id] = math.max(damage_values[entity.id] or 0, result.effective)
-			if not result.propagate then
+			local health = shared_entity_mod.get_effective_health(entity)
+			local effective = math.min(gauge, entity.health)
+			gauge -= effective
+			damage_values[entity.id] = math.max(damage_values[entity.id] or 0, effective)
+			if health > 0 or (effective == 0 and health == 0) then
 				break
 			end
 		end
@@ -100,7 +109,7 @@ function apply_damage_on_cells(grid: HexGrid, targets: { CubicCoordinate }, dama
 
 	for entity_id, value in damage_values do
 		local entity = grid.entities[entity_id]
-		damage_entity(entity, value)
+		apply_entity_damage(entity, value)
 
 		updates_mod.add_update(grid, {
 			type = "entity_update",
@@ -142,6 +151,6 @@ function destroy_entities(grid: HexGrid, destroyed_entities: { [EntityId]: boole
 end
 
 return {
-	apply_damage_on_cells = apply_damage_on_cells,
+	damage_cells = damage_cells,
 	destroy_entities = destroy_entities,
 }

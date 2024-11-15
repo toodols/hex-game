@@ -24,9 +24,6 @@ export type ServerEntityBehavior = {
 	tick: (self: Entity, grid: HexGrid, action_state: ActionState?) -> (),
 	built_on: { CellType },
 
-	-- returns how much damage this entity would take if it were to receive `damage` of `gauge`
-	-- actual mutation is handled in `server/damage`
-	take_damage: (self: Entity, grid: HexGrid, damage: Damage, gauge: number) -> DamageResult,
 	get_illumination: (self: Entity, grid: HexGrid) -> { CubicCoordinate },
 	on_completed: (self: Entity, grid: HexGrid) -> (),
 	influences: ((self: Entity, grid: HexGrid) -> ())?,
@@ -36,23 +33,9 @@ export type ServerEntityBehavior = {
 	on_event: (self: Entity, grid: HexGrid, event: EntityEvent, action_state: ActionState) -> (),
 }
 
-function default_take_damage(entity: Entity, grid: HexGrid, damage: Damage, gauge: number): DamageResult
-	if entity.is_destroyed then
-		error "Destroyed entities should not receive damage"
-	end
-	local health = shared_entity_mod.get_effective_health(entity)
-	local effective = math.min(gauge, health)
-
-	return {
-		propagate = (health == effective) and (effective > 0 or health == 0),
-		effective = effective,
-	}
-end
-
 local registry: { [string]: ServerEntityBehavior } = {}
 
 function with_defaults(behavior: any): ServerEntityBehavior
-	behavior.take_damage = behavior.take_damage or default_take_damage
 	behavior.init = behavior.init or function(self) end
 	behavior.tick = behavior.tick or function(...) end
 	behavior.on_completed = behavior.on_completed or function(...) end

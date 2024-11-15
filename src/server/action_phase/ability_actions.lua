@@ -45,7 +45,7 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState)
 
 			updates_mod.add_update(grid, ability)
 			for entity_id in
-				damage_mod.apply_damage_on_cells(grid, { cell.coordinate }, {
+				damage_mod.damage_cells(grid, { cell.coordinate }, {
 					type = "flat",
 					amount = if ability.ability_type == "scout_attack" then 1 else 3,
 					from = entity.id,
@@ -65,16 +65,17 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState)
 			do
 				for entity_id in cell.entities do
 					local affected_entity = grid.entities[entity_id]
-					-- TODO: convert this to use damage_mod
+					-- it would be nice to use damage_mod for this but it doesn't support healing damage
+					-- and this ignores layers
 					affected_entity.health = math.max(
 						affected_entity.max_health,
 						affected_entity.health + solution_config.abilities.solution_use.heal_amount
 					)
-					affected_entity.effects.shield = {
+					table.insert(affected_entity.effects, {
 						type = "shield",
 						health = solution_config.abilities.solution_use.shield_health,
 						duration = solution_config.abilities.solution_use.shield_duration,
-					}
+					})
 
 					updates_mod.add_update(grid, {
 						type = "entity_update",

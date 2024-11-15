@@ -226,15 +226,6 @@ function new_grid_from_extents(extents: Extents): HexGrid
 	return grid
 end
 
-local rotation_to_direction = {
-	[1] = { 0, 1, -1 },
-	[2] = { 1, 0, -1 },
-	[3] = { 1, -1, 0 },
-	[4] = { 0, -1, 1 },
-	[5] = { -1, 0, 1 },
-	[0] = { -1, 1, 0 },
-}
-
 return {
 	neighbors_eq = coords_mod.neighbors_eq,
 	neighbors_leq = coords_mod.neighbors_leq,
@@ -252,7 +243,7 @@ return {
 	coords_add = coords_mod.coords_add,
 	encode_coord = encode_coord,
 	decode_coord = decode_coord,
-	rotation_to_direction = rotation_to_direction,
+	rotation_to_direction = coords_mod.rotation_to_direction,
 	coords_dist = coords_mod.coords_dist,
 	line_of_sight = line_of_sight,
 }

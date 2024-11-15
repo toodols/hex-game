@@ -38,22 +38,23 @@ function decode_coord(s: EncodedCoordinate): CubicCoordinate
 	return coord
 end
 
+local rotation_to_direction = {
+	[1] = { 0, 1, -1 },
+	[2] = { 1, 0, -1 },
+	[3] = { 1, -1, 0 },
+	[4] = { 0, -1, 1 },
+	[5] = { -1, 0, 1 },
+	[0] = { -1, 1, 0 },
+}
+
 -- i am pretty certain neighbors_eq is broken
 -- returns neighbors at a radius. can give neighbors that are out of bounds
 function neighbors_eq(center: CubicCoordinate, radius: number)
-	local directions = {
-		{ 1, -1, 0 },
-		{ 1, 0, -1 },
-		{ 0, 1, -1 },
-		{ -1, 1, 0 },
-		{ -1, 0, 1 },
-		{ 0, -1, 1 },
-	}
 	local result = {}
 	if radius == 0 then
 		table.insert(result, center)
 	else
-		for _, dir in directions do
+		for _, dir in rotation_to_direction do
 			for i = 1, radius do
 				local neighbor = {
 					center[1] + dir[1] * i,
@@ -136,4 +137,5 @@ return {
 	into_cframe = into_cframe,
 	from_vec3 = from_vec3,
 	coords_lerp = coords_lerp,
+	rotation_to_direction = rotation_to_direction,
 }

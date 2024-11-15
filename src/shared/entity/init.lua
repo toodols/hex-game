@@ -25,12 +25,10 @@ require(script.phony)
 require(script.suggestion)
 require(script.altar)
 
-
-
 function get_effective_health(entity: Entity): number
 	local health = entity.health
-	for effect_type, effect in pairs(entity.effects) do
-		if effect_type == "shield" then
+	for _, effect in pairs(entity.effects) do
+		if effect.type == "shield" then
 			health += effect.health
 		end
 	end
