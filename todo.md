@@ -1,0 +1,30 @@
+# Todo
+
+- [ ] Display scores in player list
+- [ ] Add an end screen when only one team is left, then send players to lobby
+- [ ] Improve map generation to be less random or add handmade maps
+- [ ] `scout` should physically turn to face its target when attacking
+- [ ] Items in inventories with incompatible filters should be moved to different inventories
+- [ ] Make `impression` functional
+	- [ ] Add `infected` status effect
+	- [ ] Add `infected_immune` status effect
+- [ ] Make `suggestion` functional
+- [ ] Make `altar` functional
+	- [ ] Range should be extendable by proxy
+- [ ] Make `phony` functional
+- [ ] Remove `turret`. It's too generic.
+- [ ] `witness` should indicate its charges
+- [ ] `boosted` status effect, alongside boosts for each building
+- [ ] Add `mace`, an artillery-type building
+	- [ ] Warning indicator entity 
+- [ ] Systems should be visible to the client and should show total items
+- [ ] Remove power from the game. It's too complicated.
+- [ ] Finish implementation of tutorial
+- [ ] Building cards in expanded view should expand horizontally when hovered
+- [ ] Make lobby ui look better
+- [ ] Split `server/router`
+- [ ] Split `client/ui/game/entity_information`
+- [ ] Add keybinds for ui
+- [ ] Add settings menu 
+	- [ ] with configurable keybinds
+	- [ ] and configurable UI scales
