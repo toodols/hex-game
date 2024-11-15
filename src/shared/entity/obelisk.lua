@@ -1,6 +1,6 @@
 local registry_mod = require(script.Parent.registry)
 
-registry_mod.registry["obelisk"] = registry_mod.with_defaults {
+registry_mod.registry.obelisk = registry_mod.with_defaults {
 	type = "obelisk",
 	name = "Obelisk",
 	description = "Worthless trophy",

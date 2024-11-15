@@ -10,7 +10,7 @@ type Entity = types.Entity
 type HexGrid = types.HexGrid
 type ActionState = server_types.ActionState
 
-registry["factory"] = with_defaults {
+registry.factory = with_defaults {
 	autogenerate_wires = true,
 	init = function(self: Entity, grid: HexGrid)
 		self.current_recipe = "vit_to_tek"

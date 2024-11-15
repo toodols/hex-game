@@ -8,7 +8,7 @@ type HexGrid = types.HexGrid
 
 local model = asset_server.load "Entities/Altar"
 
-registry_mod.registry["altar"] = registry_mod.with_defaults {
+registry_mod.registry.altar = registry_mod.with_defaults {
 	model = model,
 }
 

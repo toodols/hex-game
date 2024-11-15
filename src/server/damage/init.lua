@@ -16,6 +16,7 @@ type ActionState = server_types.ActionState
 -- for each cell, damage is a gauge gradually reduced for each entity
 -- entities that occupy multiple cells are treated as multiple entities
 -- only the highest damage to each entity is applied
+-- damage with a gauge of 0 hitting an entity with a max health of 0 will kill the entity and also propagate
 
 -- Ex:
 -- 1     2
@@ -98,8 +99,9 @@ function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damag
 				continue
 			end
 			local health = shared_entity_mod.get_effective_health(entity)
-			local effective = math.min(gauge, entity.health)
+			local effective = math.min(gauge, health)
 			gauge -= effective
+			health -= effective
 			damage_values[entity.id] = math.max(damage_values[entity.id] or 0, effective)
 			if health > 0 or (effective == 0 and health == 0) then
 				break
@@ -107,6 +109,7 @@ function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damag
 		end
 	end
 
+	-- then apply the damage
 	for entity_id, value in damage_values do
 		local entity = grid.entities[entity_id]
 		apply_entity_damage(entity, value)

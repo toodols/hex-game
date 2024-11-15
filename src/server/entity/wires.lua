@@ -17,7 +17,7 @@ type CubicCoordinate = types.CubicCoordinate
 type HexGrid = types.HexGrid
 type ActionState = server_types.ActionState
 
-registry["wires"] = with_defaults {
+registry.wires = with_defaults {
 	neighbor_changed = function(self: Entity, grid: HexGrid)
 		local cell = grid:get_cell(self.primary_coordinate)
 		assert(cell, "cell not found")

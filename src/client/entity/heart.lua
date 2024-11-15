@@ -8,11 +8,10 @@ type HexGrid = types.HexGrid
 
 local model = asset_server.load "Entities/Heart"
 
-registry_mod.registry["heart"] = registry_mod.with_defaults {
+registry_mod.registry.heart = registry_mod.with_defaults {
 	model = model,
 	update = function(self: Entity, grid: HexGrid, old: Entity) end,
 	init = function(self: Entity, grid: HexGrid) end,
 }
 
 return {}
-

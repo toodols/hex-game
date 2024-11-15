@@ -389,6 +389,7 @@ export type EntityConfiguration = {
 	name: string,
 	description: string,
 	max_health: number,
+	buildable: boolean,
 	build_time: number,
 	abilities: {
 		[string]: {

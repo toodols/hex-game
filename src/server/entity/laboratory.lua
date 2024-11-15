@@ -13,7 +13,7 @@ type Entity = types.Entity
 type HexGrid = types.HexGrid
 type ActionState = server_types.ActionState
 
-registry["laboratory"] = with_defaults {
+registry.laboratory = with_defaults {
 	autogenerate_wires = true,
 	tick = function(self: Entity, grid: HexGrid, action_state: ActionState)
 		if self.status == "complete" and self.owner ~= grid.neutral_team then

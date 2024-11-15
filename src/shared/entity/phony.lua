@@ -2,7 +2,7 @@ local registry_mod = require(script.Parent.registry)
 local registry = registry_mod.registry
 local with_defaults = registry_mod.with_defaults
 
-registry["phony"] = with_defaults {
+registry.phony = with_defaults {
 	type = "phony",
 	name = "Phony",
 	description = "Can disguise as a different building.",

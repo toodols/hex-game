@@ -2,7 +2,7 @@ local registry_mod = require(script.Parent.registry)
 local registry = registry_mod.registry
 local with_defaults = registry_mod.with_defaults
 
-registry["generator"] = with_defaults {
+registry.generator = with_defaults {
 	type = "generator",
 	name = "Catalyst",
 	description = "Generates {entity.generator.output_power} power per turn",

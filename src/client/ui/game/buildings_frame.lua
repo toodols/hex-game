@@ -64,6 +64,9 @@ local PAGES = {
 			{
 				type = "impression",
 			},
+			{
+				type = "suggestion",
+			},
 		},
 	},
 	{
@@ -80,6 +83,9 @@ local PAGES = {
 			},
 			{
 				type = "heart",
+			},
+			{
+				type = "altar",
 			},
 		},
 	},

@@ -7,7 +7,7 @@ local with_defaults = registry_mod.with_defaults
 type Entity = types.Entity
 type HexGrid = types.HexGrid
 
-registry["vault"] = with_defaults {
+registry.vault = with_defaults {
 	autogenerate_wires = true,
 	init = function(self: Entity, grid: HexGrid) end,
 	on_completed = function(self: Entity, grid: HexGrid)

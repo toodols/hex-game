@@ -8,7 +8,7 @@ type HexGrid = types.HexGrid
 
 local model = asset_server.load "Entities/Impression"
 
-registry_mod.registry["impression"] = registry_mod.with_defaults {
+registry_mod.registry.impression = registry_mod.with_defaults {
 	model = model,
 	update = function(self: Entity, grid: HexGrid, old: Entity) end,
 	init = function(self: Entity, grid: HexGrid) end,

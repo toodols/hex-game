@@ -32,7 +32,7 @@ function update_model(self: Entity, grid: HexGrid)
 end
 
 local model = asset_server.load "Entities/Stockpile"
-registry_mod.registry["stockpile"] = registry_mod.with_defaults {
+registry_mod.registry.stockpile = registry_mod.with_defaults {
 	model = model,
 	status_changed = function(self: Entity, grid: HexGrid, old: Entity)
 		if self.status == "complete" then

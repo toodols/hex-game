@@ -37,7 +37,7 @@ local function update_model(self: Entity, grid: HexGrid)
 	end
 end
 
-registry_mod.registry["scout"] = registry_mod.with_defaults {
+registry_mod.registry.scout = registry_mod.with_defaults {
 	model = model,
 	update = function(self: Entity, grid: HexGrid, old: Entity)
 		update_model(self, grid)

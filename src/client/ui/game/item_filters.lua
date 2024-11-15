@@ -189,7 +189,6 @@ function ItemFilters(props: { entity_id: EntityId })
 						TextSize = 14,
 						[React.Event.MouseButton1Click] = function()
 							inventory.filter.items[item] = not inventory.filter.items[item]
-							print(inventory.filter)
 							interaction_remote:FireServer {
 								{
 									type = "set_inventory_filter",

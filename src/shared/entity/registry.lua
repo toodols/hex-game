@@ -23,6 +23,8 @@ function with_defaults(t: any): EntityConfiguration
 	t.type = t.type or error "no type"
 	t.init = t.init or function() end
 	t.build_time = t.build_time or 0
+	-- this entity may be built by the player?
+	t.buildable = if t.buildable ~= nil then t.buildable else true
 	t.name = t.name or t.type
 	t.description = t.description or "No description for " .. t.type
 	t.max_health = t.max_health or 0

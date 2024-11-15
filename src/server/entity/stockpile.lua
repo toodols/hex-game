@@ -7,7 +7,7 @@ local with_defaults = registry_mod.with_defaults
 type Entity = types.Entity
 type HexGrid = types.HexGrid
 
-registry["stockpile"] = with_defaults {
+registry.stockpile = with_defaults {
 	autogenerate_wires = true,
 	on_completed = function(self: Entity, grid: HexGrid)
 		local config = grid.entity_configurations[self.type]

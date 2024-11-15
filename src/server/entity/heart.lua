@@ -10,7 +10,7 @@ type Entity = types.Entity
 type HexGrid = types.HexGrid
 type ActionState = server_types.ActionState
 
-registry["heart"] = with_defaults {
+registry.heart = with_defaults {
 	autogenerate_wires = true,
 	init = function(self: Entity, grid: HexGrid)
 		-- self.should_output = 0

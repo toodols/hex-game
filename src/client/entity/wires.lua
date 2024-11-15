@@ -32,7 +32,7 @@ function update_wire_artifacts(self: Entity, grid: HexGrid)
 		end
 	end
 end
-registry_mod.registry["wires"] = registry_mod.with_defaults {
+registry_mod.registry.wires = registry_mod.with_defaults {
 	model = model,
 	update = function(self: Entity, grid: HexGrid, new: Entity) end,
 	status_changed = function(self, grid)

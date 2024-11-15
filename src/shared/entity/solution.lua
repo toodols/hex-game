@@ -1,6 +1,6 @@
 local registry_mod = require(script.Parent.registry)
 
-registry_mod.registry["solution"] = registry_mod.with_defaults {
+registry_mod.registry.solution = registry_mod.with_defaults {
 	type = "solution",
 	name = "Solution",
 	description = "When used: Heal all neighbor buildings for up to 3 health. Give 'Shield' effect to all neighbor entities.",

@@ -2,7 +2,7 @@ local registry_mod = require(script.Parent.registry)
 local registry = registry_mod.registry
 local with_defaults = registry_mod.with_defaults
 
-registry["scout"] = with_defaults {
+registry.scout = with_defaults {
 	type = "scout",
 	name = "Sentry",
 	description = "Illuminates tiles and shoots enemies. Requires {entity.scout.abilities.scout_attack.cost} to shoot.",

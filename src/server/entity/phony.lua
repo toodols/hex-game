@@ -7,7 +7,7 @@ local with_defaults = registry_mod.with_defaults
 type Entity = types.Entity
 type HexGrid = types.HexGrid
 
-registry["phony"] = with_defaults {
+registry.phony = with_defaults {
 	autogenerate_wires = true,
 	on_completed = function(self: Entity, grid: HexGrid) end,
 }

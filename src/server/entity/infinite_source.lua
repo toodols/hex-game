@@ -13,7 +13,7 @@ type Entity = types.Entity & {
 type HexGrid = types.HexGrid
 type ActionState = server_types.ActionState
 
-registry["infinite_source"] = with_defaults {
+registry.infinite_source = with_defaults {
 	autogenerate_wires = true,
 	init = function(self: Entity, grid: HexGrid)
 		self.mode = "passive"

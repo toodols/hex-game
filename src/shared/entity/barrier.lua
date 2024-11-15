@@ -1,6 +1,6 @@
 local registry_mod = require(script.Parent.registry)
 
-registry_mod.registry["barrier"] = registry_mod.with_defaults {
+registry_mod.registry.barrier = registry_mod.with_defaults {
 	type = "barrier",
 	name = "Barrier",
 	description = "Obstacle that prevents building",

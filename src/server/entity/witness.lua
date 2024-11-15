@@ -11,7 +11,7 @@ type HexGrid = types.HexGrid
 type EntityEvent = types.EntityEvent
 type ActionState = server_types.ActionState
 
-registry["witness"] = with_defaults {
+registry.witness = with_defaults {
 	autogenerate_wires = true,
 	init = function(self: Entity, grid: HexGrid)
 		self.charges = 0

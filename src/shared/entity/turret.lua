@@ -2,7 +2,7 @@ local registry_mod = require(script.Parent.registry)
 local registry = registry_mod.registry
 local with_defaults = registry_mod.with_defaults
 
-registry["turret"] = with_defaults {
+registry.turret = with_defaults {
 	type = "turret",
 	name = "Dagger",
 	description = "Deals {entity.turret.abilities.turret_attack.damage} damage to enemies in a {entity.turret.abilities.turret_attack.range} tile radius. "

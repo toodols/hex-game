@@ -33,11 +33,27 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 				error "Expected entry to be a table"
 			end
 			if entry.type == "construct" then
+				-- the cell exists
 				local cell = grid:get_cell(entry.coordinate)
 				if not cell then
-					return
+					continue
 				end
 
+				-- and does not have the presence of an enemy
+				local has_enemy_presence = false
+				if cell.owner ~= player_team.id then
+					for team_id, presence in cell.server_data.presence do
+						if team_id ~= player_team.id and presence then
+							has_enemy_presence = true
+							break
+						end
+					end
+					if has_enemy_presence then
+						continue
+					end
+				end
+
+				-- and is not blocked
 				if
 					util.table_any(
 						util.table_map(cell.entities, function(_, id)
@@ -55,30 +71,25 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 					continue
 				end
 
-				-- or has the presence of an enemy
-				local has_enemy_presence = false
-				if cell.owner ~= player_team.id then
-					for team_id, presence in cell.server_data.presence do
-						if team_id ~= player_team.id and presence then
-							has_enemy_presence = true
-							break
-						end
-					end
-					if has_enemy_presence then
-						continue
-					end
-				end
-
+				-- and is visible to the player team
 				if not effective_visibility(cell.server_data.visibility[player_team.id]) then
 					continue
 				end
 
+				-- and the entity is allowed to be built on the cell
 				local server_behavior = server_entity_mod.registry[entry.entity_type]
 				if #server_behavior.built_on > 0 then
 					if not table.find(server_behavior.built_on, cell.type) then
-						return
+						continue
 					end
 				end
+
+				-- and can be built by the player
+				local entity_config = grid.entity_configurations[entry.entity_type]
+				if not entity_config.buildable then
+					continue
+				end
+
 				local entity = entity_mod.new_entity({
 					type = entry.entity_type,
 					owner = player_team.id,
@@ -93,8 +104,8 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 					-- error_type.mistake
 					continue
 				end
-				local shared_behavior = grid.entity_configurations[entity.type]
-				local ability = shared_behavior.abilities[entry.ability_type]
+				local entity_config = grid.entity_configurations[entity.type]
+				local ability = entity_config.abilities[entry.ability_type]
 				if not ability then
 					continue
 				end
@@ -201,7 +212,7 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 						return action.type == "deconstruct"
 					end)
 				then
-					return 1
+					continue
 				end
 				if entity.status == "complete" or entity.status == "scaffold" then
 					table.insert(entity.queued_decisions, entry)
@@ -247,8 +258,8 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 					entity.inventory.filter.type = "whitelist"
 				end
 
-				for item in entry.filter.items do
-					if items_mod.item_names[item] ~= nil then
+				for item, value in entry.filter.items do
+					if value == true and items_mod.item_names[item] ~= nil then
 						entity.inventory.filter.items[item] = true
 					end
 				end

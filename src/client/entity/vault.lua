@@ -24,7 +24,7 @@ function update_model(self: Entity, grid: HexGrid)
 	end
 end
 
-registry_mod.registry["vault"] = registry_mod.with_defaults {
+registry_mod.registry.vault = registry_mod.with_defaults {
 	model = model,
 	update = function(self: Entity, grid: HexGrid, old: Entity)
 		update_model(self, grid)
@@ -34,7 +34,10 @@ registry_mod.registry["vault"] = registry_mod.with_defaults {
 			return
 		end
 		local instance_root = grid.entity_instance_map[self.id]
-		if not instance_root then warn("no instance found for vault"); return end
+		if not instance_root then
+			warn "no instance found for vault"
+			return
+		end
 		local t = (animation_state.step / 100) % (math.pi * 2)
 		local instance = instance_root:FindFirstChild "crystal" :: BasePart
 		local start = instance.Position

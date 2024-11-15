@@ -1,7 +1,7 @@
 local registry_mod = require(script.Parent.registry)
 local registry = registry_mod.registry
 local with_defaults = registry_mod.with_defaults
-registry["wires"] = with_defaults {
+registry.wires = with_defaults {
 	type = "wires",
 	name = "Vertex",
 	description = "Allows transfer of power and items between building",

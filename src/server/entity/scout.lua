@@ -7,7 +7,7 @@ local with_defaults = registry_mod.with_defaults
 type Entity = types.Entity
 type HexGrid = types.HexGrid
 
-registry["scout"] = with_defaults {
+registry.scout = with_defaults {
 	autogenerate_wires = true,
 	on_completed = function(self: Entity, grid: HexGrid) end,
 }

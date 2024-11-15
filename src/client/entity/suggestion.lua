@@ -8,9 +8,8 @@ type HexGrid = types.HexGrid
 
 local model = asset_server.load "Entities/Suggestion"
 
-registry_mod.registry["suggestion"] = registry_mod.with_defaults {
+registry_mod.registry.suggestion = registry_mod.with_defaults {
 	model = model,
 }
 
 return {}
-

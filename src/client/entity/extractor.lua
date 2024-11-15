@@ -7,7 +7,7 @@ type Entity = types.Entity
 type HexGrid = types.HexGrid
 
 local model = asset_server.load "Entities/Extractor"
-registry_mod.registry["extractor"] = registry_mod.with_defaults {
+registry_mod.registry.extractor = registry_mod.with_defaults {
 	model = model,
 }
 return {}

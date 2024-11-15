@@ -2,7 +2,7 @@ local registry_mod = require(script.Parent.registry)
 local registry = registry_mod.registry
 local with_defaults = registry_mod.with_defaults
 
-registry["vault"] = with_defaults {
+registry.vault = with_defaults {
 	type = "vault",
 	name = "Vault",
 	description = "Stores up to <b>{entity.vault.inventory_capacity}</b> of the same item",

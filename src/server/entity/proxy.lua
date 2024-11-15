@@ -13,7 +13,7 @@ type Entity = types.Entity
 type HexGrid = types.HexGrid
 type ActionState = server_types.ActionState
 
-registry["proxy"] = with_defaults {
+registry.proxy = with_defaults {
 	autogenerate_wires = true,
 	on_completed = function(self: Entity, grid: HexGrid) end,
 	influences = function(self: Entity, grid: HexGrid)

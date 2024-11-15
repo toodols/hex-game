@@ -2,7 +2,7 @@ local registry_mod = require(script.Parent.registry)
 local registry = registry_mod.registry
 local with_defaults = registry_mod.with_defaults
 
-registry["witness"] = with_defaults {
+registry.witness = with_defaults {
 	type = "witness",
 	name = "Witness",
 	description = [[Gains 1 charge each turn a neighbor {entity.extractor} produces an item or friendly building deals damage.

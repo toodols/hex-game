@@ -133,6 +133,20 @@ function create_researches()
 			},
 			time = 2,
 		},
+		altar = research_state {
+			coord = { 0, 1, -1 },
+			id = "altar",
+			name = "Altar",
+			icon = {
+				type = "model",
+				model = "Entities/Altar",
+			},
+			description = "Allows construction of {entity.altar}",
+			cost = {
+				tek = 3,
+			},
+			time = 2,
+		},
 	} :: { [string]: ResearchState }
 end
 local researches = create_researches()

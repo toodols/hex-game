@@ -8,7 +8,7 @@ type HexGrid = types.HexGrid
 
 local model = asset_server.load "Entities/Obelisk"
 
-registry_mod.registry["obelisk"] = registry_mod.with_defaults {
+registry_mod.registry.obelisk = registry_mod.with_defaults {
 	model = model,
 	update = function(self: Entity, grid: HexGrid, old: Entity) end,
 	init = function(self: Entity, grid: HexGrid) end,
