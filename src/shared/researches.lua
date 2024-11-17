@@ -88,23 +88,23 @@ function create_researches()
 			},
 			time = 2,
 		},
-		extractor_boost = research_state {
-			coord = { 1, 0, -1 },
-			id = "extractor_boost",
-			name = "Boosted Spout",
-			icon = {
-				type = "model",
-				model = "Entities/Extractor",
-			},
-			description = "{entity.extractor} create up to +1 items when adjacent to a {entity.generator}.",
-			cost = {
-				tek = 6,
-			},
-			time = 2,
-			-- precondition = function(_grid, ent)
-			-- 	return ent.researches.states.turret.status ~= "complete"
-			-- end,
-		},
+		-- extractor_boost = research_state {
+		-- 	coord = { 1, 0, -1 },
+		-- 	id = "extractor_boost",
+		-- 	name = "Boosted Spout",
+		-- 	icon = {
+		-- 		type = "model",
+		-- 		model = "Entities/Extractor",
+		-- 	},
+		-- 	description = "{entity.extractor} create up to +1 items when adjacent to a {entity.generator}.",
+		-- 	cost = {
+		-- 		tek = 6,
+		-- 	},
+		-- 	time = 2,
+		-- 	-- precondition = function(_grid, ent)
+		-- 	-- 	return ent.researches.states.turret.status ~= "complete"
+		-- 	-- end,
+		-- },
 		heart = research_state {
 			coord = { 0, -1, 1 },
 			id = "heart",

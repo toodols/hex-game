@@ -41,9 +41,6 @@ local PAGES = {
 			{
 				type = "solution",
 			},
-			{
-				type = "generator",
-			},
 		},
 	},
 	{

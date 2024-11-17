@@ -63,12 +63,6 @@ function testing_map(): HexGrid
 		owner = team1.id,
 	}, grid)
 	grid:get_cell({ magic - 1, -magic + 1, 0 }).type = "bar_deposit"
-	local generator = entity_mod.new_entity({
-		type = "generator",
-		status = "complete",
-		primary_coordinate = { magic - 2, -magic + 1, 1 },
-		owner = team1.id,
-	}, grid)
 	local stockpile = entity_mod.new_entity({
 		type = "stockpile",
 		status = "complete",
@@ -184,12 +178,6 @@ function my_map(): HexGrid
 	-- 	primary_coordinate = { magic - 1, -magic + 1, 0 },
 	-- 	owner = team1.id,
 	-- }, grid)
-	local generator = entity_mod.new_entity({
-		type = "generator",
-		status = "complete",
-		primary_coordinate = { magic - 2, -magic + 1, 1 },
-		owner = team1.id,
-	}, grid)
 	local stockpile = entity_mod.new_entity({
 		type = "stockpile",
 		status = "complete",
@@ -220,12 +208,6 @@ function my_map(): HexGrid
 	-- 	owner = team2.id,
 	-- }, grid)
 
-	local generator2 = entity_mod.new_entity({
-		type = "generator",
-		status = "complete",
-		primary_coordinate = { 2 - magic, magic - 1, -1 },
-		owner = team2.id,
-	}, grid)
 	local stockpile2 = entity_mod.new_entity({
 		type = "stockpile",
 		status = "complete",

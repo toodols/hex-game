@@ -35,13 +35,6 @@ function tests.extractor_filling_stockpile()
 		owner = team1.id,
 		decayable = false,
 	}, grid)
-	local generator = entity_mod.new_entity({
-		type = "generator",
-		status = "complete",
-		primary_coordinate = { 5, -6, 1 },
-		owner = team1.id,
-		decayable = false,
-	}, grid)
 	local stockpile = entity_mod.new_entity({
 		type = "stockpile",
 		status = "complete",
@@ -305,12 +298,6 @@ function tests.deposit_different_items_in_vault()
 		type = "extractor",
 		status = "complete",
 		primary_coordinate = { -1, 0, 1 },
-		owner = team1.id,
-	}, grid)
-	local generator = entity_mod.new_entity({
-		type = "generator",
-		status = "complete",
-		primary_coordinate = { 0, 1, -1 },
 		owner = team1.id,
 	}, grid)
 	grid:get_cell({ 1, 0, -1 }).type = "bar_deposit"

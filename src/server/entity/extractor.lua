@@ -20,16 +20,16 @@ registry_mod.registry.extractor = registry_mod.with_defaults {
 		if self.status == "complete" and self.enabled and self.owner ~= grid.neutral_team then
 			local cell = grid:get_cell(self.primary_coordinate)
 
-			local cell_researches = researches_mod.get_cell_researches(grid, cell, self.owner)
+			-- local cell_researches = researches_mod.get_cell_researches(grid, cell, self.owner)
 			local is_boosted = false
-			if cell_researches.extractor_boost then
-				for entity_id in cell.server_data.influences do
-					local entity = grid.entities[entity_id]
-					if entity.type == "generator" and entity.status == "complete" and entity.owner == self.owner then
-						is_boosted = true
-					end
-				end
-			end
+			-- if cell_researches.extractor_boost then
+			-- 	for entity_id in cell.server_data.influences do
+			-- 		local entity = grid.entities[entity_id]
+			-- 		if entity.type == "generator" and entity.status == "complete" and entity.owner == self.owner then
+			-- 			is_boosted = true
+			-- 		end
+			-- 	end
+			-- end
 
 			-- prevent extractor from missing out on output because there is no power
 			local function ok()

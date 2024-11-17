@@ -15,7 +15,6 @@ registry.factory = with_defaults {
 	recipes = {
 		vit_to_tek = {
 			layout_order = 1,
-			input_power = 1,
 			input_items = {
 				vit = 2,
 			},
@@ -26,7 +25,6 @@ registry.factory = with_defaults {
 		},
 		rad_to_pow = {
 			layout_order = 2,
-			input_power = 1,
 			input_items = {
 				rad = 1,
 				bar = 1,
@@ -38,7 +36,6 @@ registry.factory = with_defaults {
 		},
 		tar_to_tek = {
 			layout_order = 3,
-			input_power = 1,
 			input_items = {
 				tar = 2,
 			},
@@ -49,7 +46,6 @@ registry.factory = with_defaults {
 		},
 		bar_to_tek = {
 			layout_order = 3,
-			input_power = 1,
 			input_items = {
 				bar = 4,
 			},

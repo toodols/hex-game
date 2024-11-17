@@ -23,7 +23,6 @@ registry.factory = with_defaults {
 				table.insert(grid.action_queue, {
 					entity_id = self.id,
 					type = "exchange",
-					input_power = recipe.input_power,
 					input_items = recipe.input_items,
 					output_items = recipe.output_items,
 				})

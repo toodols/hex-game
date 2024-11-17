@@ -20,6 +20,7 @@
 - [ ] Systems should be visible to the client and should show total items
 - [ ] Remove power from the game. It's too complicated.
 - [ ] Finish implementation of tutorial
+- [ ] Add actual preview for ItemsFilterPreview
 - [ ] Building cards in expanded view should expand horizontally when hovered
 - [ ] Make lobby ui look better
 - [ ] Split `server/router`

@@ -21,11 +21,8 @@ registry.heart = with_defaults {
 			table.insert(grid.action_queue, {
 				entity_id = self.id,
 				type = "exchange",
-				-- output_items = if self.should_output == 0 then { "bar" } else {},
 				output_items = { "bar" },
-				output_power = config.output_power,
 			})
-			-- self.should_output = (self.should_output + 1) % 2
 		end
 	end,
 }
