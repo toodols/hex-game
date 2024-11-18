@@ -87,6 +87,7 @@ function neighbors_leq(origin: CubicCoordinate, radius: number): { CubicCoordina
 	return results
 end
 
+-- All coordinates within or equal to a radius from any of the input coordinates
 function neighbors_many_leq(coords: { CubicCoordinate }, radius: number): { CubicCoordinate }
 	local set = {}
 	for _, coord in coords do

@@ -1,11 +1,11 @@
 -- game.server.lua
 
-local RunService = game:GetService("RunService")
-local ServerScriptService = game:GetService("ServerScriptService")
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerStorage = game:GetService("ServerStorage")
-local StarterGui = game:GetService("StarterGui")
+local RunService = game:GetService "RunService"
+local ServerScriptService = game:GetService "ServerScriptService"
+local Players = game:GetService "Players"
+local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ServerStorage = game:GetService "ServerStorage"
+local StarterGui = game:GetService "StarterGui"
 
 local clone_assets = require(ReplicatedStorage.Shared.asset_server).clone
 local util = require(ReplicatedStorage.Shared.util)
@@ -16,11 +16,11 @@ type Interaction = types.Interaction
 type HexGrid = types.HexGrid
 
 -- Copy assets for client use
-local destination = Instance.new("Folder")
+local destination = Instance.new "Folder"
 destination.Parent = ReplicatedStorage
 destination.Name = "ReplicatedAssets"
 
-local server_assets = workspace:FindFirstChild("Assets")
+local server_assets = workspace:FindFirstChild "Assets"
 server_assets.Parent = ServerStorage
 
 workspace:FindFirstChild("Nonassets"):Destroy()
@@ -70,9 +70,9 @@ end
 function start_game(teleport_data: { room: types.Room }?)
 	local room = teleport_data and teleport_data.room
 	local players_config = room and room.players
-	print(game.HttpService:JSONEncode(teleport_data))
-	-- grid = presets[if room then room.map else "my_map"]()
-	grid = tests.stockpile_filters()
+	print("Starting game with teleport data", game.HttpService:JSONEncode(teleport_data))
+	grid = presets[if room then room.map else "my_map"]()
+	-- grid = tests.stockpile_filters()
 
 	_G.grid = grid
 

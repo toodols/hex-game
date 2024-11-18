@@ -19,17 +19,26 @@ local function update_model(self: Entity, grid: HexGrid)
 
 	local indicator: PVInstance? = instance:FindFirstChild "AttackArrow"
 	if attack then
-		if indicator == nil then
-			indicator = indicator_template:Clone();
-			(indicator :: any).Parent = instance
-		end
-		(indicator :: any):PivotTo(
-			CFrame.lookAt(
-				instance:GetPivot().Position,
-				instance:GetPivot().Position
-					+ hex_grid_mod.into_vec3(hex_grid_mod.coords_sub(attack.coordinate, self.primary_coordinate))
+		if indicator then
+			-- todo: make it animate?
+			(indicator :: any):PivotTo(
+				CFrame.lookAt(
+					instance:GetPivot().Position,
+					instance:GetPivot().Position
+						+ hex_grid_mod.into_vec3(hex_grid_mod.coords_sub(attack.coordinate, self.primary_coordinate))
+				)
 			)
-		)
+		else
+			indicator = indicator_template:Clone();
+			(indicator :: any).Parent = instance;
+			(indicator :: any):PivotTo(
+				CFrame.lookAt(
+					instance:GetPivot().Position,
+					instance:GetPivot().Position
+						+ hex_grid_mod.into_vec3(hex_grid_mod.coords_sub(attack.coordinate, self.primary_coordinate))
+				)
+			)
+		end
 	else
 		if indicator then
 			indicator:Destroy()

@@ -28,13 +28,11 @@ effects.shield = {
 effects.infected = {
 	init = function(grid: HexGrid, entity: Entity, effect: Effect)
 		damage_mod.damage_entity(grid, entity, {
-			amount = 3,
+			amount = 2,
 			nonlethal = true,
 		})
 	end,
-	tick = function(grid: HexGrid, entity: Entity, effect: Effect)
-	
-	end,
+	tick = function(grid: HexGrid, entity: Entity, effect: Effect) end,
 }
 
 return { effects = effects, get_entity_effect = get_entity_effects, get_one_entity_effect = get_one_entity_effect }

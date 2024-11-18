@@ -24,24 +24,28 @@ export type ServerEntityBehavior = {
 	tick: (self: Entity, grid: HexGrid, action_state: ActionState?) -> (),
 	built_on: { CellType },
 
-	get_illumination: (self: Entity, grid: HexGrid) -> { CubicCoordinate },
+	illuminates: (self: Entity, grid: HexGrid) -> { CubicCoordinate },
 	on_completed: (self: Entity, grid: HexGrid) -> (),
 	influences: ((self: Entity, grid: HexGrid) -> ())?,
 	-- laboratory only
 	on_research_completed: (self: Entity, grid: HexGrid, research_id: string) -> ()?,
 	autogenerate_wires: boolean?,
+	abilities: { [string]: (self: Entity, grid: HexGrid) -> () },
 	on_event: (self: Entity, grid: HexGrid, event: EntityEvent, action_state: ActionState) -> (),
 }
 
 local registry: { [string]: ServerEntityBehavior } = {}
 
+local noop = function() end
+
 function with_defaults(behavior: any): ServerEntityBehavior
-	behavior.init = behavior.init or function(self) end
-	behavior.tick = behavior.tick or function(...) end
-	behavior.on_completed = behavior.on_completed or function(...) end
+	behavior.init = behavior.init or noop
+	behavior.tick = behavior.tick or noop
+	behavior.on_completed = behavior.on_completed or noop
 	behavior.built_on = behavior.built_on or {}
-	behavior.influences = behavior.influences or function() end
-	behavior.on_event = behavior.on_event or function() end
+	behavior.influences = behavior.influences or noop
+	behavior.on_event = behavior.on_event or noop
+	behavior.abilities = behavior.abilities or {}
 	behavior.illuminates = function(self, grid)
 		return {}
 	end

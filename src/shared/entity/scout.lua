@@ -5,7 +5,7 @@ local with_defaults = registry_mod.with_defaults
 registry.scout = with_defaults {
 	type = "scout",
 	name = "Sentry",
-	description = "Illuminates tiles and shoots enemies. Requires {entity.scout.abilities.scout_attack.cost} to shoot.",
+	description = "Illuminates r=3 tiles. For {entity.scout.abilities.scout_attack.cost}, does {entity.scout.abilities.scout_attack.damage} damage.",
 	max_health = 3,
 	build_time = 1,
 	cost = {
@@ -14,9 +14,9 @@ registry.scout = with_defaults {
 	abilities = {
 		scout_attack = {
 			range = 3,
-			damage = 1,
+			damage = 2,
 			cost = {
-				bar = 1,
+				rad = 1,
 			},
 		},
 	},

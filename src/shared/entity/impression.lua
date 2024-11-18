@@ -5,14 +5,14 @@ local with_defaults = registry_mod.with_defaults
 registry.impression = with_defaults {
 	type = "impression",
 	name = "Impression",
-	description = [[Activates and destroys itself when an enemy is in r=1. Applies 'infected' effect to all r=2 enemies, taking 3 nonlethal damage. 'infected' spreads to neighboring allies each turn.]],
+	description = [[Activates and destroys itself when an enemy is in r=1. Applies 'infected' effect to all r=2 enemies, taking 2 nonlethal damage. 'infected' spreads to neighboring allies each turn.]],
 	max_health = 0,
 	build_time = 1,
 	cost = {
 		pow = 2,
 	},
 	abilities = {
-		use_impression = {},
+		impression_use = {},
 	},
 	layer = registry_mod.layer.building,
 }

@@ -8,6 +8,7 @@ local systems_mod = require(ServerScriptService.Server.systems)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local damage_mod = require(ServerScriptService.Server.damage)
 local updates_mod = require(ServerScriptService.Server.updates)
+local server_entity_mod = require(ServerScriptService.Server.entity)
 
 type HexGrid = types.HexGrid
 type System = server_types.System
@@ -56,34 +57,7 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState)
 				action_state.will_be_destroyed_entities[entity_id] = true
 			end
 		elseif ability.ability_type == "solution_use" then
-			local solution_config = grid.entity_configurations[entity.type]
-
-			for _, cell in
-				util.table_filter_map(hex_grid_mod.neighbors_many_leq(entity.coordinates, 1), function(coord)
-					return grid:get_cell(coord)
-				end)
-			do
-				for entity_id in cell.entities do
-					local affected_entity = grid.entities[entity_id]
-					-- it would be nice to use damage_mod for this but it doesn't support healing damage
-					-- and this ignores layers
-					affected_entity.health = math.max(
-						affected_entity.max_health,
-						affected_entity.health + solution_config.abilities.solution_use.heal_amount
-					)
-					table.insert(affected_entity.effects, {
-						type = "shield",
-						health = solution_config.abilities.solution_use.shield_health,
-						duration = solution_config.abilities.solution_use.shield_duration,
-					})
-
-					updates_mod.add_update(grid, {
-						type = "entity_update",
-						entity = affected_entity,
-					})
-				end
-			end
-
+			server_entity_mod.registry[entity.type].abilities[ability.ability_type](entity, grid)
 			action_state.will_be_destroyed_entities[entity.id] = true
 		end
 	end

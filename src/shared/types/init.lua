@@ -432,39 +432,54 @@ export type GlobalConfiguration = {
 	decaying_enabled: boolean,
 }
 
-export type EntityEvent = {
-	event_type: "dealt_damage",
-	damage: Damage,
-	entity_id: EntityId,
-} | {
-	event_type: "took_damage",
-	effective_damage: EffectiveDamage,
-	entity_id: EntityId,
-} | {
-	event_type: "consumed_items",
-	items: { [Item]: number },
-	entity_id: EntityId,
-} | {
-	event_type: "produced_items",
-	items: { [Item]: number },
-	entity_id: EntityId,
-} | {
-	event_type: "status_changed",
-	entity_id: EntityId,
-} | {
-	event_type: "removed",
-	entity_id: EntityId,
-} | {
-	event_type: "created",
-	entity_id: EntityId,
-} | {
-	event_type: "update",
-	entity_id: EntityId,
-} | {
-	event_type: "research_completed",
-	entity_id: EntityId,
-	research_id: ResearchId,
-}
+export type EntityEvent =
+	{
+		event_type: "dealt_damage",
+		damage: Damage,
+		entity_id: EntityId,
+	}
+	| {
+		event_type: "took_damage",
+		effective_damage: EffectiveDamage,
+		entity_id: EntityId,
+	}
+	| {
+		event_type: "consumed_items",
+		items: { [Item]: number },
+		entity_id: EntityId,
+	}
+	| {
+		event_type: "produced_items",
+		items: { [Item]: number },
+		entity_id: EntityId,
+	}
+	| {
+		event_type: "status_changed",
+		entity_id: EntityId,
+	}
+	-- Entity is removed for any reason
+	| {
+		event_type: "removed",
+		entity_id: EntityId,
+	}
+	| {
+		event_type: "created",
+		entity_id: EntityId,
+	}
+	| {
+		event_type: "update",
+		entity_id: EntityId,
+	}
+	| {
+		event_type: "research_completed",
+		entity_id: EntityId,
+		research_id: ResearchId,
+	}
+	-- Entity is killed by damage or other means
+	| {
+		event_type: "killed",
+		entity_id: EntityId,
+	}
 
 export type EntityAction =
 	-- attempt to fill as much of the blueprint as possible from inventories and overflow
