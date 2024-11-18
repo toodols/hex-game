@@ -1,4 +1,4 @@
-local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local util = require(ReplicatedStorage.Shared.util)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local types = require(ReplicatedStorage.Shared.types)
@@ -15,8 +15,7 @@ function compute_presence(grid: HexGrid)
 				owner = entity.owner
 			end
 
-			-- most entities do not impose a presence
-			-- barriers do
+			-- neutral barrier imposes a presence
 			if entity.owner == neutral_team and entity.type == "barrier" then
 				owner = neutral_team
 			end

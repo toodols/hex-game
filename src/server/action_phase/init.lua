@@ -1,5 +1,5 @@
-local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local ServerScriptService = game:GetService "ServerScriptService"
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
@@ -135,9 +135,18 @@ function delete_deconstructed_entities(grid: HexGrid, queue: { EntityAction })
 	end
 end
 
-function run_action_phase(grid: HexGrid)
+function run_action_phase(grid: HexGrid, extra_actions: { EntityAction }?)
 	local t0 = tick()
 	local action_state = new_action_state()
+
+	if extra_actions then
+		for _, action in extra_actions do
+			if action.type == nil then
+				error("not an action")
+			end
+			table.insert(grid.action_queue, action)
+		end
+	end
 
 	queue_entity_decisions(grid, grid.action_queue)
 	delete_deconstructed_entities(grid, grid.action_queue)

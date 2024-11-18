@@ -18,7 +18,7 @@
 - [ ] Add `mace`, an artillery-type building
 	- [ ] Warning indicator entity 
 - [ ] Systems should be visible to the client and should show total items
-- [ ] Remove power from the game. It's too complicated.
+- [x] Remove power from the game. It's too complicated.
 - [ ] Finish implementation of tutorial
 - [ ] Add actual preview for ItemsFilterPreview
 - [ ] Building cards in expanded view should expand horizontally when hovered

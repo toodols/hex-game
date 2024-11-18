@@ -5,67 +5,194 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local util = require(ReplicatedStorage.Shared.util)
 local formatting = require(ReplicatedStorage.Shared.formatting)
+local types = require(ReplicatedStorage.Shared.types)
+
 local archive = require(ServerScriptService.Server.archive)
 local presets = require(ServerScriptService.Server.presets)
 local cleanup = require(ServerScriptService.Server.cleanup).cleanup
-
 local action_phase_mod = require(ServerScriptService.Server.action_phase)
 local entity_mod = require(ServerScriptService.Server.entity)
 local damage_mod = require(ServerScriptService.Server.damage)
 
 local assert_eq = util.assert_eq
 
+type Entity = types.Entity
+type HexGrid = types.HexGrid
+type HexCell = types.HexCell
+type TeamData = types.TeamData
+
+-- spawns an entity at the first empty cell
+function spawn_entity(grid: HexGrid, entity_ty: string, cell_ty: string?)
+	local team = (util.table_find_pred(grid.teams, function(candidate)
+		return candidate.is_player_team
+	end) :: TeamData).id
+
+	local cell = util.table_find_pred(grid.cells, function(candidate)
+		return
+			--can be anywhere if there are no entities yet otherwise build next to a wire
+			(
+				next(grid.entities) == nil
+				or util.table_any(hex_grid_mod.neighbors_eq(candidate.coordinate, 1), function(neighbor)
+					return #grid:query_entity { primary_coordinate = neighbor, type = "wires", owner = team } > 0
+				end)
+			)
+				-- must be on an empty cell		
+				and next(candidate.entities) == nil
+	end) :: HexCell
+
+	local entity = entity_mod.new_entity({
+		type = entity_ty,
+		owner = team,
+		primary_coordinate = cell.coordinate,
+		status = "complete",
+	}, grid)
+
+	if cell_ty then
+		cell.type = cell_ty
+	end
+
+	return entity
+end
+
 local tests = {}
 function tests.extractor_filling_stockpile()
 	-- Build the map
-	local magic = 7
+	local grid = presets.blank_map()
+	grid.global_configuration.decaying_enabled = false
 
-	local grid = hex_grid_mod.new_grid_from_extents {
-		{ min = -magic, max = magic },
-		{ min = -magic, max = magic },
-		{ min = -magic, max = magic },
-	}
-	local team1 = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) })
-	local team2 = grid:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) })
-
-	local extractor = entity_mod.new_entity({
-		type = "extractor",
-		status = "complete",
-		primary_coordinate = { 6, -6, 0 },
-		owner = team1.id,
-		decayable = false,
-	}, grid)
-	local stockpile = entity_mod.new_entity({
-		type = "stockpile",
-		status = "complete",
-		primary_coordinate = { 5, -5, 0 },
-		owner = team1.id,
-		decayable = false,
-	}, grid)
-
-	grid:get_cell({ 6, -6, 0 }).type = "bar_deposit"
+	local extractor = spawn_entity(grid, "extractor", "bar_deposit")
+	local stockpile = spawn_entity(grid, "stockpile")
 
 	for i = 1, 2 do
 		action_phase_mod.run_action_phase(grid)
 	end
 
-	assert_eq(#stockpile.inventory.items, 1, "expected 1 item in stockpile, got " .. #stockpile.inventory.items)
+	assert_eq(#stockpile.inventory.items, 1)
 
 	for i = 1, 2 do
 		action_phase_mod.run_action_phase(grid)
 	end
 
-	assert_eq(#stockpile.inventory.items, 2, "expected 2 items in stockpile, got " .. #stockpile.inventory.items)
+	assert_eq(#stockpile.inventory.items, 2)
+
+	stockpile.inventory.items = {}
 
 	for i = 1, 10 do
 		action_phase_mod.run_action_phase(grid)
 	end
 
-	assert_eq(
-		#stockpile.inventory.items,
-		stockpile.inventory.capacity,
-		"expected all items in stockpile, got " .. #stockpile.inventory.items
+	assert_eq(#stockpile.inventory.items, stockpile.inventory.capacity)
+
+	cleanup(grid)
+end
+
+function tests.stockpile_filters()
+	local grid = presets.blank_map()
+	grid.global_configuration.decaying_enabled = false
+
+	local stockpile = spawn_entity(grid, "stockpile")
+	action_phase_mod.run_action_phase(
+		grid,
+		{ {
+			type = "exchange",
+			entity_id = stockpile.id,
+			output_items = { "bar" },
+		} }
 	)
+
+	assert_eq(stockpile.inventory.items, { "bar" })
+
+	stockpile.inventory.items = {}
+
+	stockpile.inventory.filter = {
+		type = "whitelist",
+		items = { ["bar"] = true },
+	}
+	action_phase_mod.run_action_phase(
+		grid,
+		{ {
+			type = "exchange",
+			entity_id = stockpile.id,
+			output_items = { "rad" },
+		} }
+	)
+
+	assert_eq(stockpile.inventory.items, {})
+
+	action_phase_mod.run_action_phase(
+		grid,
+		{ {
+			type = "exchange",
+			entity_id = stockpile.id,
+			output_items = { "bar" },
+		} }
+	)
+
+	assert_eq(stockpile.inventory.items, { "bar" })
+
+	action_phase_mod.run_action_phase(
+		grid,
+		{ {
+			type = "exchange",
+			entity_id = stockpile.id,
+			output_items = { "bar", "rad", "pow" },
+		} }
+	)
+
+	assert_eq(stockpile.inventory.items, { "bar", "bar" })
+
+	stockpile.inventory.items = {}
+	stockpile.inventory.filter = {
+		type = "blacklist",
+		items = { ["bar"] = true },
+	}
+	action_phase_mod.run_action_phase(
+		grid,
+		{ {
+			type = "exchange",
+			entity_id = stockpile.id,
+			output_items = { "bar", "rad", "pow" },
+		} }
+	)
+
+	assert_eq(stockpile.inventory.items, { "rad", "pow" })
+
+	cleanup(grid)
+	return grid
+end
+
+function tests.damage_scout_with_magic()
+	local grid = presets.blank_map()
+
+	local scout = spawn_entity(grid, "scout")
+
+	damage_mod.destroy_entities(
+		grid,
+		damage_mod.damage_entity(grid, scout, {
+			amount = 1,
+		})
+	)
+
+	assert_eq(scout.health, scout.max_health - 1, "scout should have 1 less health")
+
+	damage_mod.destroy_entities(
+		grid,
+		damage_mod.damage_entity(grid, scout, {
+			amount = 100,
+			nonlethal = true,
+		})
+	)
+
+	assert(not scout.is_destroyed, "Nonlethal damage should not destroy the scout")
+
+	damage_mod.destroy_entities(
+		grid,
+		damage_mod.damage_entity(grid, scout, {
+			amount = 100,
+		})
+	)
+
+	assert(scout.is_destroyed, "Lethal damage should destroy the scout")
 
 	cleanup(grid)
 end
@@ -132,41 +259,6 @@ function tests.chatgpt_didnt_grift_me() -- (it did)
 	cleanup(grid)
 end
 
-function tests.damage_extractor()
-	local grid = hex_grid_mod.new_grid_empty()
-	grid.cells[hex_grid_mod.encode_coord { 0, 0, 0 }] = hex_grid_mod.empty_cell { 0, 0, 0 }
-	local extractor = entity_mod.new_entity({
-		type = "extractor",
-		primary_coordinate = { 0, 0, 0 },
-		status = "complete",
-		owner = grid.neutral_team,
-	}, grid)
-
-	local autogenerated_wires = grid:query_entity({ primary_coordinate = { 0, 0, 0 }, type = "wires" })[1]
-
-	damage_mod.destroy_entities(
-		grid,
-		damage_mod.damage_cells(grid, { { 0, 0, 0 } }, {
-			type = "flat",
-			amount = 1,
-		})
-	)
-
-	assert_eq(extractor.health, extractor.max_health - 1, "extractor was not damaged")
-
-	damage_mod.destroy_entities(
-		grid,
-		damage_mod.damage_cells(grid, { { 0, 0, 0 } }, {
-			type = "flat",
-			amount = math.huge,
-		})
-	)
-
-	assert(extractor.is_destroyed, "extractor was not destroyed")
-	assert(autogenerated_wires.is_destroyed, "autogenerated wires was not destroyed")
-	cleanup(grid)
-end
-
 function tests.capture_extractor()
 	local grid = hex_grid_mod.new_grid_from_extents {
 		{ min = -1, max = 1 },
@@ -201,53 +293,24 @@ function tests.capture_extractor()
 	cleanup(grid)
 end
 
-function tests.wire_blueprint_builds()
-	local grid = hex_grid_mod.new_grid_from_extents {
-		{ min = -1, max = 1 },
-		{ min = -1, max = 1 },
-		{ min = -1, max = 1 },
-	}
-	local team1 = grid:new_team()
-
-	local infinite_source = entity_mod.new_entity({
-		type = "infinite_source",
-		status = "complete",
-		primary_coordinate = { 0, 0, 0 },
-		owner = team1.id,
-	}, grid)
-
-	local wires = entity_mod.new_entity({
-		type = "wires",
-		status = "blueprint",
-		primary_coordinate = { -1, 0, 1 },
-		owner = team1.id,
-	}, grid)
-
-	action_phase_mod.run_action_phase(grid)
-
-	assert_eq(wires.status, "complete")
-end
-
 function tests.stockpile_blueprint_builds()
-	local grid = hex_grid_mod.new_grid_from_extents {
-		{ min = -1, max = 1 },
-		{ min = -1, max = 1 },
-		{ min = -1, max = 1 },
-	}
+	local grid = presets.blank_map()
 	local team1 = grid:new_team()
 
-	local infinite_source = entity_mod.new_entity({
-		type = "infinite_source",
-		status = "complete",
-		primary_coordinate = { 0, 0, 0 },
-		owner = team1.id,
-	}, grid)
 	local extractor = entity_mod.new_entity({
 		type = "extractor",
 		status = "blueprint",
+		primary_coordinate = { 0, 0, 0 },
+		owner = team1.id,
+	}, grid)
+
+	local stockpile = entity_mod.new_entity({
+		type = "stockpile",
+		status = "complete",
 		primary_coordinate = { -1, 0, 1 },
 		owner = team1.id,
 	}, grid)
+	stockpile.inventory.items = { "bar", "bar", "bar", "bar", "bar" }
 
 	action_phase_mod.run_action_phase(grid)
 	assert_eq(extractor.status, "scaffold", "extractor blueprint did not become scaffold")
@@ -260,8 +323,8 @@ function tests.stockpile_blueprint_builds()
 end
 
 function tests.deconstruct_stockpile()
-	local grid = presets.testing_map()
-	local stockpile = (grid:query_entity { type = "stockpile" })[1]
+	local grid = presets.blank_map()
+	local stockpile = spawn_entity(grid, "stockpile")
 
 	table.insert(stockpile.queued_decisions, {
 		type = "deconstruct",
@@ -270,57 +333,49 @@ function tests.deconstruct_stockpile()
 
 	action_phase_mod.run_action_phase(grid)
 
-	assert_eq(#(grid:query_entity { type = "stockpile" }), 0, "stockpile is not destroyed by deconstruction")
+	assert(stockpile.is_destroyed, "stockpile should be destroyed by deconstruction")
 
 	cleanup(grid)
 end
 
 function tests.deposit_different_items_in_vault()
-	local grid = hex_grid_mod.new_grid_from_extents {
-		{ min = -3, max = 3 },
-		{ min = -3, max = 3 },
-		{ min = -3, max = 3 },
-	}
-	local team1 = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) })
-	local vault = entity_mod.new_entity({
-		type = "vault",
-		status = "complete",
-		primary_coordinate = { 0, 0, 0 },
-		owner = team1.id,
-	}, grid)
-	local bar_extractor = entity_mod.new_entity({
-		type = "extractor",
-		status = "complete",
-		primary_coordinate = { 1, 0, -1 },
-		owner = team1.id,
-	}, grid)
-	local rad_extractor = entity_mod.new_entity({
-		type = "extractor",
-		status = "complete",
-		primary_coordinate = { -1, 0, 1 },
-		owner = team1.id,
-	}, grid)
-	grid:get_cell({ 1, 0, -1 }).type = "bar_deposit"
-	grid:get_cell({ -1, 0, 1 }).type = "rad_deposit"
+	local grid = presets.blank_map()
+	local vault = spawn_entity(grid, "vault")
 
-	action_phase_mod.run_action_phase(grid)
+	action_phase_mod.run_action_phase(grid, {
+		{
+			type = "exchange",
+			entity_id = vault.id,
+			output_items = { "rad", "bar" },
+		},
+	})
+
+	assert_eq(#vault.inventory.items, 1, "Vault should only have 1 item")
 
 	cleanup(grid)
 end
 
 function tests.deconstruct_building_preserves_wires()
-	local grid = hex_grid_mod.new_grid_from_extents {
-		{ min = -1, max = 1 },
-		{ min = -1, max = 1 },
-		{ min = -1, max = 1 },
-	}
-	local team1 = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) })
+	local grid = presets.blank_map()
+	-- Create a scout "organically"
 	local scout = entity_mod.new_entity({
 		type = "scout",
-		status = "complete",
-		primary_coordinate = { -1, 1, 0 },
-		owner = team1.id,
+		status = "blueprint",
+		primary_coordinate = { 0, 0, 0 },
+		owner = grid.teams[3].id,
 	}, grid)
+
+	-- Feed it some items
+	for i = 1, 3 do
+		action_phase_mod.run_action_phase(grid, {
+			{
+				type = "exchange",
+				entity_id = scout.id,
+				output_items = { "bar" },
+			},
+		})
+	end
+
 	assert_eq(#grid:query_entity { type = "wires" }, 1, "wires not generated")
 	table.insert(scout.queued_decisions, {
 		type = "deconstruct",
@@ -333,14 +388,9 @@ function tests.deconstruct_building_preserves_wires()
 end
 
 function tests.scout_attack_each_other()
-	local magic = 3
-	local grid = hex_grid_mod.new_grid_from_extents {
-		{ min = -magic, max = magic },
-		{ min = -magic, max = magic },
-		{ min = -magic, max = magic },
-	}
-	local team1 = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) })
-	local team2 = grid:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) })
+	local grid, teams = presets.blank_map()
+	local team1 = teams.team1
+	local team2 = teams.team2
 
 	entity_mod.new_entity({
 		type = "infinite_source",

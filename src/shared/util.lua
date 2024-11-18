@@ -1,9 +1,9 @@
 function set_transparency(instance_tree: Instance, transparency: number)
-	if instance_tree:IsA "BasePart" then
+	if instance_tree:IsA("BasePart") then
 		(instance_tree :: BasePart).Transparency = transparency
 	end
 	for _, basepartq in (instance_tree:GetDescendants()) do
-		if basepartq:IsA "BasePart" then
+		if basepartq:IsA("BasePart") then
 			(basepartq :: BasePart).Transparency = transparency
 		end
 	end
@@ -244,7 +244,7 @@ function table_count_entries(tab: { [any]: any }): number
 end
 
 function assert_eq(a, b, msg)
-	if a ~= b then
+	if not deep_equal(a, b) then
 		error(`	Assertion failed {if msg then " " .. msg else ""}: {a} != {b}`)
 	end
 end

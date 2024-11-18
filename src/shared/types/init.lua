@@ -297,12 +297,22 @@ export type Interaction = Decision | {
 
 export type Damage = {
 	from: EntityId?,
-	type: "flat",
 	amount: number,
-	lethal: boolean?,
+	-- Whether this damage ignores shields
+	piercing: boolean?,
+	-- Whether this damage can kill the entity
+	nonlethal: boolean?,
+	-- Whether this damage can affect friendly entities
 	friendly_fire: boolean?,
 }
-export type EffectiveDamage = { entity_id: EntityId, source: Damage, amount: number, lethal: boolean }
+export type EffectiveDamage = {
+	-- target
+	entity_id: EntityId,
+	source: Damage,
+	amount: number,
+	-- whether the damage killed this entity
+	lethal: boolean,
+}
 
 type TeamTarget = "everyone" | { TeamId }
 

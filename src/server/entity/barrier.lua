@@ -1,5 +1,12 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local registry_mod = require(script.Parent.registry)
-
-registry_mod.registry.barrier = registry_mod.with_defaults {}
+local types = require(ReplicatedStorage.Shared.types)
+type Entity = types.Entity
+type HexGrid = types.HexGrid
+registry_mod.registry.barrier = registry_mod.with_defaults({
+	init = function(self: Entity, grid: HexGrid)
+		self.decayable = false
+	end,
+})
 
 return {}

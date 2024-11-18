@@ -11,6 +11,9 @@ registry.impression = with_defaults {
 	cost = {
 		pow = 2,
 	},
+	abilities = {
+		use_impression = {},
+	},
 	layer = registry_mod.layer.building,
 }
 

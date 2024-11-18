@@ -1,4 +1,4 @@
-local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local types = require(ReplicatedStorage.Shared.types)
 local server_entity_mod = require(script.Parent.entity)
 local server_types = require(script.Parent.types)
@@ -70,8 +70,24 @@ function apply_entity_damage(entity: Entity, amount: number): number
 	return total
 end
 
+function damage_entity(grid: HexGrid, entity: Entity, damage: Damage): { [EntityId]: boolean }
+	damage.nonlethal = damage.nonlethal or false
+	damage.friendly_fire = damage.friendly_fire or false
+	local health = shared_entity_mod.get_effective_health(entity)
+	local gauge = damage.amount
+	local effective = math.clamp(if damage.nonlethal then health - 1 else health, 0, gauge)
+	gauge -= effective
+	health -= effective
+
+	apply_entity_damage(entity, effective)
+	if health <= 0 and not damage.nonlethal then
+		return { [entity.id] = true }
+	end
+	return {}
+end
+
 function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damage): { [EntityId]: boolean }
-	damage.lethal = damage.lethal or true
+	damage.nonlethal = damage.nonlethal or false
 	damage.friendly_fire = damage.friendly_fire or false
 	local destroyed_entities = {}
 	local team = if damage.from then grid.entities[damage.from].owner else nil
@@ -99,7 +115,7 @@ function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damag
 				continue
 			end
 			local health = shared_entity_mod.get_effective_health(entity)
-			local effective = math.min(gauge, health)
+			local effective = math.clamp(if damage.nonlethal then health - 1 else health, 0, gauge)
 			gauge -= effective
 			health -= effective
 			damage_values[entity.id] = math.max(damage_values[entity.id] or 0, effective)
@@ -147,6 +163,7 @@ function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damag
 	return destroyed_entities
 end
 
+-- call to mark
 function destroy_entities(grid: HexGrid, destroyed_entities: { [EntityId]: boolean })
 	for entity_id in destroyed_entities do
 		server_entity_mod.remove_entity(grid, grid.entities[entity_id])
@@ -155,5 +172,6 @@ end
 
 return {
 	damage_cells = damage_cells,
+	damage_entity = damage_entity,
 	destroy_entities = destroy_entities,
 }

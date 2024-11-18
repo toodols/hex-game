@@ -1,5 +1,5 @@
-local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local ServerScriptService = game:GetService "ServerScriptService"
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local shared_registry_mod = require(ReplicatedStorage.Shared.entity.registry)
@@ -30,10 +30,12 @@ function entity_can_deconstruct(entity: Entity, grid: HexGrid)
 end
 
 function autogenerate_wires(grid: HexGrid, host: Entity)
-	if #grid:query_entity { primary_coordinate = host.primary_coordinate, type = "wires", owner = host.owner } == 0 then
+	if
+		#grid:query_entity({ primary_coordinate = host.primary_coordinate, type = "wires", owner = host.owner }) == 0
+	then
 		-- the status is the highest status among buildings that come with wires
 		local status = "blueprint"
-		for _, entity in grid:query_entity { primary_coordinate = host.primary_coordinate, owner = host.owner } do
+		for _, entity in grid:query_entity({ primary_coordinate = host.primary_coordinate, owner = host.owner }) do
 			if registry[entity.type].autogenerate_wires then
 				if (status == "blueprint" or status == "scaffold") and entity.status == "complete" then
 					status = "complete"
@@ -61,7 +63,7 @@ end
 function new_entity(entity_: any, grid: HexGrid): Entity
 	local entity = entity_ :: Entity
 	if not grid then
-		error "argument 2 not provided"
+		error("argument 2 not provided")
 	end
 	local server_behavior = registry[entity.type]
 	local shared_behavior = shared_registry_mod.registry[entity.type]

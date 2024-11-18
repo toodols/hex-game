@@ -1,5 +1,8 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
+local damage_mod = require(ServerScriptService.Server.damage)
+
 type Entity = types.Entity
 type HexGrid = types.HexGrid
 type Effect = types.Effect
@@ -23,7 +26,15 @@ effects.shield = {
 	tick = function(grid: HexGrid, entity: Entity, effect: Effect) end,
 }
 effects.infected = {
-	tick = function(grid: HexGrid, entity: Entity, effect: Effect) end,
+	init = function(grid: HexGrid, entity: Entity, effect: Effect)
+		damage_mod.damage_entity(grid, entity, {
+			amount = 3,
+			nonlethal = true,
+		})
+	end,
+	tick = function(grid: HexGrid, entity: Entity, effect: Effect)
+	
+	end,
 }
 
 return { effects = effects, get_entity_effect = get_entity_effects, get_one_entity_effect = get_one_entity_effect }
