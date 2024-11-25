@@ -29,3 +29,5 @@
 - [ ] Add settings menu 
 	- [ ] with configurable keybinds
 	- [ ] and configurable UI scales
+- [ ] Spectator starts off with no visibility
+	- Visibility can be granted or revoked by player teams

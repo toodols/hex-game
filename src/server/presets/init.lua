@@ -1,4 +1,4 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local entity_mod = require(script.Parent.entity)
 local computed_mod = require(script.Parent.computed)
@@ -15,11 +15,11 @@ function my_map(): HexGrid
 	-- Build the map
 	local magic = 10
 
-	local grid = hex_grid_mod.new_grid_from_extents({
+	local grid = hex_grid_mod.new_grid_from_extents {
 		{ min = -magic, max = magic },
 		{ min = -magic, max = magic },
 		{ min = -magic, max = magic },
-	})
+	}
 	local team1 = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Red")
 	local team2 = grid:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "Blue")
 
@@ -72,20 +72,20 @@ function my_map(): HexGrid
 		}, grid)
 	end
 
-	local portals = { { { -5, 5, 0 }, { 5, -5, 0 } } }
-	for _, portal_group in portals do
-		for _, portal in portal_group do
-			local cell = grid:get_cell(portal)
-			cell.type = "portal"
-			cell.portal = {
-				group = portal_group,
-				open = false,
-				open_time = 5,
-				close_time = 5,
-				steps = 0,
-			}
-		end
-	end
+	-- local portals = { { { -5, 5, 0 }, { 5, -5, 0 } } }
+	-- for _, portal_group in portals do
+	-- 	for _, portal in portal_group do
+	-- 		local cell = grid:get_cell(portal)
+	-- 		cell.type = "portal"
+	-- 		cell.portal = {
+	-- 			group = portal_group,
+	-- 			open = false,
+	-- 			open_time = 5,
+	-- 			close_time = 5,
+	-- 			steps = 0,
+	-- 		}
+	-- 	end
+	-- end
 
 	grid:get_cell({ 0, 0, 0 }).type = "bar_deposit"
 	grid:get_cell({ 0, -2, 2 }).type = "rad_deposit"

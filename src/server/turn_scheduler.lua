@@ -108,10 +108,15 @@ function new_turn_schedule(get_end_time: () -> number, run_turn: () -> ()): Turn
 		while true do
 			while os.clock() < schedule.end_time or not schedule.running do
 				if schedule.running then
-					schedule.wait_thread = task.delay((schedule.end_time - os.clock()), function()
-						schedule.wait_thread = nil
-						coroutine.resume(schedule.loop_thread)
-					end)
+					-- if the end time is not a reasonable value, the game will stop
+					if schedule.end_time - os.clock() < 1000000 then
+						schedule.wait_thread = task.delay((schedule.end_time - os.clock()), function()
+							schedule.wait_thread = nil
+							coroutine.resume(schedule.loop_thread)
+						end)
+					else
+						error "An irrecoverable error occurred and the game will stop now"
+					end
 				end
 				coroutine.yield()
 			end

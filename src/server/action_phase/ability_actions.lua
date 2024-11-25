@@ -48,7 +48,7 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState)
 			for entity_id in
 				damage_mod.damage_cells(grid, { cell.coordinate }, {
 					type = "flat",
-					amount = if ability.ability_type == "scout_attack" then 1 else 3,
+					amount = if ability.ability_type == "scout_attack" then 2 else 3,
 					from = entity.id,
 					lethal = true,
 					friendly_fire = false,
