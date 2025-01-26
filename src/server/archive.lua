@@ -396,13 +396,11 @@ local hex_grid_schema = aliasable(
 		entity_instance_root = ignore,
 		instance_entity_map = ignore,
 		instance_cell_map = ignore,
-		get_player_team = ignore,
 		get_cell = ignore,
 		new_team = ignore,
 		purge_dead_entities = ignore,
 		updates_buffer = ignore,
 		grid_update_signal = ignore,
-		get_allies = ignore,
 		query_entity = ignore,
 	},
 	"entity_id"

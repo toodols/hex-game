@@ -4,6 +4,7 @@ local util = require(ReplicatedStorage.Shared.util)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local effective_visibility = require(ReplicatedStorage.Shared.effective_visibility).effective_visibility
 local items_mod = require(ReplicatedStorage.Shared.items)
+local team = require(ReplicatedStorage.Shared.team)
 
 local questing = require(script.Parent.questing)
 local turn_scheduler = require(script.Parent.turn_scheduler)
@@ -18,7 +19,7 @@ type TeamData = types.TeamData
 
 function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction })
 	server_util.catch(function()
-		local player_team = grid:get_player_team(plr)
+		local player_team = team.team_of(grid, plr)
 		if not player_team then
 			return
 		end

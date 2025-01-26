@@ -10,6 +10,7 @@ local StarterGui = game:GetService "StarterGui"
 local clone_assets = require(ReplicatedStorage.Shared.asset_server).clone
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
+local team = require(ReplicatedStorage.Shared.team)
 
 type TeamData = types.TeamData
 type Interaction = types.Interaction
@@ -49,10 +50,10 @@ end
 local grid
 remotes_mod.get_hex_grid_data_remote.OnServerInvoke = function(player)
 	-- todo: change this to return nil when grid is not set up, and make the client poll instead
-	while not grid or not grid:get_player_team(player) do
+	while not grid or not team.team_of(grid, player) do
 		task.wait()
 	end
-	local player_team = grid:get_player_team(player)
+	local player_team = team.team_of(grid, player)
 	local serialized = serialize_mod.serialize_grid_for_team(grid, player_team.id)
 	return serialized
 end :: any

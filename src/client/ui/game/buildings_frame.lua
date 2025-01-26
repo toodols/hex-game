@@ -7,6 +7,7 @@ local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local formatting = require(ReplicatedStorage.Shared.formatting)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
+local team = require(ReplicatedStorage.Shared.team)
 
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local Items = require(script.Parent.items).Items
@@ -274,7 +275,7 @@ end)
 
 function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 	local grid: HexGrid = React.useContext(MainContext).grid
-	local player_team = grid:get_player_team(Players.LocalPlayer)
+	local player_team = team.team_of(grid, Players.LocalPlayer)
 	local current_page, set_current_page = React.useState(1)
 	local is_expanded, set_is_expanded = React.useState(false)
 	local page_layout_ref = React.useRef(nil :: any)

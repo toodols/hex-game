@@ -76,6 +76,12 @@ export type Effect = {
 	type: "shield",
 	health: number,
 	duration: number,
+} | {
+	type: "infected",
+	duration: number,
+} | {
+	type: "infected_immune",
+	duration: number,
 }
 
 export type AnimationState = {
@@ -94,7 +100,7 @@ export type Entity = {
 	max_health: number,
 	inventory: Inventory?,
 
-	effects: { [EffectType]: Effect },
+	effects: { Effect },
 
 	animation_state: AnimationState?,
 
@@ -526,10 +532,8 @@ export type HexGrid = {
 	get_cell: (self: HexGrid, coordinate: CubicCoordinate) -> HexCell?,
 	-- returns table of entities that fit the criteria
 	query_entity: (self: HexGrid, props: any) -> { Entity },
-	get_player_team: (self: HexGrid, player: Player) -> TeamData?,
 	new_team: (self: HexGrid, players: { Player }, color: TeamColor?, name: string?) -> TeamData,
 	purge_dead_entities: (self: HexGrid) -> nil,
-	get_allies: (self: HexGrid, team: TeamId) -> { TeamId },
 
 	-- get_team_coalition: (self: HexGrid, team: TeamId) -> CoalitionData,
 

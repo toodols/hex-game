@@ -2,37 +2,50 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local damage_mod = require(ServerScriptService.Server.damage)
+local methods = require(script.methods)
+local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local team = require(ReplicatedStorage.Shared.team)
 
 type Entity = types.Entity
 type HexGrid = types.HexGrid
 type Effect = types.Effect
 
-function get_entity_effects(entity: Entity, effect_type: string): { Effect }
-	local effects = {}
-	for _, effect in entity.effects do
-		if effect.type == effect_type then
-			table.insert(effects, effect)
-		end
-	end
-	return effects
-end
-
-function get_one_entity_effect(entity: Entity, effect_type: string): Effect?
-	return get_entity_effects(entity, effect_type)[1]
-end
-
 local effects = {}
-effects.shield = {
-	tick = function(grid: HexGrid, entity: Entity, effect: Effect) end,
-}
+
+-- Blocks effect.amount damage
+effects.shield = {}
+
+-- Deals 1 nonlethal damage, spreads to friendly entities on neighboring cells the next turn
 effects.infected = {
 	init = function(grid: HexGrid, entity: Entity, effect: Effect)
 		damage_mod.damage_entity(grid, entity, {
-			amount = 2,
+			amount = 1,
 			nonlethal = true,
 		})
 	end,
-	tick = function(grid: HexGrid, entity: Entity, effect: Effect) end,
+	remove = function(grid: HexGrid, entity: Entity, effect: Effect)
+		methods.add_exclusive_effect(entity, { type = "infected_immune", duration = 5 })
+		for _, cell in hex_grid_mod.neighbors_many_leq(entity.coordinates, 1) do
+			for entity_id in cell.entities do
+				local other = grid.entities[entity_id]
+				if
+					team.is_allied(grid, other.owner, entity.owner)
+					and methods.get_one_effect(other, "infected_immune") == nil
+				then
+					methods.add_exclusive_effect(other, { type = "infected", duration = 1 })
+				end
+			end
+		end
+	end,
 }
 
-return { effects = effects, get_entity_effect = get_entity_effects, get_one_entity_effect = get_one_entity_effect }
+-- This entity is immune to `infected`
+effects.infected_immune = {}
+
+return {
+	effects = effects,
+	get_effects = methods.get_effects,
+	get_one_effect = methods.get_one_effect,
+	add_exclusive_effect = methods.add_exclusive_effect,
+	add_effect = methods.add_effect,
+}

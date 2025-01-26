@@ -6,8 +6,8 @@
 - [ ] `scout` should physically turn to face its target when attacking
 - [ ] Items in inventories with incompatible filters should be moved to different inventories
 - [ ] Make `impression` functional
-	- [ ] Add `infected` status effect
-	- [ ] Add `infected_immune` status effect
+	- [x] Add `infected` status effect
+	- [x] Add `infected_immune` status effect
 - [ ] Make `suggestion` functional
 - [ ] Make `altar` functional
 	- [ ] Range should be extendable by proxy

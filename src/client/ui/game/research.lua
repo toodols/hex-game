@@ -9,6 +9,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local formatting = require(ReplicatedStorage.Shared.formatting)
+local team = require(ReplicatedStorage.Shared.team)
 
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
@@ -20,12 +21,12 @@ local Corner = util_components.Corner
 
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
-type CubicCoordinate = types.CubicCoordinate
 type Entity = types.Entity
 type ResearchState = types.ResearchState
 type HexGrid = types.HexGrid
 type EntityId = types.EntityId
 type Icon = types.Icon
+type TeamData = types.TeamData
 
 function Icon(props: {
 	ZIndex: number?,
@@ -576,7 +577,7 @@ function ResearchPreview(props: {
 })
 	local grid = React.useContext(MainContext).grid
 	local entity = hooks.use_synced_entity(props.entity_id)
-	local is_owner = entity.owner == grid:get_player_team(Players.LocalPlayer).id
+	local is_owner = entity.owner == (team.team_of(grid, Players.LocalPlayer) :: TeamData).id
 
 	return React.createElement("TextButton", {
 		BackgroundTransparency = 0.9,

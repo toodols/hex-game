@@ -64,25 +64,6 @@ function grid_purge_dead_entities(self: HexGrid)
 	end
 end
 
-function grid_get_allies(self: HexGrid, team: TeamId): { TeamId }
-	for _, coalition in self.coalitions do
-		if table.find(coalition.teams, team) then
-			return coalition.teams
-		end
-	end
-	-- no coalition found, ally is itself
-	return { team }
-end
-
-function grid_get_player_team(self: HexGrid, player: Player): TeamData
-	for _, team in self.teams do
-		if table.find(team.players, player) then
-			return team
-		end
-	end
-	return self.teams[0]
-end
-
 -- Gets a table of entities that fit props
 function grid_query_entity(self: HexGrid, props: any): { Entity }
 	local results = {}
@@ -154,8 +135,6 @@ function new_grid_empty(entity_config: { [string]: EntityConfiguration }?, globa
 		quests = {},
 		new_team = grid_new_team,
 		purge_dead_entities = grid_purge_dead_entities,
-		get_player_team = grid_get_player_team,
-		get_allies = grid_get_allies,
 		query_entity = grid_query_entity,
 		get_cell = grid_get_cell,
 	}

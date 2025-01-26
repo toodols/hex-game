@@ -5,6 +5,7 @@ local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
 local items_mod = require(ReplicatedStorage.Shared.items)
 local util = require(ReplicatedStorage.Shared.util)
+local team = require(ReplicatedStorage.Shared.team)
 
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
@@ -17,6 +18,7 @@ local interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRe
 
 type EntityId = types.EntityId
 type HexGrid = types.HexGrid
+type TeamData = types.TeamData
 
 function ItemFilters(props: { entity_id: EntityId })
 	local grid = React.useContext(MainContext).grid
@@ -254,7 +256,7 @@ function ItemFiltersPreview(props: { LayoutOrder: number?, entity_id: EntityId, 
 	local entity = hooks.use_synced_entity(props.entity_id)
 	local inventory = entity.inventory
 	assert(inventory, "inventory nil")
-	local is_owner = entity.owner == grid:get_player_team(Players.LocalPlayer).id
+	local is_owner = entity.owner == (team.team_of(grid, Players.LocalPlayer) :: TeamData).id
 
 	return React.createElement("TextButton", {
 		BackgroundTransparency = 0.9,

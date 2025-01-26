@@ -8,7 +8,7 @@ local util = require(ReplicatedStorage.Shared.util)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local formatting = require(ReplicatedStorage.Shared.formatting)
 local items_mod = require(ReplicatedStorage.Shared.items)
-local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
+local team = require(ReplicatedStorage.Shared.team)
 
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local client_entity_mod = require(ReplicatedStorage.Client.ui.Parent.entity)
@@ -16,6 +16,7 @@ local context_mod = require(ReplicatedStorage.Client.ui.context)
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 
+local Hitpoints = require(script.Parent.hitpoints).Hitpoints
 local ItemFiltersPreview = require(script.Parent.item_filters).ItemFiltersPreview
 local ActionButton = require(script.Parent.action_button).ActionButton
 local Items = require(script.Parent.items).Items
@@ -33,88 +34,30 @@ type GridUpdate = types.GridUpdate
 type HexGrid = types.HexGrid
 type Entity = types.Entity
 
-function Hitpoints(props: { entity: Entity })
-	local entity = props.entity
-	local total_health = shared_entity_mod.get_effective_health(entity)
-	local shield_health = total_health - entity.health
-
+function ShouldOutput(props: { entity: Entity, LayoutOrder: number? })
 	return React.createElement(
 		"Frame",
 		{
-			AnchorPoint = Vector2.new(1, 0),
-			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			Size = UDim2.new(1, 0, 0, 40),
 			BackgroundTransparency = 1,
-			BorderColor3 = Color3.fromRGB(0, 0, 0),
-			BorderSizePixel = 0,
-			Position = UDim2.new(1, 0, 0, 0),
-			Size = UDim2.new(0, 100, 1, 0),
+			LayoutOrder = props.LayoutOrder,
 		},
 		{
-			GridLayout = React.createElement("UIGridLayout", {
-				CellPadding = UDim2.new(0, 7, 0, 7),
-				CellSize = UDim2.new(0, 6, 0, 6),
-				HorizontalAlignment = Enum.HorizontalAlignment.Right,
+			Layout = React.createElement("UIListLayout", {
 				SortOrder = Enum.SortOrder.LayoutOrder,
-				VerticalAlignment = Enum.VerticalAlignment.Center,
-			}),
-
-			AllPad = React.createElement("UIPadding", {
-				PaddingBottom = UDim.new(0, 8),
-				PaddingLeft = UDim.new(0, 4),
-				PaddingRight = UDim.new(0, 4),
-				PaddingTop = UDim.new(0, 8),
+				FillDirection = Enum.FillDirection.Horizontal,
+				HorizontalAlignment = Enum.HorizontalAlignment.Center,
+				Padding = UDim.new(0, 10),
 			}),
 		},
-		if entity.max_health > 20
-			then React.createElement("TextLabel", {
-				BackgroundTransparency = 1,
-				BorderSizePixel = 0,
-				TextColor3 = Color3.fromRGB(255, 255, 255),
-				Size = UDim2.new(0, 100, 0, 100),
-				TextSize = 12,
-				TextXAlignment = Enum.TextXAlignment.Right,
-				Text = if entity.max_health ~= math.huge
-					then `{entity.health} / {entity.max_health}` .. if shield_health > 0
-						then ` +{shield_health}`
-						else ""
-					else "--",
+		util.table_map(util.range(2), function()
+			return React.createElement("Frame", {
+				Size = UDim2.new(0.5, -10, 1, 0),
+			}, {
+				Corner = React.createElement(Corner),
 			})
-			elseif total_health == 0 then React.createElement("Frame", {
-				BorderSizePixel = 1,
-				BorderColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundColor3 = Color3.new(0, 0, 0),
-				Size = UDim2.new(0, 100, 0, 100),
-			})
-			else util.table_map((util.range(math.max(entity.max_health, shield_health))), function(i)
-				local color
-				if i <= shield_health then
-					if i <= entity.health then
-						color = Color3.fromHSV(0.55, 0.6, 1.000000)
-					elseif i <= entity.max_health then
-						color = Color3.fromHSV(0.55, 0.6, 0.5)
-					else
-						color = Color3.fromHSV(0.55, 0.6, 0.3)
-					end
-				else
-					if i <= entity.health then
-						color = Color3.fromRGB(255, 255, 255)
-					else
-						color = Color3.fromRGB(120, 120, 120)
-					end
-				end
-				return React.createElement("Frame", {
-					BackgroundColor3 = color,
-					BorderSizePixel = 0,
-					Size = UDim2.new(0, 100, 0, 100),
-				})
-			end)
+		end)
 	)
-end
-
-function ShouldOutput(props: { entity: Entity })
-	return React.createElement("Frame", {
-		Size = UDim2.new(1, 0, 0, 40),
-	})
 end
 
 function EntityInformation(props: {
@@ -188,7 +131,7 @@ function EntityInformation(props: {
 			then Color3.new(0.458823, 0.756862, 1)
 			else if entity.status == "scaffold" then Color3.new(0.6, 1, 0.654901) else Color3.new(1, 1, 1)
 
-	local player_team = grid:get_player_team(Players.LocalPlayer)
+	local player_team = team.team_of(grid, Players.LocalPlayer)
 
 	return React.createElement("Frame", {
 		BackgroundColor3 = Color3.fromRGB(25, 25, 25),
@@ -302,15 +245,17 @@ function EntityInformation(props: {
 					-- 		Text = "Rotation: " .. entity.rotation,
 					-- 	}
 					-- ),
-					StatusLabel = if entity.status ~= "complete" then React.createElement(
-						"TextLabel",
-						themes.theme_description {
-							AutomaticSize = Enum.AutomaticSize.Y,
-							LayoutOrder = 4,
-							Size = UDim2.new(1, 0, 0, 20),
-							Text = "Status: " .. entity.status,
-						}
-					) else nil,
+					StatusLabel = if entity.status ~= "complete"
+						then React.createElement(
+							"TextLabel",
+							themes.theme_description {
+								AutomaticSize = Enum.AutomaticSize.Y,
+								LayoutOrder = 4,
+								Size = UDim2.new(1, 0, 0, 20),
+								Text = "Status: " .. entity.status,
+							}
+						)
+						else nil,
 					DecayLabel = entity.is_decaying and React.createElement(
 						"TextLabel",
 						themes.theme_description {
@@ -398,7 +343,7 @@ function EntityInformation(props: {
 									type = "research",
 									entity_id = entity.id,
 								}
-							end
+							end,
 						})
 						else nil,
 

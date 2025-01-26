@@ -6,6 +6,7 @@ local util = require(ReplicatedStorage.Shared.util)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 
 local updates_mod = require(ServerScriptService.Server.updates)
+local effect_methods = require(ServerScriptService.Server.effect.methods)
 local registry_mod = require(script.Parent.registry)
 
 type Entity = types.Entity
@@ -26,13 +27,15 @@ registry_mod.registry.solution = registry_mod.with_defaults {
 			do
 				for entity_id in cell.entities do
 					local affected_entity = grid.entities[entity_id]
+
 					-- it would be nice to use damage_mod for this but it doesn't support healing damage
 					-- and this ignores layers
 					affected_entity.health = math.max(
 						affected_entity.max_health,
 						affected_entity.health + config.abilities.solution_use.heal_amount
 					)
-					table.insert(affected_entity.effects, {
+
+					effect_methods.add_effect(affected_entity, {
 						type = "shield",
 						health = config.abilities.solution_use.shield_health,
 						duration = config.abilities.solution_use.shield_duration,
