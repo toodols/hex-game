@@ -64,6 +64,7 @@ export type ResearchState = {
 
 	precondition: (grid: HexGrid, entity: Entity) -> boolean,
 }
+
 export type Researches = {
 	queue: { ResearchId },
 	states: {
@@ -72,17 +73,15 @@ export type Researches = {
 }
 
 export type EffectType = "shield"
-export type Effect = {
+
+export type Effect = { is_destroyed: boolean?, duration: number? } & ({
 	type: "shield",
 	health: number,
-	duration: number,
 } | {
 	type: "infected",
-	duration: number,
 } | {
 	type: "infected_immune",
-	duration: number,
-}
+})
 
 export type AnimationState = {
 	type: "idle",

@@ -8,6 +8,7 @@ local entity_mod = require(ServerScriptService.Server.entity)
 
 type HexGrid = types.HexGrid
 
+-- A bunch of entities lined up
 function all_entities(): HexGrid
 	local grid = hex_grid_mod.new_grid_from_extents({
 		{ min = -10, max = 10 },
@@ -64,6 +65,7 @@ function all_entities(): HexGrid
 	return grid
 end
 
+-- 10x10x10 empty grid with 2 teams
 function blank_map(): HexGrid
 	local grid = hex_grid_mod.new_grid_from_extents({
 		{ min = -10, max = 10 },

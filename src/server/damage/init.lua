@@ -1,9 +1,10 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local server_entity_mod = require(script.Parent.entity)
 local server_types = require(script.Parent.types)
 local updates_mod = require(script.Parent.updates)
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
+local effect_methods = require(script.Parent.effect.methods)
 
 type Damage = types.Damage
 type Entity = types.Entity
@@ -56,13 +57,15 @@ function apply_entity_damage(entity: Entity, amount: number): number
 			effect.health -= effective
 			amount -= effective
 			if effect.health <= 0 then
-				entity.effects[effect.type] = nil
+				effect.is_destroyed = true
 			end
 		end
 		if amount == 0 then
 			return total
 		end
 	end
+
+	effect_methods.purge_destroyed_effects(entity)
 
 	local effective = math.min(amount, entity.health)
 	total += effective
@@ -163,15 +166,19 @@ function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damag
 	return destroyed_entities
 end
 
--- call to mark
 function destroy_entities(grid: HexGrid, destroyed_entities: { [EntityId]: boolean })
 	for entity_id in destroyed_entities do
 		server_entity_mod.remove_entity(grid, grid.entities[entity_id])
 	end
 end
 
+function damage_entity_destroying(grid: HexGrid, entity: Entity, damage: Damage)
+	destroy_entities(grid, damage_entity(grid, entity, damage))
+end
+
 return {
 	damage_cells = damage_cells,
 	damage_entity = damage_entity,
 	destroy_entities = destroy_entities,
+	damage_entity_destroying = damage_entity_destroying,
 }

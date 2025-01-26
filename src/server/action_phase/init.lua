@@ -1,5 +1,5 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerScriptService = game:GetService("ServerScriptService")
+local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ServerScriptService = game:GetService "ServerScriptService"
 
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
@@ -9,7 +9,7 @@ local server_entity_mod = require(ServerScriptService.Server.entity)
 local updates_mod = require(ServerScriptService.Server.updates)
 local computed_mod = require(ServerScriptService.Server.computed)
 local quest_methods = require(ServerScriptService.Server.questing.quest)
-local effects = require(ServerScriptService.Server.effect).effects
+local effects_mod = require(ServerScriptService.Server.effect)
 
 local do_entity_decay = require(script.entity_decay).do_entity_decay
 local new_action_state = require(script.new_action_state).new_action_state
@@ -87,23 +87,25 @@ function remove_occuluded_blueprints(grid: HexGrid)
 end
 
 function status_effects_tick(grid: HexGrid)
+	local effects = effects_mod.effects
 	for entity_id, entity in grid.entities do
 		if next(entity.effects) == nil then
 			continue
 		end
-		local new_effects = {}
 		for _, effect in entity.effects do
 			if effects[effect.type] then
 				if effects[effect.type].tick then
 					effects[effect.type].tick(grid, entity, effect)
 				end
 			end
-			effect.duration -= 1
-			if effect.duration > 0 then
-				table.insert(new_effects, effect)
+			if effect.duration ~= nil then
+				effect.duration -= 1
+				if effect.duration <= 0 then
+					effect.is_destroyed = true
+				end
 			end
 		end
-		entity.effects = new_effects
+		effects_mod.purge_destroyed_effects(entity)
 		updates_mod.add_update(grid, {
 			type = "entity_update",
 			entity = entity,
@@ -142,7 +144,7 @@ function run_action_phase(grid: HexGrid, extra_actions: { EntityAction }?)
 	if extra_actions then
 		for _, action in extra_actions do
 			if action.type == nil then
-				error("not an action")
+				error "not an action"
 			end
 			table.insert(grid.action_queue, action)
 		end

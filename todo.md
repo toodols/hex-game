@@ -17,6 +17,8 @@
 - [ ] `boosted` status effect, alongside boosts for each building
 - [ ] Add `mace`, an artillery-type building
 	- [ ] Warning indicator entity 
+- [ ] Add `exclusion`, creates a fog that blocks visibility for enemy
+- [ ] Vault can store entities
 - [ ] Systems should be visible to the client and should show total items
 - [x] Remove power from the game. It's too complicated.
 - [ ] Finish implementation of tutorial

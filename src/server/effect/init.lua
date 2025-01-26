@@ -48,4 +48,5 @@ return {
 	get_one_effect = methods.get_one_effect,
 	add_exclusive_effect = methods.add_exclusive_effect,
 	add_effect = methods.add_effect,
+	purge_destroyed_effects = methods.purge_destroyed_effects,
 }

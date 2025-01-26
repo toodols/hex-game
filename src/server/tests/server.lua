@@ -13,6 +13,7 @@ local cleanup = require(ServerScriptService.Server.cleanup).cleanup
 local action_phase_mod = require(ServerScriptService.Server.action_phase)
 local entity_mod = require(ServerScriptService.Server.entity)
 local damage_mod = require(ServerScriptService.Server.damage)
+local effect_mod = require(ServerScriptService.Server.effect)
 
 local assert_eq = util.assert_eq
 
@@ -158,7 +159,6 @@ function tests.stockpile_filters()
 	assert_eq(stockpile.inventory.items, { "rad", "pow" })
 
 	cleanup(grid)
-	return grid
 end
 
 function tests.damage_scout_with_magic()
@@ -166,33 +166,49 @@ function tests.damage_scout_with_magic()
 
 	local scout = spawn_entity(grid, "scout")
 
-	damage_mod.destroy_entities(
-		grid,
-		damage_mod.damage_entity(grid, scout, {
-			amount = 1,
-		})
-	)
+	damage_mod.damage_entity_destroying(grid, scout, {
+		amount = 1,
+	})
 
 	assert_eq(scout.health, scout.max_health - 1, "scout should have 1 less health")
 
-	damage_mod.destroy_entities(
-		grid,
-		damage_mod.damage_entity(grid, scout, {
-			amount = 100,
-			nonlethal = true,
-		})
-	)
+	damage_mod.damage_entity_destroying(grid, scout, {
+		amount = 100,
+		nonlethal = true,
+	})
 
 	assert(not scout.is_destroyed, "Nonlethal damage should not destroy the scout")
 
-	damage_mod.destroy_entities(
-		grid,
-		damage_mod.damage_entity(grid, scout, {
-			amount = 100,
-		})
-	)
+	damage_mod.damage_entity_destroying(grid, scout, {
+		amount = 100,
+	})
 
 	assert(scout.is_destroyed, "Lethal damage should destroy the scout")
+
+	cleanup(grid)
+end
+
+function tests.damage_shielded_scout_with_magic()
+	local grid = presets.blank_map()
+
+	local scout = spawn_entity(grid, "scout")
+	local shield_effect = effect_mod.add_effect(scout, { type = "shield", health = 3 })
+	damage_mod.damage_entity_destroying(grid, scout, { amount = 1 })
+	assert_eq(scout.health, scout.max_health, "scout should not have been damaged")
+	assert_eq(shield_effect.health, 2, "shield should have 2 health")
+	damage_mod.damage_entity_destroying(grid, scout, { amount = 3 })
+	assert(shield_effect.is_destroyed, "shield should have been destroyed")
+	assert_eq(scout.health, scout.max_health - 1, "scout should have 3 less health")
+
+	-- Reset scout hp to test with multiple shields
+	scout.health = scout.max_health
+	local shield_1 = effect_mod.add_effect(scout, { type = "shield", health = 3 })
+	local shield_2 = effect_mod.add_effect(scout, { type = "shield", health = 3 })
+	damage_mod.damage_entity_destroying(grid, scout, { amount = 5 })
+
+	assert(shield_1.is_destroyed, "shield 1 should have been destroyed")
+	assert(not shield_2.is_destroyed, "shield 2 should not have been destroyed")
+	assert_eq(scout.health, scout.max_health, "scout should not have been damaged")
 
 	cleanup(grid)
 end
@@ -426,7 +442,11 @@ function tests.scout_attack_each_other()
 
 	action_phase_mod.run_action_phase(grid)
 
-	assert_eq(scout2.health, scout2.max_health - 1, "Scout 2 should have been damaged")
+	assert_eq(
+		scout2.health,
+		scout2.max_health - grid.entity_configurations.scout.abilities.scout_attack.damage,
+		"Scout 2 should have been damaged"
+	)
 
 	-- reset scout health to full
 	scout2.health = scout2.max_health
@@ -454,6 +474,7 @@ function tests.scout_attack_each_other()
 end
 
 function tests.archive_grid()
+	-- todo
 	local grid = presets.my_map()
 	local compressed = archive.compress_grid(grid)
 	local original = HttpService:JSONEncode(grid)
