@@ -8,9 +8,8 @@ type Entity = types.Entity
 type HexGrid = types.HexGrid
 
 registry.vault = with_defaults {
-	autogenerate_wires = true,
-	init = function(self: Entity, grid: HexGrid) end,
-	on_completed = function(self: Entity, grid: HexGrid)
+	autogenerates_vertex = true,
+	init = function(self: Entity, grid: HexGrid)
 		local config = grid.entity_configurations[self.type]
 		if not self.inventory then
 			self.inventory = {
@@ -19,9 +18,15 @@ registry.vault = with_defaults {
 					items = {},
 				},
 				homogeneous = true,
-				capacity = config.inventory_capacity,
+				capacity = 0,
 				items = {},
 			}
+		end
+	end,
+	on_completed = function(self: Entity, grid: HexGrid)
+		local config = grid.entity_configurations[self.type]
+		if self.inventory then
+			self.inventory.capacity = config.inventory_capacity
 		end
 	end,
 }

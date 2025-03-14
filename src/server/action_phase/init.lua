@@ -133,6 +133,7 @@ function delete_deconstructed_entities(grid: HexGrid, queue: { EntityAction })
 			table.insert(queue, action)
 			continue
 		end
+
 		server_entity_mod.remove_entity(grid, entity)
 	end
 end

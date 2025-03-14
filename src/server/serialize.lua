@@ -28,6 +28,12 @@ function buildable_for_team(grid: HexGrid, cell: HexCell, team: TeamId): boolean
 	end
 	return result
 end
+
+function entity_visibility(entity: Entity, cell: HexCell, team: TeamId): boolean
+	return effective_visibility(cell.server_data.visibility[team])
+		or entity.server_data.always_visible and (entity.owner == team or entity.status ~= "blueprint")
+end
+
 function serialize_team(grid: HexGrid, team: TeamData): TeamData
 	local copy = {}
 	for k, v in team do
@@ -37,11 +43,10 @@ function serialize_team(grid: HexGrid, team: TeamData): TeamData
 	end
 	return copy :: TeamData
 end
+
 function serialize_entity_for_team(grid: HexGrid, entity: Entity, team: TeamId): Entity?
 	local cell = grid:get_cell(entity.primary_coordinate)
-	local visible_for_team = effective_visibility(cell.server_data.visibility[team])
-		or entity.server_data.always_visible
-	if visible_for_team and (entity.owner == team or entity.status ~= "blueprint") then
+	if entity_visibility(entity, cell, team) then
 		local copy = {}
 		for k, v in entity do
 			if k == "server_data" then

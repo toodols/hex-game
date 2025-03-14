@@ -5,10 +5,14 @@ local server_types = require(script.Parent.types)
 local updates_mod = require(script.Parent.updates)
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local effect_methods = require(script.Parent.effect.methods)
+local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local is_allied = require(ReplicatedStorage.Shared.team).is_allied
 
 type Damage = types.Damage
+type DamageResult = types.DamageResult
 type Entity = types.Entity
 type HexGrid = types.HexGrid
+type HexCell = types.HexCell
 type CubicCoordinate = types.CubicCoordinate
 type EntityId = types.EntityId
 type ActionState = server_types.ActionState
@@ -45,23 +49,26 @@ type ActionState = server_types.ActionState
 -- A(0)  A(0)
 -- B(0)  C(5)
 
-function apply_entity_damage(entity: Entity, amount: number): number
+function apply_entity_damage(entity: Entity, amount: number, piercing: boolean): number
 	local total = 0
 	if amount == 0 then
 		return total
 	end
-	for _, effect in entity.effects do
-		if effect.type == "shield" then
-			local effective = math.min(amount, effect.health)
-			total += effective
-			effect.health -= effective
-			amount -= effective
-			if effect.health <= 0 then
-				effect.is_destroyed = true
+
+	if not piercing then
+		for _, effect in entity.effects do
+			if effect.type == "shield" then
+				local effective = math.min(amount, effect.health)
+				total += effective
+				effect.health -= effective
+				amount -= effective
+				if effect.health <= 0 then
+					effect.is_destroyed = true
+				end
 			end
-		end
-		if amount == 0 then
-			return total
+			if amount == 0 then
+				return total
+			end
 		end
 	end
 
@@ -73,55 +80,134 @@ function apply_entity_damage(entity: Entity, amount: number): number
 	return total
 end
 
-function damage_entity(grid: HexGrid, entity: Entity, damage: Damage): { [EntityId]: boolean }
+function damage_entity(grid: HexGrid, entity: Entity, damage: Damage): DamageResult
 	damage.nonlethal = damage.nonlethal or false
 	damage.friendly_fire = damage.friendly_fire or false
-	local health = shared_entity_mod.get_effective_health(entity)
+	damage.piercing = damage.piercing or false
+	if damage.type == "healing" then
+		local effective = math.min(damage.amount, entity.max_health - entity.health)
+		entity.health += effective
+		return {
+			[entity.id] = {
+				amount = effective,
+				lethal = false,
+			},
+		}
+	end
+
+	local health = if damage.piercing then entity.health else shared_entity_mod.get_effective_health(entity)
 	local gauge = damage.amount
 	local effective = math.clamp(if damage.nonlethal then health - 1 else health, 0, gauge)
 	gauge -= effective
 	health -= effective
 
-	apply_entity_damage(entity, effective)
-	if health <= 0 and not damage.nonlethal then
-		return { [entity.id] = true }
-	end
-	return {}
+	apply_entity_damage(entity, effective, damage.piercing :: boolean)
+
+	return { [entity.id] = {
+		amount = effective,
+		lethal = health <= 0 and not damage.nonlethal,
+	} }
 end
 
-function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damage): { [EntityId]: boolean }
+function get_attackable_entities(grid: HexGrid, cell: HexCell, damage: Damage): { Entity }
+	local team = if damage.from then grid.entities[damage.from].owner else nil
+	local entities = {}
+	for entity_id in cell.entities do
+		local entity = grid.entities[entity_id]
+		if
+			-- ignore destroyed entities
+			not entity.is_destroyed
+			-- ignore blueprints
+			and entity.status ~= "blueprint"
+			-- do not attack friendly entities unless friendly_fire is on
+			and (damage.friendly_fire or not is_allied(grid, entity.owner, team))
+		then
+			table.insert(entities, entity)
+		end
+	end
+
+	table.sort(entities, function(a, b)
+		return grid.entity_configurations[a.type].layer > grid.entity_configurations[b.type].layer
+	end)
+	return entities
+end
+
+function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damage): DamageResult
 	damage.nonlethal = damage.nonlethal or false
 	damage.friendly_fire = damage.friendly_fire or false
-	local destroyed_entities = {}
-	local team = if damage.from then grid.entities[damage.from].owner else nil
+	damage.piercing = damage.piercing or false
 
-	-- calculate the damage each entity should take
+	if damage.type == "healing" then
+		error "todo"
+	end
+
+	local destroyed_entities = {}
+
+	-- different cells may give different damage values to one entity
+	-- this keeps track of the highest damage
 	local damage_values: { [EntityId]: number } = {}
+
 	for _, target in targets do
 		local cell = grid:get_cell(target)
 		local gauge = damage.amount
-		local entities = {}
 
-		for entity_id in cell.entities do
+		local entities = get_attackable_entities(grid, cell, damage)
+
+		-- compile all the altars that have influence on this cell
+		local altars = {}
+		for entity_id in cell.server_data.influences do
 			local entity = grid.entities[entity_id]
-			if not entity.is_destroyed and entity.status ~= "blueprint" then
-				table.insert(entities, entity)
+			if
+				entity.type == "altar"
+				-- altar on the cell being attacked does not count
+				and not hex_grid_mod.coords_eq(entity.primary_coordinate, target)
+			then
+				table.insert(altars, entity)
 			end
 		end
 
-		table.sort(entities, function(a, b)
-			return grid.entity_configurations[a.type].layer > grid.entity_configurations[b.type].layer
+		-- oldest entities take precedence
+		table.sort(altars, function(a, b)
+			return a.server_data.requested_at < b.server_data.requested_at
 		end)
 
+		local done = false
 		for _, entity in entities do
-			if not damage.friendly_fire and entity.owner == team then
-				continue
+			for _, altar in altars do
+				if is_allied(grid, entity.owner, altar.owner) then
+					local new_attackables =
+						get_attackable_entities(grid, grid:get_cell(altar.primary_coordinate) :: HexCell, damage)
+
+					-- if the altar is at the top, logically there is nothing to sacrifice
+					-- do not retarget.
+					if new_attackables[1] == altar then
+						continue
+					end
+
+					-- all the entities ABOVE but excluding the altar may be targeted
+					entities = {}
+					for other_entity in new_attackables do
+						if other_entity == altar then
+							break
+						end
+						table.insert(entities, other_entity)
+					end
+					done = true
+					break
+				end
+				if done then
+					break
+				end
 			end
-			local health = shared_entity_mod.get_effective_health(entity)
+		end
+
+		for _, entity in entities do
+			local health = if damage.piercing then entity.health else shared_entity_mod.get_effective_health(entity)
 			local effective = math.clamp(if damage.nonlethal then health - 1 else health, 0, gauge)
-			gauge -= effective
 			health -= effective
 			damage_values[entity.id] = math.max(damage_values[entity.id] or 0, effective)
+
+			gauge -= effective
 			if health > 0 or (effective == 0 and health == 0) then
 				break
 			end
@@ -131,7 +217,7 @@ function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damag
 	-- then apply the damage
 	for entity_id, value in damage_values do
 		local entity = grid.entities[entity_id]
-		apply_entity_damage(entity, value)
+		apply_entity_damage(entity, value, damage.piercing :: boolean)
 
 		updates_mod.add_update(grid, {
 			type = "entity_update",
@@ -166,9 +252,11 @@ function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damag
 	return destroyed_entities
 end
 
-function destroy_entities(grid: HexGrid, destroyed_entities: { [EntityId]: boolean })
-	for entity_id in destroyed_entities do
-		server_entity_mod.remove_entity(grid, grid.entities[entity_id])
+function destroy_entities(grid: HexGrid, results: DamageResult)
+	for entity_id, result in results do
+		if result.lethal then
+			server_entity_mod.remove_entity(grid, grid.entities[entity_id])
+		end
 	end
 end
 

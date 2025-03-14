@@ -59,9 +59,6 @@ function theme_button(props)
 end
 
 function theme_vertical_container(props)
-	if props.Size then
-		print "container should not have size prop"
-	end
 	props.Size = props.Size or UDim2.new(1, 0, 0, 0)
 	props.AutomaticSize = props.AutomaticSize or Enum.AutomaticSize.Y
 	props.BackgroundTransparency = props.BackgroundTransparency or 1

@@ -8,7 +8,7 @@ type Entity = types.Entity
 type HexGrid = types.HexGrid
 
 registry.turret = with_defaults {
-	autogenerate_wires = true,
+	autogenerates_vertex = true,
 	on_completed = function(self: Entity, grid: HexGrid) end,
 }
 

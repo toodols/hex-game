@@ -31,11 +31,11 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 			end
 		end,
 	},
-	build_wires_on_tile = {
+	build_vertex_on_tile = {
 		progression_requisite = function(self: Quest, grid: HexGrid)
-			local entities = grid:query_entity { primary_coordinate = { 0, 0, 0 } }
+			local entities = grid:query_entity { coordinate = { 0, 0, 0 } }
 			if #entities == 1 then
-				if entities[1].type == "wires" then
+				if entities[1].type == "vertex" then
 					return true
 				end
 			elseif #entities > 1 then
@@ -50,7 +50,7 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 			end
 		end,
 	},
-	complete_wires_blueprint = {
+	complete_vertex_blueprint = {
 		stage_start = function(self: Quest, grid: HexGrid)
 			assert(grid.turn_schedule, "no turn schedule")
 			turn_scheduler.reset_turn_time(grid, grid.turn_schedule)
@@ -182,7 +182,7 @@ local stages_data: { [string]: QuestStage } = {
 			"Select (0, 0, 0) by <b>clicking</b> on the tile.{this_quest.details.init_hint?this_quest.current_stage_data.init_hint}",
 		},
 		init_hint = "\n<i>Hint: (0, 0, 0) is on the center of the map.</i>",
-		next = "build_wires_on_tile",
+		next = "build_vertex_on_tile",
 		choices = {
 			{ text = "Hint", id = "init_hint" },
 		},
@@ -190,36 +190,36 @@ local stages_data: { [string]: QuestStage } = {
 			{ type = "highlight_cell", coordinate = { 0, 0, 0 } },
 		},
 	},
-	build_wires_on_tile = {
+	build_vertex_on_tile = {
 		messages = {
 			"Information about this tile shows up on the bottom left",
 			"As you can see, there is nothing on this tile yet. Let's change that.",
-			"Press the build button, and select {entity.wires}.",
+			"Press the build button, and select {entity.vertex}.",
 		},
 		effects = {
 			{ type = "highlight_build_button" },
-			{ type = "highlight_buildable", entity_type = "wires" },
-			{ type = "whitelist_buildable", entities = { wires = true } },
+			{ type = "highlight_buildable", entity_type = "vertex" },
+			{ type = "whitelist_buildable", entities = { vertex = true } },
 		},
-		next = "build_wires_blueprint",
+		next = "build_vertex_blueprint",
 	},
-	build_wires_blueprint = {
+	build_vertex_blueprint = {
 		messages = {
 			"Well done.",
-			"Right now, the {entity.wires} is blue as it is a blueprint.",
+			"Right now, the {entity.vertex} is blue as it is a blueprint.",
 			"Blueprints require resources and time to be built.",
 			"Thankfully there is a neighboring {entity.extractor} on (-1, 0, 1)",
 			"Let's advance forward 1 turn",
 		},
 		can_advance = true,
-		next = "complete_wires_blueprint",
+		next = "complete_vertex_blueprint",
 	},
-	complete_wires_blueprint = {
+	complete_vertex_blueprint = {
 		next = "entities_are_connected",
 	},
 	entities_are_connected = {
 		messages = {
-			"This {entity.wires} connects the {entity.extractor} to the {entity.stockpile}.",
+			"This {entity.vertex} connects the {entity.extractor} to the {entity.stockpile}.",
 			"Every turn this {entity.extractor} will generate one item.",
 			"Let's advance a few turns so the stockpile fills up.",
 		},
@@ -262,7 +262,7 @@ local stages_data: { [string]: QuestStage } = {
 	},
 	build_to_rad = {
 		messages = {
-			"Build a {entity.extractor} on the {item.rad} deposit. Connect it to your system with the {entity.wires}.",
+			"Build a {entity.extractor} on the {item.rad} deposit. Connect it to your system with the {entity.vertex}.",
 		},
 	},
 	error = {

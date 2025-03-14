@@ -29,7 +29,7 @@ export type ServerEntityBehavior = {
 	influences: ((self: Entity, grid: HexGrid) -> ())?,
 	-- laboratory only
 	on_research_completed: (self: Entity, grid: HexGrid, research_id: string) -> ()?,
-	autogenerate_wires: boolean?,
+	autogenerates_vertex: boolean?,
 	abilities: { [string]: (self: Entity, grid: HexGrid) -> () },
 	on_event: (self: Entity, grid: HexGrid, event: EntityEvent, action_state: ActionState) -> (),
 }

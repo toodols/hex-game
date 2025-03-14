@@ -43,6 +43,10 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode } })
 		set_submenu {}
 	end, { props })
 
+	local _, force_update = React.useReducer(function(x)
+		return x + 1
+	end, 0)
+
 	local selection_mode = props.selection_mode_stack[#props.selection_mode_stack]
 
 	local quest_effects = util.table_flat(util.table_map(util.table_keys(props.grid.quests), function(quest_id)
@@ -101,6 +105,24 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode } })
 					VerticalAlignment = Enum.VerticalAlignment.Bottom,
 				}),
 			}, {
+				CancelButton = React.createElement(
+					"TextButton",
+					themes.theme_button {
+						Visible = selection_mode.type == "select_some_cell"
+							or selection_mode.type == "select_direction",
+						Text = "Cancel",
+						Size = UDim2.new(0, 100, 0, 30),
+						BackgroundColor3 = Color3.fromRGB(13, 13, 13),
+						BackgroundTransparency = 0.2,
+						[React.Event.MouseButton1Click] = function()
+							props.selection_mode_stack[#props.selection_mode_stack] = nil
+							force_update()
+						end,
+					},
+					{
+						Corner = React.createElement(Corner),
+					}
+				),
 				SelectedCellFrame = selection_mode.type == "select_cells" and React.createElement(SelectedCellFrame, {
 					selected_cells = util.table_map(util.table_keys(selection_mode.selected), function(k)
 						return hex_grid_mod.decode_coord(props.grid.instance_cell_map[k])

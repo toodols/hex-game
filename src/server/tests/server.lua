@@ -30,11 +30,11 @@ function spawn_entity(grid: HexGrid, entity_ty: string, cell_ty: string?)
 
 	local cell = util.table_find_pred(grid.cells, function(candidate)
 		return
-			--can be anywhere if there are no entities yet otherwise build next to a wire
+			--can be anywhere if there are no entities yet otherwise build next to a vertex
 			(
 				next(grid.entities) == nil
 				or util.table_any(hex_grid_mod.neighbors_eq(candidate.coordinate, 1), function(neighbor)
-					return #grid:query_entity { primary_coordinate = neighbor, type = "wires", owner = team } > 0
+					return #grid:query_entity { coordinate = neighbor, type = "vertex", owner = team } > 0
 				end)
 			)
 				-- must be on an empty cell		
@@ -167,12 +167,14 @@ function tests.damage_scout_with_magic()
 	local scout = spawn_entity(grid, "scout")
 
 	damage_mod.damage_entity_destroying(grid, scout, {
+		type = "physical",
 		amount = 1,
 	})
 
 	assert_eq(scout.health, scout.max_health - 1, "scout should have 1 less health")
 
 	damage_mod.damage_entity_destroying(grid, scout, {
+		type = "physical",
 		amount = 100,
 		nonlethal = true,
 	})
@@ -180,6 +182,7 @@ function tests.damage_scout_with_magic()
 	assert(not scout.is_destroyed, "Nonlethal damage should not destroy the scout")
 
 	damage_mod.damage_entity_destroying(grid, scout, {
+		type = "physical",
 		amount = 100,
 	})
 
@@ -193,10 +196,10 @@ function tests.damage_shielded_scout_with_magic()
 
 	local scout = spawn_entity(grid, "scout")
 	local shield_effect = effect_mod.add_effect(scout, { type = "shield", health = 3 })
-	damage_mod.damage_entity_destroying(grid, scout, { amount = 1 })
+	damage_mod.damage_entity_destroying(grid, scout, { type = "physical", amount = 1 })
 	assert_eq(scout.health, scout.max_health, "scout should not have been damaged")
 	assert_eq(shield_effect.health, 2, "shield should have 2 health")
-	damage_mod.damage_entity_destroying(grid, scout, { amount = 3 })
+	damage_mod.damage_entity_destroying(grid, scout, { type = "physical", amount = 3 })
 	assert(shield_effect.is_destroyed, "shield should have been destroyed")
 	assert_eq(scout.health, scout.max_health - 1, "scout should have 3 less health")
 
@@ -204,7 +207,7 @@ function tests.damage_shielded_scout_with_magic()
 	scout.health = scout.max_health
 	local shield_1 = effect_mod.add_effect(scout, { type = "shield", health = 3 })
 	local shield_2 = effect_mod.add_effect(scout, { type = "shield", health = 3 })
-	damage_mod.damage_entity_destroying(grid, scout, { amount = 5 })
+	damage_mod.damage_entity_destroying(grid, scout, { type = "physical", amount = 5 })
 
 	assert(shield_1.is_destroyed, "shield 1 should have been destroyed")
 	assert(not shield_2.is_destroyed, "shield 2 should not have been destroyed")
@@ -296,8 +299,8 @@ function tests.capture_extractor()
 		owner = team1.id,
 	}, grid)
 
-	local wires = entity_mod.new_entity({
-		type = "wires",
+	local vertex = entity_mod.new_entity({
+		type = "vertex",
 		primary_coordinate = { 0, 0, 0 },
 		status = "blueprint",
 		owner = team1.id,
@@ -371,7 +374,7 @@ function tests.deposit_different_items_in_vault()
 	cleanup(grid)
 end
 
-function tests.deconstruct_building_preserves_wires()
+function tests.deconstruct_building_preserves_vertex()
 	local grid = presets.blank_map()
 	-- Create a scout "organically"
 	local scout = entity_mod.new_entity({
@@ -392,13 +395,13 @@ function tests.deconstruct_building_preserves_wires()
 		})
 	end
 
-	assert_eq(#grid:query_entity { type = "wires" }, 1, "wires not generated")
+	assert_eq(#grid:query_entity { type = "vertex" }, 1, "vertex not generated")
 	table.insert(scout.queued_decisions, {
 		type = "deconstruct",
 		entity_id = scout.id,
 	})
 	action_phase_mod.run_action_phase(grid)
-	assert_eq(#grid:query_entity { type = "wires" }, 1, "wires not preserved")
+	assert_eq(#grid:query_entity { type = "vertex" }, 1, "vertex not preserved")
 
 	cleanup(grid)
 end

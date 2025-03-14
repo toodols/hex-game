@@ -10,7 +10,7 @@ type Entity = types.Entity
 type HexGrid = types.HexGrid
 
 registry_mod.registry.extractor = registry_mod.with_defaults {
-	autogenerate_wires = true,
+	autogenerates_vertex = true,
 	built_on = { "bar_deposit", "vit_deposit", "rad_deposit", "tar_deposit" },
 	init = function(self: Entity, grid: HexGrid)
 		self.should_output = 0

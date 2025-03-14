@@ -4,7 +4,7 @@ local types = require(script.Parent.types)
 type EntityConfiguration = types.EntityConfiguration
 type Entity = types.Entity
 
-require(script.wires)
+require(script.vertex)
 require(script.stockpile)
 require(script.extractor)
 require(script.scout)

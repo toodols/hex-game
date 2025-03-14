@@ -5,42 +5,46 @@ local damage_mod = require(ServerScriptService.Server.damage)
 local methods = require(script.methods)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local team = require(ReplicatedStorage.Shared.team)
+local server_types = require(ServerScriptService.Server.types)
 
 type Entity = types.Entity
 type HexGrid = types.HexGrid
 type Effect = types.Effect
+type ActionState = server_types.ActionState
+type EffectBehavior = {
+	description: string?,
+	desirability: "positive" | "negative" | "neutral" | nil,
+	init: (grid: HexGrid, entity: Entity, effect: Effect) -> ()?,
+	tick: (grid: HexGrid, action_state: ActionState, entity: Entity, effect: Effect) -> ()?,
+	remove: (grid: HexGrid, entity: Entity, effect: Effect) -> ()?,
+}
 
-local effects = {}
+local effects: { [string]: EffectBehavior } = {}
 
 -- Blocks effect.amount damage
 effects.shield = {}
 
--- Deals 1 nonlethal damage, spreads to friendly entities on neighboring cells the next turn
-effects.infected = {
-	init = function(grid: HexGrid, entity: Entity, effect: Effect)
+effects.regeneration = {
+	description = "Gains +1 hitpoint every turn",
+	desirability = "positive",
+	init = function(grid: HexGrid, entity: Entity, effect: Effect) end,
+	tick = function(grid: HexGrid, action_state: ActionState, entity: Entity, effect: Effect)
 		damage_mod.damage_entity(grid, entity, {
+			type = "healing",
 			amount = 1,
-			nonlethal = true,
 		})
-	end,
-	remove = function(grid: HexGrid, entity: Entity, effect: Effect)
-		methods.add_exclusive_effect(entity, { type = "infected_immune", duration = 5 })
-		for _, cell in hex_grid_mod.neighbors_many_leq(entity.coordinates, 1) do
-			for entity_id in cell.entities do
-				local other = grid.entities[entity_id]
-				if
-					team.is_allied(grid, other.owner, entity.owner)
-					and methods.get_one_effect(other, "infected_immune") == nil
-				then
-					methods.add_exclusive_effect(other, { type = "infected", duration = 1 })
-				end
-			end
-		end
 	end,
 }
 
--- This entity is immune to `infected`
-effects.infected_immune = {}
+-- Todo: some negative debuff that comes with being infected
+effects.infected = {
+	desirability = "negative",
+	init = function(grid: HexGrid, entity: Entity, effect: Effect) end,
+	remove = function(grid: HexGrid, entity: Entity, effect: Effect) end,
+	tick = function()
+		-- todo: spread to other cells
+	end,
+}
 
 return {
 	effects = effects,

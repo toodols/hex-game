@@ -8,7 +8,8 @@ type Entity = types.Entity
 type HexGrid = types.HexGrid
 
 registry.phony = with_defaults {
-	autogenerate_wires = true,
+	autogenerates_vertex = true,
+	update = function(self: Entity) end,
 	on_completed = function(self: Entity, grid: HexGrid) end,
 }
 

@@ -1,12 +1,14 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local load = require(ReplicatedStorage.Shared.asset_server).load
+local font = require(ReplicatedStorage.Shared.formatting.methods).font
+local item_colors = require(ReplicatedStorage.Shared.items).item_colors
 
 local cell_names = {
 	basic = "Basic",
-	bar_deposit = "Bar Deposit",
-	vit_deposit = "Vit Deposit",
-	rad_deposit = "Rad Deposit",
-	tar_deposit = "Tar Deposit",
+	bar_deposit = `{font("Bar", {color=item_colors.bar})} Deposit`,
+	vit_deposit = `{font("Vit", {color=item_colors.vit})} Deposit`,
+	rad_deposit = `{font("Rad", {color=item_colors.rad})} Deposit`,
+	tar_deposit = `{font("Tar", {color=item_colors.tar})} Deposit`,
 	portal = "Portal",
 }
 

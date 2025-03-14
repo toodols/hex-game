@@ -12,7 +12,7 @@ type EntityEvent = types.EntityEvent
 type ActionState = server_types.ActionState
 
 registry.witness = with_defaults {
-	autogenerate_wires = true,
+	autogenerates_vertex = true,
 	init = function(self: Entity, grid: HexGrid)
 		self.charges = 0
 	end,

@@ -8,7 +8,7 @@ type Entity = types.Entity
 type HexGrid = types.HexGrid
 
 registry.stockpile = with_defaults {
-	autogenerate_wires = true,
+	autogenerates_vertex = true,
 	on_completed = function(self: Entity, grid: HexGrid)
 		local config = grid.entity_configurations[self.type]
 		if not self.inventory then

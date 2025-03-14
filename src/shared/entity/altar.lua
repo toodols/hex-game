@@ -12,6 +12,7 @@ registry.altar = with_defaults {
 		pow = 2,
 		bar = 2,
 	},
+	range = 2,
 	required_research = {
 		"altar",
 	},

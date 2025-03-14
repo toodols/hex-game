@@ -59,6 +59,16 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState)
 		elseif ability.ability_type == "solution_use" then
 			server_entity_mod.registry[entity.type].abilities[ability.ability_type](entity, grid)
 			action_state.will_be_destroyed_entities[entity.id] = true
+		elseif ability.ability_type == "disguise" then
+			local coordinate = ability.coordinate
+			-- get the entity to copy
+			local cell = grid:get_cell(coordinate)
+			if not cell then
+				warn "invalid coordinate"
+				continue
+			end
+			
+			-- get the list of entities, filter the ones visible to this team, and sort it by layer
 		end
 	end
 end

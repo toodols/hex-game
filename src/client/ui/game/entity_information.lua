@@ -109,7 +109,7 @@ function EntityInformation(props: {
 	end, { entity })
 
 	React.useEffect(function()
-		local model = client_entity_mod.registry[entity.type].model:Clone()
+		local model = client_entity_mod.create_model_from_type(grid, entity.type)
 		model.Parent = viewport_ref.current
 		model:PivotTo(CFrame.new(0, -2, -4))
 
@@ -371,6 +371,37 @@ function EntityInformation(props: {
 					LayoutOrder = 2,
 					Size = UDim2.new(1, 0, 0, 30),
 				}, {
+					DisguiseButton = if entity.owner == player_team.id and entity.type == "phony"
+						then React.createElement(ActionButton, {
+							color = Color3.fromRGB(113, 172, 196),
+							Text = "Disguise",
+							on_click = function()
+								local ability = shared_behavior.abilities.disguise
+								local candidates = {}
+								for _, coord in hex_grid_mod.neighbors_leq(entity.primary_coordinate, ability.range) do
+									local cell = grid:get_cell(coord)
+									if cell and next(cell.entities) then
+										local instance = grid.cell_instance_map[hex_grid_mod.encode_coord(coord)]
+										candidates[instance] = coord
+									end
+								end
+								table.insert(selection_mode_stack, {
+									type = "select_some_cell",
+									candidates = candidates,
+									on_selected = function(instance)
+										client_interaction_remote:FireServer {
+											{
+												type = "ability",
+												ability_type = "disguise",
+												entity_id = entity.id,
+												coordinate = candidates[instance],
+											},
+										}
+									end,
+								})
+							end,
+						})
+						else nil,
 					AttackButton = entity.owner == player_team.id
 						and (entity.type == "scout" or entity.type == "turret")
 						and entity.status == "complete"
@@ -379,40 +410,41 @@ function EntityInformation(props: {
 							Text = "Attack",
 							LayoutOrder = 0,
 							on_click = function()
-								if entity.type == "scout" or entity.type == "turret" then
-									local candidates = {}
-									for _, coord in hex_grid_mod.neighbors_leq(entity.primary_coordinate, 3) do
-										local instance = grid.cell_instance_map[hex_grid_mod.encode_coord(coord)]
-										if
-											not instance
-											or not hex_grid_mod.line_of_sight(
-												grid,
-												entity.primary_coordinate,
-												coord,
-												player_team.id
-											)
-										then
-											continue
-										end
-										candidates[instance] = coord
+								local ability_name = if entity.type == "scout"
+									then "scout_attack"
+									else if entity.type == "turret" then "turret_attack" else error "unreachable"
+								local ability = shared_behavior.abilities[ability_name]
+
+								local candidates = {}
+								for _, coord in hex_grid_mod.neighbors_leq(entity.primary_coordinate, ability.range) do
+									local instance = grid.cell_instance_map[hex_grid_mod.encode_coord(coord)]
+									if
+										not instance
+										or not hex_grid_mod.line_of_sight(
+											grid,
+											entity.primary_coordinate,
+											coord,
+											player_team.id
+										)
+									then
+										continue
 									end
-									table.insert(selection_mode_stack, {
-										type = "select_some_cell",
-										candidates = candidates,
-										on_selected = function(instance)
-											client_interaction_remote:FireServer {
-												{
-													type = "ability",
-													ability_type = if entity.type == "scout"
-														then "scout_attack"
-														else "turret_attack",
-													entity_id = entity.id,
-													coordinate = candidates[instance],
-												},
-											}
-										end,
-									})
+									candidates[instance] = coord
 								end
+								table.insert(selection_mode_stack, {
+									type = "select_some_cell",
+									candidates = candidates,
+									on_selected = function(instance)
+										client_interaction_remote:FireServer {
+											{
+												type = "ability",
+												ability_type = ability_name,
+												entity_id = entity.id,
+												coordinate = candidates[instance],
+											},
+										}
+									end,
+								})
 							end,
 						}),
 					UseButton = entity.owner == player_team.id

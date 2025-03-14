@@ -40,7 +40,7 @@ Completed entities are functional.
 
 ## Entity Decay / Capture
 
-Entities not connected to a Monarch undergoes decay. While undergoing decay, entities cannot be queued for deconstruction. After 3 turns, this entity becomes neutral, and may be captured by any team by building a wire on it.
+Entities not connected to a Monarch undergoes decay. While undergoing decay, entities cannot be queued for deconstruction. After 3 turns, this entity becomes neutral, and may be captured by any team by building a vertex on it.
 
 ## Visibility
 This game implements a fog of war system. All buildings can see r<=2 tiles. Some buildings like Sentry can see r<=3.
@@ -49,7 +49,7 @@ This game implements a fog of war system. All buildings can see r<=2 tiles. Some
 Entities exert a r<=1 presence that prevents enemies from building on those tiles. 
 
 ## Damage
-Damage has a gauge, and is applied from the highest layer (shield) to the lowest layer (wires). Damage gauge is decremented by the total health of the entity it hits. Damage stops when the gauge is depleted. This gauge is copied for each cell if the damage has AoE, but is only applied once for entities that occupy multiple cells.
+Damage has a gauge, and is applied from the highest layer (shield) to the lowest layer (vertex). Damage gauge is decremented by the total health of the entity it hits. Damage stops when the gauge is depleted. This gauge is copied for each cell if the damage has AoE, but is only applied once for entities that occupy multiple cells.
 
 ## Influence
 Certain entities, like Sage exert an influence.

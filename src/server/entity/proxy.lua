@@ -14,7 +14,7 @@ type HexGrid = types.HexGrid
 type ActionState = server_types.ActionState
 
 registry.proxy = with_defaults {
-	autogenerate_wires = true,
+	autogenerates_vertex = true,
 	on_completed = function(self: Entity, grid: HexGrid) end,
 	influences = function(self: Entity, grid: HexGrid)
 		local config = grid.entity_configurations[self.type]

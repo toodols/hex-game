@@ -17,8 +17,8 @@ function compute_systems(grid: HexGrid)
 		-- find any unvisited coords
 		local initial_coord = hex_grid_mod.decode_coord(encoded_initial_coord)
 		local initial_entity = grid:query_entity({
-			primary_coordinate = initial_coord,
-			type = "wires",
+			coordinate = initial_coord,
+			type = "vertex",
 			status = "complete",
 			is_destroyed = false,
 		})[1]
@@ -34,10 +34,11 @@ function compute_systems(grid: HexGrid)
 				local coord = table.remove(visitable_stack)
 				local encoded_coord = hex_grid_mod.encode_coord(coord)
 				local ent = grid:query_entity({
-					type = "wires",
+					type = "vertex",
 					status = "complete",
 					is_destroyed = false,
-					primary_coordinate = coord,
+					coordinate = coord,
+					owner = initial_entity.owner,
 				})[1]
 				local cell = grid:get_cell(coord)
 
@@ -102,7 +103,7 @@ function compute_systems(grid: HexGrid)
 
 	for entity_id, entity in grid.entities do
 		if not entities_set[entity_id] then
-			-- cells is empty because individual entities do not have a wire and cells only count wires
+			-- cells is empty because individual entities do not have a vertex and cells only count vertex
 			table.insert(result, { entities = { [entity_id] = true }, cells = {} })
 		end
 	end

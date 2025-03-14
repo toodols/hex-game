@@ -1,7 +1,7 @@
 local registry = require(script.registry).registry
 local methods = require(script.methods)
 
-require(script.wires)
+require(script.vertex)
 require(script.stockpile)
 require(script.extractor)
 require(script.scout)
@@ -25,7 +25,7 @@ require(script.altar)
 return {
 	registry = registry,
 	new_entity = methods.new_entity,
-	autogenerate_wires = methods.autogenerate_wires,
+	autogenerates_vertex = methods.autogenerates_vertex,
 	remove_entity = methods.remove_entity,
 	-- entity_can_deconstruct = methods.entity_can_deconstruct,
 }

@@ -120,13 +120,11 @@ function QuestDialogue(props: {
 					{
 						BackgroundTransparency = 1,
 						Size = UDim2.new(1, 0, 0, 40),
-						Position = UDim2.new(0, 0, 1, 0),
+						Position = UDim2.new(0, 0, 1, 5),
 					},
 					{
 						HorizontalLayout = React.createElement("UIListLayout", {
-							FillDirection = Enum.FillDirection.Horizontal,
-							VerticalAlignment = Enum.VerticalAlignment.Center,
-							HorizontalAlignment = Enum.HorizontalAlignment.Right,
+							HorizontalAlignment = Enum.HorizontalAlignment.Left,
 							Padding = UDim.new(0, 5),
 						}),
 					},
@@ -134,10 +132,11 @@ function QuestDialogue(props: {
 						return React.createElement(
 							"TextButton",
 							themes.theme_button {
-								BackgroundTransparency = 0.8,
+								BackgroundTransparency = 0.9,
 								BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 								Text = choice.text,
-								Size = UDim2.new(0, 0, 0, 30),
+								Size = UDim2.new(1, 0, 0, 30),
+								TextXAlignment = Enum.TextXAlignment.Left,
 								[React.Event.MouseButton1Click] = function()
 									client_interaction_remote:FireServer {
 										{
@@ -151,8 +150,7 @@ function QuestDialogue(props: {
 							},
 							{
 								Padding = React.createElement("UIPadding", {
-									PaddingLeft = UDim.new(0, 5),
-									PaddingRight = UDim.new(0, 5),
+									PaddingLeft = UDim.new(0, 10),
 								}),
 								Corner = React.createElement(Corner),
 							}

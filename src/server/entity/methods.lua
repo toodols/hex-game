@@ -1,5 +1,5 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerScriptService = game:GetService("ServerScriptService")
+local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local shared_registry_mod = require(ReplicatedStorage.Shared.entity.registry)
@@ -19,9 +19,9 @@ function entity_can_deconstruct(entity: Entity, grid: HexGrid)
 	local cell = grid:get_cell(entity.primary_coordinate)
 	assert(cell, "cell not found")
 	if
-		entity.type == "wires"
+		entity.type == "vertex"
 		and not util.table_any(cell.entities, function(_, entity_id)
-			return shared_registry_mod.registry[grid.entities[entity_id].type].layer > shared_registry_mod.layer.wires
+			return shared_registry_mod.registry[grid.entities[entity_id].type].layer > shared_registry_mod.layer.vertex
 		end)
 	then
 		return false
@@ -29,14 +29,13 @@ function entity_can_deconstruct(entity: Entity, grid: HexGrid)
 	return true
 end
 
-function autogenerate_wires(grid: HexGrid, host: Entity)
-	if
-		#grid:query_entity({ primary_coordinate = host.primary_coordinate, type = "wires", owner = host.owner }) == 0
-	then
-		-- the status is the highest status among buildings that come with wires
+function autogenerate_vertex(grid: HexGrid, host: Entity)
+	if #grid:query_entity { coordinate = host.primary_coordinate, type = "vertex", owner = host.owner } == 0 then
+		-- the status is the highest status among buildings that come with vertex
+		-- principally used when buildings spawn in already completed, and the wires that come with must also be completed
 		local status = "blueprint"
-		for _, entity in grid:query_entity({ primary_coordinate = host.primary_coordinate, owner = host.owner }) do
-			if registry[entity.type].autogenerate_wires then
+		for _, entity in grid:query_entity { coordinate = host.primary_coordinate, owner = host.owner } do
+			if registry[entity.type].autogenerates_vertex then
 				if (status == "blueprint" or status == "scaffold") and entity.status == "complete" then
 					status = "complete"
 				elseif status == "blueprint" and entity.status == "scaffold" then
@@ -45,7 +44,7 @@ function autogenerate_wires(grid: HexGrid, host: Entity)
 			end
 		end
 		local entity = new_entity({
-			type = "wires",
+			type = "vertex",
 			primary_coordinate = host.primary_coordinate,
 			status = status,
 			build_time = -1,
@@ -63,13 +62,18 @@ end
 function new_entity(entity_: any, grid: HexGrid): Entity
 	local entity = entity_ :: Entity
 	if not grid then
-		error("argument 2 not provided")
+		error "argument 2 not provided"
 	end
 	local server_behavior = registry[entity.type]
 	local shared_behavior = shared_registry_mod.registry[entity.type]
-	local cell = grid:get_cell(entity.primary_coordinate)
-	if not cell then
-		error("No cell at " .. hex_grid_mod.encode_coord(entity.primary_coordinate))
+	local cell
+	if entity.primary_coordinate then
+		cell = grid:get_cell(entity.primary_coordinate)
+		if not cell then
+			error("No cell at " .. hex_grid_mod.encode_coord(entity.primary_coordinate))
+		end
+	else
+		warn "no primary_coordinate provided"
 	end
 	if server_behavior == nil then
 		error("No server behavior for " .. entity.type)
@@ -106,13 +110,15 @@ function new_entity(entity_: any, grid: HexGrid): Entity
 
 	server_behavior.init(entity, grid)
 	grid.entities[entity.id] = entity
-	cell.entities[entity.id] = true
+	if cell then
+		cell.entities[entity.id] = true
+	end
 
 	if entity.status == "complete" then
 		server_behavior.on_completed(entity, grid)
 	end
-	if server_behavior.autogenerate_wires then
-		autogenerate_wires(grid, entity)
+	if server_behavior.autogenerates_vertex then
+		autogenerate_vertex(grid, entity)
 	end
 
 	updates_mod.add_update(grid, { type = "entity_update", entity = entity })
@@ -142,6 +148,6 @@ end
 
 return {
 	remove_entity = remove_entity,
-	autogenerate_wires = autogenerate_wires,
+	autogenerates_vertex = autogenerate_vertex,
 	new_entity = new_entity,
 }

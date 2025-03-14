@@ -9,7 +9,9 @@ type AnimationState = types.AnimationState
 
 local registry: { [string]: ClientEntityBehavior } = {}
 type ClientEntityBehavior = {
-	model: Instance,
+	-- self is possibly nil so ui can create a model from entity type alone
+	-- i don't like this behavior and i think a fake entity should be created instead
+	model: Instance | (self: Entity?, grid: HexGrid) -> Instance,
 
 	-- this happens before the model is parented to workspace
 	init: (self: Entity, grid: HexGrid) -> (),

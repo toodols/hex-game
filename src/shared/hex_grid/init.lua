@@ -51,47 +51,54 @@ function grid_new_team(self: HexGrid, players: { Player }?, color: TeamColor?, n
 end
 
 -- Remove entities that are is_destroyed from grid.entities to reclaim memory
-function grid_purge_dead_entities(self: HexGrid)
-	for entity_id, entity in self.entities do
+function grid_purge_dead_entities(grid: HexGrid)
+	for entity_id, entity in grid.entities do
 		if entity.is_destroyed then
-			self.entities[entity.id] = nil
-			local instance = self.entity_instance_map[entity.id]
+			grid.entities[entity.id] = nil
+			local instance = grid.entity_instance_map[entity.id]
 			if instance then
-				self.instance_entity_map[instance] = nil
-				self.entity_instance_map[entity.id] = nil
+				grid.instance_entity_map[instance] = nil
+				grid.entity_instance_map[entity.id] = nil
 			end
 		end
 	end
 end
 
 -- Gets a table of entities that fit props
-function grid_query_entity(self: HexGrid, props: any): { Entity }
+-- Special prop "coordinate" will query only entities that are at the given coordinate.
+function grid_query_entity(grid: HexGrid, props: any): { Entity }
+	if props.primary_coordinate then
+		warn "use of `primary_coordinate` in query_entity! use `coordinate` instead"
+	end
 	local results = {}
 	local function pred(entity: Entity)
 		props.is_destroyed = false
 		for k, v in props do
+			if k == "coordinate" then
+				continue
+			end
 			if not util.deep_equal(entity[k], v) then
 				return false
 			end
 		end
 		return true
 	end
-	if props.primary_coordinate then
-		local cell = self:get_cell(props.primary_coordinate)
+	if props.coordinate then
+		local cell = grid:get_cell(props.coordinate)
 		if not cell then
 			return {}
 		end
 		local entities = cell.entities
 		for entity_id in entities do
-			if not self.entities[entity_id] then
+			if not grid.entities[entity_id] then
 				error(`{entity_id} not found for {encode_coord(cell.coordinate)}`)
 			end
-			if pred(self.entities[entity_id]) then
-				table.insert(results, self.entities[entity_id])
+			if pred(grid.entities[entity_id]) then
+				table.insert(results, grid.entities[entity_id])
 			end
 		end
 	else
-		for _, entity in self.entities do
+		for _, entity in grid.entities do
 			if pred(entity) then
 				table.insert(results, entity)
 			end
@@ -140,7 +147,7 @@ function new_grid_empty(entity_config: { [string]: EntityConfiguration }?, globa
 	}
 	-- neutral team
 	-- does not impose presence on its neighbors
-	-- certain units can be captured by building a wire on top of it
+	-- certain units can be captured by building a vertex on top of it
 	grid.neutral_team = grid:new_team({}, {
 		type = "color3",
 		color = Color3.fromRGB(150, 150, 150),

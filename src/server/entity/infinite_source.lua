@@ -14,7 +14,7 @@ type HexGrid = types.HexGrid
 type ActionState = server_types.ActionState
 
 registry.infinite_source = with_defaults {
-	autogenerate_wires = true,
+	autogenerates_vertex = true,
 	init = function(self: Entity, grid: HexGrid)
 		self.mode = "passive"
 	end,

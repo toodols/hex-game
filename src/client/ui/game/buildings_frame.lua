@@ -8,7 +8,6 @@ local types = require(ReplicatedStorage.Shared.types)
 local formatting = require(ReplicatedStorage.Shared.formatting)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
 local team = require(ReplicatedStorage.Shared.team)
-
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local Items = require(script.Parent.items).Items
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
@@ -29,7 +28,7 @@ local PAGES = {
 	{
 		name = "Page 1",
 		items = {
-			{ type = "wires" },
+			{ type = "vertex" },
 			{
 				type = "stockpile",
 			},
@@ -85,6 +84,9 @@ local PAGES = {
 			{
 				type = "altar",
 			},
+			{
+				type = "phony",
+			},
 		},
 	},
 }
@@ -100,7 +102,7 @@ function BuildingItem(props: {
 	local button_ref = React.useRef(nil :: any)
 	local viewport_ref = React.useRef(nil :: any)
 	React.useEffect(function()
-		local model = client_entity_mod.registry[props.type].model:Clone()
+		local model = client_entity_mod.create_model_from_type(grid, props.type)
 		model.Parent = viewport_ref.current
 		model:PivotTo(CFrame.new(0, -2, -4))
 	end, { props.type })
