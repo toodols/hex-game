@@ -42,7 +42,7 @@ local serialize_mod = require(ServerScriptService.Server.serialize)
 local presets = require(ServerScriptService.Server.presets)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 local updates_mod = require(ServerScriptService.Server.updates)
-
+local server_util = require(ServerScriptService.Server.util)
 if RunService:IsStudio() then
 	tests.run_tests()
 end
@@ -78,7 +78,17 @@ function start_game(teleport_data: { room: types.Room }?)
 	_G.grid = grid
 
 	remotes_mod.client_interaction_remote.OnServerEvent:Connect(function(plr: Player, data: { Interaction })
-		router_mod.on_client_interaction(grid, plr, data)
+		local player_team = team_mod.team_of(grid, plr)
+		if not player_team then
+			return
+		end
+		server_util.catch(function()
+			router_mod.on_client_interaction(grid, {
+				player_team = player_team,
+				data = data,
+				plr = plr,
+			})
+		end, plr, data)
 	end)
 
 	local function auto_add_player(plr: Player)

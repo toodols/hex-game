@@ -28,8 +28,9 @@ function filter_duplicate_entity_updates(updates)
 	return result
 end
 
-function flush_updates(grid: HexGrid)
+function flush_updates(grid: HexGrid): { [TeamId]: { GridUpdate } }
 	local buffer = grid.updates_buffer
+	local updates = {}
 	if #buffer > 0 then
 		for _, team in grid.teams do
 			if #team.players == 0 then
@@ -80,6 +81,7 @@ function flush_updates(grid: HexGrid)
 				end
 			end))
 			if #mapped > 0 then
+				updates[team.id] = mapped
 				for _, player in team.players do
 					remotes_mod.grid_updates_remote:FireClient(player, mapped)
 				end
@@ -87,6 +89,7 @@ function flush_updates(grid: HexGrid)
 		end
 	end
 	grid.updates_buffer = {}
+	return updates
 end
 
 function add_update(grid: HexGrid, event: GridUpdate)

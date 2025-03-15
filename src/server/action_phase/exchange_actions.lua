@@ -12,11 +12,12 @@ type ActionState = server_types.ActionState
 type EntityAction = types.EntityAction
 
 function handle_exchange_actions(grid: HexGrid, action_state: ActionState)
-	for _, exchange_action: any in
+	for _, exchange_action_: any in
 		util.table_extract(grid.action_queue, function(action)
 			return (action.type == "exchange" or action.type == "exchange_promise")
 		end)
 	do
+		local exchange_action = util.deep_copy(exchange_action_)
 		local system = action_state.system_by_entity_id[exchange_action.entity_id]
 		local input_items = exchange_action.input_items
 		local output_items = exchange_action.output_items

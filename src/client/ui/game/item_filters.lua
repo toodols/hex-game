@@ -11,7 +11,6 @@ local themes = require(ReplicatedStorage.Client.ui.themes)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
-local Items = require(script.Parent.items).Items
 
 local Corner = util_components.Corner
 local interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
@@ -21,7 +20,6 @@ type HexGrid = types.HexGrid
 type TeamData = types.TeamData
 
 function ItemFilters(props: { entity_id: EntityId })
-	local grid = React.useContext(MainContext).grid
 	local entity = hooks.use_synced_entity(props.entity_id)
 	local inventory = entity.inventory
 	assert(inventory, "inventory nil")
@@ -291,7 +289,7 @@ function ItemFiltersPreview(props: { LayoutOrder: number?, entity_id: EntityId, 
 				BackgroundTransparency = 1,
 				Size = UDim2.new(0, 0, 1, 0),
 				TextColor3 = Color3.fromRGB(255, 255, 255),
-				Text = "Edit Filter",
+				Text = if is_owner then "Edit Filter" else "View Filter",
 			}
 		),
 	})

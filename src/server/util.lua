@@ -43,13 +43,6 @@ function get_neighbors_set(grid: HexGrid, coordinates: { CubicCoordinate }): { [
 	return neighbor_set
 end
 
-function bind(fn, ...)
-	local arg = { ... }
-	return function()
-		return fn(unpack(arg))
-	end
-end
-
 local error_type = {
 	-- can happen intentionally or unintentionally
 	dismiss = 1,
@@ -62,7 +55,6 @@ local error_type = {
 return {
 	new_global_id = new_global_id,
 	catch = catch,
-	bind = bind,
 	error_type = error_type,
 	get_neighbors_set = get_neighbors_set,
 }

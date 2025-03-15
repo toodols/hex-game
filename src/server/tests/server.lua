@@ -357,6 +357,53 @@ function tests.deconstruct_stockpile()
 	cleanup(grid)
 end
 
+function tests.factory_creates_items()
+	local grid = presets.blank_map()
+	local factory = spawn_entity(grid, "factory")
+	local rad_stockpile = spawn_entity(grid, "stockpile")
+	rad_stockpile.inventory.items = { "rad", "rad", "rad", "rad", "rad" }
+	rad_stockpile.inventory.filter = {
+		type = "whitelist",
+		items = { ["rad"] = true },
+	}
+	local bar_stockpile = spawn_entity(grid, "stockpile")
+	bar_stockpile.inventory.items = { "bar", "bar", "bar", "bar", "bar" }
+	bar_stockpile.inventory.filter = {
+		type = "whitelist",
+		items = { ["bar"] = true },
+	}
+	local pow_stockpile = spawn_entity(grid, "stockpile")
+	pow_stockpile.inventory.items = { "pow" }
+	pow_stockpile.inventory.filter = {
+		type = "whitelist",
+		items = { ["pow"] = true },
+	}
+
+	factory.current_recipe = "rad_to_pow"
+
+	action_phase_mod.run_action_phase(grid)
+
+	assert_eq(#pow_stockpile.inventory.items, 3, "pow stockpile should have 3 item")
+	assert_eq(pow_stockpile.inventory.items[1], "pow", "stockpile should have pow")
+	assert_eq(#rad_stockpile.inventory.items, 4, "rad stockpile should have 4 items")
+	assert_eq(#bar_stockpile.inventory.items, 4, "bar stockpile should have 4 items")
+
+	action_phase_mod.run_action_phase(grid)
+
+	assert_eq(#pow_stockpile.inventory.items, 5, "pow stockpile should have 5 items")
+	assert_eq(#rad_stockpile.inventory.items, 3, "rad stockpile should have 1 items")
+	assert_eq(#bar_stockpile.inventory.items, 3, "bar stockpile should have 1 items")
+
+	-- it is unfeasible to make factory *not* run when there is no room for the output.
+	-- so rad+bar being consumed to make nothing is intended behavior
+	-- maybe this will change in the future
+	action_phase_mod.run_action_phase(grid)
+
+	assert_eq(#pow_stockpile.inventory.items, 5, "pow stockpile should have 5 items")
+	assert_eq(#rad_stockpile.inventory.items, 2, "rad stockpile should have 1 items")
+	assert_eq(#bar_stockpile.inventory.items, 2, "bar stockpile should have 1 items")
+end
+
 function tests.deposit_different_items_in_vault()
 	local grid = presets.blank_map()
 	local vault = spawn_entity(grid, "vault")
@@ -370,6 +417,7 @@ function tests.deposit_different_items_in_vault()
 	})
 
 	assert_eq(#vault.inventory.items, 1, "Vault should only have 1 item")
+	assert_eq(vault.inventory.items[1], "rad", "Vault should have rad")
 
 	cleanup(grid)
 end
