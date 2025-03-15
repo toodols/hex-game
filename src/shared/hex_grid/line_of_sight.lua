@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local RunService = game:GetService "RunService"
 local types = require(ReplicatedStorage.Shared.types)
 local coords_mod = require(script.Parent.coords)
-local effective_visibility = require(ReplicatedStorage.Shared.effective_visibility).effective_visibility
+local cell_visibility = require(ReplicatedStorage.Shared.visibility).cell_visibility
 
 type HexGrid = types.HexGrid
 type HexCell = types.HexCell
@@ -13,7 +13,7 @@ type TeamId = types.TeamId
 function blocked(grid: HexGrid, cell: HexCell, team: TeamId?)
 	local visible = if RunService:IsClient()
 		then cell.visible_for_team
-		else effective_visibility(team and cell.server_data.visibility[team])
+		else cell_visibility(team and cell.server_data.visibility[team])
 	if team ~= nil and not visible then
 		return true
 	end

@@ -11,17 +11,18 @@ local model = asset_server.load "Entities/Phony"
 registry_mod.registry.phony = registry_mod.with_defaults {
 	model = model,
 	update = function(self: Entity, grid: HexGrid, old: Entity)
+		local instance = grid.entity_instance_map[self.id]
 		if self.disguise then
 			if old.disguise then
 				if old.disguise.id ~= self.disguise.id then
 					-- different entity, delete old disguise and create new one
-				end	
+				end
 			else
 				-- create new disguise
-			end	
+			end
 		elseif old.disguise then
 			-- delete current disguise, replace with base phony model
-		end	
+		end
 	end,
 	init = function(self: Entity, grid: HexGrid) end,
 }

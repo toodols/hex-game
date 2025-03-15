@@ -2,7 +2,7 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
-local effective_visibility = require(ReplicatedStorage.Shared.effective_visibility).effective_visibility
+local cell_visibility = require(ReplicatedStorage.Shared.visibility).cell_visibility
 local server_types = require(ServerScriptService.Server.types)
 
 type HexGrid = types.HexGrid
@@ -30,7 +30,7 @@ function compute_visibility(grid: HexGrid): { [TeamId]: { [EncodedCoordinate]: b
 		end
 		changed_to_visible[team_id] = changed_to_visible[team_id] or {}
 		old_vis[encoded_coord] = old_vis[encoded_coord] or {}
-		if not effective_visibility(old_vis[encoded_coord][team_id]) then
+		if not cell_visibility(old_vis[encoded_coord][team_id]) then
 			changed_to_visible[team_id][encoded_coord] = true
 		end
 		cell.server_data.visibility[team_id] = cell.server_data.visibility[team_id] or {}
@@ -71,16 +71,16 @@ function compute_visibility(grid: HexGrid): { [TeamId]: { [EncodedCoordinate]: b
 	end
 
 	for _, team in grid.teams do
-		if team.server_data.visibility == "full" then
+		if team.server_data.visibility == "fogless" or team.server_data.visibility == "perfect" then
 			changed_to_visible[team.id] = changed_to_visible[team.id] or {}
 			for _, cell in grid.cells do
 				local encoded_coord = hex_grid_mod.encode_coord(cell.coordinate)
 				old_vis[encoded_coord] = old_vis[encoded_coord] or {}
-				if not effective_visibility(old_vis[encoded_coord][team.id]) then
+				if not cell_visibility(old_vis[encoded_coord][team.id]) then
 					changed_to_visible[team.id][encoded_coord] = true
 				end
 				cell.server_data.visibility[team.id] = cell.server_data.visibility[team.id] or {}
-				cell.server_data.visibility[team.id].full = true
+				cell.server_data.visibility[team.id].fogless = true
 			end
 		end
 	end

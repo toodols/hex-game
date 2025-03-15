@@ -1,4 +1,4 @@
--- module for serializeing and deserializeing game state
+-- module for serializing and deserializing game state
 
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"

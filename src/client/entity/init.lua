@@ -81,6 +81,13 @@ function update_entity_client(grid: HexGrid, old: Entity?, new: Entity)
 		if old then
 			local instance = grid.entity_instance_map[new.id]
 			local cell_instance = grid.cell_instance_map[hex_grid.encode_coord(new.primary_coordinate)]
+			-- type changed. destroy old one and swap in with new
+			if old.type ~= new.type then
+				instance:Destroy()
+				instance = create_model_from_entity(grid, new)
+				client_behavior.init(new, grid)
+				instance.Parent = grid.entity_instance_root
+			end
 			client_behavior.update(new, grid, old)
 			instance:PivotTo(
 				(cell_instance.Base.CFrame + Vector3.new(0, cell_instance.Base.Size.Y / 2, 0))

@@ -4,11 +4,13 @@ local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
 
 local util = require(ReplicatedStorage.Shared.util)
+local visibility_mod = require(ReplicatedStorage.Shared.visibility)
+
 local systems_mod = require(ServerScriptService.Server.systems)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local damage_mod = require(ServerScriptService.Server.damage)
 local updates_mod = require(ServerScriptService.Server.updates)
 local server_entity_mod = require(ServerScriptService.Server.entity)
+local server_util = require(ServerScriptService.Server.util)
 
 type HexGrid = types.HexGrid
 type System = server_types.System
@@ -67,8 +69,54 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState)
 				warn "invalid coordinate"
 				continue
 			end
-			
-			-- get the list of entities, filter the ones visible to this team, and sort it by layer
+
+			grid:query_entity {
+				coordinate = coordinate,
+				status = "complete",
+			}
+			-- get the list of entities, filter the ones visible to this team
+			-- ignore entities that occupy more than one cell and sort it by layer
+			local entities = util.table_filter(
+				grid:query_entity {
+					coordinate = coordinate,
+					status = "complete",
+				},
+				function(target_entity)
+					return visibility_mod.entity_visibility(target_entity, cell, entity.owner)
+						and #target_entity.coordinates == 1
+				end
+			)
+			table.sort(entities, function(a, b)
+				return grid.entity_configurations[a.type].layer > grid.entity_configurations[b.type].layer
+			end)
+
+			local top = entities[1]
+			if not top then
+				continue
+			end
+
+			-- treat entity disguising as itself as resetting disguise
+			if top == entity then
+				entity.disguise = nil
+				table.insert(grid.updates_buffer, {
+					type = "disguise",
+					entity_id = entity.id,
+				})
+				continue
+			end
+
+			-- copy this entity into the disguise
+			local copied = util.deep_copy(top)
+			copied.disguise = nil
+			copied.id = entity.id
+			copied.primary_coordinate = entity.primary_coordinate
+			copied.coordinates = entity.coordinates
+			entity.disguise = copied
+
+			table.insert(grid.updates_buffer, {
+				type = "disguise",
+				entity_id = entity.id,
+			})
 		end
 	end
 end

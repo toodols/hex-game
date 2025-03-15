@@ -256,62 +256,80 @@ function EntityInformation(props: {
 							}
 						)
 						else nil,
-					DecayLabel = entity.is_decaying and React.createElement(
+					DecayLabel = if entity.is_decaying then React.createElement(
 						"TextLabel",
 						themes.theme_description {
 							LayoutOrder = 5,
 							Size = UDim2.new(1, 0, 0, 20),
 							Text = "Decay: " .. tostring(entity.decay),
 						}
-					),
-					TurnsUntilBuilt = entity.status == "scaffold" and React.createElement(
-						"TextLabel",
-						themes.theme_description {
-							LayoutOrder = 5,
-							Size = UDim2.new(1, 0, 0, 20),
-							Text = "Turns until built: " .. tostring(entity.build_time),
-						}
-					),
-					ShouldOutput = entity.type == "extractor" and React.createElement(ShouldOutput, {
-						entity = entity,
-					}),
-					Items = entity.inventory and React.createElement("Frame", {
-						BackgroundTransparency = 1,
-						LayoutOrder = 6,
-						AutomaticSize = Enum.AutomaticSize.Y,
-						Size = UDim2.new(1, 0, 0, 0),
-					}, {
-						HorizontalLayout = React.createElement("UIListLayout", {
-							SortOrder = Enum.SortOrder.LayoutOrder,
-							FillDirection = Enum.FillDirection.Horizontal,
-							Padding = UDim.new(0, 8),
-							VerticalAlignment = Enum.VerticalAlignment.Center,
-						}),
-						ItemsLabel = React.createElement(
+					) else nil,
+					TurnsUntilBuilt = if entity.status == "scaffold"
+						then React.createElement(
 							"TextLabel",
 							themes.theme_description {
-								LayoutOrder = 1,
-								Size = UDim2.new(0, 0, 0, 20),
-								Text = "Items",
+								LayoutOrder = 5,
+								Size = UDim2.new(1, 0, 0, 20),
+								Text = "Turns until built: " .. tostring(entity.build_time),
 							}
-						),
-						Items = React.createElement(Items, {
-							items = items_mod.into_counted_items(entity.inventory.items),
-							LayoutOrder = 2,
-						}),
-					}),
-					Costs = entity.status == "blueprint" and React.createElement("Frame", {
-						BackgroundTransparency = 1,
-						LayoutOrder = 6,
-						AutomaticSize = Enum.AutomaticSize.Y,
-						Size = UDim2.new(1, 0, 0, 0),
-					}, {
-						Items = React.createElement(Items, {
-							items = util.table_map(entity.cost, function(v, k)
-								return `{entity.cost_fulfilled[k] or 0}/{v}`
-							end),
-						}),
-					}),
+						)
+						else nil,
+					ShouldOutput = if entity.type == "extractor"
+						then React.createElement(ShouldOutput, {
+							entity = entity,
+						})
+						else nil,
+					Disguised = if entity.disguise
+						then React.createElement(
+							"TextLabel",
+							themes.theme_description {
+								LayoutOrder = 5,
+								Text = "Disguised",
+								Size = UDim2.new(1, 0, 0, 20),
+							}
+						)
+						else nil,
+					Items = if entity.inventory
+						then React.createElement("Frame", {
+							BackgroundTransparency = 1,
+							LayoutOrder = 6,
+							AutomaticSize = Enum.AutomaticSize.Y,
+							Size = UDim2.new(1, 0, 0, 0),
+						}, {
+							HorizontalLayout = React.createElement("UIListLayout", {
+								SortOrder = Enum.SortOrder.LayoutOrder,
+								FillDirection = Enum.FillDirection.Horizontal,
+								Padding = UDim.new(0, 8),
+								VerticalAlignment = Enum.VerticalAlignment.Center,
+							}),
+							ItemsLabel = React.createElement(
+								"TextLabel",
+								themes.theme_description {
+									LayoutOrder = 1,
+									Size = UDim2.new(0, 0, 0, 20),
+									Text = "Items",
+								}
+							),
+							Items = React.createElement(Items, {
+								items = items_mod.into_counted_items(entity.inventory.items),
+								LayoutOrder = 2,
+							}),
+						})
+						else nil,
+					Costs = if entity.status == "blueprint"
+						then React.createElement("Frame", {
+							BackgroundTransparency = 1,
+							LayoutOrder = 6,
+							AutomaticSize = Enum.AutomaticSize.Y,
+							Size = UDim2.new(1, 0, 0, 0),
+						}, {
+							Items = React.createElement(Items, {
+								items = util.table_map(entity.cost, function(v, k)
+									return `{entity.cost_fulfilled[k] or 0}/{v}`
+								end),
+							}),
+						})
+						else nil,
 
 					Gap = React.createElement("Frame", {
 						BackgroundTransparency = 1,

@@ -2,7 +2,7 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
-local effective_visibility = require(ReplicatedStorage.Shared.effective_visibility).effective_visibility
+local cell_visibility = require(ReplicatedStorage.Shared.visibility).cell_visibility
 local items_mod = require(ReplicatedStorage.Shared.items)
 local team = require(ReplicatedStorage.Shared.team)
 
@@ -110,7 +110,7 @@ function on_client_interaction(grid: HexGrid, plr: Player, data: { Interaction }
 				end
 
 				-- and is visible to the player team
-				if not effective_visibility(cell.server_data.visibility[player_team.id]) then
+				if not cell_visibility(cell.server_data.visibility[player_team.id]) then
 					continue
 				end
 

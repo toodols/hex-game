@@ -223,7 +223,7 @@ function tests.chatgpt_didnt_grift_me() -- (it did)
 		{ min = -5, max = 5 },
 	}
 	local team1 = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) })
-	team1.server_data.visibility = "full"
+	team1.server_data.visibility = "perfect"
 
 	local result = hex_grid_mod.line_of_sight(grid, { -2, 0, 2 }, { 2, 0, -2 })
 	assert(result, "no blockage: expected true")

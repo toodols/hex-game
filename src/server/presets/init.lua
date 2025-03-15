@@ -13,7 +13,7 @@ type HexGrid = types.HexGrid
 
 function my_map(): HexGrid
 	-- Build the map
-	local magic = 10
+	local magic = 5
 
 	local grid = hex_grid_mod.new_grid_from_extents {
 		{ min = -magic, max = magic },

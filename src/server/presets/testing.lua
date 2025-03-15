@@ -1,5 +1,5 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerScriptService = game:GetService("ServerScriptService")
+local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
@@ -10,14 +10,14 @@ type HexGrid = types.HexGrid
 
 -- A bunch of entities lined up
 function all_entities(): HexGrid
-	local grid = hex_grid_mod.new_grid_from_extents({
+	local grid = hex_grid_mod.new_grid_from_extents {
 		{ min = -10, max = 10 },
 		{ min = -10, max = 10 },
 		{ min = -3, max = 3 },
-	})
+	}
 
 	local team1 = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "red")
-	team1.server_data.visibility = "full"
+	team1.server_data.visibility = "perfect"
 	local team2 = grid:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "blue")
 	team2.is_player_team = false
 
@@ -67,11 +67,11 @@ end
 
 -- 10x10x10 empty grid with 2 teams
 function blank_map(): HexGrid
-	local grid = hex_grid_mod.new_grid_from_extents({
+	local grid = hex_grid_mod.new_grid_from_extents {
 		{ min = -10, max = 10 },
 		{ min = -10, max = 10 },
 		{ min = -10, max = 10 },
-	})
+	}
 
 	local team1 = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "red")
 	local team2 = grid:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "blue")

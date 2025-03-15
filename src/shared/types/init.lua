@@ -169,6 +169,15 @@ type Portal = {
 	close_time: number,
 }
 
+export type CellTeamVisibility = {
+	-- visible by virtue of having an entity right next to this cell
+	contact: boolean?,
+	-- visible by virtue of this team having fog disabled
+	fogless: boolean?,
+	-- visible by virtue of this cell being a portal and a connected portal being occupied by the team
+	portal: boolean?,
+}
+
 export type HexCell = {
 	type: CellType,
 	entities: { [EntityId]: boolean },
@@ -197,16 +206,7 @@ export type HexCell = {
 		},
 
 		visibility: {
-			[TeamId]: {
-				-- visible by virtue of contact (r=2)
-				contact: boolean?,
-
-				-- visible by virtue of having full visibility on the map (all cells)
-				full: boolean?,
-
-				-- visible by virtue of occupying a portal
-				portal: boolean?,
-			},
+			[TeamId]: CellTeamVisibility,
 		},
 	},
 }
@@ -241,11 +241,12 @@ export type TeamData = {
 	is_spectator_team: boolean?,
 
 	server_data: {
-
 		-- creative mode (todo)
 		creative: boolean,
-		-- normal is fog of war, full can see the entire map
-		visibility: "normal" | "full",
+		-- "normal" is fog of war
+		-- "fogless" disables cell-level fog of war but not entity-level (like phony)
+		-- "perfect" is admin-level visibility
+		visibility: "normal" | "fogless" | "perfect",
 	}?,
 	-- is_ai: boolean -- not confident i am capable of implementing ai
 }

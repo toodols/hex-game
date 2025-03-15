@@ -38,7 +38,7 @@ function flush_updates(grid: HexGrid)
 			local mapped = filter_duplicate_entity_updates(util.table_filter_map(buffer, function(update: GridUpdate)
 				local target = (update :: any).target or "everyone"
 				if
-					team.server_data.visibility ~= "full"
+					team.server_data.visibility ~= "perfect"
 					and target ~= "everyone"
 					and table.find(target, team.id) == nil
 				then

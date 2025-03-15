@@ -36,7 +36,7 @@
 # Ongoing
 - [ ] Make `impression` functional
 	- [x] Add `infected` status effect
-- [ ] Make `phony` functional
 
 # Complete
 - [x] Remove power from the game. It's too complicated.
+- [x] Make `phony` functional

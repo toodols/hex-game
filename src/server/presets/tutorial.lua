@@ -37,7 +37,7 @@ function tutorial_map()
 	end)
 
 	local player_team = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Player")
-	player_team.server_data.visibility = "full"
+	player_team.server_data.visibility = "perfect"
 	grid:get_cell({ -1, 0, 1 }).type = "bar_deposit"
 	local extractor = entity_mod.new_entity({
 		type = "extractor",

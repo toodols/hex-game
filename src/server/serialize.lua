@@ -1,9 +1,13 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
-local effective_visibility = require(ReplicatedStorage.Shared.effective_visibility).effective_visibility
+local visibility_mod = require(ReplicatedStorage.Shared.visibility)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local quest_methods = require(script.Parent.questing.quest)
+local team_mod = require(ReplicatedStorage.Shared.team)
+
+local cell_visibility = visibility_mod.cell_visibility
+local entity_visibility = visibility_mod.entity_visibility
 
 type Entity = types.Entity
 type HexGrid = types.HexGrid
@@ -29,11 +33,6 @@ function buildable_for_team(grid: HexGrid, cell: HexCell, team: TeamId): boolean
 	return result
 end
 
-function entity_visibility(entity: Entity, cell: HexCell, team: TeamId): boolean
-	return effective_visibility(cell.server_data.visibility[team])
-		or entity.server_data.always_visible and (entity.owner == team or entity.status ~= "blueprint")
-end
-
 function serialize_team(grid: HexGrid, team: TeamData): TeamData
 	local copy = {}
 	for k, v in team do
@@ -45,10 +44,21 @@ function serialize_team(grid: HexGrid, team: TeamData): TeamData
 end
 
 function serialize_entity_for_team(grid: HexGrid, entity: Entity, team: TeamId): Entity?
+	local team_data = grid.teams[team]
+	assert(team_data, "no team")
 	local cell = grid:get_cell(entity.primary_coordinate)
 	if entity_visibility(entity, cell, team) then
+		local to_copy = entity
+		if
+			entity.type == "phony"
+			and entity.disguise ~= nil
+			and not team_mod.is_allied(grid, entity.owner, team)
+			and team_data.server_data.visibility ~= "perfect"
+		then
+			to_copy = entity.disguise
+		end
 		local copy = {}
-		for k, v in entity do
+		for k, v in to_copy do
 			if k == "server_data" then
 			elseif k == "queued_decisions" and cell.owner ~= team then
 				copy[k] = {}
@@ -62,7 +72,7 @@ function serialize_entity_for_team(grid: HexGrid, entity: Entity, team: TeamId):
 end
 
 function serialize_cell_for_team(grid: HexGrid, cell: HexCell, team: TeamId): HexCell | nil
-	local visible_for_team = effective_visibility(cell.server_data.visibility[team])
+	local visible_for_team = cell_visibility(cell.server_data.visibility[team])
 	if visible_for_team then
 		local influences = {}
 		for entity_id in cell.server_data.influences do
