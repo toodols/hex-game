@@ -142,7 +142,12 @@ function on_client_interaction(
 			dirty_entities[entity.id] = true
 		elseif entry.type == "ability" then
 			local entity = grid.entities[entry.entity_id]
-			if not entity or entity.owner ~= player_team.id or entity.status ~= "complete" then
+			if
+				not entity
+				or not entity.server_data.active
+				or entity.owner ~= player_team.id
+				or entity.status ~= "complete"
+			then
 				-- error_type.mistake
 				continue
 			end
@@ -167,7 +172,7 @@ function on_client_interaction(
 			dirty_entities[entity.id] = true
 		elseif entry.type == "rotate_entity" then
 			local entity = grid.entities[entry.entity_id]
-			if not entity or entity.owner ~= player_team.id then
+			if not entity or not entity.server_data.active or entity.owner ~= player_team.id then
 				-- error_type.mistake
 				continue
 			end
@@ -175,7 +180,7 @@ function on_client_interaction(
 			dirty_entities[entity.id] = true
 		elseif entry.type == "cancel_decision" then
 			local entity = grid.entities[entry.entity_id]
-			if not entity or entity.owner ~= player_team.id then
+			if not entity or not entity.server_data.active or entity.owner ~= player_team.id then
 				-- error_type.mistake
 				continue
 			end
@@ -187,6 +192,7 @@ function on_client_interaction(
 			local entity = grid.entities[entry.entity_id]
 			if
 				not entity
+				or not entity.server_data.active
 				or entity.owner ~= player_team.id
 				or entity.status ~= "complete"
 				or entity.type ~= "laboratory"
@@ -218,6 +224,7 @@ function on_client_interaction(
 
 			if
 				not entity
+				or not entity.server_data.active
 				or entity.owner ~= player_team.id
 				or entity.status ~= "complete"
 				or entity.type ~= "laboratory"
@@ -239,7 +246,7 @@ function on_client_interaction(
 			dirty_entities[entity.id] = true
 		elseif entry.type == "deconstruct" then
 			local entity = grid.entities[entry.entity_id]
-			if not entity or entity.owner ~= player_team.id then
+			if not entity or not entity.server_data.active or entity.owner ~= player_team.id then
 				-- error_type.mistake
 				continue
 			end
@@ -260,7 +267,12 @@ function on_client_interaction(
 			end
 		elseif entry.type == "set_entity_enabled" then
 			local entity = grid.entities[entry.entity_id]
-			if not entity or entity.owner ~= player_team.id or entity.status ~= "complete" then
+			if
+				not entity
+				or not entity.server_data.active
+				or entity.owner ~= player_team.id
+				or entity.status ~= "complete"
+			then
 				-- error_type.mistake
 				continue
 			end
@@ -269,7 +281,12 @@ function on_client_interaction(
 			dirty_entities[entity.id] = true
 		elseif entry.type == "set_recipe" then
 			local entity = grid.entities[entry.entity_id]
-			if not entity or entity.owner ~= player_team.id or entity.status ~= "complete" then
+			if
+				not entity
+				or not entity.server_data.active
+				or entity.owner ~= player_team.id
+				or entity.status ~= "complete"
+			then
 				-- error_type.mistake
 				continue
 			end
@@ -279,6 +296,7 @@ function on_client_interaction(
 			local entity = grid.entities[entry.entity_id]
 			if
 				not entity
+				or not entity.server_data.active
 				or entity.owner ~= player_team.id
 				or entity.status ~= "complete"
 				or entity.inventory == nil
@@ -338,7 +356,7 @@ function on_client_interaction(
 
 	-- reset actions for scout if it no longer has a line of sight
 	-- don't know what can possibly cause this but...
-	for _, entity in grid.entities do
+	for _, entity in grid:active_entities() do
 		if entity.type == "scout" then
 			local extracted = util.table_extract(entity.queued_decisions, function(action)
 				if action.type == "scout" then

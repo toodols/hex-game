@@ -81,27 +81,39 @@ function new_entity(entity_: any, grid: HexGrid): Entity
 	if shared_behavior == nil then
 		error("No shared behavior for " .. entity.type)
 	end
-	entity.id = entity.id or server_util.new_global_id()
-	entity.name = entity.name or shared_registry_mod.registry[entity.type].name
-	entity.queued_decisions = entity.queued_decisions or {}
-	entity.rotation = if entity.rotation ~= nil then entity.rotation else 0
-	entity.health = entity.health or shared_behavior.max_health
-	entity.status = entity.status or "blueprint"
-	entity.max_health = shared_behavior.max_health
-	entity.enabled = if entity.enabled ~= nil then entity.enabled else true
-	entity.decay = entity.decay or 0
-	entity.decayable = if entity.decayable ~= nil then entity.decayable else true
-	entity.build_time = entity.build_time or shared_behavior.build_time
-	entity.coordinates = entity.coordinates or { entity.primary_coordinate }
-	entity.cost = entity.cost or shared_behavior.cost
-	entity.is_destroyed = entity.is_destroyed or false
-	entity.cost_fulfilled = entity.cost_fulfilled or {}
-	entity.effects = entity.effects or {}
+
 	-- quickly catch when i use TeamData for owner instead of TeamId
 	assert(not entity.owner or typeof(entity.owner) == "number", "Entity owner is not a number")
-	entity.owner = entity.owner or grid.neutral_team
-	entity.server_data = entity.server_data or {}
-	entity.server_data.requested_at = entity.server_data.requested_at or os.clock()
+
+	local defaults = {
+		build_time = shared_behavior.build_time,
+		coordinates = { entity.primary_coordinate },
+		cost = shared_behavior.cost,
+		cost_fulfilled = {},
+		decay = 0,
+		decayable = true,
+		effects = {},
+		enabled = true,
+		health = shared_behavior.max_health,
+		id = server_util.new_global_id(),
+		is_destroyed = false,
+		max_health = shared_behavior.max_health,
+		name = shared_behavior.name,
+		owner = grid.neutral_team,
+		queued_decisions = {},
+		server_data = {},
+		rotation = 0,
+		status = "complete",
+	}
+	for k, v in defaults do
+		if entity[k] == nil then
+			entity[k] = v
+		end
+	end
+	entity.server_data.requested_at = if entity.server_data.requested_at ~= nil
+		then entity.server_data.requested_at
+		else os.clock()
+	entity.server_data.active = if entity.server_data.active ~= nil then entity.server_data.active else true
 
 	-- todo: rotate the offsets by the rotation
 	for _, offset in shared_behavior.offsets do

@@ -13,6 +13,7 @@ type GridUpdate = types.GridUpdate
 local grid_data = get_hex_grid_data_remote:InvokeServer()
 local grid = hex_grid_mod.new_grid_from_data(grid_data)
 
+print(grid_data)
 game_mod.render_grid(grid)
 
 local connection = grid_updates_remote.OnClientEvent:Connect(function(updates: { GridUpdate })

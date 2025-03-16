@@ -41,13 +41,11 @@ function tutorial_map()
 	grid:get_cell({ -1, 0, 1 }).type = "bar_deposit"
 	local extractor = entity_mod.new_entity({
 		type = "extractor",
-		status = "complete",
 		primary_coordinate = { -1, 0, 1 },
 		owner = player_team.id,
 	}, grid)
 	local stockpile = entity_mod.new_entity({
 		type = "stockpile",
-		status = "complete",
 		primary_coordinate = { 1, 0, -1 },
 		owner = player_team.id,
 	}, grid)

@@ -15,7 +15,7 @@ function do_entity_decay(grid: HexGrid, action_state: ActionState)
 	local decayable_entities = {}
 
 	-- initially mark all decayable entities as decayable
-	for _, entity in grid.entities do
+	for _, entity in grid:active_entities() do
 		if
 			grid.global_configuration.decaying_enabled
 			and entity.status ~= "blueprint"
@@ -77,7 +77,7 @@ function do_entity_decay(grid: HexGrid, action_state: ActionState)
 				entity = entity,
 			})
 			if entity.decay >= 3 then
-				if entity.type == "vertex" then
+				if entity.type == "wires" then
 					server_entity_mod.remove_entity(grid, entity)
 				else
 					entity.owner = grid.neutral_team

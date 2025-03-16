@@ -52,7 +52,7 @@ registry_mod.registry.stockpile = registry_mod.with_defaults {
 			return
 		end
 		local instance_root = grid.entity_instance_map[self.id]
-		assert(instance_root, "instance_root nil")
+		assert(instance_root, `instance_root of {self.id} is nil`)
 
 		local t = (animation_state.step / 100) % (math.pi * 2)
 		for i = 1, self.inventory.capacity do

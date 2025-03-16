@@ -50,6 +50,7 @@ function theme_label(props)
 end
 
 function theme_button(props)
+	props.BackgroundTransparency = props.BackgroundTransparency or 0.9
 	props.FontFace = props.FontFace or Font.fromName("Oswald", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 	props.TextColor3 = props.TextColor3 or Color3.fromRGB(255, 255, 255)
 	props.RichText = props.RichText or true

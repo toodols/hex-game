@@ -26,7 +26,6 @@ function all_entities(): HexGrid
 	local function next_entity(ty: string)
 		local entity = entity_mod.new_entity({
 			type = ty,
-			status = "complete",
 			primary_coordinate = start,
 			owner = team1.id,
 		}, grid)

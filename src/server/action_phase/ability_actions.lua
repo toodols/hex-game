@@ -82,7 +82,7 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState)
 					status = "complete",
 				},
 				function(target_entity)
-					return visibility_mod.entity_visibility(target_entity, cell, entity.owner)
+					return visibility_mod.entity_visibility(grid, target_entity, entity.owner)
 						and #target_entity.coordinates == 1
 				end
 			)
@@ -97,6 +97,13 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState)
 
 			-- treat entity disguising as itself as resetting disguise
 			if top == entity then
+				if entity.disguise then
+					grid.entities[entity.disguise].is_destroyed = true
+					table.insert(grid.updates_buffer, {
+						type = "entity_update",
+						entity = grid.entities[entity.disguise],
+					})
+				end
 				entity.disguise = nil
 				table.insert(grid.updates_buffer, {
 					type = "disguise",
@@ -105,17 +112,24 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState)
 				continue
 			end
 
-			-- copy this entity into the disguise
 			local copied = util.deep_copy(top)
 			copied.disguise = nil
-			copied.id = entity.id
+			copied.active = false
+			copied.server_data.active = false
+			copied.id = server_util.new_global_id()
 			copied.primary_coordinate = entity.primary_coordinate
 			copied.coordinates = entity.coordinates
-			entity.disguise = copied
-
+			copied.owner = entity.owner
+			grid.entities[copied.id] = copied
+			entity.disguise = copied.id
 			table.insert(grid.updates_buffer, {
-				type = "disguise",
+				type = "entity_update",
+				entity = copied,
+			})
+			table.insert(grid.updates_buffer, {
+				type = "entity_disguise",
 				entity_id = entity.id,
+				disguise_id = copied.id,
 			})
 		end
 	end

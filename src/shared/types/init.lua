@@ -89,6 +89,8 @@ export type AnimationState = {
 }
 
 export type Entity = {
+	active: boolean?,
+
 	type: string,
 	coordinates: { CubicCoordinate },
 	primary_coordinate: CubicCoordinate,
@@ -101,16 +103,11 @@ export type Entity = {
 
 	effects: { Effect },
 
-	animation_state: AnimationState?,
-
-	-- Whether this entity is ticked
-	active: boolean,
-
 	-- factory only
 	current_recipe: string?,
 
 	-- proxy only
-	disguise: Entity?,
+	disguise: EntityId?,
 
 	-- Whether this building's primary abilities are enabled
 	enabled: boolean?,
@@ -144,6 +141,8 @@ export type Entity = {
 	queued_decisions: { Decision },
 
 	server_data: {
+		active: boolean?,
+		is_disguise_of: EntityId?,
 		-- whether this entity is always visible regardless of whether the cell it is on is visible
 		always_visible: boolean?,
 		-- timestamp of when it was first requested to be constructed
@@ -176,6 +175,8 @@ export type CellTeamVisibility = {
 	fogless: boolean?,
 	-- visible by virtue of this cell being a portal and a connected portal being occupied by the team
 	portal: boolean?,
+	-- illuminated by scout, or (later on) torch
+	illumination: boolean?,
 }
 
 export type HexCell = {
@@ -544,6 +545,7 @@ export type HexGrid = {
 	query_entity: (self: HexGrid, props: any) -> { Entity },
 	new_team: (self: HexGrid, players: { Player }, color: TeamColor?, name: string?) -> TeamData,
 	purge_dead_entities: (self: HexGrid) -> nil,
+	active_entities: (self: HexGrid) -> { [EntityId]: Entity },
 
 	-- get_team_coalition: (self: HexGrid, team: TeamId) -> CoalitionData,
 
@@ -585,6 +587,9 @@ export type HexGrid = {
 	speed_base: number,
 
 	quests: { [string]: Quest },
+
+	-- client only
+	animation_states: { [EntityId]: AnimationState }?,
 }
 export type PartialHexGrid = {
 	cells: { [EncodedCoordinate]: HexCell },

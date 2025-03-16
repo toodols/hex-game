@@ -17,6 +17,7 @@ local INDICATORS = {
 	deconstruction = { icon = "rbxassetid://11768918600", color = Color3.new(0.898039, 0.211765, 0.211765) },
 	construction = { icon = "rbxassetid://6034275725", color = Color3.new(0, 0.584314, 0.898039) },
 	disabled = { icon = "http://www.roblox.com/asset/?id=6031084743", color = Color3.new(0.898039, 0.823529, 0) },
+	disguise = { icon = "http://www.roblox.com/asset/?id=6034467796", color = Color3.fromRGB(113, 172, 196) },
 }
 
 function IconAndNumber(props: {
@@ -122,9 +123,10 @@ function TileAlerts()
 				local indicators = {}
 				for entity_id in cell.entities do
 					local entity = grid.entities[entity_id]
-					if not entity then warn("no entity for", entity_id)
+					if not entity then
+						warn("no entity for", entity_id)
 						continue
-				 	end
+					end
 					local is_deconstructing = false
 					for _, decision in entity.queued_decisions do
 						if decision.type == "deconstruct" then
@@ -145,6 +147,9 @@ function TileAlerts()
 					end
 					if entity.is_decaying then
 						indicators.disconnected = entity.decay
+					end
+					if entity.disguise then
+						indicators.disguise = (indicators.disguise or 0) + 1
 					end
 				end
 				if next(indicators) then

@@ -101,7 +101,7 @@ function compute_systems(grid: HexGrid)
 		table.insert(result, { entities = entities, cells = cells })
 	end
 
-	for entity_id, entity in grid.entities do
+	for entity_id, entity in grid:active_entities() do
 		if not entities_set[entity_id] then
 			-- cells is empty because individual entities do not have a vertex and cells only count vertex
 			table.insert(result, { entities = { [entity_id] = true }, cells = {} })

@@ -83,7 +83,8 @@ end
 -- Resets the turn time to the beginning (does not report)
 function reset_turn_time(grid: HexGrid, turn_schedule: TurnSchedule)
 	local count_entities = 0
-	for _ in grid.entities do
+	-- todo: simply counting every entity is a terrible way to scale game time
+	for _ in grid:active_entities() do
 		count_entities += 1
 	end
 	local wait_time = count_entities * grid.speed_multiplier + grid.speed_base

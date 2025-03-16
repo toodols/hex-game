@@ -9,8 +9,8 @@ local tests = {}
 function tests.render_grid()
 	local grid = presets.my_map()
 	client_game_mod.render_grid(grid)
+	client_game_mod.step_animations(grid)
 	client_game_mod.destroy_grid_instances(grid)
-
 	cleanup(grid)
 end
 

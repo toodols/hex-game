@@ -64,10 +64,10 @@ function my_map(): HexGrid
 	do
 		entity_mod.new_entity({
 			type = "barrier",
-			status = "complete",
 			primary_coordinate = coord,
 			server_data = {
 				always_visible = true,
+				active = true,
 			},
 		}, grid)
 	end
@@ -97,25 +97,21 @@ function my_map(): HexGrid
 
 	-- local extractor = entity_mod.new_entity({
 	-- 	type = "extractor",
-	-- 	status = "complete",
 	-- 	primary_coordinate = { magic - 1, -magic + 1, 0 },
 	-- 	owner = team1.id,
 	-- }, grid)
 	local stockpile = entity_mod.new_entity({
 		type = "stockpile",
-		status = "complete",
 		owner = team1.id,
 		primary_coordinate = { magic - 1, -magic + 2, -1 },
 	}, grid)
 	local scout = entity_mod.new_entity({
 		type = "scout",
-		status = "complete",
 		primary_coordinate = { magic - 2, -magic + 2, 0 },
 		owner = team1.id,
 	}, grid)
 	local heart = entity_mod.new_entity({
 		type = "heart",
-		status = "complete",
 		primary_coordinate = { magic - 1, -magic + 1, 0 },
 		owner = team1.id,
 	}, grid)
@@ -126,26 +122,22 @@ function my_map(): HexGrid
 
 	-- local extractor2 = entity_mod.new_entity({
 	-- 	type = "extractor",
-	-- 	status = "complete",
 	-- 	primary_coordinate = { 1 - magic, magic - 1, 0 },
 	-- 	owner = team2.id,
 	-- }, grid)
 
 	local stockpile2 = entity_mod.new_entity({
 		type = "stockpile",
-		status = "complete",
 		primary_coordinate = { -magic + 1, magic - 2, 1 },
 		owner = team2.id,
 	}, grid)
 	local scout2 = entity_mod.new_entity({
 		type = "scout",
-		status = "complete",
 		primary_coordinate = { 2 - magic, magic - 2, 0 },
 		owner = team2.id,
 	}, grid)
 	local heart2 = entity_mod.new_entity({
 		type = "heart",
-		status = "complete",
 		primary_coordinate = { 1 - magic, magic - 1, 0 },
 		owner = team2.id,
 	}, grid)

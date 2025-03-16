@@ -2,6 +2,8 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 
 type CubicCoordinate = types.CubicCoordinate
+type Entity = types.Entity
+type EntityId = types.EntityId
 
 export type SelectionMode = {
 	type: "select_cells",
@@ -14,5 +16,11 @@ export type SelectionMode = {
 } | {
 	type: "show_cells",
 	cells: { [Instance]: true },
+} | {
+	type: "show_one_entity",
+	entity_id: EntityId,
+} | {
+	type: "show_one_entity",
+	entity: Entity,
 }
 return {}

@@ -64,6 +64,9 @@ end
 
 -- returns the first value, if any, that satisfies `pred`
 function table_find_pred<K, T>(tab: { [K]: T }, pred: (value: T) -> boolean): T?
+	if tab == nil then
+		print(debug.traceback())
+	end
 	for key, value in tab do
 		if pred(value) then
 			return value, key
@@ -208,6 +211,14 @@ function deep_copy<T>(obj: T): T
 	end
 end
 
+function collect<T>(iterable): { T }
+	local result = {}
+	for value in iterable do
+		table.insert(result, value)
+	end
+	return result
+end
+
 function range(n: number)
 	local t = {}
 	for i = 1, n do
@@ -259,6 +270,7 @@ return {
 	table_every = table_every,
 	table_join = table_join,
 	table_flat = table_flat,
+	collect = collect,
 	table_remove_needle = table_remove_needle,
 	table_find_pred = table_find_pred,
 	table_extract = table_extract,

@@ -45,7 +45,6 @@ function spawn_entity(grid: HexGrid, entity_ty: string, cell_ty: string?)
 		type = entity_ty,
 		owner = team,
 		primary_coordinate = cell.coordinate,
-		status = "complete",
 	}, grid)
 
 	if cell_ty then
@@ -230,7 +229,6 @@ function tests.chatgpt_didnt_grift_me() -- (it did)
 	local barrier_at_origin = entity_mod.new_entity({
 		type = "barrier",
 		primary_coordinate = { 0, 0, 0 },
-		status = "complete",
 		owner = grid.neutral_team,
 	}, grid)
 
@@ -243,7 +241,6 @@ function tests.chatgpt_didnt_grift_me() -- (it did)
 	entity_mod.new_entity({
 		type = "barrier",
 		primary_coordinate = { 1, -1, 0 },
-		status = "complete",
 		owner = grid.neutral_team,
 	}, grid)
 
@@ -257,14 +254,12 @@ function tests.chatgpt_didnt_grift_me() -- (it did)
 	entity_mod.new_entity({
 		type = "barrier",
 		primary_coordinate = { 3, 0, -3 },
-		status = "complete",
 		owner = grid.neutral_team,
 	}, grid)
 
 	entity_mod.new_entity({
 		type = "scout",
 		primary_coordinate = { 1, 0, -1 },
-		status = "complete",
 		owner = team1.id,
 	}, grid)
 
@@ -288,13 +283,11 @@ function tests.capture_extractor()
 	local extractor = entity_mod.new_entity({
 		type = "extractor",
 		primary_coordinate = { 0, 0, 0 },
-		status = "complete",
 		owner = grid.neutral_team,
 	}, grid)
 
 	local infinite_source = entity_mod.new_entity({
 		type = "infinite_source",
-		status = "complete",
 		primary_coordinate = { -1, 1, 0 },
 		owner = team1.id,
 	}, grid)
@@ -325,7 +318,6 @@ function tests.stockpile_blueprint_builds()
 
 	local stockpile = entity_mod.new_entity({
 		type = "stockpile",
-		status = "complete",
 		primary_coordinate = { -1, 0, 1 },
 		owner = team1.id,
 	}, grid)
@@ -461,25 +453,21 @@ function tests.scout_attack_each_other()
 
 	entity_mod.new_entity({
 		type = "infinite_source",
-		status = "complete",
 		primary_coordinate = { -2, 2, 0 },
 		owner = team1.id,
 	}, grid)
 	local scout = entity_mod.new_entity({
 		type = "scout",
-		status = "complete",
 		primary_coordinate = { -1, 1, 0 },
 		owner = team1.id,
 	}, grid)
 	entity_mod.new_entity({
 		type = "infinite_source",
-		status = "complete",
 		primary_coordinate = { 2, -2, 0 },
 		owner = team2.id,
 	}, grid)
 	local scout2 = entity_mod.new_entity({
 		type = "scout",
-		status = "complete",
 		primary_coordinate = { 1, -1, 0 },
 		owner = team2.id,
 	}, grid)

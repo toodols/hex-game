@@ -140,7 +140,7 @@ function EntityInformation(props: {
 		BorderSizePixel = 0,
 		ClipsDescendants = true,
 		LayoutOrder = -shared_behavior.layer,
-		Position = UDim2.new(1.64, 0, -0.264, 0),
+		Position = UDim2.new(0, 0, 0, 0),
 		ZIndex = 2,
 		ref = ref,
 	}, {
@@ -256,14 +256,16 @@ function EntityInformation(props: {
 							}
 						)
 						else nil,
-					DecayLabel = if entity.is_decaying then React.createElement(
-						"TextLabel",
-						themes.theme_description {
-							LayoutOrder = 5,
-							Size = UDim2.new(1, 0, 0, 20),
-							Text = "Decay: " .. tostring(entity.decay),
-						}
-					) else nil,
+					DecayLabel = if entity.is_decaying
+						then React.createElement(
+							"TextLabel",
+							themes.theme_description {
+								LayoutOrder = 5,
+								Size = UDim2.new(1, 0, 0, 20),
+								Text = "Decay: " .. tostring(entity.decay),
+							}
+						)
+						else nil,
 					TurnsUntilBuilt = if entity.status == "scaffold"
 						then React.createElement(
 							"TextLabel",
@@ -281,11 +283,38 @@ function EntityInformation(props: {
 						else nil,
 					Disguised = if entity.disguise
 						then React.createElement(
-							"TextLabel",
-							themes.theme_description {
+							"TextButton",
+							themes.theme_button {
 								LayoutOrder = 5,
-								Text = "Disguised",
-								Size = UDim2.new(1, 0, 0, 20),
+								Text = "View Disguise",
+								TextColor3 = Color3.fromRGB(255, 255, 255),
+								AutoButtonColor = false,
+								Size = UDim2.new(0, 0, 0, 20),
+								[React.Event.MouseButton1Click] = function()
+									table.insert(selection_mode_stack, {
+										type = "show_one_entity",
+										entity_id = entity.disguise,
+									})
+									context.force_update()
+								end,
+								[React.Event.MouseEnter] = function(current)
+									TweenService:Create(current, TweenInfo.new(0.5), {
+										BackgroundColor3 = Color3.fromRGB(113, 172, 196),
+									}):Play()
+								end,
+								[React.Event.MouseLeave] = function(current)
+									TweenService:Create(current, TweenInfo.new(0.5), {
+										BackgroundColor3 = Color3.fromRGB(163, 162, 165),
+									}):Play()
+								end,
+							},
+							{
+								Padding = React.createElement("UIPadding", {
+									PaddingLeft = UDim.new(0, 10),
+									PaddingRight = UDim.new(0, 10),
+									PaddingTop = UDim.new(0, 5),
+									PaddingBottom = UDim.new(0, 5),
+								}),
 							}
 						)
 						else nil,
@@ -389,7 +418,9 @@ function EntityInformation(props: {
 					LayoutOrder = 2,
 					Size = UDim2.new(1, 0, 0, 30),
 				}, {
-					DisguiseButton = if entity.owner == player_team.id and entity.type == "phony"
+					DisguiseButton = if entity.active ~= false
+							and entity.owner == player_team.id
+							and entity.type == "phony"
 						then React.createElement(ActionButton, {
 							color = Color3.fromRGB(113, 172, 196),
 							Text = "Disguise",
@@ -420,7 +451,8 @@ function EntityInformation(props: {
 							end,
 						})
 						else nil,
-					AttackButton = entity.owner == player_team.id
+					AttackButton = entity.active ~= false
+						and entity.owner == player_team.id
 						and (entity.type == "scout" or entity.type == "turret")
 						and entity.status == "complete"
 						and React.createElement(ActionButton, {
@@ -465,7 +497,8 @@ function EntityInformation(props: {
 								})
 							end,
 						}),
-					UseButton = entity.owner == player_team.id
+					UseButton = entity.active ~= false
+						and entity.owner == player_team.id
 						and entity.type == "solution"
 						and React.createElement(ActionButton, {
 							color = Color3.fromRGB(255, 255, 120),
@@ -481,30 +514,33 @@ function EntityInformation(props: {
 								}
 							end,
 						}),
-					DeconstructButton = entity.owner == player_team.id and React.createElement(ActionButton, {
-						color = Color3.fromRGB(255, 82, 82),
-						Text = if is_deconstructing then "Cancel Deconstruct" else "Deconstruct",
-						LayoutOrder = 1,
-						on_click = function()
-							if is_deconstructing then
-								client_interaction_remote:FireServer {
-									{
-										type = "cancel_decision",
-										entity_id = entity.id,
-										decision_type = "deconstruct",
-									},
-								}
-							else
-								client_interaction_remote:FireServer {
-									{
-										type = "deconstruct",
-										entity_id = entity.id,
-									},
-								}
-							end
-						end,
-					}),
-					ToggleEnableButton = entity.owner == player_team.id
+					DeconstructButton = entity.active ~= false
+						and entity.owner == player_team.id
+						and React.createElement(ActionButton, {
+							color = Color3.fromRGB(255, 82, 82),
+							Text = if is_deconstructing then "Cancel Deconstruct" else "Deconstruct",
+							LayoutOrder = 1,
+							on_click = function()
+								if is_deconstructing then
+									client_interaction_remote:FireServer {
+										{
+											type = "cancel_decision",
+											entity_id = entity.id,
+											decision_type = "deconstruct",
+										},
+									}
+								else
+									client_interaction_remote:FireServer {
+										{
+											type = "deconstruct",
+											entity_id = entity.id,
+										},
+									}
+								end
+							end,
+						}),
+					ToggleEnableButton = entity.active ~= false
+						and entity.owner == player_team.id
 						and shared_behavior.can_disable
 						and React.createElement(ActionButton, {
 							color = Color3.fromRGB(255, 255, 120),
@@ -520,7 +556,7 @@ function EntityInformation(props: {
 								}
 							end,
 						}),
-					OpenRecipeButton = entity.owner == player_team.id
+					OpenRecipeButton = entity.active ~= false and entity.owner == player_team.id
 						and (entity.type == "factory")
 						and entity.status == "complete"
 						and React.createElement(ActionButton, {

@@ -73,6 +73,9 @@ function grid_query_entity(grid: HexGrid, props: any): { Entity }
 	local results = {}
 	local function pred(entity: Entity)
 		props.is_destroyed = false
+		if entity.server_data and entity.server_data.active == false or entity.active == false then
+			return false
+		end
 		for k, v in props do
 			if k == "coordinate" then
 				continue
@@ -98,6 +101,8 @@ function grid_query_entity(grid: HexGrid, props: any): { Entity }
 			end
 		end
 	else
+		warn "query_entity without coordinate is bad"
+		warn(debug.traceback())
 		for _, entity in grid.entities do
 			if pred(entity) then
 				table.insert(results, entity)
@@ -109,6 +114,37 @@ end
 
 function grid_get_cell(self: HexGrid, coord: CubicCoordinate): HexCell?
 	return self.cells[encode_coord(coord)]
+end
+
+-- Turns out using luau's iterators is actually like 50% slower than creating a new table even for 100k elements
+-- Very sad
+-- function next_active_entity(entities: { [EntityId]: Entity }, k: EntityId?)
+-- 	local v
+-- 	k, v = next(entities, k)
+-- 	while k do
+-- 		if v.active then
+-- 			return k, v
+-- 		end
+-- 		k, v = next(entities, k)
+-- 	end
+-- 	return nil
+-- end
+
+function grid_active_entities(self: HexGrid): { [EntityId]: Entity }
+	return util.table_filter(self.entities, function(entity)
+		if entity.server_data then
+			return entity.server_data.active
+		else
+			return entity.active ~= false
+		end
+	end)
+	-- return (
+	-- 	setmetatable({}, {
+	-- 		__iter = function()
+	-- 			return next_active_entity, self.entities
+	-- 		end,
+	-- 	}) :: any
+	-- ) :: { [EntityId]: Entity }
 end
 
 function new_grid_empty(entity_config: { [string]: EntityConfiguration }?, global_config: GlobalConfiguration?): HexGrid
@@ -140,6 +176,7 @@ function new_grid_empty(entity_config: { [string]: EntityConfiguration }?, globa
 			decaying_enabled = true,
 		},
 		quests = {},
+		active_entities = grid_active_entities,
 		new_team = grid_new_team,
 		purge_dead_entities = grid_purge_dead_entities,
 		query_entity = grid_query_entity,

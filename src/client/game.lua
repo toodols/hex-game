@@ -102,7 +102,8 @@ function render_grid(grid: HexGrid)
 	end
 
 	-- first pass for entity update
-	for _, entity in grid.entities do
+	for entity_id in grid:active_entities() do
+		local entity = grid.entities[entity_id]
 		client_entity_mod.update_entity_client(grid, nil, entity)
 	end
 end
@@ -128,25 +129,32 @@ function animate_cell_removal(instance: Model)
 	end
 end
 
-function start_animations(grid: HexGrid)
-	local animation_states = {}
-	return RunService.Heartbeat:Connect(function()
-		-- remove animation states for entities that are gone
-		local new_animation_states = {}
-		for entity_id in grid.entities do
-			new_animation_states[entity_id] = animation_states[entity_id]
-		end
-		animation_states = new_animation_states
-		for entity_id, entity in grid.entities do
-			local behavior = client_entity_mod.registry[entity.type]
-			if behavior.animate then
-				if not animation_states[entity_id] then
-					animation_states[entity_id] = { type = "idle", step = 0 }
-				end
-				animation_states[entity_id].step += 1
-				behavior.animate(entity, grid, animation_states[entity_id])
+function step_animations(grid: HexGrid)
+	if grid.animation_states == nil then
+		grid.animation_states = {}
+	end
+	assert(grid.animation_states, "this should never error")
+	-- remove animation states for entities that are gone
+	local new_animation_states = {}
+	for entity_id in grid:active_entities() do
+		new_animation_states[entity_id] = grid.animation_states[entity_id]
+	end
+	grid.animation_states = new_animation_states
+	for entity_id, entity in grid:active_entities() do
+		local behavior = client_entity_mod.registry[entity.type]
+		if behavior.animate then
+			if not grid.animation_states[entity_id] then
+				grid.animation_states[entity_id] = { type = "idle", step = 0 }
 			end
+			grid.animation_states[entity_id].step += 1
+			behavior.animate(entity, grid, grid.animation_states[entity_id])
 		end
+	end
+end
+
+function start_animations(grid: HexGrid)
+	return RunService.Heartbeat:Connect(function()
+		step_animations(grid)
 	end)
 end
 
@@ -162,6 +170,7 @@ function destroy_grid_instances(grid: HexGrid)
 end
 
 function handle_updates(grid: HexGrid, updates: { GridUpdate })
+	print(updates)
 	table.sort(updates, function(a, b)
 		local order = {
 			turn_timer = 1,
@@ -181,7 +190,9 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 			-- should be fine if single threaded
 			local old_entity = grid.entities[update.entity.id]
 			grid.entities[update.entity.id] = update.entity
-			table.insert(updated_entities, { old = old_entity, new = update.entity })
+			if update.entity.active ~= false then
+				table.insert(updated_entities, { old = old_entity, new = update.entity })
+			end
 		elseif update.type == "turn_timer" then
 			grid.turn_schedule = update.schedule
 		elseif update.type == "turn" then
@@ -300,6 +311,7 @@ end
 
 return {
 	start_animations = start_animations,
+	step_animations = step_animations,
 	handle_updates = handle_updates,
 	render_grid = render_grid,
 	destroy_grid_instances = destroy_grid_instances,

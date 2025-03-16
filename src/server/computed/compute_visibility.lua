@@ -39,7 +39,7 @@ function compute_visibility(grid: HexGrid): { [TeamId]: { [EncodedCoordinate]: b
 
 	-- loop through each entity and apply r=2
 	-- some other entities will have extra illuminations
-	for _, entity in grid.entities do
+	for _, entity in grid:active_entities() do
 		if entity.status ~= "complete" or entity.is_destroyed then
 			continue
 		end
@@ -66,7 +66,7 @@ function compute_visibility(grid: HexGrid): { [TeamId]: { [EncodedCoordinate]: b
 			illuminated = hex_grid_mod.neighbors_leq(entity.primary_coordinate, 3)
 		end
 		for _, neighbor_coord in illuminated do
-			add_visibility(neighbor_coord, entity.owner, "contact")
+			add_visibility(neighbor_coord, entity.owner, "illumination")
 		end
 	end
 

@@ -38,7 +38,7 @@ function portals_tick(grid: HexGrid)
 end
 
 function queue_entity_decisions(grid: HexGrid, queue: { EntityAction })
-	for _, entity in grid.entities do
+	for _, entity in grid:active_entities() do
 		for _, decision in entity.queued_decisions do
 			table.insert(queue, decision)
 			updates_mod.add_update(grid, {
@@ -51,7 +51,7 @@ function queue_entity_decisions(grid: HexGrid, queue: { EntityAction })
 end
 
 function queue_blueprints_and_scaffolds(grid: HexGrid, queue: { EntityAction })
-	for _, entity in grid.entities do
+	for _, entity in grid:active_entities() do
 		-- queue all scaffolds for advancement
 		if entity.status == "scaffold" then
 			table.insert(queue, {
@@ -69,7 +69,7 @@ end
 
 function remove_occuluded_blueprints(grid: HexGrid)
 	-- remove blueprints that are too close to enemies
-	for _, entity in grid.entities do
+	for _, entity in grid:active_entities() do
 		if entity.status == "blueprint" then
 			local cell = grid:get_cell(entity.primary_coordinate)
 			if
@@ -88,7 +88,7 @@ end
 
 function status_effects_tick(grid: HexGrid)
 	local effects = effects_mod.effects
-	for entity_id, entity in grid.entities do
+	for entity_id, entity in grid:active_entities() do
 		if next(entity.effects) == nil then
 			continue
 		end
@@ -115,7 +115,7 @@ end
 
 --- Requires influences to be computed
 function entities_tick(grid: HexGrid, action_state: ActionState)
-	for _, entity in grid.entities do
+	for _, entity in grid:active_entities() do
 		local server_behavior = server_entity_mod.registry[entity.type]
 		server_behavior.tick(entity, grid, action_state)
 	end

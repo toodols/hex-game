@@ -24,6 +24,7 @@ local TopCenter = require(script.top_center).TopCenter
 local SelectedCellFrame = require(script.selected_cell_frame).SelectedCellFrame
 local TileAlerts = require(script.tile_alerts).TileAlerts
 local ItemFilters = require(script.item_filters).ItemFilters
+local EntityInformation = require(script.entity_information).EntityInformation
 
 local MainContext = context_mod.MainContext
 local Corner = util_components.Corner
@@ -59,6 +60,7 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode } })
 			grid = props.grid,
 			selection_mode_stack = props.selection_mode_stack,
 			quest_effects = quest_effects,
+			force_update = force_update,
 		},
 	}, {
 		TileAlerts = React.createElement(TileAlerts),
@@ -123,22 +125,98 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode } })
 						Corner = React.createElement(Corner),
 					}
 				),
-				SelectedCellFrame = selection_mode.type == "select_cells" and React.createElement(SelectedCellFrame, {
-					selected_cells = util.table_map(util.table_keys(selection_mode.selected), function(k)
-						return hex_grid_mod.decode_coord(props.grid.instance_cell_map[k])
-					end),
-					toggle_submenu = function(menu)
-						set_submenu(function(current)
-							return if util.deep_equal(current, menu) then {} else menu
-						end)
-					end,
-				}),
-				Recipes = submenu.type == "recipes" and React.createElement(Recipes, {
-					entity_id = submenu.entity_id,
-					on_close = function()
-						set_submenu {}
-					end,
-				}),
+				SelectedCellFrame = if selection_mode.type == "select_cells"
+					then React.createElement(SelectedCellFrame, {
+						selected_cells = util.table_map(util.table_keys(selection_mode.selected), function(k)
+							return hex_grid_mod.decode_coord(props.grid.instance_cell_map[k])
+						end),
+						toggle_submenu = function(menu)
+							set_submenu(function(current)
+								return if util.deep_equal(current, menu) then {} else menu
+							end)
+						end,
+					})
+					else nil,
+				OneEntityFrame = if selection_mode.type == "show_one_entity"
+					then React.createElement("Frame", {
+						AnchorPoint = Vector2.new(0, 1),
+						BackgroundTransparency = 1,
+						Position = UDim2.new(-250, 250, 20, -20),
+						Size = UDim2.new(0, 250, 0, 300),
+					}, {
+
+						VerticalLayout = React.createElement("UIListLayout", {
+							HorizontalAlignment = Enum.HorizontalAlignment.Center,
+							SortOrder = Enum.SortOrder.LayoutOrder,
+							VerticalAlignment = Enum.VerticalAlignment.Bottom,
+						}),
+						Corner = React.createElement(Corner),
+						Header = React.createElement(
+							"Frame",
+							themes.theme_solid {
+								LayoutOrder = 1,
+								Size = UDim2.new(1, 0, 0, 40),
+							},
+							{
+								Corner = React.createElement(Corner),
+								BackButton = React.createElement(
+									"TextButton",
+									themes.theme_button {
+										Text = "Back",
+										Size = UDim2.new(1, 0, 1, 0),
+										[React.Event.MouseButton1Click] = function()
+											props.selection_mode_stack[#props.selection_mode_stack] = nil
+											force_update()
+										end,
+									}
+								),
+							}
+						),
+						Content = React.createElement(
+							"Frame",
+							themes.theme_background {
+								AnchorPoint = Vector2.new(0.5, 0.5),
+								AutomaticSize = Enum.AutomaticSize.Y,
+								LayoutOrder = 2,
+								Position = UDim2.new(0.5, 0, 0.5, 0),
+								Size = UDim2.new(1, 0, 0, 0),
+							},
+							{
+								VerticalLayout = React.createElement("UIListLayout", {
+									Padding = UDim.new(0, 4),
+									SortOrder = Enum.SortOrder.LayoutOrder,
+								}),
+								Padding = React.createElement("UIPadding", {
+									PaddingBottom = UDim.new(0, 4),
+									PaddingLeft = UDim.new(0, 4),
+									PaddingRight = UDim.new(0, 4),
+									PaddingTop = UDim.new(0, 4),
+								}),
+							},
+							{
+								Info = React.createElement(EntityInformation, {
+									entity_id = selection_mode.entity_id,
+									compressed = false,
+									on_compress = function() end,
+									on_select = function() end,
+									toggle_submenu = function(menu)
+										set_submenu(function(current)
+											return if util.deep_equal(current, menu) then {} else menu
+										end)
+									end,
+								}),
+							}
+						),
+					})
+					else nil,
+				Recipes = if submenu.type == "recipes"
+					then React.createElement(Recipes, {
+						entity_id = submenu.entity_id,
+						on_close = function()
+							set_submenu {}
+						end,
+					})
+					else nil,
 				ItemFilters = if submenu.type == "item_filters"
 					then React.createElement(ItemFilters, {
 						entity_id = submenu.entity_id,

@@ -46,24 +46,21 @@ end
 function serialize_entity_for_team(grid: HexGrid, entity: Entity, team: TeamId): Entity?
 	local team_data = grid.teams[team]
 	assert(team_data, "no team")
-	local cell = grid:get_cell(entity.primary_coordinate)
-	if entity_visibility(entity, cell, team) then
+	if entity_visibility(grid, entity, team) then
 		local to_copy = entity
-		if
-			entity.type == "phony"
-			and entity.disguise ~= nil
-			and not team_mod.is_allied(grid, entity.owner, team)
-			and team_data.server_data.visibility ~= "perfect"
-		then
-			to_copy = entity.disguise
-		end
 		local copy = {}
 		for k, v in to_copy do
 			if k == "server_data" then
-			elseif k == "queued_decisions" and cell.owner ~= team then
+			elseif k == "queued_decisions" and team_mod.is_allied(grid, entity.owner, team) then
 				copy[k] = {}
 			else
 				copy[k] = v
+			end
+		end
+		if entity.server_data.is_disguise_of then
+			local host = grid.entities[entity.server_data.is_disguise_of]
+			if team_mod.is_allied(grid, host.owner, team) then
+				copy.active = false
 			end
 		end
 		return copy :: Entity
@@ -72,6 +69,7 @@ function serialize_entity_for_team(grid: HexGrid, entity: Entity, team: TeamId):
 end
 
 function serialize_cell_for_team(grid: HexGrid, cell: HexCell, team: TeamId): HexCell | nil
+	local team_data = grid.teams[team]
 	local visible_for_team = cell_visibility(cell.server_data.visibility[team])
 	if visible_for_team then
 		local influences = {}
@@ -81,11 +79,28 @@ function serialize_cell_for_team(grid: HexGrid, cell: HexCell, team: TeamId): He
 				influences[entity_id] = true
 			end
 		end
+		local entities = {}
+		for entity_id in cell.entities do
+			local entity = grid.entities[entity_id]
+			if entity.owner == team or entity.status ~= "blueprint" then
+				if entity.disguise then
+					if
+						team_data.server_data.visibility == "perfect" or team_mod.is_allied(grid, team, entity.owner)
+					then
+						entities[entity_id] = true
+					else
+						entities[entity.disguise] = true
+					end
+				else
+					entities[entity_id] = true
+				end
+			end
+		end
+		-- table.sort(entities, function(a, b)
+		-- 	return grid.entity_configurations[a.type].layer > grid.entity_configurations[b.type].layer
+		-- end)
 		return {
-			entities = util.table_filter(cell.entities, function(_, entity_id)
-				local entity = grid.entities[entity_id]
-				return entity.owner == team or entity.status ~= "blueprint"
-			end),
+			entities = entities,
 			coordinate = cell.coordinate,
 			owner = cell.owner,
 			type = cell.type,

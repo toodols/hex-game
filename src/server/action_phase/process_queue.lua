@@ -23,6 +23,7 @@ function process_queue(grid: HexGrid, action_state: ActionState)
 	local function should_terminate(): boolean
 		if iterations > MAX_ALLOWED_ITERATIONS then
 			warn "MAX_ALLOWED_ITERATIONS reached"
+			warn("left in queue", grid.action_queue)
 			return true
 		end
 		iterations += 1
