@@ -26,7 +26,8 @@ function TeamDropdownItem(props: {
 				Text = props.text,
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 14,
-			} {
+			},
+			{
 				LeftPadding = React.createElement("UIPadding", {
 					PaddingLeft = UDim.new(0, 5),
 				}),

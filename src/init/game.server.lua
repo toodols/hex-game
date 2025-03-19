@@ -73,7 +73,7 @@ function start_game(teleport_data: { room: types.Room }?)
 	local players_config = room and room.players
 	print("Starting game with teleport data", game.HttpService:JSONEncode(teleport_data))
 	grid = presets[if room then room.map else "my_map"]()
-	-- grid = tests.stockpile_filters()
+	-- grid = tests.server.correct_phony_updates()
 
 	_G.grid = grid
 

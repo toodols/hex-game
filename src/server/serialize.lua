@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
-local visibility_mod = require(ReplicatedStorage.Shared.visibility)
+local visibility_mod = require(script.Parent.visibility)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local quest_methods = require(script.Parent.questing.quest)
 local team_mod = require(ReplicatedStorage.Shared.team)
@@ -59,8 +59,8 @@ function serialize_entity_for_team(grid: HexGrid, entity: Entity, team: TeamId):
 		end
 		if entity.server_data.is_disguise_of then
 			local host = grid.entities[entity.server_data.is_disguise_of]
-			if team_mod.is_allied(grid, host.owner, team) then
-				copy.active = false
+			if not team_mod.is_allied(grid, host.owner, team) then
+				copy.active = true
 			end
 		end
 		return copy :: Entity

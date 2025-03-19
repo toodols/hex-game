@@ -170,7 +170,6 @@ function destroy_grid_instances(grid: HexGrid)
 end
 
 function handle_updates(grid: HexGrid, updates: { GridUpdate })
-	print(updates)
 	table.sort(updates, function(a, b)
 		local order = {
 			turn_timer = 1,
@@ -237,6 +236,10 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 			local event = update.event
 			if event.event_type == "produced_items" or event.event_type == "consumed_items" then
 				local entity_instance = grid.entity_instance_map[event.entity_id]
+				if not entity_instance then
+					warn("entity not found", event.entity_id)
+					continue
+				end
 				local template = asset_server.load "Billboards/Exchange"
 				local instance = template:Clone()
 				instance.Parent = workspace
@@ -251,6 +254,7 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 					)
 				end
 				if event.event_type == "produced_items" then
+					instance.Enabled = false
 					instance.Amount.Text = `<font color="#a3e5a0">{display("+", event.items)}</font>`
 				elseif event.event_type == "consumed_items" then
 					instance.Amount.Text = `<font color="#e56b6b">{display("-", event.items)}</font>`
@@ -262,6 +266,42 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 					TextTransparency = 1,
 				}):Play()
 				Debris:AddItem(instance, 5)
+
+				if event.event_type == "produced_items" then
+					local item_template = asset_server.load "Effects/Item"
+					for item_type, amount in event.items do
+						for i = 1, amount do
+							local item = item_template:Clone()
+							item.Parent = workspace
+							item.Position = entity_instance:GetPivot().Position + Vector3.new(0, 4, 0)
+							item.Velocity = Vector3.new(math.random(-5, 5), 30, math.random(-5, 5))
+							item.Anchored = false
+							item.Color = items_mod.item_colors[item_type]
+							TweenService:Create(item, TweenInfo.new(2), {
+								Transparency = 1,
+							}):Play()
+							Debris:AddItem(item, 2)
+						end
+					end
+				elseif event.event_type == "consumed_items" then
+					local item_template = asset_server.load "Effects/Item"
+					task.spawn(function()
+						for item_type, amount in event.items do
+							for i = 1, amount do
+								local item = item_template:Clone()
+								item.Parent = workspace
+								item.Position = entity_instance:GetPivot().Position + Vector3.new(0, 6, 0)
+								item.Color = items_mod.item_colors[item_type]
+								TweenService:Create(item, TweenInfo.new(0.7, Enum.EasingStyle.Quart), {
+									Position = entity_instance:GetPivot().Position,
+									Transparency = 1,
+								}):Play()
+								Debris:AddItem(item, 0.7)
+								wait(0.2)
+							end
+						end
+					end)
+				end
 			end
 		elseif update.type == "ability" then
 			if update.ability_type == "scout_attack" or update.ability_type == "turret_attack" then

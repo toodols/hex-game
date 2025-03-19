@@ -86,6 +86,7 @@ function new_entity(entity_: any, grid: HexGrid): Entity
 	assert(not entity.owner or typeof(entity.owner) == "number", "Entity owner is not a number")
 
 	local defaults = {
+		active = true,
 		build_time = shared_behavior.build_time,
 		coordinates = { entity.primary_coordinate },
 		cost = shared_behavior.cost,
@@ -113,7 +114,6 @@ function new_entity(entity_: any, grid: HexGrid): Entity
 	entity.server_data.requested_at = if entity.server_data.requested_at ~= nil
 		then entity.server_data.requested_at
 		else os.clock()
-	entity.server_data.active = if entity.server_data.active ~= nil then entity.server_data.active else true
 
 	-- todo: rotate the offsets by the rotation
 	for _, offset in shared_behavior.offsets do

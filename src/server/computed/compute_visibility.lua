@@ -2,7 +2,7 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
-local cell_visibility = require(ReplicatedStorage.Shared.visibility).cell_visibility
+local cell_visibility = require(ServerScriptService.Server.visibility).cell_visibility
 local server_types = require(ServerScriptService.Server.types)
 
 type HexGrid = types.HexGrid

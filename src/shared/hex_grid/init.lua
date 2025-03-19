@@ -73,7 +73,7 @@ function grid_query_entity(grid: HexGrid, props: any): { Entity }
 	local results = {}
 	local function pred(entity: Entity)
 		props.is_destroyed = false
-		if entity.server_data and entity.server_data.active == false or entity.active == false then
+		if entity.server_data and entity.active == false or entity.active == false then
 			return false
 		end
 		for k, v in props do
@@ -133,7 +133,7 @@ end
 function grid_active_entities(self: HexGrid): { [EntityId]: Entity }
 	return util.table_filter(self.entities, function(entity)
 		if entity.server_data then
-			return entity.server_data.active
+			return entity.active
 		else
 			return entity.active ~= false
 		end

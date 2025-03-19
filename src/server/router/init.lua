@@ -2,7 +2,7 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
-local cell_visibility = require(ReplicatedStorage.Shared.visibility).cell_visibility
+local cell_visibility = require(script.Parent.visibility).cell_visibility
 local items_mod = require(ReplicatedStorage.Shared.items)
 
 local questing = require(script.Parent.questing)
@@ -142,12 +142,7 @@ function on_client_interaction(
 			dirty_entities[entity.id] = true
 		elseif entry.type == "ability" then
 			local entity = grid.entities[entry.entity_id]
-			if
-				not entity
-				or not entity.server_data.active
-				or entity.owner ~= player_team.id
-				or entity.status ~= "complete"
-			then
+			if not entity or not entity.active or entity.owner ~= player_team.id or entity.status ~= "complete" then
 				-- error_type.mistake
 				continue
 			end
@@ -172,7 +167,7 @@ function on_client_interaction(
 			dirty_entities[entity.id] = true
 		elseif entry.type == "rotate_entity" then
 			local entity = grid.entities[entry.entity_id]
-			if not entity or not entity.server_data.active or entity.owner ~= player_team.id then
+			if not entity or not entity.active or entity.owner ~= player_team.id then
 				-- error_type.mistake
 				continue
 			end
@@ -180,7 +175,7 @@ function on_client_interaction(
 			dirty_entities[entity.id] = true
 		elseif entry.type == "cancel_decision" then
 			local entity = grid.entities[entry.entity_id]
-			if not entity or not entity.server_data.active or entity.owner ~= player_team.id then
+			if not entity or not entity.active or entity.owner ~= player_team.id then
 				-- error_type.mistake
 				continue
 			end
@@ -192,7 +187,7 @@ function on_client_interaction(
 			local entity = grid.entities[entry.entity_id]
 			if
 				not entity
-				or not entity.server_data.active
+				or not entity.active
 				or entity.owner ~= player_team.id
 				or entity.status ~= "complete"
 				or entity.type ~= "laboratory"
@@ -224,7 +219,7 @@ function on_client_interaction(
 
 			if
 				not entity
-				or not entity.server_data.active
+				or not entity.active
 				or entity.owner ~= player_team.id
 				or entity.status ~= "complete"
 				or entity.type ~= "laboratory"
@@ -246,7 +241,7 @@ function on_client_interaction(
 			dirty_entities[entity.id] = true
 		elseif entry.type == "deconstruct" then
 			local entity = grid.entities[entry.entity_id]
-			if not entity or not entity.server_data.active or entity.owner ~= player_team.id then
+			if not entity or not entity.active or entity.owner ~= player_team.id then
 				-- error_type.mistake
 				continue
 			end
@@ -267,12 +262,7 @@ function on_client_interaction(
 			end
 		elseif entry.type == "set_entity_enabled" then
 			local entity = grid.entities[entry.entity_id]
-			if
-				not entity
-				or not entity.server_data.active
-				or entity.owner ~= player_team.id
-				or entity.status ~= "complete"
-			then
+			if not entity or not entity.active or entity.owner ~= player_team.id or entity.status ~= "complete" then
 				-- error_type.mistake
 				continue
 			end
@@ -281,12 +271,7 @@ function on_client_interaction(
 			dirty_entities[entity.id] = true
 		elseif entry.type == "set_recipe" then
 			local entity = grid.entities[entry.entity_id]
-			if
-				not entity
-				or not entity.server_data.active
-				or entity.owner ~= player_team.id
-				or entity.status ~= "complete"
-			then
+			if not entity or not entity.active or entity.owner ~= player_team.id or entity.status ~= "complete" then
 				-- error_type.mistake
 				continue
 			end
@@ -296,7 +281,7 @@ function on_client_interaction(
 			local entity = grid.entities[entry.entity_id]
 			if
 				not entity
-				or not entity.server_data.active
+				or not entity.active
 				or entity.owner ~= player_team.id
 				or entity.status ~= "complete"
 				or entity.inventory == nil

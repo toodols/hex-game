@@ -1,6 +1,7 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local client_tests = require(script.client)
 local server_tests = require(script.server)
+local unit_tests = require(script.unit)
 local util = require(ReplicatedStorage.Shared.util)
 
 function run_tests()
@@ -26,10 +27,11 @@ function run_tests()
 			end
 		end
 	end
-	run_tests_recursive({
+	run_tests_recursive {
 		server = server_tests,
 		client = client_tests,
-	})
+		unit = unit_tests,
+	}
 
 	if successes == total then
 		print(`{successes} / {total} tests passed. Completed in {math.floor((os.clock() - tests_t0) * 1000)}ms`)
@@ -40,9 +42,7 @@ end
 
 return {
 	run_tests = run_tests,
-	scout_attack_each_other = server_tests.scout_attack_each_other,
-	deconstruct_stockpile = server_tests.deconstruct_stockpile,
-	chatgpt_didnt_grift_me = server_tests.chatgpt_didnt_grift_me,
-	extractor_filling_stockpile = server_tests.extractor_filling_stockpile,
-	stockpile_filters = server_tests.stockpile_filters,
+	server = server_tests,
+	client = client_tests,
+	unit = unit_tests,
 }

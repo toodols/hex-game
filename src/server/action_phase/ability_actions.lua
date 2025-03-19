@@ -4,13 +4,13 @@ local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
 
 local util = require(ReplicatedStorage.Shared.util)
-local visibility_mod = require(ReplicatedStorage.Shared.visibility)
 
 local systems_mod = require(ServerScriptService.Server.systems)
 local damage_mod = require(ServerScriptService.Server.damage)
 local updates_mod = require(ServerScriptService.Server.updates)
 local server_entity_mod = require(ServerScriptService.Server.entity)
 local server_util = require(ServerScriptService.Server.util)
+local visibility_mod = require(ServerScriptService.Server.visibility)
 
 type HexGrid = types.HexGrid
 type System = server_types.System
@@ -99,13 +99,13 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState)
 			if top == entity then
 				if entity.disguise then
 					grid.entities[entity.disguise].is_destroyed = true
-					table.insert(grid.updates_buffer, {
+					updates_mod.add_update(grid, {
 						type = "entity_update",
 						entity = grid.entities[entity.disguise],
 					})
 				end
 				entity.disguise = nil
-				table.insert(grid.updates_buffer, {
+				updates_mod.add_update(grid, {
 					type = "disguise",
 					entity_id = entity.id,
 				})
@@ -115,18 +115,18 @@ function handle_ability_actions(grid: HexGrid, action_state: ActionState)
 			local copied = util.deep_copy(top)
 			copied.disguise = nil
 			copied.active = false
-			copied.server_data.active = false
 			copied.id = server_util.new_global_id()
 			copied.primary_coordinate = entity.primary_coordinate
 			copied.coordinates = entity.coordinates
 			copied.owner = entity.owner
+			copied.server_data.is_disguise_of = entity.id
 			grid.entities[copied.id] = copied
 			entity.disguise = copied.id
-			table.insert(grid.updates_buffer, {
+			updates_mod.add_update(grid, {
 				type = "entity_update",
 				entity = copied,
 			})
-			table.insert(grid.updates_buffer, {
+			updates_mod.add_update(grid, {
 				type = "entity_disguise",
 				entity_id = entity.id,
 				disguise_id = copied.id,

@@ -31,7 +31,7 @@ function entity_visibility(grid: HexGrid, entity: Entity, team: TeamId): boolean
 	if
 		cell_visibility(cell.server_data.visibility[team])
 		and entity.status ~= "blueprint"
-		and entity.server_data.active
+		and entity.active
 		and entity.disguise == nil
 	then
 		return true

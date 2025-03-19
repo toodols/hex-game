@@ -350,6 +350,8 @@ export type Icon = {
 export type GridUpdate =
 	-- handles add, update, and destruction
 	{ type: "entity_update", entity: Entity, target: TeamTarget }
+	| { type: "entity_created", entity_id: EntityId, target: TeamTarget }
+	| { type: "entity_event", event: EntityEvent, target: TeamTarget }
 	| {
 		type: "cell_update",
 		cell: HexCell,
@@ -552,8 +554,6 @@ export type HexGrid = {
 	-- server only
 	action_queue: { EntityAction },
 
-	-- these fields are more convenient inlined
-	-- append only
 	coalitions: { CoalitionData },
 	teams: { TeamData },
 

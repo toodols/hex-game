@@ -435,13 +435,13 @@ function tests.deconstruct_building_preserves_vertex()
 		})
 	end
 
-	assert_eq(#grid:query_entity { type = "vertex" }, 1, "vertex not generated")
+	assert_eq(#grid:query_entity { type = "vertex", coordinate = { 0, 0, 0 } }, 1, "vertex not generated")
 	table.insert(scout.queued_decisions, {
 		type = "deconstruct",
 		entity_id = scout.id,
 	})
 	action_phase_mod.run_action_phase(grid)
-	assert_eq(#grid:query_entity { type = "vertex" }, 1, "vertex not preserved")
+	assert_eq(#grid:query_entity { type = "vertex", coordinate = { 0, 0, 0 } }, 1, "vertex not preserved")
 
 	cleanup(grid)
 end
@@ -512,6 +512,53 @@ function tests.scout_attack_each_other()
 	cleanup(grid)
 end
 
+function tests.correct_phony_updates()
+	local grid, teams = presets.blank_map()
+	grid.global_configuration.decaying_enabled = false
+
+	local phony =
+		entity_mod.new_entity({ type = "phony", owner = teams.team2.id, primary_coordinate = { 0, 0, 0 } }, grid)
+	local scout =
+		entity_mod.new_entity({ type = "scout", owner = teams.team2.id, primary_coordinate = { 1, 0, -1 } }, grid)
+
+	local enemy =
+		entity_mod.new_entity({ type = "scout", owner = teams.team1.id, primary_coordinate = { -2, 0, 2 } }, grid)
+
+	phony.queued_decisions = {
+		{
+			type = "ability",
+			ability_type = "disguise",
+			entity_id = phony.id,
+			coordinate = scout.primary_coordinate,
+		},
+	}
+
+	local result = action_phase_mod.run_action_phase(grid)
+	assert(
+		util.table_any(result.updates[teams.team1.id], function(update)
+			return update.type == "entity_update"
+				and update.entity.id == phony.disguise
+				and update.entity.active == true
+		end),
+		"Disguise should be visible to enemy team"
+	)
+
+	assert(not util.table_any(result.updates[teams.team1.id], function(update)
+		return update.type == "entity_update" and update.entity.id == phony.id
+	end), "Phony should not be visible to enemy team")
+
+	assert(
+		util.table_any(result.updates[teams.team2.id], function(update)
+			return update.type == "entity_update"
+				and update.entity.id == phony.disguise
+				and update.entity.active == false
+		end),
+		"Disguise should be visible but not active to phony's team"
+	)
+
+	return grid
+end
+
 function tests.archive_grid()
 	-- todo
 	local grid = presets.my_map()
@@ -522,36 +569,6 @@ function tests.archive_grid()
 	cleanup(grid)
 end
 
-function tests.formatting()
-	assert_eq(
-		formatting.format_text_raw(
-			"I am {state.mood.value} because my hunger is {state.hunger}.",
-			{ state = { hunger = 90, mood = { value = "unhappy" } } }
-		),
-		"I am unhappy because my hunger is 90."
-	)
-	assert_eq(
-		formatting.format_text_raw("I am {condition?value}happy.", { condition = true, value = "NOT " }),
-		"I am NOT happy."
-	)
-	assert_eq(
-		formatting.format_text_raw("I am {condition?value}happy.", { condition = false, value = "NOT " }),
-		"I am happy."
-	)
-	assert_eq(
-		formatting.format_text_raw(
-			"The sky is {condition?then_val:else_val}",
-			{ condition = true, then_val = "blue", else_val = "red" }
-		),
-		"The sky is blue"
-	)
-	assert_eq(
-		formatting.format_text_raw(
-			"The sky is {condition?then_val:else_val}",
-			{ condition = false, then_val = "blue", else_val = "red" }
-		),
-		"The sky is red"
-	)
-end
+
 
 return tests

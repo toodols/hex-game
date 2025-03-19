@@ -207,11 +207,12 @@ function run_action_phase(grid: HexGrid, extra_actions: { EntityAction }?)
 		quest_methods.quest_update(quest, grid)
 	end
 
-	updates_mod.flush_updates(grid)
+	local updates = updates_mod.flush_updates(grid)
 	grid:purge_dead_entities()
 
 	return {
 		elapsed = tick() - t0,
+		updates = updates,
 	}
 end
 

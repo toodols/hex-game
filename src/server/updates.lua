@@ -1,8 +1,11 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local RunService = game:GetService "RunService"
+
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local serialize_mod = require(script.Parent.serialize)
 local remotes_mod = require(script.Parent.remotes)
+local visibility = require(script.Parent.visibility)
 
 type HexGrid = types.HexGrid
 type GridUpdate = types.GridUpdate
@@ -33,7 +36,7 @@ function flush_updates(grid: HexGrid): { [TeamId]: { GridUpdate } }
 	local updates = {}
 	if #buffer > 0 then
 		for _, team in grid.teams do
-			if #team.players == 0 then
+			if #team.players == 0 and not RunService:IsStudio() then
 				continue
 			end
 			local mapped = filter_duplicate_entity_updates(util.table_filter_map(buffer, function(update: GridUpdate)
@@ -51,6 +54,20 @@ function flush_updates(grid: HexGrid): { [TeamId]: { GridUpdate } }
 						type = update.type,
 						entity = serialized,
 					}
+				elseif update.type == "entity_created" then
+					if visibility.entity_visibility(grid, grid.entities[update.entity_id], team.id) then
+						return {
+							type = update.type,
+							entity_id = update.entity_id,
+						}
+					end
+				elseif update.type == "entity_event" then
+					if visibility.entity_visibility(grid, grid.entities[update.event.entity_id], team.id) then
+						return {
+							type = update.type,
+							event = update.event,
+						}
+					end
 				elseif update.type == "cell_update" then
 					local serialized = serialize_mod.serialize_cell_for_team(grid, update.cell, team.id)
 					return serialized and {

@@ -64,9 +64,6 @@ end
 
 -- returns the first value, if any, that satisfies `pred`
 function table_find_pred<K, T>(tab: { [K]: T }, pred: (value: T) -> boolean): T?
-	if tab == nil then
-		print(debug.traceback())
-	end
 	for key, value in tab do
 		if pred(value) then
 			return value, key
