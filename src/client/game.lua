@@ -179,6 +179,7 @@ function handle_updates(world: World, updates: { WorldUpdate })
 			entity_update = 3,
 			exchange = 4,
 			scout_attack = 4,
+			entity_event = 4,
 		}
 		return (order[a.type] or 5) < (order[b.type] or 5)
 	end)

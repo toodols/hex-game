@@ -27,7 +27,7 @@ function blocked(world: World, cell: HexCell, team: TeamId?)
 	return false
 end
 
-function hex_line(start, finish)
+function hex_line(start: CubicCoordinate, finish: CubicCoordinate): { { CubicCoordinate } }
 	local N = math.max(math.abs(start[1] - finish[1]), math.abs(start[2] - finish[2]), math.abs(start[3] - finish[3]))
 	local results = {}
 	for i = 0, N do

@@ -2,9 +2,7 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local coords = require(ReplicatedStorage.Shared.coords)
 local asset_server = require(ReplicatedStorage.Shared.asset_server)
 local types = require(ReplicatedStorage.Shared.types)
-local world_mod = require(ReplicatedStorage.Shared.world)
 local util = require(ReplicatedStorage.Shared.util)
-local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local registry_mod = require(script.Parent.registry)
 
 local model = asset_server.load "Entities/Vertex"

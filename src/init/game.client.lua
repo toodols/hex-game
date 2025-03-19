@@ -13,7 +13,6 @@ type WorldUpdate = types.WorldUpdate
 local world_data = get_world_data_remote:InvokeServer()
 local world = world_mod.new_world_from_data(world_data)
 
-print(world_data)
 game_mod.render_world(world)
 
 local connection = world_updates_remote.OnClientEvent:Connect(function(updates: { WorldUpdate })

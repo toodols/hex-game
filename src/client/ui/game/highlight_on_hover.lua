@@ -5,7 +5,7 @@ local util = require(ReplicatedStorage.Shared.util)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local Corner = require(ReplicatedStorage.Client.ui.util_components).Corner
-local world_mod = require(ReplicatedStorage.Shared.world)
+local coords_mod = require(ReplicatedStorage.Shared.coords)
 
 type CubicCoordinate = types.CubicCoordinate
 type World = types.World
@@ -19,7 +19,7 @@ end
 function into_instance_set(world: World, coords: { CubicCoordinate })
 	local set = {}
 	for _, coord in coords do
-		local instance = world.cell_instance_map[coords.encode_coord(coord)]
+		local instance = world.cell_instance_map[coords_mod.encode_coord(coord)]
 		if not instance then
 			continue
 		end

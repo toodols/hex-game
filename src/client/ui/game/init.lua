@@ -25,6 +25,7 @@ local SelectedCellFrame = require(script.selected_cell_frame).SelectedCellFrame
 local TileAlerts = require(script.tile_alerts).TileAlerts
 local ItemFilters = require(script.item_filters).ItemFilters
 local EntityInformation = require(script.entity_information).EntityInformation
+local SettingsMenu = require(script.settings_menu).SettingsMenu
 
 local MainContext = context_mod.MainContext
 local Corner = util_components.Corner
@@ -43,6 +44,8 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 	hooks.use_immediate_effect(function()
 		set_submenu {}
 	end, { props })
+
+	local settings_open, set_settings_open = React.useState(false)
 
 	local _, force_update = React.useReducer(function(x)
 		return x + 1
@@ -83,6 +86,7 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 				Size = UDim2.new(1, 0, 1, 0),
 			}, {
 				PlayerList = React.createElement(PlayerList),
+				SettingsMenu = if settings_open then React.createElement(SettingsMenu) else nil,
 			}),
 			TopCenter = React.createElement(TopCenter),
 			BottomCenter = React.createElement("Frame", {
@@ -255,6 +259,9 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 							ImageColor3 = Color3.fromRGB(255, 255, 255),
 							Position = UDim2.new(0.5, 0, 0.5, 0),
 							Size = UDim2.new(1, -10, 1, -10),
+							[React.Event.MouseButton1Click] = function()
+								set_settings_open(not settings_open)
+							end,
 						}),
 
 						Corner = React.createElement(Corner),

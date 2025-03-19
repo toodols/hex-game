@@ -1,5 +1,4 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local RunService = game:GetService "RunService"
 local registry_mod = require(script.Parent.registry)
 local asset_server = require(ReplicatedStorage.Shared.asset_server)
 local types = require(ReplicatedStorage.Shared.types)

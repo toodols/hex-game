@@ -14,8 +14,10 @@
 - [ ] `torch` a building that can illuminate areas
 - [ ] Add `mace`, an artillery-type building
 	- [ ] Warning indicator entity 
-- [ ] Add `exclusion`, creates a fog that blocks visibility for enemy
+	- [ ] Mace occupies 3 tiles?
+- [ ] Add `exclusion`, creates a fog that blocks visibility or building for enemy
 - [ ] `vault` can store entities
+- [ ] `vault` has passive that blocks lethal damage by consuming items in its inventory
 - [ ] Systems should be visible to the client and should show total items
 - [ ] Finish implementation of tutorial
 - [ ] Add actual preview for ItemsFilterPreview
@@ -32,6 +34,7 @@
 - [ ] Entities get respective buffs while on a resource tile
 	- [ ] Vit: Passive Healing
 	- [ ] Rad: +1 Charge
+- [ ] `host` A building that can control time
 
 # Ongoing
 - [ ] Make `impression` functional
