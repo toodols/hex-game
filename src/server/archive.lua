@@ -7,7 +7,7 @@ local server_entity_mod = require(ServerScriptService.Server.entity)
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 
-type HexGrid = types.HexGrid
+type World = types.World
 type Entity = types.Entity
 type HexCell = types.HexCell
 type Inventory = types.Inventory
@@ -106,7 +106,7 @@ local all_symbols = enum {
 	"full",
 	"portal",
 
-	-- HexGrid symbols
+	-- World symbols
 	"entities",
 	"cells",
 	"systems",
@@ -382,7 +382,7 @@ local cell_schema = struct {
 	entities = default(map(identity, entity_id), {}),
 }
 
-local hex_grid_schema = aliasable(
+local world_schema = aliasable(
 	struct {
 		entities = map(entity_id, entity_schema),
 		cells = map(identity, cell_schema),
@@ -400,21 +400,21 @@ local hex_grid_schema = aliasable(
 		new_team = ignore,
 		purge_dead_entities = ignore,
 		updates_buffer = ignore,
-		grid_update_signal = ignore,
+		world_update_signal = ignore,
 		query_entity = ignore,
 	},
 	"entity_id"
 )
 
-function compress_grid(grid: HexGrid)
-	return game:GetService("HttpService"):JSONEncode(hex_grid_schema.serialize(grid, {}))
+function compress_world(world: World)
+	return game:GetService("HttpService"):JSONEncode(world_schema.serialize(world, {}))
 end
 
-function decompress_grid(state: string)
-	return hex_grid_schema.deserialize(game:GetService("HttpService"):JSONDecode(state), {})
+function decompress_world(state: string)
+	return world_schema.deserialize(game:GetService("HttpService"):JSONDecode(state), {})
 end
 
 return {
-	compress_grid = compress_grid,
-	decompress_grid = decompress_grid,
+	compress_world = compress_world,
+	decompress_world = decompress_world,
 }

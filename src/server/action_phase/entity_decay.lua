@@ -7,19 +7,19 @@ local util = require(ReplicatedStorage.Shared.util)
 local updates_mod = require(ServerScriptService.Server.updates)
 local server_entity_mod = require(ServerScriptService.Server.entity)
 
-type HexGrid = types.HexGrid
+type World = types.World
 type ActionState = server_types.ActionState
 
 --- Decays entities that are not connected. Requires systems to be created
-function do_entity_decay(grid: HexGrid, action_state: ActionState)
+function do_entity_decay(world: World, action_state: ActionState)
 	local decayable_entities = {}
 
 	-- initially mark all decayable entities as decayable
-	for _, entity in grid:active_entities() do
+	for _, entity in world:active_entities() do
 		if
-			grid.global_configuration.decaying_enabled
+			world.global_configuration.decaying_enabled
 			and entity.status ~= "blueprint"
-			and entity.owner ~= grid.neutral_team
+			and entity.owner ~= world.neutral_team
 			and entity.decayable
 		then
 			decayable_entities[entity.id] = true
@@ -30,7 +30,7 @@ function do_entity_decay(grid: HexGrid, action_state: ActionState)
 	for _, system in action_state.systems do
 		local has_heart = false
 		for entity_id in system.entities do
-			local entity = grid.entities[entity_id]
+			local entity = world.entities[entity_id]
 			if entity.type == "heart" or entity.type == "infinite_source" then
 				has_heart = true
 			end
@@ -38,15 +38,15 @@ function do_entity_decay(grid: HexGrid, action_state: ActionState)
 
 		for neighbor in
 			server_util.get_neighbors_set(
-				grid,
+				world,
 				util.table_flat(util.table_map(util.table_keys(system.entities), function(id)
-					return grid.entities[id].coordinates
+					return world.entities[id].coordinates
 				end))
 			)
 		do
-			if grid.cells[neighbor] then
-				for entity_id in grid.cells[neighbor].entities do
-					local entity = grid.entities[entity_id]
+			if world.cells[neighbor] then
+				for entity_id in world.cells[neighbor].entities do
+					local entity = world.entities[entity_id]
 					if entity.status == "scaffold" then
 						decayable_entities[entity_id] = false
 					end
@@ -63,7 +63,7 @@ function do_entity_decay(grid: HexGrid, action_state: ActionState)
 
 	-- make them decay
 	for entity_id, should_decay in decayable_entities do
-		local entity = grid.entities[entity_id]
+		local entity = world.entities[entity_id]
 		if entity == nil then
 			warn("entity not found", entity_id)
 			continue
@@ -72,15 +72,15 @@ function do_entity_decay(grid: HexGrid, action_state: ActionState)
 		if should_decay then
 			entity.is_decaying = true
 			entity.decay += 1
-			updates_mod.add_update(grid, {
+			updates_mod.add_update(world, {
 				type = "entity_update",
 				entity = entity,
 			})
 			if entity.decay >= 3 then
 				if entity.type == "wires" then
-					server_entity_mod.remove_entity(grid, entity)
+					server_entity_mod.remove_entity(world, entity)
 				else
-					entity.owner = grid.neutral_team
+					entity.owner = world.neutral_team
 					entity.decay = 0
 					entity.is_decaying = false
 				end
@@ -89,7 +89,7 @@ function do_entity_decay(grid: HexGrid, action_state: ActionState)
 			if entity.is_decaying then
 				entity.is_decaying = false
 				entity.decay = 0
-				updates_mod.add_update(grid, {
+				updates_mod.add_update(world, {
 					type = "entity_update",
 					entity = entity,
 				})

@@ -1,25 +1,25 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local RunService = game:GetService "RunService"
 local types = require(ReplicatedStorage.Shared.types)
-type HexGrid = types.HexGrid
+type World = types.World
 type HexCell = types.HexCell
 type TeamId = types.TeamId
 type ResearchState = types.ResearchState
 type ResearchId = types.ResearchId
 
-function get_cell_researches(grid: HexGrid, cell: HexCell, team: TeamId)
+function get_cell_researches(world: World, cell: HexCell, team: TeamId)
 	local researches_set: { [ResearchId]: boolean } = {}
 	local influences = if RunService:IsServer() then cell.server_data.influences else cell.influences
 	for entity_id in influences do
-		local entity = grid.entities[entity_id]
+		local entity = world.entities[entity_id]
 		if not entity then
 			continue
 		end
 		if entity.type == "proxy" then
-			local proxy_cell = grid:get_cell(entity.primary_coordinate)
+			local proxy_cell = world:get_cell(entity.primary_coordinate)
 			for proxy_influence_id in proxy_cell.entities do
 				if proxy_influence_id ~= entity.id then
-					local proxy_influence = grid.entities[proxy_influence_id]
+					local proxy_influence = world.entities[proxy_influence_id]
 					if proxy_influence.researches then
 						for research_id, state: ResearchState in proxy_influence.researches.states do
 							if state.status == "complete" then
@@ -101,7 +101,7 @@ function create_researches()
 		-- 		tek = 6,
 		-- 	},
 		-- 	time = 2,
-		-- 	-- precondition = function(_grid, ent)
+		-- 	-- precondition = function(_world, ent)
 		-- 	-- 	return ent.researches.states.turret.status ~= "complete"
 		-- 	-- end,
 		-- },

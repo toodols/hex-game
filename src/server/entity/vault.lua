@@ -5,12 +5,12 @@ local registry = registry_mod.registry
 local with_defaults = registry_mod.with_defaults
 
 type Entity = types.Entity
-type HexGrid = types.HexGrid
+type World = types.World
 
 registry.vault = with_defaults {
 	autogenerates_vertex = true,
-	init = function(self: Entity, grid: HexGrid)
-		local config = grid.entity_configurations[self.type]
+	init = function(self: Entity, world: World)
+		local config = world.entity_configurations[self.type]
 		if not self.inventory then
 			self.inventory = {
 				filter = {
@@ -23,8 +23,8 @@ registry.vault = with_defaults {
 			}
 		end
 	end,
-	on_completed = function(self: Entity, grid: HexGrid)
-		local config = grid.entity_configurations[self.type]
+	on_completed = function(self: Entity, world: World)
+		local config = world.entity_configurations[self.type]
 		if self.inventory then
 			self.inventory.capacity = config.inventory_capacity
 		end

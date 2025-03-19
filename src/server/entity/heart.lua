@@ -7,18 +7,18 @@ local server_types = require(ServerScriptService.Server.types)
 local with_defaults = registry_mod.with_defaults
 
 type Entity = types.Entity
-type HexGrid = types.HexGrid
+type World = types.World
 type ActionState = server_types.ActionState
 
 registry.heart = with_defaults {
 	autogenerates_vertex = true,
-	init = function(self: Entity, grid: HexGrid)
+	init = function(self: Entity, world: World)
 		-- self.should_output = 0
 	end,
-	tick = function(self: Entity, grid: HexGrid, action_state: ActionState)
-		local config = grid.entity_configurations[self.type]
+	tick = function(self: Entity, world: World, action_state: ActionState)
+		local config = world.entity_configurations[self.type]
 		if self.status == "complete" then
-			table.insert(grid.action_queue, {
+			table.insert(world.action_queue, {
 				entity_id = self.id,
 				type = "exchange",
 				output_items = { "bar" },

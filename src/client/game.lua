@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local TweenService = game:GetService "TweenService"
 local RunService = game:GetService "RunService"
 
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local coords = require(ReplicatedStorage.Shared.coords)
 local asset_server = require(ReplicatedStorage.Shared.asset_server)
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
@@ -11,23 +11,23 @@ local items_mod = require(ReplicatedStorage.Shared.items)
 local client_entity_mod = require(script.Parent.entity)
 local cells_mod = require(ReplicatedStorage.Shared.cells)
 
-local into_vec3 = hex_grid_mod.into_vec3
-local encode_coord = hex_grid_mod.encode_coord
-local decode_coord = hex_grid_mod.decode_coord
+local into_vec3 = coords.into_vec3
+local encode_coord = coords.encode_coord
+local decode_coord = coords.decode_coord
 
 type Entity = types.Entity
-type HexGrid = types.HexGrid
+type World = types.World
 type HexCell = types.HexCell
 type EntityId = types.EntityId
 type TeamId = types.TeamId
 type CubicCoordinate = types.CubicCoordinate
 type EncodedCoordinate = types.EncodedCoordinate
-type GridUpdate = types.GridUpdate
-type PartialHexGrid = types.PartialHexGrid
+type WorldUpdate = types.WorldUpdate
+type PartialWorld = types.PartialWorld
 type Item = types.Item
 
-function color_cell(grid: HexGrid, cell: HexCell)
-	local instance = grid.cell_instance_map[hex_grid_mod.encode_coord(cell.coordinate)]
+function color_cell(world: World, cell: HexCell)
+	local instance = world.cell_instance_map[coords.encode_coord(cell.coordinate)]
 	local function tween_color(color: Color3)
 		TweenService:Create(instance:FindFirstChild "Base", TweenInfo.new(), {
 			Color = color,
@@ -39,7 +39,7 @@ function color_cell(grid: HexGrid, cell: HexCell)
 	end
 	-- tiles that are r=1 of a friendly tile and do not have an enemy presence
 	if cell.owner then
-		local color = (grid.teams[cell.owner].color :: any).color
+		local color = (world.teams[cell.owner].color :: any).color
 		tween_color(color)
 	else
 		if cell.buildable_for_team then
@@ -50,61 +50,61 @@ function color_cell(grid: HexGrid, cell: HexCell)
 	end
 end
 
-function update_neighbors(grid: HexGrid, coordinates: { CubicCoordinate })
+function update_neighbors(world: World, coordinates: { CubicCoordinate })
 	local neighbor_set = {}
 	for _, coord in coordinates do
 		neighbor_set[encode_coord(coord)] = coord
-		for _, neighbor_coord in hex_grid_mod.neighbors_eq(coord, 1) do
+		for _, neighbor_coord in coords.neighbors_eq(coord, 1) do
 			neighbor_set[encode_coord(neighbor_coord)] = coord
 		end
 	end
 	for encoded_neighbor_coord, coord in neighbor_set do
-		local neighbor_cell = grid:get_cell(decode_coord(encoded_neighbor_coord))
+		local neighbor_cell = world:get_cell(decode_coord(encoded_neighbor_coord))
 		if neighbor_cell then
 			for neighbor_entity_id in neighbor_cell.entities do
-				local neighbor_entity = grid.entities[neighbor_entity_id]
+				local neighbor_entity = world.entities[neighbor_entity_id]
 				if not neighbor_entity then
 					print("missing", neighbor_entity_id)
 				end
 				local client_behavior = client_entity_mod.registry[neighbor_entity.type]
-				client_behavior.neighbor_changed(neighbor_entity, grid)
+				client_behavior.neighbor_changed(neighbor_entity, world)
 			end
 		end
 	end
 end
 
-function create_cell_instance(grid: HexGrid, cell: HexCell)
+function create_cell_instance(world: World, cell: HexCell)
 	local instance = cells_mod.cell_models[cell.type]:Clone()
-	instance.Parent = grid.cell_instance_root
+	instance.Parent = world.cell_instance_root
 	instance:PivotTo(CFrame.new(into_vec3(cell.coordinate) * 4.542 / 2))
 	-- for debugging purposes
-	instance.Name = hex_grid_mod.encode_coord(cell.coordinate)
-	grid.cell_instance_map[hex_grid_mod.encode_coord(cell.coordinate)] = instance
-	color_cell(grid, cell)
-	grid.instance_cell_map[instance] = hex_grid_mod.encode_coord(cell.coordinate)
+	instance.Name = coords.encode_coord(cell.coordinate)
+	world.cell_instance_map[coords.encode_coord(cell.coordinate)] = instance
+	color_cell(world, cell)
+	world.instance_cell_map[instance] = coords.encode_coord(cell.coordinate)
 	return instance
 end
 
-function render_grid(grid: HexGrid)
-	destroy_grid_instances(grid)
+function render_world(world: World)
+	destroy_world_instances(world)
 	local entity_folder = Instance.new "Folder"
 	entity_folder.Parent = workspace
-	grid.entity_instance_root = entity_folder
+	world.entity_instance_root = entity_folder
 	entity_folder.Name = "Entities"
 	local cell_folder = Instance.new "Folder"
 	cell_folder.Parent = workspace
 	cell_folder.Name = "Cells"
-	grid.cell_instance_root = cell_folder
+	world.cell_instance_root = cell_folder
 
 	-- create cell instances
-	for _, cell in grid.cells do
-		create_cell_instance(grid, cell)
+	for _, cell in world.cells do
+		create_cell_instance(world, cell)
 	end
 
 	-- first pass for entity update
-	for entity_id in grid:active_entities() do
-		local entity = grid.entities[entity_id]
-		client_entity_mod.update_entity_client(grid, nil, entity)
+	for entity_id in world:active_entities() do
+		local entity = world.entities[entity_id]
+		client_entity_mod.update_entity_client(world, nil, entity)
 	end
 end
 
@@ -129,47 +129,47 @@ function animate_cell_removal(instance: Model)
 	end
 end
 
-function step_animations(grid: HexGrid)
-	if grid.animation_states == nil then
-		grid.animation_states = {}
+function step_animations(world: World)
+	if world.animation_states == nil then
+		world.animation_states = {}
 	end
-	assert(grid.animation_states, "this should never error")
+	assert(world.animation_states, "this should never error")
 	-- remove animation states for entities that are gone
 	local new_animation_states = {}
-	for entity_id in grid:active_entities() do
-		new_animation_states[entity_id] = grid.animation_states[entity_id]
+	for entity_id in world:active_entities() do
+		new_animation_states[entity_id] = world.animation_states[entity_id]
 	end
-	grid.animation_states = new_animation_states
-	for entity_id, entity in grid:active_entities() do
+	world.animation_states = new_animation_states
+	for entity_id, entity in world:active_entities() do
 		local behavior = client_entity_mod.registry[entity.type]
 		if behavior.animate then
-			if not grid.animation_states[entity_id] then
-				grid.animation_states[entity_id] = { type = "idle", step = 0 }
+			if not world.animation_states[entity_id] then
+				world.animation_states[entity_id] = { type = "idle", step = 0 }
 			end
-			grid.animation_states[entity_id].step += 1
-			behavior.animate(entity, grid, grid.animation_states[entity_id])
+			world.animation_states[entity_id].step += 1
+			behavior.animate(entity, world, world.animation_states[entity_id])
 		end
 	end
 end
 
-function start_animations(grid: HexGrid)
+function start_animations(world: World)
 	return RunService.Heartbeat:Connect(function()
-		step_animations(grid)
+		step_animations(world)
 	end)
 end
 
-function destroy_grid_instances(grid: HexGrid)
-	grid.cell_instance_map = {}
-	grid.entity_instance_map = {}
-	if grid.cell_instance_root then
-		grid.cell_instance_root:Destroy()
+function destroy_world_instances(world: World)
+	world.cell_instance_map = {}
+	world.entity_instance_map = {}
+	if world.cell_instance_root then
+		world.cell_instance_root:Destroy()
 	end
-	if grid.entity_instance_root then
-		grid.entity_instance_root:Destroy()
+	if world.entity_instance_root then
+		world.entity_instance_root:Destroy()
 	end
 end
 
-function handle_updates(grid: HexGrid, updates: { GridUpdate })
+function handle_updates(world: World, updates: { WorldUpdate })
 	table.sort(updates, function(a, b)
 		local order = {
 			turn_timer = 1,
@@ -187,55 +187,55 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 	for _, update in updates do
 		if update.type == "entity_update" then
 			-- should be fine if single threaded
-			local old_entity = grid.entities[update.entity.id]
-			grid.entities[update.entity.id] = update.entity
+			local old_entity = world.entities[update.entity.id]
+			world.entities[update.entity.id] = update.entity
 			if update.entity.active ~= false then
 				table.insert(updated_entities, { old = old_entity, new = update.entity })
 			end
 		elseif update.type == "turn_timer" then
-			grid.turn_schedule = update.schedule
+			world.turn_schedule = update.schedule
 		elseif update.type == "turn" then
-			grid.highest_turn = update.turn
-			grid.turn = update.turn
+			world.highest_turn = update.turn
+			world.turn = update.turn
 		elseif update.type == "cell_update" then
-			grid.cells[hex_grid_mod.encode_coord(update.cell.coordinate)] = update.cell
+			world.cells[coords.encode_coord(update.cell.coordinate)] = update.cell
 		elseif update.type == "cells" then
-			for old_encoded_coord, old_cell in grid.cells do
+			for old_encoded_coord, old_cell in world.cells do
 				if not update.cells[old_encoded_coord] then
-					local instance = grid.cell_instance_map[old_encoded_coord]
-					grid.cell_instance_map[old_encoded_coord] = nil
-					grid.instance_cell_map[instance] = nil
+					local instance = world.cell_instance_map[old_encoded_coord]
+					world.cell_instance_map[old_encoded_coord] = nil
+					world.instance_cell_map[instance] = nil
 					animate_cell_removal(instance)
 					Debris:AddItem(instance, 2)
-					grid.cells[old_encoded_coord] = nil
+					world.cells[old_encoded_coord] = nil
 				end
 			end
 			for encoded_coord, cell in update.cells do
-				if not grid.cells[encoded_coord] then
-					grid.cells[encoded_coord] = cell
-					local instance = create_cell_instance(grid, cell)
+				if not world.cells[encoded_coord] then
+					world.cells[encoded_coord] = cell
+					local instance = create_cell_instance(world, cell)
 					animate_cell_appearance(instance)
 				end
 
-				if grid.cells[encoded_coord].visible_for_team and not cell.visible_for_team then
-					for entity_id in grid.cells[encoded_coord].entities do
-						local entity = grid.entities[entity_id]
+				if world.cells[encoded_coord].visible_for_team and not cell.visible_for_team then
+					for entity_id in world.cells[encoded_coord].entities do
+						local entity = world.entities[entity_id]
 						local client_behavior = client_entity_mod.registry[entity.type]
 						if client_behavior.on_hidden then
-							client_behavior.on_hidden(entity, grid)
+							client_behavior.on_hidden(entity, world)
 						end
 						entity.is_destroyed = true
 					end
 				end
-				grid.cells[encoded_coord] = cell
+				world.cells[encoded_coord] = cell
 			end
-			for _, cell in grid.cells do
-				color_cell(grid, cell)
+			for _, cell in world.cells do
+				color_cell(world, cell)
 			end
 		elseif update.type == "entity_event" then
 			local event = update.event
 			if event.event_type == "produced_items" or event.event_type == "consumed_items" then
-				local entity_instance = grid.entity_instance_map[event.entity_id]
+				local entity_instance = world.entity_instance_map[event.entity_id]
 				if not entity_instance then
 					warn("entity not found", event.entity_id)
 					continue
@@ -304,8 +304,8 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 			end
 		elseif update.type == "ability" then
 			if update.ability_type == "scout_attack" or update.ability_type == "turret_attack" then
-				local cell_instance = grid.cell_instance_map[hex_grid_mod.encode_coord(update.coordinate)]
-				local entity_instance = grid.entity_instance_map[update.entity_id]
+				local cell_instance = world.cell_instance_map[coords.encode_coord(update.coordinate)]
+				local entity_instance = world.entity_instance_map[update.entity_id]
 				local bullet = Instance.new "Part"
 				bullet.Size = Vector3.new(0.5, 0.5, 0.5)
 				bullet.CanCollide = false
@@ -320,14 +320,14 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 				Debris:AddItem(bullet, 0.3)
 			end
 		elseif update.type == "turn_skips" then
-			grid.needed_skips = update.needed_skips
-			grid.current_skips = update.current_skips
-			-- grid.can_skip = update.can_skip
+			world.needed_skips = update.needed_skips
+			world.current_skips = update.current_skips
+			-- world.can_skip = update.can_skip
 		elseif update.type == "teams" then
-			grid.teams = update.teams
-			grid.coalitions = update.coalitions
+			world.teams = update.teams
+			world.coalitions = update.coalitions
 		elseif update.type == "quest_update" then
-			grid.quests[update.quest.id] = update.quest
+			world.quests[update.quest.id] = update.quest
 		end
 	end
 
@@ -335,23 +335,23 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 	for _, entry in updated_entities do
 		local old_entity = entry.old
 		local new_entity = entry.new
-		client_entity_mod.update_entity_client(grid, old_entity, new_entity)
+		client_entity_mod.update_entity_client(world, old_entity, new_entity)
 	end
 
 	-- third pass: update neighbors and other stuff
 	for _, entry in updated_entities do
 		local new_entity = entry.new
-		update_neighbors(grid, new_entity.coordinates)
+		update_neighbors(world, new_entity.coordinates)
 	end
-	grid.grid_update_signal.send(updates)
+	world.world_update_signal.send(updates)
 
-	grid:purge_dead_entities()
+	world:purge_dead_entities()
 end
 
 return {
 	start_animations = start_animations,
 	step_animations = step_animations,
 	handle_updates = handle_updates,
-	render_grid = render_grid,
-	destroy_grid_instances = destroy_grid_instances,
+	render_world = render_world,
+	destroy_world_instances = destroy_world_instances,
 }

@@ -1,24 +1,23 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
-local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
-local action_phase_mod = require(ServerScriptService.Server.action_phase)
+local world_mod = require(ReplicatedStorage.Shared.world)
 local entity_mod = require(ServerScriptService.Server.entity)
+local coords = require(ReplicatedStorage.Shared.coords)
 
-type HexGrid = types.HexGrid
+type World = types.World
 
 -- A bunch of entities lined up
-function all_entities(): HexGrid
-	local grid = hex_grid_mod.new_grid_from_extents {
+function all_entities(): World
+	local world = world_mod.new_world_from_extents {
 		{ min = -10, max = 10 },
 		{ min = -10, max = 10 },
 		{ min = -3, max = 3 },
 	}
 
-	local team1 = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "red")
+	local team1 = world:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "red")
 	team1.server_data.visibility = "perfect"
-	local team2 = grid:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "blue")
+	local team2 = world:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "blue")
 	team2.is_player_team = false
 
 	local start = { -9, 7, 2 }
@@ -28,7 +27,7 @@ function all_entities(): HexGrid
 			type = ty,
 			primary_coordinate = start,
 			owner = team1.id,
-		}, grid)
+		}, world)
 		start = {
 			start[1] + 1,
 			start[2] - 1,
@@ -37,7 +36,7 @@ function all_entities(): HexGrid
 		return entity
 	end
 
-	grid.cells[hex_grid_mod.encode_coord(start)].type = "bar_deposit"
+	world.cells[coords.encode_coord(start)].type = "bar_deposit"
 
 	for _, ty in
 		{
@@ -61,21 +60,21 @@ function all_entities(): HexGrid
 		next_entity(ty)
 	end
 
-	return grid
+	return world
 end
 
--- 10x10x10 empty grid with 2 teams
-function blank_map(): HexGrid
-	local grid = hex_grid_mod.new_grid_from_extents {
+-- 10x10x10 empty world with 2 teams
+function blank_map(): World
+	local world = world_mod.new_world_from_extents {
 		{ min = -10, max = 10 },
 		{ min = -10, max = 10 },
 		{ min = -10, max = 10 },
 	}
 
-	local team1 = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "red")
-	local team2 = grid:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "blue")
+	local team1 = world:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "red")
+	local team2 = world:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "blue")
 
-	return grid, {
+	return world, {
 		team1 = team1,
 		team2 = team2,
 	}

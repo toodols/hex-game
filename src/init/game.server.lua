@@ -14,7 +14,7 @@ local team_mod = require(ReplicatedStorage.Shared.team)
 
 type TeamData = types.TeamData
 type Interaction = types.Interaction
-type HexGrid = types.HexGrid
+type World = types.World
 
 -- Copy assets for client use
 local destination = Instance.new "Folder"
@@ -47,24 +47,24 @@ if RunService:IsStudio() then
 	tests.run_tests()
 end
 
-local grid
-remotes_mod.get_hex_grid_data_remote.OnServerInvoke = function(player)
-	-- todo: change this to return nil when grid is not set up, and make the client poll instead
-	while not grid or not team_mod.team_of(grid, player) do
+local world
+remotes_mod.get_world_data_remote.OnServerInvoke = function(player)
+	-- todo: change this to return nil when world is not set up, and make the client poll instead
+	while not world or not team_mod.team_of(world, player) do
 		task.wait()
 	end
-	local player_team = team_mod.team_of(grid, player)
-	local serialized = serialize_mod.serialize_grid_for_team(grid, player_team.id)
+	local player_team = team_mod.team_of(world, player)
+	local serialized = serialize_mod.serialize_world_for_team(world, player_team.id)
 	return serialized
 end :: any
 
-function republish_teams(grid: HexGrid)
-	updates_mod.add_update(grid, {
+function republish_teams(world: World)
+	updates_mod.add_update(world, {
 		type = "teams",
-		teams = util.table_map(grid.teams, function(team)
-			return serialize_mod.serialize_team(grid, team)
+		teams = util.table_map(world.teams, function(team)
+			return serialize_mod.serialize_team(world, team)
 		end),
-		coalitions = grid.coalitions,
+		coalitions = world.coalitions,
 	})
 end
 
@@ -72,18 +72,18 @@ function start_game(teleport_data: { room: types.Room }?)
 	local room = teleport_data and teleport_data.room
 	local players_config = room and room.players
 	print("Starting game with teleport data", game.HttpService:JSONEncode(teleport_data))
-	grid = presets[if room then room.map else "my_map"]()
-	-- grid = tests.server.correct_phony_updates()
+	world = presets[if room then room.map else "my_map"]()
+	-- world = tests.server.correct_phony_updates()
 
-	_G.grid = grid
+	_G.world = world
 
 	remotes_mod.client_interaction_remote.OnServerEvent:Connect(function(plr: Player, data: { Interaction })
-		local player_team = team_mod.team_of(grid, plr)
+		local player_team = team_mod.team_of(world, plr)
 		if not player_team then
 			return
 		end
 		server_util.catch(function()
-			router_mod.on_client_interaction(grid, {
+			router_mod.on_client_interaction(world, {
 				player_team = player_team,
 				data = data,
 				plr = plr,
@@ -93,12 +93,12 @@ function start_game(teleport_data: { room: types.Room }?)
 
 	local function auto_add_player(plr: Player)
 		if players_config and players_config[plr.UserId] then
-			local team = grid.teams[players_config[plr.UserId].team]
+			local team = world.teams[players_config[plr.UserId].team]
 			assert(team, "team not found")
 			table.insert(team, plr)
 		else
 			local team_with_least_players = nil
-			for _, team in grid.teams do
+			for _, team in world.teams do
 				if not team.is_player_team then
 					continue
 				end
@@ -115,21 +115,21 @@ function start_game(teleport_data: { room: types.Room }?)
 		auto_add_player(plr)
 	end
 
-	turn_scheduler.recalculate_skips(grid)
+	turn_scheduler.recalculate_skips(world)
 
 	Players.PlayerAdded:Connect(function(plr)
 		auto_add_player(plr)
-		turn_scheduler.recalculate_skips(grid)
-		republish_teams(grid)
+		turn_scheduler.recalculate_skips(world)
+		republish_teams(world)
 	end)
 	Players.PlayerRemoving:Connect(function(plr)
-		for _, team in grid.teams do
+		for _, team in world.teams do
 			util.table_remove_needle(team.players, plr)
 		end
-		util.table_remove_needle(grid.skipped, plr)
+		util.table_remove_needle(world.skipped, plr)
 
-		turn_scheduler.recalculate_skips(grid)
-		republish_teams(grid)
+		turn_scheduler.recalculate_skips(world)
+		republish_teams(world)
 	end)
 end
 

@@ -7,17 +7,17 @@ local updates_mod = require(ServerScriptService.Server.updates)
 
 local util = require(ReplicatedStorage.Shared.util)
 local systems_mod = require(ServerScriptService.Server.systems)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local coords = require(ReplicatedStorage.Shared.coords)
 local server_entity_mod = require(ServerScriptService.Server.entity)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
 
-type HexGrid = types.HexGrid
+type World = types.World
 type System = server_types.System
 type ActionState = server_types.ActionState
 type EntityAction = types.EntityAction
 
-function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
-	local try_promote_actions: { EntityAction } = util.table_extract(grid.action_queue, function(action)
+function handle_try_promote_actions(world: World, action_state: ActionState)
+	local try_promote_actions: { EntityAction } = util.table_extract(world.action_queue, function(action)
 		if action.type == "try_promote_blueprint" or action.type == "try_promote_scaffold" then
 			return true
 		end
@@ -25,20 +25,20 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 	end)
 
 	table.sort(try_promote_actions, function(a, b)
-		local entity_a = grid.entities[a.entity_id]
-		local entity_b = grid.entities[b.entity_id]
+		local entity_a = world.entities[a.entity_id]
+		local entity_b = world.entities[b.entity_id]
 		return entity_a.server_data.requested_at < entity_b.server_data.requested_at
 	end)
 	for _, action in try_promote_actions do
-		local entity = grid.entities[action.entity_id]
+		local entity = world.entities[action.entity_id]
 		local server_behavior = server_entity_mod.registry[entity.type]
-		local shared_config = grid.entity_configurations[entity.type]
+		local shared_config = world.entity_configurations[entity.type]
 
 		if action.type == "try_promote_blueprint" then
 			local valid_systems = {}
 
 			-- can promote if it is neighboring a system
-			for encoded_neighbor, neighbor in server_util.get_neighbors_set(grid, entity.coordinates) do
+			for encoded_neighbor, neighbor in server_util.get_neighbors_set(world, entity.coordinates) do
 				local system = action_state.system_by_cell[encoded_neighbor]
 				if system ~= nil then
 					table.insert(valid_systems, system)
@@ -46,10 +46,10 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 			end
 
 			-- promote this blueprint if it is on a portal connected to a system
-			local cell = grid:get_cell(entity.primary_coordinate)
+			local cell = world:get_cell(entity.primary_coordinate)
 			if cell.type == "portal" and cell.portal.open then
 				for _, coord in cell.portal.group do
-					local system = action_state.system_by_cell[hex_grid_mod.encode_coord(coord)]
+					local system = action_state.system_by_cell[coords.encode_coord(coord)]
 					if system ~= nil then
 						table.insert(valid_systems, system)
 					end
@@ -60,7 +60,7 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 			end
 			for _, system in valid_systems do
 				-- is this blueprint researched?
-				local cell_researches = researches_mod.get_cell_researches(grid, cell, entity.owner)
+				local cell_researches = researches_mod.get_cell_researches(world, cell, entity.owner)
 				if
 					shared_config.required_research
 					and not util.table_every(shared_config.required_research, function(research_id)
@@ -78,10 +78,10 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 					end
 					local difference = request_amount - entity.cost_fulfilled[request_item_type]
 					local net =
-						systems_mod.system_consume_item_type(grid, action_state, system, request_item_type, difference)
+						systems_mod.system_consume_item_type(world, action_state, system, request_item_type, difference)
 					entity.cost_fulfilled[request_item_type] += net
 					if net > 0 then
-						updates_mod.add_update(grid, {
+						updates_mod.add_update(world, {
 							type = "entity_update",
 							entity = entity,
 						})
@@ -89,7 +89,7 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 					end
 				end
 
-				table.insert(grid.action_queue, {
+				table.insert(world.action_queue, {
 					type = "entity_event",
 					event_type = "consumed_items",
 					entity_id = entity.id,
@@ -98,12 +98,12 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 				-- if entity.cost_fulfilled deep_equal entity.cost then entity can promote to
 				if util.deep_equal(entity.cost, entity.cost_fulfilled) then
 					entity.status = "scaffold"
-					updates_mod.add_update(grid, {
+					updates_mod.add_update(world, {
 						type = "entity_update",
 						entity = entity,
 					})
 					if server_behavior.autogenerates_vertex then
-						local vertex = grid:query_entity({
+						local vertex = world:query_entity({
 							coordinate = entity.primary_coordinate,
 							type = "vertex",
 							owner = entity.owner,
@@ -112,7 +112,7 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 							if vertex.autogenerated then
 								vertex.status = "scaffold"
 							end
-							updates_mod.add_update(grid, {
+							updates_mod.add_update(world, {
 								type = "entity_update",
 								entity = vertex,
 							})
@@ -124,7 +124,7 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 			end
 		elseif action.type == "try_promote_scaffold" and entity.build_time > 0 then
 			entity.build_time -= 1
-			updates_mod.add_update(grid, {
+			updates_mod.add_update(world, {
 				type = "entity_update",
 				entity = entity,
 			})
@@ -132,23 +132,23 @@ function handle_try_promote_actions(grid: HexGrid, action_state: ActionState)
 
 		-- if this blueprint is still not promoted, add it back to the queue
 		if entity.status == "blueprint" then
-			table.insert(grid.action_queue, action)
+			table.insert(world.action_queue, action)
 		-- if this blueprint, now a scaffold has a build time of zero, complete it immediately
 		elseif entity.status == "scaffold" and entity.build_time == 0 then
 			entity.status = "complete"
-			server_behavior.on_completed(entity, grid, action_state)
-			updates_mod.add_update(grid, {
+			server_behavior.on_completed(entity, world, action_state)
+			updates_mod.add_update(world, {
 				type = "entity_update",
 				entity = entity,
 			})
-			local vertex = grid:query_entity({
+			local vertex = world:query_entity({
 				coordinate = entity.primary_coordinate,
 				type = "vertex",
 				owner = entity.owner,
 			})[1]
 			if vertex then
 				vertex.status = "complete"
-				updates_mod.add_update(grid, {
+				updates_mod.add_update(world, {
 					type = "entity_update",
 					entity = vertex,
 				})

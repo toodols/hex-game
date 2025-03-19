@@ -3,7 +3,7 @@ local React = require(ReplicatedStorage.Packages.react)
 local MainContext = require(script.Parent.context).MainContext
 local types = require(ReplicatedStorage.Shared.types)
 
-type HexGrid = types.HexGrid
+type World = types.World
 type Entity = types.Entity
 
 function use_immediate_effect(callback, dependencies: { any })
@@ -20,9 +20,9 @@ end
 
 function use_synced_entity(entity_id)
 	local context = React.useContext(MainContext)
-	local entity: Entity, set_entity = React.useState(context.grid.entities[entity_id])
+	local entity: Entity, set_entity = React.useState(context.world.entities[entity_id])
 	React.useEffect(function()
-		local cleanup = context.grid.grid_update_signal.listen(function(updates)
+		local cleanup = context.world.world_update_signal.listen(function(updates)
 			for _, update in updates do
 				if update.type == "entity_update" and update.entity.id == entity_id then
 					set_entity(update.entity)

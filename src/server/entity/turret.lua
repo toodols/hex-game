@@ -5,11 +5,11 @@ local registry = registry_mod.registry
 local with_defaults = registry_mod.with_defaults
 
 type Entity = types.Entity
-type HexGrid = types.HexGrid
+type World = types.World
 
 registry.turret = with_defaults {
 	autogenerates_vertex = true,
-	on_completed = function(self: Entity, grid: HexGrid) end,
+	on_completed = function(self: Entity, world: World) end,
 }
 
 return {}

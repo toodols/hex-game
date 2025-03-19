@@ -7,8 +7,8 @@ local serialize_mod = require(script.Parent.serialize)
 local remotes_mod = require(script.Parent.remotes)
 local visibility = require(script.Parent.visibility)
 
-type HexGrid = types.HexGrid
-type GridUpdate = types.GridUpdate
+type World = types.World
+type WorldUpdate = types.WorldUpdate
 type EntityId = types.EntityId
 type TeamId = types.TeamId
 
@@ -31,15 +31,15 @@ function filter_duplicate_entity_updates(updates)
 	return result
 end
 
-function flush_updates(grid: HexGrid): { [TeamId]: { GridUpdate } }
-	local buffer = grid.updates_buffer
+function flush_updates(world: World): { [TeamId]: { WorldUpdate } }
+	local buffer = world.updates_buffer
 	local updates = {}
 	if #buffer > 0 then
-		for _, team in grid.teams do
+		for _, team in world.teams do
 			if #team.players == 0 and not RunService:IsStudio() then
 				continue
 			end
-			local mapped = filter_duplicate_entity_updates(util.table_filter_map(buffer, function(update: GridUpdate)
+			local mapped = filter_duplicate_entity_updates(util.table_filter_map(buffer, function(update: WorldUpdate)
 				local target = (update :: any).target or "everyone"
 				if
 					team.server_data.visibility ~= "perfect"
@@ -49,34 +49,34 @@ function flush_updates(grid: HexGrid): { [TeamId]: { GridUpdate } }
 					return
 				end
 				if update.type == "entity_update" then
-					local serialized = serialize_mod.serialize_entity_for_team(grid, update.entity, team.id)
+					local serialized = serialize_mod.serialize_entity_for_team(world, update.entity, team.id)
 					return serialized and {
 						type = update.type,
 						entity = serialized,
 					}
 				elseif update.type == "entity_created" then
-					if visibility.entity_visibility(grid, grid.entities[update.entity_id], team.id) then
+					if visibility.entity_visibility(world, world.entities[update.entity_id], team.id) then
 						return {
 							type = update.type,
 							entity_id = update.entity_id,
 						}
 					end
 				elseif update.type == "entity_event" then
-					if visibility.entity_visibility(grid, grid.entities[update.event.entity_id], team.id) then
+					if visibility.entity_visibility(world, world.entities[update.event.entity_id], team.id) then
 						return {
 							type = update.type,
 							event = update.event,
 						}
 					end
 				elseif update.type == "cell_update" then
-					local serialized = serialize_mod.serialize_cell_for_team(grid, update.cell, team.id)
+					local serialized = serialize_mod.serialize_cell_for_team(world, update.cell, team.id)
 					return serialized and {
 						type = update.type,
 						entity = serialized,
 					}
 				elseif update.type == "ability" then
-					local hit_cell = grid:get_cell(update.coordinate)
-					local entity = grid.entities[update.entity_id]
+					local hit_cell = world:get_cell(update.coordinate)
+					local entity = world.entities[update.entity_id]
 					if hit_cell.owner == team.id or entity.owner == team.id then
 						return {
 							type = update.type,
@@ -90,7 +90,7 @@ function flush_updates(grid: HexGrid): { [TeamId]: { GridUpdate } }
 					return {
 						type = update.type,
 						cells = util.table_map(update.cells, function(cell)
-							return serialize_mod.serialize_cell_for_team(grid, cell, team.id)
+							return serialize_mod.serialize_cell_for_team(world, cell, team.id)
 						end),
 					}
 				else
@@ -100,22 +100,22 @@ function flush_updates(grid: HexGrid): { [TeamId]: { GridUpdate } }
 			if #mapped > 0 then
 				updates[team.id] = mapped
 				for _, player in team.players do
-					remotes_mod.grid_updates_remote:FireClient(player, mapped)
+					remotes_mod.world_updates_remote:FireClient(player, mapped)
 				end
 			end
 		end
 	end
-	grid.updates_buffer = {}
+	world.updates_buffer = {}
 	return updates
 end
 
-function add_update(grid: HexGrid, event: GridUpdate)
+function add_update(world: World, event: WorldUpdate)
 	if event.type == "entity_update" then
 		if event.entity == nil then
 			error "event.entity is nil"
 		end
 	end
-	table.insert(grid.updates_buffer, event)
+	table.insert(world.updates_buffer, event)
 end
 
 return {

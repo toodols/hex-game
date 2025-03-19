@@ -16,7 +16,7 @@ local Corner = util_components.Corner
 local interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
 type EntityId = types.EntityId
-type HexGrid = types.HexGrid
+type World = types.World
 type TeamData = types.TeamData
 
 function ItemFilters(props: { entity_id: EntityId })
@@ -250,11 +250,11 @@ function ItemFilters(props: { entity_id: EntityId })
 end
 
 function ItemFiltersPreview(props: { LayoutOrder: number?, entity_id: EntityId, click: () -> () })
-	local grid = React.useContext(MainContext).grid
+	local world = React.useContext(MainContext).world
 	local entity = hooks.use_synced_entity(props.entity_id)
 	local inventory = entity.inventory
 	assert(inventory, "inventory nil")
-	local is_owner = entity.owner == (team.team_of(grid, Players.LocalPlayer) :: TeamData).id
+	local is_owner = entity.owner == (team.team_of(world, Players.LocalPlayer) :: TeamData).id
 
 	return React.createElement("TextButton", {
 		BackgroundTransparency = 0.9,

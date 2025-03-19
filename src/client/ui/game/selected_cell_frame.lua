@@ -15,33 +15,33 @@ local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local Corner = util_components.Corner
 
 type CubicCoordinate = types.CubicCoordinate
-type HexGrid = types.HexGrid
+type World = types.World
 type EntityId = types.EntityId
-type GridUpdate = types.GridUpdate
+type WorldUpdate = types.WorldUpdate
 
-function best_uncompressed_entity(grid: HexGrid, entities_set: { [EntityId]: true })
+function best_uncompressed_entity(world: World, entities_set: { [EntityId]: true })
 	local candidate_uncompressed_entity: EntityId?
 	local candidate_uncompressed_entity_layer: number?
 	for entity_id in entities_set do
-		local entity = grid.entities[entity_id]
+		local entity = world.entities[entity_id]
 		if not entity or entity.is_destroyed then
 			continue
 		end
 		if
-			grid.entity_configurations[entity.type].layer == shared_entity_mod.layer.building
+			world.entity_configurations[entity.type].layer == shared_entity_mod.layer.building
 			or not candidate_uncompressed_entity_layer
 		then
 			candidate_uncompressed_entity = entity_id
-			candidate_uncompressed_entity_layer = grid.entity_configurations[entity.type].layer
+			candidate_uncompressed_entity_layer = world.entity_configurations[entity.type].layer
 		end
 	end
 	return candidate_uncompressed_entity
 end
 
-function entities_from_cells(grid: HexGrid, selected_cells: { CubicCoordinate })
+function entities_from_cells(world: World, selected_cells: { CubicCoordinate })
 	local entities_set = {}
 	for _, coord in selected_cells do
-		local cell = grid:get_cell(coord)
+		local cell = world:get_cell(coord)
 		for entity_id in cell.entities do
 			entities_set[entity_id] = true
 		end
@@ -51,7 +51,7 @@ end
 
 function SelectedCellFrame(props: { toggle_submenu: (submenu: any) -> (), selected_cells: { CubicCoordinate } })
 	local context = React.useContext(MainContext)
-	local grid = context.grid
+	local world = context.world
 
 	local _, force_update = React.useReducer(function(x)
 		return x + 1
@@ -60,27 +60,27 @@ function SelectedCellFrame(props: { toggle_submenu: (submenu: any) -> (), select
 	local props_ref = React.useRef(props)
 	props_ref.current = props
 
-	local entities_set = entities_from_cells(grid, props.selected_cells)
-	local uncompressed_entity = React.useRef(best_uncompressed_entity(grid, entities_set))
+	local entities_set = entities_from_cells(world, props.selected_cells)
+	local uncompressed_entity = React.useRef(best_uncompressed_entity(world, entities_set))
 	local gradient_ref = React.useRef(nil)
 
 	hooks.use_immediate_effect(function()
-		local new_entities = entities_from_cells(grid, props.selected_cells)
+		local new_entities = entities_from_cells(world, props.selected_cells)
 		if not new_entities[uncompressed_entity.current] then
-			local best = best_uncompressed_entity(grid, new_entities)
+			local best = best_uncompressed_entity(world, new_entities)
 			uncompressed_entity.current = best
 		end
 	end, { props })
 
 	React.useEffect(function()
-		local cleanup = grid.grid_update_signal.listen(function(updates: { GridUpdate })
+		local cleanup = world.world_update_signal.listen(function(updates: { WorldUpdate })
 			if
 				uncompressed_entity.current == nil
-				or not grid.entities[uncompressed_entity.current]
-				or grid.entities[uncompressed_entity.current].is_destroyed
+				or not world.entities[uncompressed_entity.current]
+				or world.entities[uncompressed_entity.current].is_destroyed
 			then
 				uncompressed_entity.current =
-					best_uncompressed_entity(grid, entities_from_cells(grid, props.selected_cells))
+					best_uncompressed_entity(world, entities_from_cells(world, props.selected_cells))
 			end
 			force_update(nil)
 		end)
@@ -230,7 +230,7 @@ function SelectedCellFrame(props: { toggle_submenu: (submenu: any) -> (), select
 						"TextLabel",
 						themes.theme_title {
 							Text = if #props.selected_cells == 1
-								then cells_mod.cell_names[grid:get_cell(props.selected_cells[1]).type]
+								then cells_mod.cell_names[world:get_cell(props.selected_cells[1]).type]
 								else `{#props.selected_cells} Cells Selected`,
 							TextSize = 23,
 						},

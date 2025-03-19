@@ -5,10 +5,11 @@ local TweenService = game:GetService "TweenService"
 local types = require(ReplicatedStorage.Shared.types)
 local React = require(ReplicatedStorage.Packages.react)
 local util = require(ReplicatedStorage.Shared.util)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local world_mod = require(ReplicatedStorage.Shared.world)
 local formatting = require(ReplicatedStorage.Shared.formatting)
 local items_mod = require(ReplicatedStorage.Shared.items)
 local team = require(ReplicatedStorage.Shared.team)
+local coords = require(ReplicatedStorage.Shared.coords)
 
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local client_entity_mod = require(ReplicatedStorage.Client.ui.Parent.entity)
@@ -30,8 +31,8 @@ local Separator = util_components.Separator
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
 type EntityId = types.EntityId
-type GridUpdate = types.GridUpdate
-type HexGrid = types.HexGrid
+type WorldUpdate = types.WorldUpdate
+type World = types.World
 type Entity = types.Entity
 
 function ShouldOutput(props: { entity: Entity, LayoutOrder: number? })
@@ -68,7 +69,7 @@ function EntityInformation(props: {
 	toggle_submenu: (submenu: any) -> (),
 })
 	local context = React.useContext(MainContext)
-	local grid: HexGrid = context.grid
+	local world: World = context.world
 	local selection_mode_stack = context.selection_mode_stack
 
 	local viewport_ref = React.useRef(nil :: any)
@@ -95,7 +96,7 @@ function EntityInformation(props: {
 	end, { props.compressed })
 
 	local entity = hooks.use_synced_entity(props.entity_id)
-	local shared_behavior = grid.entity_configurations[entity.type]
+	local shared_behavior = world.entity_configurations[entity.type]
 
 	React.useEffect(function()
 		TweenService:Create(ref.current, TweenInfo.new(0.2), {
@@ -109,7 +110,7 @@ function EntityInformation(props: {
 	end, { entity })
 
 	React.useEffect(function()
-		local model = client_entity_mod.create_model_from_type(grid, entity.type)
+		local model = client_entity_mod.create_model_from_type(world, entity.type)
 		model.Parent = viewport_ref.current
 		model:PivotTo(CFrame.new(0, -2, -4))
 
@@ -131,7 +132,7 @@ function EntityInformation(props: {
 			then Color3.new(0.458823, 0.756862, 1)
 			else if entity.status == "scaffold" then Color3.new(0.6, 1, 0.654901) else Color3.new(1, 1, 1)
 
-	local player_team = team.team_of(grid, Players.LocalPlayer)
+	local player_team = team.team_of(world, Players.LocalPlayer)
 
 	return React.createElement("Frame", {
 		BackgroundColor3 = Color3.fromRGB(25, 25, 25),
@@ -234,7 +235,7 @@ function EntityInformation(props: {
 							AutomaticSize = Enum.AutomaticSize.Y,
 							LayoutOrder = 2,
 							Size = UDim2.new(1, 0, 0, 20),
-							Text = formatting.format_text(grid, shared_behavior.description),
+							Text = formatting.format_text(world, shared_behavior.description),
 						}
 					),
 					-- Rotation = React.createElement(
@@ -396,10 +397,10 @@ function EntityInformation(props: {
 
 					Range = if entity.type == "laboratory"
 						then React.createElement(HighlightOnHover, {
-							Text = `Range: {grid.entity_configurations.laboratory.range}`,
-							coords = hex_grid_mod.neighbors_leq(
+							Text = `Range: {world.entity_configurations.laboratory.range}`,
+							coords = coords.neighbors_leq(
 								entity.primary_coordinate,
-								grid.entity_configurations.laboratory.range :: number
+								world.entity_configurations.laboratory.range :: number
 							),
 						})
 						else nil,
@@ -427,10 +428,10 @@ function EntityInformation(props: {
 							on_click = function()
 								local ability = shared_behavior.abilities.disguise
 								local candidates = {}
-								for _, coord in hex_grid_mod.neighbors_leq(entity.primary_coordinate, ability.range) do
-									local cell = grid:get_cell(coord)
+								for _, coord in coords.neighbors_leq(entity.primary_coordinate, ability.range) do
+									local cell = world:get_cell(coord)
 									if cell and next(cell.entities) then
-										local instance = grid.cell_instance_map[hex_grid_mod.encode_coord(coord)]
+										local instance = world.cell_instance_map[coords.encode_coord(coord)]
 										candidates[instance] = coord
 									end
 								end
@@ -466,12 +467,12 @@ function EntityInformation(props: {
 								local ability = shared_behavior.abilities[ability_name]
 
 								local candidates = {}
-								for _, coord in hex_grid_mod.neighbors_leq(entity.primary_coordinate, ability.range) do
-									local instance = grid.cell_instance_map[hex_grid_mod.encode_coord(coord)]
+								for _, coord in coords.neighbors_leq(entity.primary_coordinate, ability.range) do
+									local instance = world.cell_instance_map[coords.encode_coord(coord)]
 									if
 										not instance
-										or not hex_grid_mod.line_of_sight(
-											grid,
+										or not world_mod.line_of_sight(
+											world,
 											entity.primary_coordinate,
 											coord,
 											player_team.id
@@ -556,7 +557,8 @@ function EntityInformation(props: {
 								}
 							end,
 						}),
-					OpenRecipeButton = entity.active ~= false and entity.owner == player_team.id
+					OpenRecipeButton = entity.active ~= false
+						and entity.owner == player_team.id
 						and (entity.type == "factory")
 						and entity.status == "complete"
 						and React.createElement(ActionButton, {

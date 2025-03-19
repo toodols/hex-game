@@ -4,21 +4,21 @@ local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
 local computed_mod = require(ServerScriptService.Server.computed)
 
-type HexGrid = types.HexGrid
+type World = types.World
 type ActionState = server_types.ActionState
 type System = server_types.System
 
-function create_systems(grid: HexGrid, action_state: ActionState)
+function create_systems(world: World, action_state: ActionState)
 	local systems = {}
 	local system_by_entity_id = {}
 	local system_by_cell = {}
-	for _, system_data in computed_mod.compute_systems(grid) do
+	for _, system_data in computed_mod.compute_systems(world) do
 		local system = {
 			entities = system_data.entities,
 			cells = system_data.cells,
 			overflow_items = {},
 			power = 0,
-			team = grid.entities[next(system_data.entities) :: any].owner,
+			team = world.entities[next(system_data.entities) :: any].owner,
 		} :: System
 
 		for entity_id in system.entities do

@@ -5,14 +5,14 @@ local items_mod = require(script.Parent.items)
 local types = require(script.Parent.types)
 local methods = require(script.methods)
 
-function format_text(grid: types.HexGrid, text: string, ns: { [string]: any }?, depth: number?)
+function format_text(world: types.World, text: string, ns: { [string]: any }?, depth: number?)
 	local namespaces = {
 		research = researches_mod.researches,
 		item = items_mod.item_names,
 		cell = cells.cell_models,
-		entity = grid.entity_configurations,
-		quest = grid.quests,
-		turn = grid.turn,
+		entity = world.entity_configurations,
+		quest = world.quests,
+		turn = world.turn,
 	}
 	if ns then
 		for key, value in ns do

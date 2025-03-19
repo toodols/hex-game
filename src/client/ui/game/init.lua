@@ -5,7 +5,7 @@ local ContextActionService = game:GetService "ContextActionService"
 local UserInputService = game:GetService "UserInputService"
 
 local React = require(ReplicatedStorage.Packages.react)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local coords = require(ReplicatedStorage.Shared.coords)
 local ReactRoblox = require(ReplicatedStorage.Packages["react-roblox"])
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
@@ -31,14 +31,14 @@ local Corner = util_components.Corner
 
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
-type HexGrid = types.HexGrid
+type World = types.World
 type CubicCoordinate = types.CubicCoordinate
 type Entity = types.Entity
 type EntityId = types.EntityId
-type GridUpdate = types.GridUpdate
+type WorldUpdate = types.WorldUpdate
 type SelectionMode = ui_types.SelectionMode
 
-function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode } })
+function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 	local submenu, set_submenu = React.useState {}
 	hooks.use_immediate_effect(function()
 		set_submenu {}
@@ -50,14 +50,14 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode } })
 
 	local selection_mode = props.selection_mode_stack[#props.selection_mode_stack]
 
-	local quest_effects = util.table_flat(util.table_map(util.table_keys(props.grid.quests), function(quest_id)
-		local quest = props.grid.quests[quest_id]
+	local quest_effects = util.table_flat(util.table_map(util.table_keys(props.world.quests), function(quest_id)
+		local quest = props.world.quests[quest_id]
 		return quest.current_stage_data.effects
 	end))
 
 	return React.createElement(MainContext.Provider, {
 		value = {
-			grid = props.grid,
+			world = props.world,
 			selection_mode_stack = props.selection_mode_stack,
 			quest_effects = quest_effects,
 			force_update = force_update,
@@ -128,7 +128,7 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode } })
 				SelectedCellFrame = if selection_mode.type == "select_cells"
 					then React.createElement(SelectedCellFrame, {
 						selected_cells = util.table_map(util.table_keys(selection_mode.selected), function(k)
-							return hex_grid_mod.decode_coord(props.grid.instance_cell_map[k])
+							return coords.decode_coord(props.world.instance_cell_map[k])
 						end),
 						toggle_submenu = function(menu)
 							set_submenu(function(current)
@@ -265,7 +265,7 @@ function Main(props: { grid: HexGrid, selection_mode_stack: { SelectionMode } })
 	})
 end
 
-function init_ui(grid: HexGrid, root_instance: Instance?)
+function init_ui(world: World, root_instance: Instance?)
 	local root = ReactRoblox.createRoot(root_instance or Players.LocalPlayer.PlayerGui)
 	local selection_mode_stack: { SelectionMode } = {
 		{
@@ -275,11 +275,11 @@ function init_ui(grid: HexGrid, root_instance: Instance?)
 	}
 
 	local cell_instances_select = Instance.new "Model"
-	cell_instances_select.Parent = grid.cell_instance_root
+	cell_instances_select.Parent = world.cell_instance_root
 	cell_instances_select.Name = "Highlights"
 
 	local cell_instances_hover = Instance.new "Model"
-	cell_instances_hover.Parent = grid.cell_instance_root
+	cell_instances_hover.Parent = world.cell_instance_root
 	cell_instances_hover.Name = "HighlightsHover"
 
 	local hover_highlight: Highlight = Instance.new "Highlight"
@@ -306,7 +306,7 @@ function init_ui(grid: HexGrid, root_instance: Instance?)
 				continue
 			end
 			if not selected[instance] then
-				instance.Parent = grid.cell_instance_root
+				instance.Parent = world.cell_instance_root
 			end
 		end
 		for instance in selected do
@@ -341,7 +341,7 @@ function init_ui(grid: HexGrid, root_instance: Instance?)
 				end
 
 				root:render(React.createElement(Main, {
-					grid = grid,
+					world = world,
 					selection_mode_stack = selection_mode_stack,
 				}))
 
@@ -363,7 +363,7 @@ function init_ui(grid: HexGrid, root_instance: Instance?)
 				refresh_highlight(hover_highlight, selection_mode.candidates[cursor_instance])
 			end
 			root:render(React.createElement(Main, {
-				grid = grid,
+				world = world,
 				selection_mode_stack = selection_mode_stack,
 			}))
 		elseif selection_mode.type == "select_some_cell" then
@@ -373,7 +373,7 @@ function init_ui(grid: HexGrid, root_instance: Instance?)
 				refresh_highlight(hover_highlight, { [cursor_instance] = true })
 			end
 			root:render(React.createElement(Main, {
-				grid = grid,
+				world = world,
 				selection_mode_stack = selection_mode_stack,
 			}))
 		elseif selection_mode.type == "show_cells" then
@@ -388,7 +388,7 @@ function init_ui(grid: HexGrid, root_instance: Instance?)
 		render_stepped_connection = RunService.RenderStepped:Connect(function()
 			local raycast_params = RaycastParams.new()
 			raycast_params.FilterType = Enum.RaycastFilterType.Include
-			raycast_params.FilterDescendantsInstances = { grid.cell_instance_root }
+			raycast_params.FilterDescendantsInstances = { world.cell_instance_root }
 			local unit_ray = mouse.UnitRay
 
 			local raycast_result = workspace:Raycast(unit_ray.Origin, unit_ray.Direction * 1000, raycast_params)
@@ -399,7 +399,7 @@ function init_ui(grid: HexGrid, root_instance: Instance?)
 
 			if raycast_result then
 				cursor_instance = raycast_result.Instance
-				while cursor_instance and not grid.instance_cell_map[cursor_instance] do
+				while cursor_instance and not world.instance_cell_map[cursor_instance] do
 					cursor_instance = cursor_instance.Parent
 				end
 			end
@@ -429,7 +429,7 @@ function init_ui(grid: HexGrid, root_instance: Instance?)
 						end
 						-- update selected
 						root:render(React.createElement(Main, {
-							grid = grid,
+							world = world,
 							selection_mode_stack = selection_mode_stack,
 						}))
 						refresh_highlight(selected_highlight, selection_mode.selected)
@@ -437,7 +437,7 @@ function init_ui(grid: HexGrid, root_instance: Instance?)
 							{
 								type = "tutorial_report_selection",
 								selected = util.table_map(util.table_keys(selection_mode.selected), function(instance)
-									return hex_grid_mod.decode_coord(grid.instance_cell_map[instance])
+									return coords.decode_coord(world.instance_cell_map[instance])
 								end),
 							},
 						}
@@ -448,7 +448,7 @@ function init_ui(grid: HexGrid, root_instance: Instance?)
 						selection_mode_stack[#selection_mode_stack] = nil
 					end
 					root:render(React.createElement(Main, {
-						grid = grid,
+						world = world,
 						selection_mode_stack = selection_mode_stack,
 					}))
 				end
@@ -459,7 +459,7 @@ function init_ui(grid: HexGrid, root_instance: Instance?)
 	end
 
 	root:render(React.createElement(Main, {
-		grid = grid,
+		world = world,
 		selection_mode_stack = selection_mode_stack,
 	}))
 

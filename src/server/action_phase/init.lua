@@ -16,15 +16,15 @@ local new_action_state = require(script.new_action_state).new_action_state
 local create_systems = require(script.create_systems).create_systems
 local process_queue = require(script.process_queue).process_queue
 
-type HexGrid = types.HexGrid
+type World = types.World
 type EntityId = types.EntityId
 type ActionState = server_types.ActionState
 type EntityAction = types.EntityAction
 type TeamId = types.TeamId
 type System = server_types.System
 
-function portals_tick(grid: HexGrid)
-	for _, cell in grid.cells do
+function portals_tick(world: World)
+	for _, cell in world.cells do
 		if cell.type == "portal" then
 			local max_steps = cell.portal.open_time + cell.portal.close_time
 			cell.portal.steps = (cell.portal.steps + 1) % max_steps
@@ -37,11 +37,11 @@ function portals_tick(grid: HexGrid)
 	end
 end
 
-function queue_entity_decisions(grid: HexGrid, queue: { EntityAction })
-	for _, entity in grid:active_entities() do
+function queue_entity_decisions(world: World, queue: { EntityAction })
+	for _, entity in world:active_entities() do
 		for _, decision in entity.queued_decisions do
 			table.insert(queue, decision)
-			updates_mod.add_update(grid, {
+			updates_mod.add_update(world, {
 				type = "entity_update",
 				entity = entity,
 			})
@@ -50,8 +50,8 @@ function queue_entity_decisions(grid: HexGrid, queue: { EntityAction })
 	end
 end
 
-function queue_blueprints_and_scaffolds(grid: HexGrid, queue: { EntityAction })
-	for _, entity in grid:active_entities() do
+function queue_blueprints_and_scaffolds(world: World, queue: { EntityAction })
+	for _, entity in world:active_entities() do
 		-- queue all scaffolds for advancement
 		if entity.status == "scaffold" then
 			table.insert(queue, {
@@ -67,11 +67,11 @@ function queue_blueprints_and_scaffolds(grid: HexGrid, queue: { EntityAction })
 	end
 end
 
-function remove_occuluded_blueprints(grid: HexGrid)
+function remove_occuluded_blueprints(world: World)
 	-- remove blueprints that are too close to enemies
-	for _, entity in grid:active_entities() do
+	for _, entity in world:active_entities() do
 		if entity.status == "blueprint" then
-			local cell = grid:get_cell(entity.primary_coordinate)
+			local cell = world:get_cell(entity.primary_coordinate)
 			if
 				util.table_any(util.table_keys(cell.server_data.presence), function(team)
 					if team ~= entity.owner then
@@ -80,22 +80,22 @@ function remove_occuluded_blueprints(grid: HexGrid)
 					return false
 				end)
 			then
-				server_entity_mod.remove_entity(grid, entity)
+				server_entity_mod.remove_entity(world, entity)
 			end
 		end
 	end
 end
 
-function status_effects_tick(grid: HexGrid)
+function status_effects_tick(world: World)
 	local effects = effects_mod.effects
-	for entity_id, entity in grid:active_entities() do
+	for entity_id, entity in world:active_entities() do
 		if next(entity.effects) == nil then
 			continue
 		end
 		for _, effect in entity.effects do
 			if effects[effect.type] then
 				if effects[effect.type].tick then
-					effects[effect.type].tick(grid, entity, effect)
+					effects[effect.type].tick(world, entity, effect)
 				end
 			end
 			if effect.duration ~= nil then
@@ -106,7 +106,7 @@ function status_effects_tick(grid: HexGrid)
 			end
 		end
 		effects_mod.purge_destroyed_effects(entity)
-		updates_mod.add_update(grid, {
+		updates_mod.add_update(world, {
 			type = "entity_update",
 			entity = entity,
 		})
@@ -114,31 +114,31 @@ function status_effects_tick(grid: HexGrid)
 end
 
 --- Requires influences to be computed
-function entities_tick(grid: HexGrid, action_state: ActionState)
-	for _, entity in grid:active_entities() do
+function entities_tick(world: World, action_state: ActionState)
+	for _, entity in world:active_entities() do
 		local server_behavior = server_entity_mod.registry[entity.type]
-		server_behavior.tick(entity, grid, action_state)
+		server_behavior.tick(entity, world, action_state)
 	end
 end
 
-function delete_deconstructed_entities(grid: HexGrid, queue: { EntityAction })
+function delete_deconstructed_entities(world: World, queue: { EntityAction })
 	for _, action in
 		util.table_extract(queue, function(a: EntityAction)
 			return a.type == "deconstruct"
 		end)
 	do
-		local entity = grid.entities[action.entity_id]
+		local entity = world.entities[action.entity_id]
 		-- decaying entities can't be deconstructed
 		if entity.is_decaying then
 			table.insert(queue, action)
 			continue
 		end
 
-		server_entity_mod.remove_entity(grid, entity)
+		server_entity_mod.remove_entity(world, entity)
 	end
 end
 
-function run_action_phase(grid: HexGrid, extra_actions: { EntityAction }?)
+function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	local t0 = tick()
 	local action_state = new_action_state()
 
@@ -147,42 +147,42 @@ function run_action_phase(grid: HexGrid, extra_actions: { EntityAction }?)
 			if action.type == nil then
 				error "not an action"
 			end
-			table.insert(grid.action_queue, action)
+			table.insert(world.action_queue, action)
 		end
 	end
 
-	queue_entity_decisions(grid, grid.action_queue)
-	delete_deconstructed_entities(grid, grid.action_queue)
-	portals_tick(grid)
+	queue_entity_decisions(world, world.action_queue)
+	delete_deconstructed_entities(world, world.action_queue)
+	portals_tick(world)
 
-	computed_mod.compute_influences(grid)
-	entities_tick(grid, action_state)
+	computed_mod.compute_influences(world)
+	entities_tick(world, action_state)
 
-	queue_blueprints_and_scaffolds(grid, grid.action_queue)
+	queue_blueprints_and_scaffolds(world, world.action_queue)
 
-	create_systems(grid, action_state)
-	process_queue(grid, action_state)
+	create_systems(world, action_state)
+	process_queue(world, action_state)
 
-	status_effects_tick(grid)
+	status_effects_tick(world)
 
 	-- destroy entities marked for destruction
 	for entity_id in action_state.will_be_destroyed_entities do
-		server_entity_mod.remove_entity(grid, grid.entities[entity_id])
+		server_entity_mod.remove_entity(world, world.entities[entity_id])
 	end
 
-	create_systems(grid, action_state)
-	do_entity_decay(grid, action_state)
+	create_systems(world, action_state)
+	do_entity_decay(world, action_state)
 
-	computed_mod.compute_presence(grid)
-	remove_occuluded_blueprints(grid)
+	computed_mod.compute_presence(world)
+	remove_occuluded_blueprints(world)
 
-	for team_id, changed_to_visible in computed_mod.compute_visibility(grid, action_state) do
+	for team_id, changed_to_visible in computed_mod.compute_visibility(world, action_state) do
 		for encoded_coord in changed_to_visible do
-			local cell = grid.cells[encoded_coord]
+			local cell = world.cells[encoded_coord]
 			for entity_id in cell.entities do
-				updates_mod.add_update(grid, {
+				updates_mod.add_update(world, {
 					type = "entity_update",
-					entity = grid.entities[entity_id],
+					entity = world.entities[entity_id],
 					targets = {
 						team_id,
 					},
@@ -191,24 +191,24 @@ function run_action_phase(grid: HexGrid, extra_actions: { EntityAction }?)
 		end
 	end
 
-	updates_mod.add_update(grid, {
+	updates_mod.add_update(world, {
 		type = "cells",
-		cells = grid.cells,
+		cells = world.cells,
 	})
 
-	grid.turn += 1
-	updates_mod.add_update(grid, {
+	world.turn += 1
+	updates_mod.add_update(world, {
 		type = "turn",
-		turn = grid.turn,
-		highest_turn = grid.highest_turn,
+		turn = world.turn,
+		highest_turn = world.highest_turn,
 	})
 
-	for _, quest in grid.quests do
-		quest_methods.quest_update(quest, grid)
+	for _, quest in world.quests do
+		quest_methods.quest_update(quest, world)
 	end
 
-	local updates = updates_mod.flush_updates(grid)
-	grid:purge_dead_entities()
+	local updates = updates_mod.flush_updates(world)
+	world:purge_dead_entities()
 
 	return {
 		elapsed = tick() - t0,

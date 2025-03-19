@@ -4,9 +4,9 @@ local ReactRoblox = require(ReplicatedStorage.Packages["react-roblox"])
 local util = require(ReplicatedStorage.Shared.util)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local types = require(ReplicatedStorage.Shared.types)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local coords = require(ReplicatedStorage.Shared.coords)
 
-type HexGrid = types.HexGrid
+type World = types.World
 type EncodedCoordinate = types.EncodedCoordinate
 
 local INDICATORS = {
@@ -107,22 +107,22 @@ function TileAlert(props: { adornee: Instance, indicators: { [string]: number } 
 end
 
 function TileAlerts()
-	local grid: HexGrid = React.useContext(MainContext).grid
+	local world: World = React.useContext(MainContext).world
 	local cells: { [EncodedCoordinate]: {
 		[string]: number,
 	} }, set_cells = React.useState {}
 	React.useEffect(function()
-		return grid.grid_update_signal.listen(function(updates)
+		return world.world_update_signal.listen(function(updates)
 			if not util.table_any(updates, function(update)
 				return update.type == "entity_update"
 			end) then
 				return
 			end
 			local new_cells = {}
-			for _, cell in grid.cells do
+			for _, cell in world.cells do
 				local indicators = {}
 				for entity_id in cell.entities do
-					local entity = grid.entities[entity_id]
+					local entity = world.entities[entity_id]
 					if not entity then
 						warn("no entity for", entity_id)
 						continue
@@ -153,7 +153,7 @@ function TileAlerts()
 					end
 				end
 				if next(indicators) then
-					new_cells[hex_grid_mod.encode_coord(cell.coordinate)] = indicators
+					new_cells[coords.encode_coord(cell.coordinate)] = indicators
 				end
 			end
 			set_cells(new_cells)
@@ -164,7 +164,7 @@ function TileAlerts()
 		React.Fragment,
 		{},
 		util.table_map(cells, function(v, k)
-			local cell_instance = grid.cell_instance_map[k]
+			local cell_instance = world.cell_instance_map[k]
 			return TileAlert { adornee = cell_instance, indicators = v }
 		end)
 	)

@@ -2,10 +2,10 @@ local HttpService = game:GetService "HttpService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
-local hex_grid = require(ReplicatedStorage.Shared.hex_grid)
 local server_types = require(ServerScriptService.Server.types)
+local coords = require(ReplicatedStorage.Shared.coords)
 
-type HexGrid = types.HexGrid
+type World = types.World
 type Entity = types.Entity
 type CubicCoordinate = types.CubicCoordinate
 type EncodedCoordinate = types.EncodedCoordinate
@@ -32,12 +32,12 @@ function catch(fn, plr, data)
 end
 
 -- creates a set of all neighboring coordinates in r<=1
-function get_neighbors_set(grid: HexGrid, coordinates: { CubicCoordinate }): { [EncodedCoordinate]: CubicCoordinate }
+function get_neighbors_set(world: World, coordinates: { CubicCoordinate }): { [EncodedCoordinate]: CubicCoordinate }
 	local neighbor_set = {}
 	for _, coord in coordinates do
-		neighbor_set[hex_grid.encode_coord(coord)] = coord
-		for _, neighbor_coord in hex_grid.neighbors_eq(coord, 1) do
-			neighbor_set[hex_grid.encode_coord(neighbor_coord)] = coord
+		neighbor_set[coords.encode_coord(coord)] = coord
+		for _, neighbor_coord in coords.neighbors_eq(coord, 1) do
+			neighbor_set[coords.encode_coord(neighbor_coord)] = coord
 		end
 	end
 	return neighbor_set

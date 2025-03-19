@@ -3,7 +3,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local updates_mod = require(script.Parent.updates)
 local new_signal = require(ReplicatedStorage.Shared.signal).new_signal
 
-type HexGrid = types.HexGrid
+type World = types.World
 type TurnSchedule = types.TurnSchedule
 
 -- don't like how much of a mess this all is
@@ -41,9 +41,9 @@ function turn_schedule_kill(schedule: TurnSchedule)
 	coroutine.close(schedule.loop_thread)
 end
 
-function recalculate_skips(grid: HexGrid)
+function recalculate_skips(world: World)
 	local needed_skips = 0
-	for _, team in grid.teams do
+	for _, team in world.teams do
 		needed_skips += #team.players
 	end
 
@@ -51,43 +51,43 @@ function recalculate_skips(grid: HexGrid)
 		return
 	end
 
-	if #grid.skipped >= needed_skips and grid.turn_schedule ~= nil then
-		grid.skipped = {}
-		turn_schedule_skip(grid.turn_schedule)
+	if #world.skipped >= needed_skips and world.turn_schedule ~= nil then
+		world.skipped = {}
+		turn_schedule_skip(world.turn_schedule)
 	else
-		grid.needed_skips = needed_skips
-		grid.current_skips = #grid.skipped
-		updates_mod.add_update(grid, {
+		world.needed_skips = needed_skips
+		world.current_skips = #world.skipped
+		updates_mod.add_update(world, {
 			type = "turn_skips",
-			current_skips = #grid.skipped,
+			current_skips = #world.skipped,
 			needed_skips = needed_skips,
 		})
 	end
 end
 
 -- Reports the turn time to the players
-function report_turn_time(grid: HexGrid)
-	assert(grid.turn_schedule, "no turn schedule")
-	updates_mod.add_update(grid, {
+function report_turn_time(world: World)
+	assert(world.turn_schedule, "no turn schedule")
+	updates_mod.add_update(world, {
 		type = "turn_timer",
 		schedule = {
-			start_time_sync = grid.turn_schedule.start_time_sync,
-			start_time = grid.turn_schedule.start_time,
-			end_time = grid.turn_schedule.end_time,
-			running = grid.turn_schedule.running,
+			start_time_sync = world.turn_schedule.start_time_sync,
+			start_time = world.turn_schedule.start_time,
+			end_time = world.turn_schedule.end_time,
+			running = world.turn_schedule.running,
 		},
 	})
-	updates_mod.flush_updates(grid)
+	updates_mod.flush_updates(world)
 end
 
 -- Resets the turn time to the beginning (does not report)
-function reset_turn_time(grid: HexGrid, turn_schedule: TurnSchedule)
+function reset_turn_time(world: World, turn_schedule: TurnSchedule)
 	local count_entities = 0
 	-- todo: simply counting every entity is a terrible way to scale game time
-	for _ in grid:active_entities() do
+	for _ in world:active_entities() do
 		count_entities += 1
 	end
-	local wait_time = count_entities * grid.speed_multiplier + grid.speed_base
+	local wait_time = count_entities * world.speed_multiplier + world.speed_base
 	turn_schedule.start_time_sync = workspace:GetServerTimeNow()
 	turn_schedule.start_time = os.clock()
 	turn_schedule.end_time = os.clock() + wait_time

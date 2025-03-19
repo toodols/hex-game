@@ -4,14 +4,14 @@ local types = require(ReplicatedStorage.Shared.types)
 local asset_server = require(ReplicatedStorage.Shared.asset_server)
 
 type Entity = types.Entity
-type HexGrid = types.HexGrid
+type World = types.World
 
 local model = asset_server.load "Entities/Barrier"
 
 registry_mod.registry.barrier = registry_mod.with_defaults {
 	model = model,
-	update = function(self: Entity, grid: HexGrid, old: Entity) end,
-	init = function(self: Entity, grid: HexGrid) end,
+	update = function(self: Entity, world: World, old: Entity) end,
+	init = function(self: Entity, world: World) end,
 }
 
 return {}

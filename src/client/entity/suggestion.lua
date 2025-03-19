@@ -4,7 +4,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local asset_server = require(ReplicatedStorage.Shared.asset_server)
 
 type Entity = types.Entity
-type HexGrid = types.HexGrid
+type World = types.World
 
 local model = asset_server.load "Entities/Suggestion"
 

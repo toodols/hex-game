@@ -3,30 +3,30 @@ local ServerScriptService = game:GetService "ServerScriptService"
 
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local coords = require(ReplicatedStorage.Shared.coords)
 
 local updates_mod = require(ServerScriptService.Server.updates)
 local effect_methods = require(ServerScriptService.Server.effect.methods)
 local registry_mod = require(script.Parent.registry)
 
 type Entity = types.Entity
-type HexGrid = types.HexGrid
+type World = types.World
 type EntityEvent = types.EntityEvent
 
 registry_mod.registry.solution = registry_mod.with_defaults {
-	init = function(self: Entity, grid: HexGrid)
+	init = function(self: Entity, world: World)
 		self.decayable = false
 	end,
 	abilities = {
-		solution_use = function(self: Entity, grid: HexGrid)
-			local config = grid.entity_configurations[self.type]
+		solution_use = function(self: Entity, world: World)
+			local config = world.entity_configurations[self.type]
 			for _, cell in
-				util.table_filter_map(hex_grid_mod.neighbors_many_leq(self.coordinates, 1), function(coord)
-					return grid:get_cell(coord)
+				util.table_filter_map(coords.neighbors_many_leq(self.coordinates, 1), function(coord)
+					return world:get_cell(coord)
 				end)
 			do
 				for entity_id in cell.entities do
-					local affected_entity = grid.entities[entity_id]
+					local affected_entity = world.entities[entity_id]
 
 					-- it would be nice to use damage_mod for this but it doesn't support healing damage
 					-- and this ignores layers
@@ -41,7 +41,7 @@ registry_mod.registry.solution = registry_mod.with_defaults {
 						duration = config.abilities.solution_use.shield_duration,
 					})
 
-					updates_mod.add_update(grid, {
+					updates_mod.add_update(world, {
 						type = "entity_update",
 						entity = affected_entity,
 					})
@@ -49,9 +49,9 @@ registry_mod.registry.solution = registry_mod.with_defaults {
 			end
 		end,
 	},
-	on_event = function(self: Entity, grid: HexGrid, event: EntityEvent)
+	on_event = function(self: Entity, world: World, event: EntityEvent)
 		if event.event_type == "killed" then
-			registry_mod.registry[self.type].abilities.solution_use(self, grid)
+			registry_mod.registry[self.type].abilities.solution_use(self, world)
 		end
 	end,
 }

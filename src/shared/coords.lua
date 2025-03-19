@@ -124,6 +124,41 @@ function from_vec3(_vec: Vector3): CubicCoordinate
 	return 0 :: any
 end
 
+function coords_round(coord: { number }): { CubicCoordinate }
+	local q = math.floor(coord[1] + 0.5)
+	local r = math.floor(coord[2] + 0.5)
+	local s = math.floor(coord[3] + 0.5)
+
+	local q_diff = math.abs(q - coord[1])
+	local r_diff = math.abs(r - coord[2])
+	local s_diff = math.abs(s - coord[3])
+
+	local results = {}
+
+	-- Check for boundaries and add the neighboring cells it falls between
+	if q_diff == 0.5 then
+		table.insert(results, { q + (q > coord[1] and -1 or 1), r, s })
+	end
+	if r_diff == 0.5 then
+		table.insert(results, { q, r + (r > coord[2] and -1 or 1), s })
+	end
+	if s_diff == 0.5 then
+		table.insert(results, { q, r, s + (s > coord[3] and -1 or 1) })
+	end
+
+	if q_diff > r_diff and q_diff > s_diff then
+		q = -r - s
+	elseif r_diff > s_diff then
+		r = -q - s
+	else
+		s = -q - r
+	end
+
+	table.insert(results, { q == -0 and 0 or q, r == -0 and 0 or r, s == -0 and 0 or s })
+
+	return results
+end
+
 return {
 	coords_eq = coords_eq,
 	coords_sub = coords_sub,
@@ -138,5 +173,6 @@ return {
 	into_cframe = into_cframe,
 	from_vec3 = from_vec3,
 	coords_lerp = coords_lerp,
+	coords_round = coords_round,
 	rotation_to_direction = rotation_to_direction,
 }

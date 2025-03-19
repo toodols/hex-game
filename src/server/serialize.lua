@@ -2,7 +2,7 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local visibility_mod = require(script.Parent.visibility)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local coords = require(ReplicatedStorage.Shared.coords)
 local quest_methods = require(script.Parent.questing.quest)
 local team_mod = require(ReplicatedStorage.Shared.team)
 
@@ -10,17 +10,17 @@ local cell_visibility = visibility_mod.cell_visibility
 local entity_visibility = visibility_mod.entity_visibility
 
 type Entity = types.Entity
-type HexGrid = types.HexGrid
+type World = types.World
 type TeamId = types.TeamId
 type HexCell = types.HexCell
-type PartialHexGrid = types.PartialHexGrid
+type PartialWorld = types.PartialWorld
 type TeamData = types.TeamData
 type EntityId = types.EntityId
 
-function buildable_for_team(grid: HexGrid, cell: HexCell, team: TeamId): boolean
+function buildable_for_team(world: World, cell: HexCell, team: TeamId): boolean
 	local result = false
-	for _, coordinate in hex_grid_mod.neighbors_eq(cell.coordinate, 1) do
-		local neighbor_cell = grid:get_cell(coordinate)
+	for _, coordinate in coords.neighbors_eq(cell.coordinate, 1) do
+		local neighbor_cell = world:get_cell(coordinate)
 		if neighbor_cell and neighbor_cell.owner == team then
 			result = true
 		end
@@ -33,7 +33,7 @@ function buildable_for_team(grid: HexGrid, cell: HexCell, team: TeamId): boolean
 	return result
 end
 
-function serialize_team(grid: HexGrid, team: TeamData): TeamData
+function serialize_team(world: World, team: TeamData): TeamData
 	local copy = {}
 	for k, v in team do
 		if k ~= "server_data" then
@@ -43,16 +43,16 @@ function serialize_team(grid: HexGrid, team: TeamData): TeamData
 	return copy :: TeamData
 end
 
-function serialize_entity_for_team(grid: HexGrid, entity: Entity, team: TeamId): Entity?
-	local team_data = grid.teams[team]
+function serialize_entity_for_team(world: World, entity: Entity, team: TeamId): Entity?
+	local team_data = world.teams[team]
 	assert(team_data, "no team")
-	if entity_visibility(grid, entity, team) then
+	if entity_visibility(world, entity, team) then
 		local to_copy = entity
 		local copy = {}
 		for k, v in to_copy do
 			if k == "server_data" then
 			elseif k == "queued_decisions" then
-				if team_mod.is_allied(grid, entity.owner, team) then
+				if team_mod.is_allied(world, entity.owner, team) then
 					copy[k] = v
 				else
 					copy[k] = {}
@@ -62,8 +62,8 @@ function serialize_entity_for_team(grid: HexGrid, entity: Entity, team: TeamId):
 			end
 		end
 		if entity.server_data.is_disguise_of then
-			local host = grid.entities[entity.server_data.is_disguise_of]
-			if not team_mod.is_allied(grid, host.owner, team) then
+			local host = world.entities[entity.server_data.is_disguise_of]
+			if not team_mod.is_allied(world, host.owner, team) then
 				copy.active = true
 			end
 		end
@@ -72,24 +72,24 @@ function serialize_entity_for_team(grid: HexGrid, entity: Entity, team: TeamId):
 	return nil
 end
 
-function serialize_cell_for_team(grid: HexGrid, cell: HexCell, team: TeamId): HexCell | nil
-	local team_data = grid.teams[team]
+function serialize_cell_for_team(world: World, cell: HexCell, team: TeamId): HexCell | nil
+	local team_data = world.teams[team]
 	local visible_for_team = cell_visibility(cell.server_data.visibility[team])
 	if visible_for_team then
 		local influences = {}
 		for entity_id in cell.server_data.influences do
-			local entity = grid.entities[entity_id]
+			local entity = world.entities[entity_id]
 			if entity.owner == team then
 				influences[entity_id] = true
 			end
 		end
 		local entities = {}
 		for entity_id in cell.entities do
-			local entity = grid.entities[entity_id]
+			local entity = world.entities[entity_id]
 			if entity.owner == team or entity.status ~= "blueprint" then
 				if entity.disguise then
 					if
-						team_data.server_data.visibility == "perfect" or team_mod.is_allied(grid, team, entity.owner)
+						team_data.server_data.visibility == "perfect" or team_mod.is_allied(world, team, entity.owner)
 					then
 						entities[entity_id] = true
 					else
@@ -101,7 +101,7 @@ function serialize_cell_for_team(grid: HexGrid, cell: HexCell, team: TeamId): He
 			end
 		end
 		-- table.sort(entities, function(a, b)
-		-- 	return grid.entity_configurations[a.type].layer > grid.entity_configurations[b.type].layer
+		-- 	return world.entity_configurations[a.type].layer > world.entity_configurations[b.type].layer
 		-- end)
 		return {
 			entities = entities,
@@ -109,14 +109,14 @@ function serialize_cell_for_team(grid: HexGrid, cell: HexCell, team: TeamId): He
 			owner = cell.owner,
 			type = cell.type,
 			visible_for_team = visible_for_team,
-			buildable_for_team = buildable_for_team(grid, cell, team),
+			buildable_for_team = buildable_for_team(world, cell, team),
 			influences = influences,
 			server_data = nil :: any,
 		}
 	else
 		return {
 			entities = util.table_filter(cell.entities, function(_, entity_id)
-				local entity = grid.entities[entity_id]
+				local entity = world.entities[entity_id]
 				-- if one of its coordinates is visible or it is .server_data.always_visible
 				return entity.server_data.always_visible
 			end),
@@ -128,42 +128,42 @@ function serialize_cell_for_team(grid: HexGrid, cell: HexCell, team: TeamId): He
 		}
 	end
 end
-function serialize_grid_for_team(grid: HexGrid, team: TeamId): PartialHexGrid
+function serialize_world_for_team(world: World, team: TeamId): PartialWorld
 	local entities: { [EntityId]: Entity } = {}
-	for entity_id, entity in grid.entities do
-		local serialized = serialize_entity_for_team(grid, entity, team)
+	for entity_id, entity in world.entities do
+		local serialized = serialize_entity_for_team(world, entity, team)
 		if serialized then
 			entities[entity_id] = serialized
 		end
 	end
 
-	local partial_grid: PartialHexGrid = {
-		cells = util.table_map(grid.cells, function(cell)
-			return serialize_cell_for_team(grid, cell, team)
+	local partial_world: PartialWorld = {
+		cells = util.table_map(world.cells, function(cell)
+			return serialize_cell_for_team(world, cell, team)
 		end),
-		coalitions = grid.coalitions,
-		teams = util.table_map(grid.teams, function(other_team)
-			return serialize_team(grid, other_team)
+		coalitions = world.coalitions,
+		teams = util.table_map(world.teams, function(other_team)
+			return serialize_team(world, other_team)
 		end),
-		quests = util.table_map(grid.quests, function(quest)
-			return quest_methods.quest_serialize(quest, grid)
+		quests = util.table_map(world.quests, function(quest)
+			return quest_methods.quest_serialize(quest, world)
 		end),
-		turn = grid.turn,
-		current_skips = grid.current_skips,
-		needed_skips = grid.needed_skips,
-		highest_turn = grid.highest_turn,
-		turn_schedule = grid.turn_schedule,
+		turn = world.turn,
+		current_skips = world.current_skips,
+		needed_skips = world.needed_skips,
+		highest_turn = world.highest_turn,
+		turn_schedule = world.turn_schedule,
 		entities = entities,
-		entity_configurations = grid.entity_configurations,
-		global_configuration = grid.global_configuration,
-		neutral_team = grid.neutral_team,
-		spectator_team = grid.spectator_team,
+		entity_configurations = world.entity_configurations,
+		global_configuration = world.global_configuration,
+		neutral_team = world.neutral_team,
+		spectator_team = world.spectator_team,
 	}
-	return partial_grid
+	return partial_world
 end
 
 return {
-	serialize_grid_for_team = serialize_grid_for_team,
+	serialize_world_for_team = serialize_world_for_team,
 	serialize_cell_for_team = serialize_cell_for_team,
 	serialize_entity_for_team = serialize_entity_for_team,
 	buildable_for_team = buildable_for_team,

@@ -6,7 +6,7 @@ local server_types = require(ServerScriptService.Server.types)
 local items_mod = require(ReplicatedStorage.Shared.items)
 local updates_mod = require(ServerScriptService.Server.updates)
 
-type HexGrid = types.HexGrid
+type World = types.World
 type System = server_types.System
 type ActionState = server_types.ActionState
 type Item = types.Item
@@ -15,14 +15,14 @@ type Inventory = types.Inventory
 
 -- consume items from inventories, prioritizing overflow_items
 function system_consume_item_type(
-	grid: HexGrid,
+	world: World,
 	action_state: ActionState,
 	system: System,
 	request_item: Item,
 	amount: number
 )
 	local infinite_source = util.table_any(util.table_keys(system.entities), function(entity_id)
-		return grid.entities[entity_id].type == "infinite_source"
+		return world.entities[entity_id].type == "infinite_source"
 	end)
 	if infinite_source then
 		return amount
@@ -44,9 +44,9 @@ function system_consume_item_type(
 		local nonempty_inventory_entities: { Entity } = util.table_filter_map(
 			util.table_keys(system.entities),
 			function(entity_id)
-				local inventory = grid.entities[entity_id].inventory
+				local inventory = world.entities[entity_id].inventory
 				if inventory and #inventory.items > 0 then
-					return grid.entities[entity_id]
+					return world.entities[entity_id]
 				end
 				return nil
 			end
@@ -58,7 +58,7 @@ function system_consume_item_type(
 			end)
 			amount -= #extracted
 			net += #extracted
-			updates_mod.add_update(grid, {
+			updates_mod.add_update(world, {
 				type = "entity_update",
 				entity = inventory_entity,
 			})
@@ -69,13 +69,13 @@ end
 
 -- returns true if the inventories + overflow_items can satisfy the request_items
 function system_has_items(
-	grid: HexGrid,
+	world: World,
 	action_state: ActionState,
 	system: System,
 	request_items: { [Item]: number? }
 ): boolean
 	local infinite_source = util.table_any(util.table_keys(system.entities), function(entity_id)
-		return grid.entities[entity_id].type == "infinite_source"
+		return world.entities[entity_id].type == "infinite_source"
 	end)
 	if infinite_source then
 		return true
@@ -92,9 +92,9 @@ function system_has_items(
 	local nonempty_inventory_entities: { Entity } = util.table_filter_map(
 		util.table_keys(system.entities),
 		function(entity_id)
-			local inventory = grid.entities[entity_id].inventory
+			local inventory = world.entities[entity_id].inventory
 			if inventory and #inventory.items > 0 then
-				return grid.entities[entity_id]
+				return world.entities[entity_id]
 			end
 		end
 	)
@@ -110,13 +110,13 @@ function system_has_items(
 end
 
 -- add items to inventories in the system, then add overflow to overflow_items
-function system_add_items(grid: HexGrid, action_state: ActionState, system: System, items: { Item })
+function system_add_items(world: World, action_state: ActionState, system: System, items: { Item })
 	local open_inventory_entities: { Entity & { inventory: Inventory } } = util.table_filter_map(
 		util.table_keys(system.entities),
 		function(entity_id)
-			local inventory = grid.entities[entity_id].inventory
+			local inventory = world.entities[entity_id].inventory
 			if inventory and inventory.capacity > #inventory.items then
-				return grid.entities[entity_id]
+				return world.entities[entity_id]
 			end
 			return nil
 		end
@@ -125,7 +125,7 @@ function system_add_items(grid: HexGrid, action_state: ActionState, system: Syst
 	while #open_inventory_entities > 0 and #items > 0 do
 		local target = open_inventory_entities[#open_inventory_entities]
 		if items_mod.inventory_deposit(target.inventory, items) then
-			updates_mod.add_update(grid, {
+			updates_mod.add_update(world, {
 				type = "entity_update",
 				entity = target,
 			})

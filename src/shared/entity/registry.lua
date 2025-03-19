@@ -3,7 +3,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 
 type HexCell = types.HexCell
-type HexGrid = types.HexGrid
+type World = types.World
 type Entity = types.Entity
 type CubicCoordinate = types.CubicCoordinate
 type Item = types.Item

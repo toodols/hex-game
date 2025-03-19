@@ -3,20 +3,20 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local damage_mod = require(ServerScriptService.Server.damage)
 local methods = require(script.methods)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local world_mod = require(ReplicatedStorage.Shared.world)
 local team = require(ReplicatedStorage.Shared.team)
 local server_types = require(ServerScriptService.Server.types)
 
 type Entity = types.Entity
-type HexGrid = types.HexGrid
+type World = types.World
 type Effect = types.Effect
 type ActionState = server_types.ActionState
 type EffectBehavior = {
 	description: string?,
 	desirability: "positive" | "negative" | "neutral" | nil,
-	init: (grid: HexGrid, entity: Entity, effect: Effect) -> ()?,
-	tick: (grid: HexGrid, action_state: ActionState, entity: Entity, effect: Effect) -> ()?,
-	remove: (grid: HexGrid, entity: Entity, effect: Effect) -> ()?,
+	init: (world: World, entity: Entity, effect: Effect) -> ()?,
+	tick: (world: World, action_state: ActionState, entity: Entity, effect: Effect) -> ()?,
+	remove: (world: World, entity: Entity, effect: Effect) -> ()?,
 }
 
 local effects: { [string]: EffectBehavior } = {}
@@ -27,9 +27,9 @@ effects.shield = {}
 effects.regeneration = {
 	description = "Gains +1 hitpoint every turn",
 	desirability = "positive",
-	init = function(grid: HexGrid, entity: Entity, effect: Effect) end,
-	tick = function(grid: HexGrid, action_state: ActionState, entity: Entity, effect: Effect)
-		damage_mod.damage_entity(grid, entity, {
+	init = function(world: World, entity: Entity, effect: Effect) end,
+	tick = function(world: World, action_state: ActionState, entity: Entity, effect: Effect)
+		damage_mod.damage_entity(world, entity, {
 			type = "healing",
 			amount = 1,
 		})
@@ -39,8 +39,8 @@ effects.regeneration = {
 -- Todo: some negative debuff that comes with being infected
 effects.infected = {
 	desirability = "negative",
-	init = function(grid: HexGrid, entity: Entity, effect: Effect) end,
-	remove = function(grid: HexGrid, entity: Entity, effect: Effect) end,
+	init = function(world: World, entity: Entity, effect: Effect) end,
+	remove = function(world: World, entity: Entity, effect: Effect) end,
 	tick = function()
 		-- todo: spread to other cells
 	end,

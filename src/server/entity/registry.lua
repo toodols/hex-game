@@ -6,8 +6,8 @@ local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 
 type Damage = types.Damage
 type HexCell = types.HexCell
-type HexGrid = types.HexGrid
-type PartialHexGrid = types.PartialHexGrid
+type World = types.World
+type PartialWorld = types.PartialWorld
 type Entity = types.Entity
 type ActionState = server_types.ActionState
 type CellType = types.CellType
@@ -18,20 +18,20 @@ type EntityEvent = types.EntityEvent
 
 export type ServerEntityBehavior = {
 	type: string,
-	init: (self: Entity, grid: HexGrid) -> (),
+	init: (self: Entity, world: World) -> (),
 
 	-- called at the start of every action phase
-	tick: (self: Entity, grid: HexGrid, action_state: ActionState?) -> (),
+	tick: (self: Entity, world: World, action_state: ActionState?) -> (),
 	built_on: { CellType },
 
-	illuminates: (self: Entity, grid: HexGrid) -> { CubicCoordinate },
-	on_completed: (self: Entity, grid: HexGrid) -> (),
-	influences: ((self: Entity, grid: HexGrid) -> ())?,
+	illuminates: (self: Entity, world: World) -> { CubicCoordinate },
+	on_completed: (self: Entity, world: World) -> (),
+	influences: ((self: Entity, world: World) -> ())?,
 	-- laboratory only
-	on_research_completed: (self: Entity, grid: HexGrid, research_id: string) -> ()?,
+	on_research_completed: (self: Entity, world: World, research_id: string) -> ()?,
 	autogenerates_vertex: boolean?,
-	abilities: { [string]: (self: Entity, grid: HexGrid) -> () },
-	on_event: (self: Entity, grid: HexGrid, event: EntityEvent, action_state: ActionState) -> (),
+	abilities: { [string]: (self: Entity, world: World) -> () },
+	on_event: (self: Entity, world: World, event: EntityEvent, action_state: ActionState) -> (),
 }
 
 local registry: { [string]: ServerEntityBehavior } = {}
@@ -46,7 +46,7 @@ function with_defaults(behavior: any): ServerEntityBehavior
 	behavior.influences = behavior.influences or noop
 	behavior.on_event = behavior.on_event or noop
 	behavior.abilities = behavior.abilities or {}
-	behavior.illuminates = function(self, grid)
+	behavior.illuminates = function(self, world)
 		return {}
 	end
 	return behavior

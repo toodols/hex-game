@@ -12,17 +12,17 @@ local types = require(ReplicatedStorage.Shared.types)
 local Corner = util_components.Corner
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
-type HexGrid = types.HexGrid
+type World = types.World
 
 function TopCenter()
-	local grid: HexGrid = React.useContext(MainContext).grid
+	local world: World = React.useContext(MainContext).world
 	local _, force_update = React.useReducer(function(x)
 		return x + 1
 	end, 0)
 	local bar_ref = React.useRef(nil)
 	local display_ref = React.useRef(nil)
 	React.useEffect(function()
-		local cleanup = grid.grid_update_signal.listen(function(updates)
+		local cleanup = world.world_update_signal.listen(function(updates)
 			for _, update in updates do
 				if
 					update.type == "turn_timer"
@@ -40,7 +40,7 @@ function TopCenter()
 			end
 			local current_time = workspace:GetServerTimeNow()
 
-			local schedule = grid.turn_schedule
+			local schedule = world.turn_schedule
 			if schedule and schedule.end_time ~= math.huge and schedule.end_time ~= 0 then
 				local diff = schedule.end_time - schedule.start_time
 				local end_time_sync = schedule.start_time_sync + diff
@@ -93,7 +93,7 @@ function TopCenter()
 					AnchorPoint = Vector2.new(0, 0.5),
 					Position = UDim2.new(0, 0, 0.5, 0),
 					Size = UDim2.new(1, 0, 0, 30),
-					Text = tostring(grid.turn) .. '<font color="#00FF00" size="30"></font>',
+					Text = tostring(world.turn) .. '<font color="#00FF00" size="30"></font>',
 					TextColor3 = Color3.fromRGB(255, 255, 255),
 					TextSize = 50,
 				}),
@@ -211,7 +211,7 @@ function TopCenter()
 					FontFace = Font.new "rbxasset://fonts/families/SourceSansPro.json",
 					LayoutOrder = 2,
 					Size = UDim2.new(0, 0, 1, 0),
-					Text = `{grid.current_skips}/{grid.needed_skips}`,
+					Text = `{world.current_skips}/{world.needed_skips}`,
 					TextColor3 = Color3.fromRGB(190, 190, 190),
 					TextSize = 15,
 				}),
@@ -232,7 +232,7 @@ function TopCenter()
 					SortOrder = Enum.SortOrder.LayoutOrder,
 				}),
 			},
-			util.table_map(grid.quests, function(quest)
+			util.table_map(world.quests, function(quest)
 				return quest.current_stage_data.messages
 					and React.createElement(
 						React.Fragment,

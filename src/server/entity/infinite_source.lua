@@ -10,17 +10,17 @@ local util = require(ReplicatedStorage.Shared.util)
 type Entity = types.Entity & {
 	mode: "passive" | "active",
 }
-type HexGrid = types.HexGrid
+type World = types.World
 type ActionState = server_types.ActionState
 
 registry.infinite_source = with_defaults {
 	autogenerates_vertex = true,
-	init = function(self: Entity, grid: HexGrid)
+	init = function(self: Entity, world: World)
 		self.mode = "passive"
 	end,
-	tick = function(self: Entity, grid: HexGrid, action_state: ActionState)
+	tick = function(self: Entity, world: World, action_state: ActionState)
 		if self.mode == "active" then
-			table.insert(grid.action_queue, {
+			table.insert(world.action_queue, {
 				entity_id = self.id,
 				type = "exchange",
 				output_power = 999,

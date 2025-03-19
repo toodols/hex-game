@@ -1,50 +1,52 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local world_mod = require(ReplicatedStorage.Shared.world)
+local types = require(ReplicatedStorage.Shared.types)
+local coords = require(ReplicatedStorage.Shared.coords)
+
 local entity_mod = require(script.Parent.entity)
 local computed_mod = require(script.Parent.computed)
-local types = require(ReplicatedStorage.Shared.types)
 local updates_mod = require(script.Parent.updates)
 local turn_scheduler = require(script.Parent.turn_scheduler)
 local action_phase_mod = require(script.Parent.action_phase)
 local tutorial_map = require(script.tutorial).tutorial_map
 local testing_maps = require(script.testing)
 
-type HexGrid = types.HexGrid
+type World = types.World
 
-function my_map(): HexGrid
+function my_map(): World
 	-- Build the map
 	local magic = 5
 
-	local grid = hex_grid_mod.new_grid_from_extents {
+	local world = world_mod.new_world_from_extents {
 		{ min = -magic, max = magic },
 		{ min = -magic, max = magic },
 		{ min = -magic, max = magic },
 	}
-	local team1 = grid:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Red")
-	local team2 = grid:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "Blue")
+	local team1 = world:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Red")
+	local team2 = world:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "Blue")
 
-	grid.turn_schedule = turn_scheduler.new_turn_schedule(function()
-		turn_scheduler.reset_turn_time(grid, grid.turn_schedule)
-		turn_scheduler.report_turn_time(grid)
+	world.turn_schedule = turn_scheduler.new_turn_schedule(function()
+		turn_scheduler.reset_turn_time(world, world.turn_schedule)
+		turn_scheduler.report_turn_time(world)
 	end, function()
-		action_phase_mod.run_action_phase(grid)
+		action_phase_mod.run_action_phase(world)
 	end)
-	turn_scheduler.reset_turn_time(grid, grid.turn_schedule)
-	turn_scheduler.turn_schedule_resume(grid.turn_schedule)
+	turn_scheduler.reset_turn_time(world, world.turn_schedule)
+	turn_scheduler.turn_schedule_resume(world.turn_schedule)
 
-	for _, cell in grid.cells do
+	for _, cell in world.cells do
 		if math.random() < 0.0015 then
-			grid:get_cell(hex_grid_mod.coords_sub({ 0, 0, 0 }, cell.coordinate)).type = "vit_deposit"
+			world:get_cell(coords.coords_sub({ 0, 0, 0 }, cell.coordinate)).type = "vit_deposit"
 			cell.type = "vit_deposit"
 		elseif math.random() < 0.003 then
-			grid:get_cell(hex_grid_mod.coords_sub({ 0, 0, 0 }, cell.coordinate)).type = "rad_deposit"
+			world:get_cell(coords.coords_sub({ 0, 0, 0 }, cell.coordinate)).type = "rad_deposit"
 			cell.type = "rad_deposit"
 		elseif math.random() < 0.0045 then
-			grid:get_cell(hex_grid_mod.coords_sub({ 0, 0, 0 }, cell.coordinate)).type = "tar_deposit"
+			world:get_cell(coords.coords_sub({ 0, 0, 0 }, cell.coordinate)).type = "tar_deposit"
 			cell.type = "tar_deposit"
 		elseif math.random() < 0.008 then
 			cell.type = "bar_deposit"
-			grid:get_cell(hex_grid_mod.coords_sub({ 0, 0, 0 }, cell.coordinate)).type = "bar_deposit"
+			world:get_cell(coords.coords_sub({ 0, 0, 0 }, cell.coordinate)).type = "bar_deposit"
 		end
 	end
 
@@ -69,13 +71,13 @@ function my_map(): HexGrid
 				always_visible = true,
 				active = true,
 			},
-		}, grid)
+		}, world)
 	end
 
 	-- local portals = { { { -5, 5, 0 }, { 5, -5, 0 } } }
 	-- for _, portal_group in portals do
 	-- 	for _, portal in portal_group do
-	-- 		local cell = grid:get_cell(portal)
+	-- 		local cell = world:get_cell(portal)
 	-- 		cell.type = "portal"
 	-- 		cell.portal = {
 	-- 			group = portal_group,
@@ -87,75 +89,75 @@ function my_map(): HexGrid
 	-- 	end
 	-- end
 
-	grid:get_cell({ 0, 0, 0 }).type = "bar_deposit"
-	grid:get_cell({ 0, -2, 2 }).type = "rad_deposit"
-	grid:get_cell({ 0, 2, -2 }).type = "rad_deposit"
-	grid:get_cell({ 2, 0, -2 }).type = "vit_deposit"
-	grid:get_cell({ -2, 0, 2 }).type = "vit_deposit"
-	grid:get_cell({ magic, 0, -magic }).type = "bar_deposit"
-	grid:get_cell({ -magic, 0, magic }).type = "bar_deposit"
+	world:get_cell({ 0, 0, 0 }).type = "bar_deposit"
+	world:get_cell({ 0, -2, 2 }).type = "rad_deposit"
+	world:get_cell({ 0, 2, -2 }).type = "rad_deposit"
+	world:get_cell({ 2, 0, -2 }).type = "vit_deposit"
+	world:get_cell({ -2, 0, 2 }).type = "vit_deposit"
+	world:get_cell({ magic, 0, -magic }).type = "bar_deposit"
+	world:get_cell({ -magic, 0, magic }).type = "bar_deposit"
 
 	-- local extractor = entity_mod.new_entity({
 	-- 	type = "extractor",
 	-- 	primary_coordinate = { magic - 1, -magic + 1, 0 },
 	-- 	owner = team1.id,
-	-- }, grid)
+	-- }, world)
 	local stockpile = entity_mod.new_entity({
 		type = "stockpile",
 		owner = team1.id,
 		primary_coordinate = { magic - 1, -magic + 2, -1 },
-	}, grid)
+	}, world)
 	local scout = entity_mod.new_entity({
 		type = "scout",
 		primary_coordinate = { magic - 2, -magic + 2, 0 },
 		owner = team1.id,
-	}, grid)
+	}, world)
 	local heart = entity_mod.new_entity({
 		type = "heart",
 		primary_coordinate = { magic - 1, -magic + 1, 0 },
 		owner = team1.id,
-	}, grid)
+	}, world)
 
 	stockpile.inventory.items = { "bar", "rad", "rad", "bar", "bar" }
 
-	-- grid:get_cell({ magic - 1, -magic + 1, 0 }).type = "bar_deposit"
+	-- world:get_cell({ magic - 1, -magic + 1, 0 }).type = "bar_deposit"
 
 	-- local extractor2 = entity_mod.new_entity({
 	-- 	type = "extractor",
 	-- 	primary_coordinate = { 1 - magic, magic - 1, 0 },
 	-- 	owner = team2.id,
-	-- }, grid)
+	-- }, world)
 
 	local stockpile2 = entity_mod.new_entity({
 		type = "stockpile",
 		primary_coordinate = { -magic + 1, magic - 2, 1 },
 		owner = team2.id,
-	}, grid)
+	}, world)
 	local scout2 = entity_mod.new_entity({
 		type = "scout",
 		primary_coordinate = { 2 - magic, magic - 2, 0 },
 		owner = team2.id,
-	}, grid)
+	}, world)
 	local heart2 = entity_mod.new_entity({
 		type = "heart",
 		primary_coordinate = { 1 - magic, magic - 1, 0 },
 		owner = team2.id,
-	}, grid)
+	}, world)
 
-	-- grid:get_cell({ 1 - magic, magic - 1, 0 }).type = "bar_deposit"
+	-- world:get_cell({ 1 - magic, magic - 1, 0 }).type = "bar_deposit"
 	stockpile2.inventory.items = { "bar", "bar", "rad", "bar", "rad" }
 
-	return grid
+	return world
 end
 
-function prepare_preset(fn: (...any) -> HexGrid): (...any) -> HexGrid
+function prepare_preset(fn: (...any) -> World): (...any) -> World
 	return function(...)
 		local result = { fn(...) }
-		local grid = result[1]
-		updates_mod.flush_updates(grid)
-		computed_mod.compute_presence(grid)
-		computed_mod.compute_visibility(grid)
-		computed_mod.compute_systems(grid)
+		local world = result[1]
+		updates_mod.flush_updates(world)
+		computed_mod.compute_presence(world)
+		computed_mod.compute_visibility(world)
+		computed_mod.compute_systems(world)
 		return unpack(result)
 	end
 end

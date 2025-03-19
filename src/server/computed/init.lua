@@ -1,5 +1,5 @@
--- Computes properties of HexGrid that are a reflection of
--- The grid's entities and cells
+-- Computes properties of World that are a reflection of
+-- The world's entities and cells
 
 local compute_influences = require(script.compute_influences).compute_influences
 local compute_presence = require(script.compute_presence).compute_presence

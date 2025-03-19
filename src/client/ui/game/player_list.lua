@@ -8,7 +8,7 @@ local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local RunService = game:GetService "RunService"
 
 type TeamData = types.TeamData
-type HexGrid = types.HexGrid
+type World = types.World
 
 function TeamSection(props: {
 	team: TeamData,
@@ -130,12 +130,12 @@ function TeamSection(props: {
 end
 
 function PlayerList()
-	local grid: HexGrid = React.useContext(MainContext).grid
+	local world: World = React.useContext(MainContext).world
 	local visible, set_visible = React.useState(false)
-	local teams, set_teams = React.useState(grid.teams)
+	local teams, set_teams = React.useState(world.teams)
 
 	React.useEffect(function()
-		grid.grid_update_signal.listen(function(updates)
+		world.world_update_signal.listen(function(updates)
 			for _, update in updates do
 				if update.type == "teams" then
 					set_teams(update.teams)

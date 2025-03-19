@@ -6,20 +6,20 @@ local game_ui = require(ReplicatedStorage.Client.ui.game)
 local cleanup = require(ServerScriptService.Server.cleanup).cleanup
 local tests = {}
 
-function tests.render_grid()
-	local grid = presets.my_map()
-	client_game_mod.render_grid(grid)
-	client_game_mod.step_animations(grid)
-	client_game_mod.destroy_grid_instances(grid)
-	cleanup(grid)
+function tests.render_world()
+	local world = presets.my_map()
+	client_game_mod.render_world(world)
+	client_game_mod.step_animations(world)
+	client_game_mod.destroy_world_instances(world)
+	cleanup(world)
 end
 
 function tests.render_ui()
-	local grid = presets.my_map()
-	local ui = game_ui.init_ui(grid, Instance.new "Folder")
+	local world = presets.my_map()
+	local ui = game_ui.init_ui(world, Instance.new "Folder")
 
 	ui.destroy()
-	cleanup(grid)
+	cleanup(world)
 end
 
 return tests

@@ -3,25 +3,26 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local shared_registry_mod = require(ReplicatedStorage.Shared.entity.registry)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
-local registry = require(script.Parent.registry).registry
+local coords = require(ReplicatedStorage.Shared.coords)
 local server_util = require(ServerScriptService.Server.util)
 local server_types = require(ServerScriptService.Server.types)
 local updates_mod = require(ServerScriptService.Server.updates)
 
-type HexGrid = types.HexGrid
+local registry = require(script.Parent.registry).registry
+
+type World = types.World
 type Entity = types.Entity
 type CubicCoordinate = types.CubicCoordinate
-type GridUpdate = types.GridUpdate
+type WorldUpdate = types.WorldUpdate
 type ActionState = server_types.ActionState
 
-function entity_can_deconstruct(entity: Entity, grid: HexGrid)
-	local cell = grid:get_cell(entity.primary_coordinate)
+function entity_can_deconstruct(entity: Entity, world: World)
+	local cell = world:get_cell(entity.primary_coordinate)
 	assert(cell, "cell not found")
 	if
 		entity.type == "vertex"
 		and not util.table_any(cell.entities, function(_, entity_id)
-			return shared_registry_mod.registry[grid.entities[entity_id].type].layer > shared_registry_mod.layer.vertex
+			return shared_registry_mod.registry[world.entities[entity_id].type].layer > shared_registry_mod.layer.vertex
 		end)
 	then
 		return false
@@ -29,12 +30,12 @@ function entity_can_deconstruct(entity: Entity, grid: HexGrid)
 	return true
 end
 
-function autogenerate_vertex(grid: HexGrid, host: Entity)
-	if #grid:query_entity { coordinate = host.primary_coordinate, type = "vertex", owner = host.owner } == 0 then
+function autogenerate_vertex(world: World, host: Entity)
+	if #world:query_entity { coordinate = host.primary_coordinate, type = "vertex", owner = host.owner } == 0 then
 		-- the status is the highest status among buildings that come with vertex
 		-- principally used when buildings spawn in already completed, and the wires that come with must also be completed
 		local status = "blueprint"
-		for _, entity in grid:query_entity { coordinate = host.primary_coordinate, owner = host.owner } do
+		for _, entity in world:query_entity { coordinate = host.primary_coordinate, owner = host.owner } do
 			if registry[entity.type].autogenerates_vertex then
 				if (status == "blueprint" or status == "scaffold") and entity.status == "complete" then
 					status = "complete"
@@ -53,24 +54,24 @@ function autogenerate_vertex(grid: HexGrid, host: Entity)
 			owner = host.owner,
 			decayable = host.decayable,
 			cost = {},
-		}, grid)
+		}, world)
 	end
 end
 
--- Creates a new entity on a grid
+-- Creates a new entity on a world
 -- And adds relevant events to the updates buffer
-function new_entity(entity_: any, grid: HexGrid): Entity
+function new_entity(entity_: any, world: World): Entity
 	local entity = entity_ :: Entity
-	if not grid then
+	if not world then
 		error "argument 2 not provided"
 	end
 	local server_behavior = registry[entity.type]
 	local shared_behavior = shared_registry_mod.registry[entity.type]
 	local cell
 	if entity.primary_coordinate then
-		cell = grid:get_cell(entity.primary_coordinate)
+		cell = world:get_cell(entity.primary_coordinate)
 		if not cell then
-			error("No cell at " .. hex_grid_mod.encode_coord(entity.primary_coordinate))
+			error("No cell at " .. coords.encode_coord(entity.primary_coordinate))
 		end
 	else
 		warn "no primary_coordinate provided"
@@ -100,7 +101,7 @@ function new_entity(entity_: any, grid: HexGrid): Entity
 		is_destroyed = false,
 		max_health = shared_behavior.max_health,
 		name = shared_behavior.name,
-		owner = grid.neutral_team,
+		owner = world.neutral_team,
 		queued_decisions = {},
 		server_data = {},
 		rotation = 0,
@@ -117,24 +118,24 @@ function new_entity(entity_: any, grid: HexGrid): Entity
 
 	-- todo: rotate the offsets by the rotation
 	for _, offset in shared_behavior.offsets do
-		table.insert(entity.coordinates, hex_grid_mod.coords_add(entity.primary_coordinate, offset))
+		table.insert(entity.coordinates, coords.coords_add(entity.primary_coordinate, offset))
 	end
 
-	server_behavior.init(entity, grid)
-	grid.entities[entity.id] = entity
+	server_behavior.init(entity, world)
+	world.entities[entity.id] = entity
 	if cell then
 		cell.entities[entity.id] = true
 	end
 
 	if entity.status == "complete" then
-		server_behavior.on_completed(entity, grid)
+		server_behavior.on_completed(entity, world)
 	end
 	if server_behavior.autogenerates_vertex then
-		autogenerate_vertex(grid, entity)
+		autogenerate_vertex(world, entity)
 	end
 
-	updates_mod.add_update(grid, { type = "entity_update", entity = entity })
-	updates_mod.add_update(grid, {
+	updates_mod.add_update(world, { type = "entity_update", entity = entity })
+	updates_mod.add_update(world, {
 		type = "entity_created",
 		entity_id = entity.id,
 	})
@@ -142,16 +143,16 @@ function new_entity(entity_: any, grid: HexGrid): Entity
 end
 
 -- Marks an entity as destroyed, removing it from the cells it occupies
--- Does not remove it from grid.entities
-function remove_entity(grid: HexGrid, entity: Entity)
-	local cell = grid:get_cell(entity.primary_coordinate)
+-- Does not remove it from world.entities
+function remove_entity(world: World, entity: Entity)
+	local cell = world:get_cell(entity.primary_coordinate)
 	assert(cell, "cell not found")
 	for _, coord in entity.coordinates do
 		cell.entities[entity.id] = nil
 	end
 	entity.is_destroyed = true
-	updates_mod.add_update(grid, { type = "entity_update", entity = entity })
-	table.insert(grid.action_queue, {
+	updates_mod.add_update(world, { type = "entity_update", entity = entity })
+	table.insert(world.action_queue, {
 		event_type = "entity_event",
 		type = "removed",
 		entity_id = entity.id,

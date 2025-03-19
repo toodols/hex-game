@@ -62,7 +62,7 @@ export type ResearchState = {
 	coord: CubicCoordinate,
 	status: "incomplete" | "researching" | "complete",
 
-	precondition: (grid: HexGrid, entity: Entity) -> boolean,
+	precondition: (world: World, entity: Entity) -> boolean,
 }
 
 export type Researches = {
@@ -347,7 +347,7 @@ export type Icon = {
 } | nil
 
 -- A message from Server to Client about the state of the game
-export type GridUpdate =
+export type WorldUpdate =
 	-- handles add, update, and destruction
 	{ type: "entity_update", entity: Entity, target: TeamTarget }
 	| { type: "entity_created", entity_id: EntityId, target: TeamTarget }
@@ -392,8 +392,8 @@ export type GridUpdate =
 		teams: { [TeamId]: TeamData },
 		coalitions: { [CoalitionId]: CoalitionData },
 		-- } | {
-		-- 	type: "grid",
-		-- 	grid: PartialHexGrid,
+		-- 	type: "world",
+		-- 	world: PartialWorld,
 	}
 	| {
 		type: "quest_update",
@@ -414,7 +414,7 @@ export type TurnSchedule = {
 
 export type EntityConfiguration = {
 	type: string,
-	init: ((self: Entity, grid: HexGrid) -> ())?,
+	init: ((self: Entity, world: World) -> ())?,
 	name: string,
 	description: string,
 	max_health: number,
@@ -519,16 +519,16 @@ export type EntityAction =
 		input_power: number?,
 		output_items: { Item }?,
 		output_power: number?,
-		on_success: (grid: HexGrid) -> (),
+		on_success: (world: World) -> (),
 	}
 	| (EntityEvent & { type: "entity_event" })
 	| Decision
 
-export type HexGrid = {
+export type World = {
 	-- instances are always nil on the server, while always a table on the client
 	entity_instance_map: InstanceMap<EntityId>,
 	entities: { [EntityId]: Entity },
-	grid_update_signal: Signal<{ GridUpdate }>,
+	world_update_signal: Signal<{ WorldUpdate }>,
 	instance_entity_map: { [Instance]: EntityId },
 	-- ngl i forgot why I used EncodedCoordinate instead of CubicCoordinate
 	instance_cell_map: { [Instance]: EncodedCoordinate },
@@ -542,14 +542,14 @@ export type HexGrid = {
 	global_configuration: GlobalConfiguration,
 
 	-- extents: Extents,
-	get_cell: (self: HexGrid, coordinate: CubicCoordinate) -> HexCell?,
+	get_cell: (self: World, coordinate: CubicCoordinate) -> HexCell?,
 	-- returns table of entities that fit the criteria
-	query_entity: (self: HexGrid, props: any) -> { Entity },
-	new_team: (self: HexGrid, players: { Player }, color: TeamColor?, name: string?) -> TeamData,
-	purge_dead_entities: (self: HexGrid) -> nil,
-	active_entities: (self: HexGrid) -> { [EntityId]: Entity },
+	query_entity: (self: World, props: any) -> { Entity },
+	new_team: (self: World, players: { Player }, color: TeamColor?, name: string?) -> TeamData,
+	purge_dead_entities: (self: World) -> nil,
+	active_entities: (self: World) -> { [EntityId]: Entity },
 
-	-- get_team_coalition: (self: HexGrid, team: TeamId) -> CoalitionData,
+	-- get_team_coalition: (self: World, team: TeamId) -> CoalitionData,
 
 	-- server only
 	action_queue: { EntityAction },
@@ -569,7 +569,7 @@ export type HexGrid = {
 		},
 	} },
 
-	updates_buffer: { GridUpdate },
+	updates_buffer: { WorldUpdate },
 
 	turn_schedule: TurnSchedule?,
 
@@ -591,7 +591,7 @@ export type HexGrid = {
 	-- client only
 	animation_states: { [EntityId]: AnimationState }?,
 }
-export type PartialHexGrid = {
+export type PartialWorld = {
 	cells: { [EncodedCoordinate]: HexCell },
 	coalitions: { CoalitionData },
 	teams: { TeamData },
@@ -646,9 +646,9 @@ export type QuestStage = {
 }
 
 export type ServerQuestStageBehavior = {
-	progression_requisite: ((Quest, HexGrid) -> boolean)?,
-	stage_start: ((Quest, HexGrid) -> ())?,
-	choice_selected: ((Quest, HexGrid, string) -> ())?,
+	progression_requisite: ((Quest, World) -> boolean)?,
+	stage_start: ((Quest, World) -> ())?,
+	choice_selected: ((Quest, World, string) -> ())?,
 }
 
 export type Quest = {

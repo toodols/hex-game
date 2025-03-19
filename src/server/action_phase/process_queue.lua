@@ -12,26 +12,26 @@ local handle_try_promote_actions = require(script.Parent.try_promote_actions).ha
 local handle_advance_research_actions = require(script.Parent.advance_research_actions).handle_advance_research_actions
 local handle_entity_event_actions = require(script.Parent.entity_event_actions).handle_entity_event_actions
 
-type HexGrid = types.HexGrid
+type World = types.World
 type ActionState = server_types.ActionState
 
---- Processes all actions in grid.action_queue. requires systems to be created
-function process_queue(grid: HexGrid, action_state: ActionState)
+--- Processes all actions in world.action_queue. requires systems to be created
+function process_queue(world: World, action_state: ActionState)
 	local old_queue
 	local iterations = 0
 	local MAX_ALLOWED_ITERATIONS = 100
 	local function should_terminate(): boolean
 		if iterations > MAX_ALLOWED_ITERATIONS then
 			warn "MAX_ALLOWED_ITERATIONS reached"
-			warn("left in queue", grid.action_queue)
+			warn("left in queue", world.action_queue)
 			return true
 		end
 		iterations += 1
-		if #old_queue ~= #grid.action_queue then
+		if #old_queue ~= #world.action_queue then
 			return false
 		end
 		for i, action in old_queue do
-			if action ~= grid.action_queue[i] then
+			if action ~= world.action_queue[i] then
 				return false
 			end
 		end
@@ -40,23 +40,23 @@ function process_queue(grid: HexGrid, action_state: ActionState)
 
 	repeat
 		old_queue = {}
-		for _, action in grid.action_queue do
+		for _, action in world.action_queue do
 			table.insert(old_queue, action)
 		end
 
-		handle_exchange_actions(grid, action_state)
-		handle_ability_actions(grid, action_state)
-		handle_try_promote_actions(grid, action_state)
-		handle_advance_research_actions(grid, action_state)
-		handle_entity_event_actions(grid, action_state)
+		handle_exchange_actions(world, action_state)
+		handle_ability_actions(world, action_state)
+		handle_try_promote_actions(world, action_state)
+		handle_advance_research_actions(world, action_state)
+		handle_entity_event_actions(world, action_state)
 
 		for _, system in action_state.systems do
 			-- add overflow items to inventory
 			for _, open_inventory_entity in
 				util.table_filter_map(util.table_keys(system.entities), function(entity_id)
-					local inventory = grid.entities[entity_id].inventory
+					local inventory = world.entities[entity_id].inventory
 					if inventory and inventory.capacity > #inventory.items then
-						return grid.entities[entity_id]
+						return world.entities[entity_id]
 					end
 					return nil
 				end)
@@ -70,7 +70,7 @@ function process_queue(grid: HexGrid, action_state: ActionState)
 	until should_terminate()
 
 	-- clear action queue
-	grid.action_queue = {}
+	world.action_queue = {}
 end
 
 return {

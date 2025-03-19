@@ -7,9 +7,9 @@ local asset_server = require(ReplicatedStorage.Shared.asset_server)
 local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
 local formatting = require(ReplicatedStorage.Shared.formatting)
 local team = require(ReplicatedStorage.Shared.team)
+local coords = require(ReplicatedStorage.Shared.coords)
 
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
@@ -23,7 +23,7 @@ local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientIntera
 
 type Entity = types.Entity
 type ResearchState = types.ResearchState
-type HexGrid = types.HexGrid
+type World = types.World
 type EntityId = types.EntityId
 type Icon = types.Icon
 type TeamData = types.TeamData
@@ -78,7 +78,7 @@ function Icon(props: {
 end
 
 function Aside(props: { state: ResearchState, on_add: () -> (), on_remove: () -> () })
-	local grid = React.useContext(MainContext).grid
+	local world = React.useContext(MainContext).world
 	return React.createElement(
 		"Frame",
 		themes.theme_solid {
@@ -130,7 +130,7 @@ function Aside(props: { state: ResearchState, on_add: () -> (), on_remove: () ->
 					Description = React.createElement(
 						"TextLabel",
 						themes.theme_description {
-							Text = formatting.format_text(grid, props.state.description),
+							Text = formatting.format_text(world, props.state.description),
 							Size = UDim2.new(1, 0, 0, 40),
 							LayoutOrder = 2,
 						}
@@ -181,7 +181,7 @@ function Node(props: { state: ResearchState, on_click: () -> () })
 	local ratio = scale / 52 / TRANSFORM_SIZE
 	-- local offset = { 1531 * ratio, 1598 * ratio }
 	local offset = { 1531 * ratio, 1598 * ratio }
-	local vec3 = hex_grid_mod.into_vec3(props.state.coord)
+	local vec3 = coords.into_vec3(props.state.coord)
 	local x = vec3.X
 	local y = vec3.Z
 
@@ -575,9 +575,9 @@ function ResearchPreview(props: {
 	entity_id: EntityId,
 	click: () -> (),
 })
-	local grid = React.useContext(MainContext).grid
+	local world = React.useContext(MainContext).world
 	local entity = hooks.use_synced_entity(props.entity_id)
-	local is_owner = entity.owner == (team.team_of(grid, Players.LocalPlayer) :: TeamData).id
+	local is_owner = entity.owner == (team.team_of(world, Players.LocalPlayer) :: TeamData).id
 
 	return React.createElement("TextButton", {
 		BackgroundTransparency = 0.9,

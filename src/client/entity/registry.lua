@@ -3,7 +3,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 
 type Entity = types.Entity
-type HexGrid = types.HexGrid
+type World = types.World
 type HexCell = types.HexCell
 type AnimationState = types.AnimationState
 
@@ -11,25 +11,25 @@ local registry: { [string]: ClientEntityBehavior } = {}
 type ClientEntityBehavior = {
 	-- self is possibly nil so ui can create a model from entity type alone
 	-- i don't like this behavior and i think a fake entity should be created instead
-	model: Instance | (self: Entity?, grid: HexGrid) -> Instance,
+	model: Instance | (self: Entity?, world: World) -> Instance,
 
 	-- this happens before the model is parented to workspace
-	init: (self: Entity, grid: HexGrid) -> (),
+	init: (self: Entity, world: World) -> (),
 
 	-- subset of `update`, override to replace the default built animation
-	status_changed: (self: Entity, grid: HexGrid, old: Entity) -> (),
+	status_changed: (self: Entity, world: World, old: Entity) -> (),
 
-	neighbor_changed: (self: Entity, grid: HexGrid) -> (),
+	neighbor_changed: (self: Entity, world: World) -> (),
 
-	-- called before `self` is replaced by `new` in `grid`
-	update: (self: Entity, grid: HexGrid, old: Entity) -> (),
+	-- called before `self` is replaced by `new` in `world`
+	update: (self: Entity, world: World, old: Entity) -> (),
 
-	on_destroy: (self: Entity, grid: HexGrid) -> (),
-	on_hidden: (self: Entity, grid: HexGrid) -> (),
+	on_destroy: (self: Entity, world: World) -> (),
+	on_hidden: (self: Entity, world: World) -> (),
 
-	animate: ((self: Entity, grid: HexGrid, animation_state: AnimationState) -> ())?,
+	animate: ((self: Entity, world: World, animation_state: AnimationState) -> ())?,
 
-	-- turn_start: (self: Entity, grid: HexGrid, cell: HexCell) -> (),
+	-- turn_start: (self: Entity, world: World, cell: HexCell) -> (),
 }
 local transparency = {
 	blueprint = 0.7,
@@ -43,8 +43,8 @@ function with_defaults(t: any)
 		init = t.init or function() end,
 		neighbor_changed = t.neighbor_changed or function() end,
 
-		status_changed = t.status_changed or function(self: Entity, grid: HexGrid, old: Entity)
-			local instance = grid.entity_instance_map[self.id]
+		status_changed = t.status_changed or function(self: Entity, world: World, old: Entity)
+			local instance = world.entity_instance_map[self.id]
 			if instance then
 				for _, v in instance:GetDescendants() do
 					if v:IsA "BasePart" then
@@ -53,20 +53,20 @@ function with_defaults(t: any)
 				end
 			end
 		end,
-		on_destroy = t.on_destroy or function(self: Entity, grid: HexGrid)
-			local instance: Instance = grid.entity_instance_map[self.id]
+		on_destroy = t.on_destroy or function(self: Entity, world: World)
+			local instance: Instance = world.entity_instance_map[self.id]
 			if instance then
 				instance:Destroy()
 			end
 		end,
-		on_hidden = t.on_hidden or function(self: Entity, grid: HexGrid)
-			local instance: Instance = grid.entity_instance_map[self.id]
+		on_hidden = t.on_hidden or function(self: Entity, world: World)
+			local instance: Instance = world.entity_instance_map[self.id]
 			if instance then
 				instance:Destroy()
 			end
 		end,
 		animate = t.animate,
-		update = t.update or function(self: Entity, grid: HexGrid, old: Entity)
+		update = t.update or function(self: Entity, world: World, old: Entity)
 			if self.type ~= self.type then
 				-- oh no
 			end

@@ -4,7 +4,7 @@ local asset_server = require(ReplicatedStorage.Shared.asset_server)
 local types = require(ReplicatedStorage.Shared.types)
 
 type Entity = types.Entity
-type HexGrid = types.HexGrid
+type World = types.World
 
 local model = asset_server.load "Entities/Extractor"
 registry_mod.registry.extractor = registry_mod.with_defaults {

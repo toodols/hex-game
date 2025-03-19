@@ -5,13 +5,13 @@ local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
 local ui_types = require(script.Parent.types)
 
-type HexGrid = types.HexGrid
+type World = types.World
 type CubicCoordinate = types.CubicCoordinate
 type SelectionMode = ui_types.SelectionMode
 type QuestEffect = types.QuestEffect
 
 local MainContext: React.ReactContext<{
-	grid: HexGrid,
+	world: World,
 	selection_mode_stack: { SelectionMode },
 	quest_effects: { QuestEffect },
 }> =

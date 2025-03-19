@@ -1,16 +1,15 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local util = require(ReplicatedStorage.Shared.util)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local coords = require(ReplicatedStorage.Shared.coords)
 local types = require(ReplicatedStorage.Shared.types)
-type HexGrid = types.HexGrid
+type World = types.World
 
 -- a presence prevents enemy teams from building on that cell
-function compute_presence(grid: HexGrid)
-	local neutral_team = grid.neutral_team
-	for _, cell in grid.cells do
+function compute_presence(world: World)
+	local neutral_team = world.neutral_team
+	for _, cell in world.cells do
 		local owner
 		for entity_id in cell.entities do
-			local entity = grid.entities[entity_id]
+			local entity = world.entities[entity_id]
 			if entity.owner ~= neutral_team and entity.status ~= "blueprint" and not entity.is_destroyed then
 				owner = entity.owner
 			end
@@ -22,16 +21,16 @@ function compute_presence(grid: HexGrid)
 		end
 		cell.owner = owner
 	end
-	for _, cell in grid.cells do
+	for _, cell in world.cells do
 		local presence = {}
-		for _, coord in hex_grid_mod.neighbors_leq(cell.coordinate, 1) do
-			local neighbor = grid:get_cell(coord)
+		for _, coord in coords.neighbors_leq(cell.coordinate, 1) do
+			local neighbor = world:get_cell(coord)
 			-- teams impose a presence in r<=1
 			-- neutral teams impose a presence in r=0
 			if
 				neighbor
 				and neighbor.owner
-				and (neighbor.owner ~= neutral_team or hex_grid_mod.coords_eq(cell.coordinate, coord))
+				and (neighbor.owner ~= neutral_team or coords.coords_eq(cell.coordinate, coord))
 			then
 				presence[neighbor.owner] = true
 			end

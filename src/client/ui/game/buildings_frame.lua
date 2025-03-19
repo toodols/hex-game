@@ -21,7 +21,7 @@ local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientIntera
 
 type CubicCoordinate = types.CubicCoordinate
 type Item = types.Item
-type HexGrid = types.HexGrid
+type World = types.World
 type ResearchId = types.ResearchId
 
 local PAGES = {
@@ -97,12 +97,12 @@ function BuildingItem(props: {
 	cell: CubicCoordinate,
 	researches: { [ResearchId]: boolean },
 })
-	local grid: HexGrid = React.useContext(MainContext).grid
-	local entity_config = grid.entity_configurations[props.type]
+	local world: World = React.useContext(MainContext).world
+	local entity_config = world.entity_configurations[props.type]
 	local button_ref = React.useRef(nil :: any)
 	local viewport_ref = React.useRef(nil :: any)
 	React.useEffect(function()
-		local model = client_entity_mod.create_model_from_type(grid, props.type)
+		local model = client_entity_mod.create_model_from_type(world, props.type)
 		model.Parent = viewport_ref.current
 		model:PivotTo(CFrame.new(0, -2, -4))
 	end, { props.type })
@@ -192,7 +192,7 @@ function BuildingItem(props: {
 							BackgroundTransparency = 1,
 							LayoutOrder = 3,
 							Size = UDim2.new(1, 0, 0, 0),
-							Text = formatting.format_text(grid, entity_config.description),
+							Text = formatting.format_text(world, entity_config.description),
 							TextWrapped = true,
 							TextSize = 13,
 							TextTruncate = Enum.TextTruncate.AtEnd,
@@ -276,8 +276,8 @@ local BuildingPage = React.forwardRef(function(
 end)
 
 function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
-	local grid: HexGrid = React.useContext(MainContext).grid
-	local player_team = team.team_of(grid, Players.LocalPlayer)
+	local world: World = React.useContext(MainContext).world
+	local player_team = team.team_of(world, Players.LocalPlayer)
 	local current_page, set_current_page = React.useState(1)
 	local is_expanded, set_is_expanded = React.useState(false)
 	local page_layout_ref = React.useRef(nil :: any)
@@ -285,9 +285,9 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 	local ref = React.useRef(nil :: any)
 	local expanded_content_ref = React.useRef(nil :: any)
 
-	local cell = grid:get_cell(props.cell)
+	local cell = world:get_cell(props.cell)
 	assert(cell, "cell is nil")
-	local researches = researches_mod.get_cell_researches(grid, cell, player_team.id)
+	local researches = researches_mod.get_cell_researches(world, cell, player_team.id)
 
 	React.useEffect(function()
 		page_layout_ref.current:GetPropertyChangedSignal("CurrentPage"):Connect(function()

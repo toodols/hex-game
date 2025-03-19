@@ -14,7 +14,7 @@ local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientIntera
 type Item = types.Item
 type Entity = types.Entity
 type Recipe = types.Recipe
-type HexGrid = types.HexGrid
+type World = types.World
 type EntityId = types.EntityId
 
 function RecipeItem(props: {
@@ -75,8 +75,8 @@ end
 
 function Recipes(props: { entity_id: EntityId, on_close: () -> () })
 	local entity = hooks.use_synced_entity(props.entity_id)
-	local grid = React.useContext(MainContext).grid
-	local config = grid.entity_configurations["factory"]
+	local world = React.useContext(MainContext).world
+	local config = world.entity_configurations["factory"]
 	return React.createElement(
 		"Frame",
 		themes.theme_vertical_container {

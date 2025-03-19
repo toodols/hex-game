@@ -17,7 +17,7 @@ type Quest = types.Quest
 function QuestDialogue(props: {
 	quest: Quest,
 })
-	local grid = React.useContext(MainContext).grid
+	local world = React.useContext(MainContext).world
 	local message_num, set_message_num = React.useState(1)
 	local current_stage_data = props.quest.current_stage_data
 	return React.createElement(
@@ -76,7 +76,7 @@ function QuestDialogue(props: {
 				Position = UDim2.new(0, 0, 0, 30),
 				RichText = true,
 				Size = UDim2.new(1, 0, 0, 0),
-				Text = format_text(grid, current_stage_data.messages[message_num], {
+				Text = format_text(world, current_stage_data.messages[message_num], {
 					this_quest = props.quest,
 				}),
 				TextColor3 = Color3.fromRGB(200, 200, 200),

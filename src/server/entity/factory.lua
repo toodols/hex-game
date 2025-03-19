@@ -7,20 +7,20 @@ local server_types = require(ServerScriptService.Server.types)
 local with_defaults = registry_mod.with_defaults
 
 type Entity = types.Entity
-type HexGrid = types.HexGrid
+type World = types.World
 type ActionState = server_types.ActionState
 
 registry.factory = with_defaults {
 	autogenerates_vertex = true,
-	init = function(self: Entity, grid: HexGrid)
+	init = function(self: Entity, world: World)
 		self.current_recipe = "vit_to_tek"
 	end,
-	tick = function(self: Entity, grid: HexGrid, action_state: ActionState)
-		local config = grid.entity_configurations[self.type]
-		if self.status == "complete" and self.enabled and self.owner ~= grid.neutral_team then
+	tick = function(self: Entity, world: World, action_state: ActionState)
+		local config = world.entity_configurations[self.type]
+		if self.status == "complete" and self.enabled and self.owner ~= world.neutral_team then
 			local recipe = config.recipes[self.current_recipe]
 			if recipe then
-				table.insert(grid.action_queue, {
+				table.insert(world.action_queue, {
 					entity_id = self.id,
 					type = "exchange",
 					input_items = recipe.input_items,

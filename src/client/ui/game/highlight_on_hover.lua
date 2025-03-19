@@ -5,10 +5,10 @@ local util = require(ReplicatedStorage.Shared.util)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local Corner = require(ReplicatedStorage.Client.ui.util_components).Corner
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
+local world_mod = require(ReplicatedStorage.Shared.world)
 
 type CubicCoordinate = types.CubicCoordinate
-type HexGrid = types.HexGrid
+type World = types.World
 
 local function clear_show_cells(context)
 	util.table_extract(context.selection_mode_stack, function(selection_mode)
@@ -16,10 +16,10 @@ local function clear_show_cells(context)
 	end)
 end
 
-function into_instance_set(grid: HexGrid, coords: { CubicCoordinate })
+function into_instance_set(world: World, coords: { CubicCoordinate })
 	local set = {}
 	for _, coord in coords do
-		local instance = grid.cell_instance_map[hex_grid_mod.encode_coord(coord)]
+		local instance = world.cell_instance_map[coords.encode_coord(coord)]
 		if not instance then
 			continue
 		end
@@ -44,7 +44,7 @@ function HighlightOnHover(props: { Text: string, coords: { CubicCoordinate }, La
 				clear_show_cells(context)
 				table.insert(context.selection_mode_stack, {
 					type = "show_cells",
-					cells = into_instance_set(context.grid, props.coords),
+					cells = into_instance_set(context.world, props.coords),
 				})
 			end,
 			[React.Event.MouseLeave] = function()

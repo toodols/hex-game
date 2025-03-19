@@ -1,17 +1,19 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
+local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
+local world_mod = require(ReplicatedStorage.Shared.world)
+local coords = require(ReplicatedStorage.Shared.coords)
+local is_allied = require(ReplicatedStorage.Shared.team).is_allied
+
 local server_entity_mod = require(script.Parent.entity)
 local server_types = require(script.Parent.types)
 local updates_mod = require(script.Parent.updates)
-local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local effect_methods = require(script.Parent.effect.methods)
-local hex_grid_mod = require(ReplicatedStorage.Shared.hex_grid)
-local is_allied = require(ReplicatedStorage.Shared.team).is_allied
 
 type Damage = types.Damage
 type DamageResult = types.DamageResult
 type Entity = types.Entity
-type HexGrid = types.HexGrid
+type World = types.World
 type HexCell = types.HexCell
 type CubicCoordinate = types.CubicCoordinate
 type EntityId = types.EntityId
@@ -80,7 +82,7 @@ function apply_entity_damage(entity: Entity, amount: number, piercing: boolean):
 	return total
 end
 
-function damage_entity(grid: HexGrid, entity: Entity, damage: Damage): DamageResult
+function damage_entity(world: World, entity: Entity, damage: Damage): DamageResult
 	damage.nonlethal = damage.nonlethal or false
 	damage.friendly_fire = damage.friendly_fire or false
 	damage.piercing = damage.piercing or false
@@ -109,30 +111,30 @@ function damage_entity(grid: HexGrid, entity: Entity, damage: Damage): DamageRes
 	} }
 end
 
-function get_attackable_entities(grid: HexGrid, cell: HexCell, damage: Damage): { Entity }
-	local team = if damage.from then grid.entities[damage.from].owner else nil
+function get_attackable_entities(world: World, cell: HexCell, damage: Damage): { Entity }
+	local team = if damage.from then world.entities[damage.from].owner else nil
 	local entities = {}
 	for entity_id in cell.entities do
-		local entity = grid.entities[entity_id]
+		local entity = world.entities[entity_id]
 		if
 			-- ignore destroyed entities
 			not entity.is_destroyed
 			-- ignore blueprints
 			and entity.status ~= "blueprint"
 			-- do not attack friendly entities unless friendly_fire is on
-			and (damage.friendly_fire or not is_allied(grid, entity.owner, team))
+			and (damage.friendly_fire or not is_allied(world, entity.owner, team))
 		then
 			table.insert(entities, entity)
 		end
 	end
 
 	table.sort(entities, function(a, b)
-		return grid.entity_configurations[a.type].layer > grid.entity_configurations[b.type].layer
+		return world.entity_configurations[a.type].layer > world.entity_configurations[b.type].layer
 	end)
 	return entities
 end
 
-function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damage): DamageResult
+function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage): DamageResult
 	damage.nonlethal = damage.nonlethal or false
 	damage.friendly_fire = damage.friendly_fire or false
 	damage.piercing = damage.piercing or false
@@ -148,19 +150,19 @@ function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damag
 	local damage_values: { [EntityId]: number } = {}
 
 	for _, target in targets do
-		local cell = grid:get_cell(target)
+		local cell = world:get_cell(target)
 		local gauge = damage.amount
 
-		local entities = get_attackable_entities(grid, cell, damage)
+		local entities = get_attackable_entities(world, cell, damage)
 
 		-- compile all the altars that have influence on this cell
 		local altars = {}
 		for entity_id in cell.server_data.influences do
-			local entity = grid.entities[entity_id]
+			local entity = world.entities[entity_id]
 			if
 				entity.type == "altar"
 				-- altar on the cell being attacked does not count
-				and not hex_grid_mod.coords_eq(entity.primary_coordinate, target)
+				and not coords.coords_eq(entity.primary_coordinate, target)
 			then
 				table.insert(altars, entity)
 			end
@@ -174,9 +176,9 @@ function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damag
 		local done = false
 		for _, entity in entities do
 			for _, altar in altars do
-				if is_allied(grid, entity.owner, altar.owner) then
+				if is_allied(world, entity.owner, altar.owner) then
 					local new_attackables =
-						get_attackable_entities(grid, grid:get_cell(altar.primary_coordinate) :: HexCell, damage)
+						get_attackable_entities(world, world:get_cell(altar.primary_coordinate) :: HexCell, damage)
 
 					-- if the altar is at the top, logically there is nothing to sacrifice
 					-- do not retarget.
@@ -216,14 +218,14 @@ function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damag
 
 	-- then apply the damage
 	for entity_id, value in damage_values do
-		local entity = grid.entities[entity_id]
+		local entity = world.entities[entity_id]
 		apply_entity_damage(entity, value, damage.piercing :: boolean)
 
-		updates_mod.add_update(grid, {
+		updates_mod.add_update(world, {
 			type = "entity_update",
 			entity = entity,
 		})
-		table.insert(grid.action_queue, {
+		table.insert(world.action_queue, {
 			type = "entity_event",
 			event_type = "took_damage",
 			entity_id = entity_id,
@@ -241,7 +243,7 @@ function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damag
 	end
 
 	if damage.from ~= nil then
-		table.insert(grid.action_queue, {
+		table.insert(world.action_queue, {
 			type = "entity_event",
 			event_type = "dealt_damage",
 			entity_id = damage.from,
@@ -252,16 +254,16 @@ function damage_cells(grid: HexGrid, targets: { CubicCoordinate }, damage: Damag
 	return destroyed_entities
 end
 
-function destroy_entities(grid: HexGrid, results: DamageResult)
+function destroy_entities(world: World, results: DamageResult)
 	for entity_id, result in results do
 		if result.lethal then
-			server_entity_mod.remove_entity(grid, grid.entities[entity_id])
+			server_entity_mod.remove_entity(world, world.entities[entity_id])
 		end
 	end
 end
 
-function damage_entity_destroying(grid: HexGrid, entity: Entity, damage: Damage)
-	destroy_entities(grid, damage_entity(grid, entity, damage))
+function damage_entity_destroying(world: World, entity: Entity, damage: Damage)
+	destroy_entities(world, damage_entity(world, entity, damage))
 end
 
 return {

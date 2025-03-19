@@ -5,12 +5,12 @@ local asset_server = require(ReplicatedStorage.Shared.asset_server)
 local items_mod = require(ReplicatedStorage.Shared.items)
 
 type Entity = types.Entity
-type HexGrid = types.HexGrid
+type World = types.World
 
 local model = asset_server.load "Entities/Vault"
 
-function update_model(self: Entity, grid: HexGrid)
-	local crystal = grid.entity_instance_map[self.id]:FindFirstChild "crystal" :: BasePart
+function update_model(self: Entity, world: World)
+	local crystal = world.entity_instance_map[self.id]:FindFirstChild "crystal" :: BasePart
 	if self.status == "complete" then
 		assert(self.inventory ~= nil, "inventory nil")
 		if #self.inventory.items > 0 then
@@ -26,14 +26,14 @@ end
 
 registry_mod.registry.vault = registry_mod.with_defaults {
 	model = model,
-	update = function(self: Entity, grid: HexGrid, old: Entity)
-		update_model(self, grid)
+	update = function(self: Entity, world: World, old: Entity)
+		update_model(self, world)
 	end,
-	animate = function(self: Entity, grid: HexGrid, animation_state: types.AnimationState)
+	animate = function(self: Entity, world: World, animation_state: types.AnimationState)
 		if not self.inventory then
 			return
 		end
-		local instance_root = grid.entity_instance_map[self.id]
+		local instance_root = world.entity_instance_map[self.id]
 		if not instance_root then
 			warn "no instance found for vault"
 			return
@@ -43,8 +43,8 @@ registry_mod.registry.vault = registry_mod.with_defaults {
 		local start = instance.Position
 		instance:PivotTo(CFrame.Angles(0, t, 0) + start)
 	end,
-	init = function(self: Entity, grid: HexGrid)
-		update_model(self, grid)
+	init = function(self: Entity, world: World)
+		update_model(self, world)
 	end,
 }
 
