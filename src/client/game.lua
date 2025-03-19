@@ -254,7 +254,6 @@ function handle_updates(grid: HexGrid, updates: { GridUpdate })
 					)
 				end
 				if event.event_type == "produced_items" then
-					instance.Enabled = false
 					instance.Amount.Text = `<font color="#a3e5a0">{display("+", event.items)}</font>`
 				elseif event.event_type == "consumed_items" then
 					instance.Amount.Text = `<font color="#e56b6b">{display("-", event.items)}</font>`

@@ -51,8 +51,12 @@ function serialize_entity_for_team(grid: HexGrid, entity: Entity, team: TeamId):
 		local copy = {}
 		for k, v in to_copy do
 			if k == "server_data" then
-			elseif k == "queued_decisions" and team_mod.is_allied(grid, entity.owner, team) then
-				copy[k] = {}
+			elseif k == "queued_decisions" then
+				if team_mod.is_allied(grid, entity.owner, team) then
+					copy[k] = v
+				else
+					copy[k] = {}
+				end
 			else
 				copy[k] = v
 			end
