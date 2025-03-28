@@ -10,6 +10,7 @@ local updates_mod = require(ServerScriptService.Server.updates)
 local computed_mod = require(ServerScriptService.Server.computed)
 local quest_methods = require(ServerScriptService.Server.questing.quest)
 local effects_mod = require(ServerScriptService.Server.effect)
+local visibility_mod = require(ServerScriptService.Server.visibility)
 
 local do_entity_decay = require(script.entity_decay).do_entity_decay
 local new_action_state = require(script.new_action_state).new_action_state
@@ -176,7 +177,7 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	computed_mod.compute_presence(world)
 	remove_occuluded_blueprints(world)
 
-	for team_id, changed_to_visible in computed_mod.compute_visibility(world, action_state) do
+	for team_id, changed_to_visible in visibility_mod.compute_visibility(world) do
 		for encoded_coord in changed_to_visible do
 			local cell = world.cells[encoded_coord]
 			for entity_id in cell.entities do

@@ -11,6 +11,7 @@ type World = types.World
 type WorldUpdate = types.WorldUpdate
 type EntityId = types.EntityId
 type TeamId = types.TeamId
+type TeamData = types.TeamData
 
 -- Removes all but the last "entity_update" for each entity_id from a list of updates.
 function filter_duplicate_entity_updates(updates)
@@ -31,77 +32,80 @@ function filter_duplicate_entity_updates(updates)
 	return result
 end
 
+function get_updates_for_team(world: World, buffer: { WorldUpdate }, team_id: TeamId): { WorldUpdate }
+	local team = world.teams[team_id]
+	if #team.players == 0 and not RunService:IsStudio() then
+		return {}
+	end
+	local mapped = filter_duplicate_entity_updates(util.table_filter_map(buffer, function(update: WorldUpdate)
+		local target = (update :: any).target or "everyone"
+		if team.server_data.visibility ~= "perfect" and target ~= "everyone" and table.find(target, team.id) == nil then
+			return
+		end
+		if update.type == "entity_update" then
+			local serialized = serialize_mod.serialize_entity_for_team(world, update.entity, team.id)
+			return serialized and {
+				type = update.type,
+				entity = serialized,
+			}
+		elseif update.type == "entity_created" then
+			if visibility.entity_visibility(world, world.entities[update.entity_id], team.id) then
+				return {
+					type = update.type,
+					entity_id = update.entity_id,
+				}
+			else
+				return nil
+			end
+		elseif update.type == "entity_event" then
+			if visibility.entity_visibility(world, world.entities[update.event.entity_id], team.id) then
+				return {
+					type = update.type,
+					event = update.event,
+				}
+			else
+				return nil
+			end
+		elseif update.type == "cell_update" then
+			local serialized = serialize_mod.serialize_cell_for_team(world, update.cell, team.id)
+			return serialized and {
+				type = update.type,
+				entity = serialized,
+			}
+		elseif update.type == "ability" then
+			local hit_cell = world:get_cell(update.coordinate)
+			local entity = world.entities[update.entity_id]
+			if hit_cell.owner == team.id or entity.owner == team.id then
+				return {
+					type = update.type,
+					entity_id = update.entity_id,
+					ability_type = update.ability_type,
+					coordinate = update.coordinate,
+				}
+			end
+			return nil
+		elseif update.type == "cells" then
+			return {
+				type = update.type,
+				cells = util.table_map(update.cells, function(cell)
+					return serialize_mod.serialize_cell_for_team(world, cell, team.id)
+				end),
+			}
+		else
+			return update
+		end
+	end))
+	return mapped or {}
+end
+
 function flush_updates(world: World): { [TeamId]: { WorldUpdate } }
 	local buffer = world.updates_buffer
 	local updates = {}
-	if #buffer > 0 then
-		for _, team in world.teams do
-			if #team.players == 0 and not RunService:IsStudio() then
-				continue
-			end
-			local mapped = filter_duplicate_entity_updates(util.table_filter_map(buffer, function(update: WorldUpdate)
-				local target = (update :: any).target or "everyone"
-				if
-					team.server_data.visibility ~= "perfect"
-					and target ~= "everyone"
-					and table.find(target, team.id) == nil
-				then
-					return
-				end
-				if update.type == "entity_update" then
-					local serialized = serialize_mod.serialize_entity_for_team(world, update.entity, team.id)
-					return serialized and {
-						type = update.type,
-						entity = serialized,
-					}
-				elseif update.type == "entity_created" then
-					if visibility.entity_visibility(world, world.entities[update.entity_id], team.id) then
-						return {
-							type = update.type,
-							entity_id = update.entity_id,
-						}
-					end
-				elseif update.type == "entity_event" then
-					if visibility.entity_visibility(world, world.entities[update.event.entity_id], team.id) then
-						return {
-							type = update.type,
-							event = update.event,
-						}
-					end
-				elseif update.type == "cell_update" then
-					local serialized = serialize_mod.serialize_cell_for_team(world, update.cell, team.id)
-					return serialized and {
-						type = update.type,
-						entity = serialized,
-					}
-				elseif update.type == "ability" then
-					local hit_cell = world:get_cell(update.coordinate)
-					local entity = world.entities[update.entity_id]
-					if hit_cell.owner == team.id or entity.owner == team.id then
-						return {
-							type = update.type,
-							entity_id = update.entity_id,
-							ability_type = update.ability_type,
-							coordinate = update.coordinate,
-						}
-					end
-					return nil
-				elseif update.type == "cells" then
-					return {
-						type = update.type,
-						cells = util.table_map(update.cells, function(cell)
-							return serialize_mod.serialize_cell_for_team(world, cell, team.id)
-						end),
-					}
-				else
-					return update
-				end
-			end))
-			if #mapped > 0 then
-				updates[team.id] = mapped
-				for _, player in team.players do
-					remotes_mod.world_updates_remote:FireClient(player, mapped)
-				end
+	for _, team in world.teams do
+		updates[team.id] = get_updates_for_team(world, buffer, team.id)
+		if #updates[team.id] > 0 then
+			for _, player in team.players do
+				remotes_mod.world_updates_remote:FireClient(player, updates[team.id])
 			end
 		end
 	end
@@ -119,6 +123,7 @@ function add_update(world: World, event: WorldUpdate)
 end
 
 return {
+	get_updates_for_team = get_updates_for_team,
 	flush_updates = flush_updates,
 	add_update = add_update,
 }

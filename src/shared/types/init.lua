@@ -524,6 +524,11 @@ export type EntityAction =
 	| (EntityEvent & { type: "entity_event" })
 	| Decision
 
+export type System = {
+	entities: { [EntityId]: Entity },
+	cells: { [EncodedCoordinate]: HexCell },
+}
+
 export type World = {
 	-- instances are always nil on the server, while always a table on the client
 	entity_instance_map: InstanceMap<EntityId>,
@@ -541,8 +546,8 @@ export type World = {
 	entity_configurations: { [string]: EntityConfiguration },
 	global_configuration: GlobalConfiguration,
 
-	-- extents: Extents,
 	get_cell: (self: World, coordinate: CubicCoordinate) -> HexCell?,
+
 	-- returns table of entities that fit the criteria
 	query_entity: (self: World, props: any) -> { Entity },
 	new_team: (self: World, players: { Player }, color: TeamColor?, name: string?) -> TeamData,
@@ -559,6 +564,8 @@ export type World = {
 
 	neutral_team: TeamId,
 	spectator_team: TeamId,
+
+	systems: { System },
 
 	-- player teams can grant or revoke visibility to spectators
 	-- use userid so visibility is preserved even after the spectator leaves
@@ -591,6 +598,7 @@ export type World = {
 	-- client only
 	animation_states: { [EntityId]: AnimationState }?,
 }
+
 export type PartialWorld = {
 	cells: { [EncodedCoordinate]: HexCell },
 	coalitions: { CoalitionData },
@@ -610,6 +618,7 @@ export type PartialWorld = {
 	neutral_team: TeamId,
 	spectator_team: TeamId,
 	quests: { [string]: Quest },
+	systems: { System },
 }
 
 -- Questing types

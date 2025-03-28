@@ -5,8 +5,9 @@ local coords = require(ReplicatedStorage.Shared.coords)
 type World = types.World
 type CubicCoordinate = types.CubicCoordinate
 type EncodedCoordinate = types.EncodedCoordinate
+type System = types.System
 
-function compute_systems(world: World)
+function compute_systems(world: World): { System }
 	local systems: { { CubicCoordinate } } = {}
 	local visited: { [EncodedCoordinate]: { CubicCoordinate } } = {}
 

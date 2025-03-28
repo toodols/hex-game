@@ -201,7 +201,9 @@ function handle_updates(world: World, updates: { WorldUpdate })
 		elseif update.type == "cell_update" then
 			world.cells[coords.encode_coord(update.cell.coordinate)] = update.cell
 		elseif update.type == "cells" then
+			-- hide cells that are removed
 			for old_encoded_coord, old_cell in world.cells do
+				-- todo: this also needs to remove entities
 				if not update.cells[old_encoded_coord] then
 					local instance = world.cell_instance_map[old_encoded_coord]
 					world.cell_instance_map[old_encoded_coord] = nil

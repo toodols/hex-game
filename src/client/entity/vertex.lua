@@ -18,7 +18,7 @@ function update_vertex_artifacts(self: Entity, world: World)
 	for _, neighbor_coord in (coords.neighbors_eq(self.primary_coordinate, 1)) do
 		local neighbor_cell = world:get_cell(neighbor_coord)
 		local neighbor_offset = coords.coords_sub(self.primary_coordinate, neighbor_coord)
-		local vertex_instance = instance:FindFirstChild(coords.encode_coord(neighbor_offset))
+		local vertex_instance = instance:FindFirstChild(("%d,%d,%d"):format(unpack(neighbor_offset)))
 		if vertex_instance then
 			local neighbor_vertex = world:query_entity({
 				coordinate = neighbor_coord,

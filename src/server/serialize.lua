@@ -5,6 +5,7 @@ local visibility_mod = require(script.Parent.visibility)
 local coords = require(ReplicatedStorage.Shared.coords)
 local quest_methods = require(script.Parent.questing.quest)
 local team_mod = require(ReplicatedStorage.Shared.team)
+local computed_mod = require(script.Parent.computed)
 
 local cell_visibility = visibility_mod.cell_visibility
 local entity_visibility = visibility_mod.entity_visibility
@@ -16,6 +17,7 @@ type HexCell = types.HexCell
 type PartialWorld = types.PartialWorld
 type TeamData = types.TeamData
 type EntityId = types.EntityId
+type System = types.System
 
 function buildable_for_team(world: World, cell: HexCell, team: TeamId): boolean
 	local result = false
@@ -128,7 +130,13 @@ function serialize_cell_for_team(world: World, cell: HexCell, team: TeamId): Hex
 		}
 	end
 end
+
+function serialize_system_for_team(world: World, system: System, team: TeamId): System?
+	return nil
+end
+
 function serialize_world_for_team(world: World, team: TeamId): PartialWorld
+	world.systems = computed_mod.compute_systems(world)
 	local entities: { [EntityId]: Entity } = {}
 	for entity_id, entity in world.entities do
 		local serialized = serialize_entity_for_team(world, entity, team)
@@ -147,6 +155,9 @@ function serialize_world_for_team(world: World, team: TeamId): PartialWorld
 		end),
 		quests = util.table_map(world.quests, function(quest)
 			return quest_methods.quest_serialize(quest, world)
+		end),
+		systems = util.table_filter_map(world.systems, function(system)
+			return serialize_system_for_team(world, system, team)
 		end),
 		turn = world.turn,
 		current_skips = world.current_skips,

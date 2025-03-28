@@ -73,7 +73,7 @@ function start_game(teleport_data: { room: types.Room }?)
 	local players_config = room and room.players
 	print("Starting game with teleport data", game.HttpService:JSONEncode(teleport_data))
 	main_world = presets[if room then room.map else "my_map"]()
-	-- world = tests.server.correct_phony_updates()
+	-- main_world = presets.stress_test()
 
 	_G.world = main_world
 

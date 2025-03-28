@@ -26,16 +26,20 @@ end
 
 -- Encodes a CubicCoordinate into a string
 function encode_coord(coord: CubicCoordinate): EncodedCoordinate
-	return table.concat(coord, ",")
+	return tostring((coord[1] + 1000) * 10000 + (coord[2] + 1000))
 end
 
 --  Decodes a string back into a CubicCoordinate
 function decode_coord(s: EncodedCoordinate): CubicCoordinate
-	local coord = {}
-	for i, frag in s:split "," do
-		coord[i] = tonumber(frag)
-	end
-	return coord
+	local n = tonumber(s)
+	local x = math.floor(n / 10000) - 1000
+	local y = (n % 10000) - 1000
+	local z = -x - y
+	return { x, y, z }
+end
+
+function display_coord(coord: CubicCoordinate): string
+	return string.format("(%d, %d, %d)", coord[1], coord[2], coord[3])
 end
 
 local rotation_to_direction = {
@@ -174,5 +178,6 @@ return {
 	from_vec3 = from_vec3,
 	coords_lerp = coords_lerp,
 	coords_round = coords_round,
+	display_coord = display_coord,
 	rotation_to_direction = rotation_to_direction,
 }

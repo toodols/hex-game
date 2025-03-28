@@ -175,6 +175,7 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 			decaying_enabled = true,
 		},
 		quests = {},
+		systems = {},
 		active_entities = world_active_entities,
 		new_team = world_new_team,
 		purge_dead_entities = world_purge_dead_entities,

@@ -8,6 +8,7 @@ local computed_mod = require(script.Parent.computed)
 local updates_mod = require(script.Parent.updates)
 local turn_scheduler = require(script.Parent.turn_scheduler)
 local action_phase_mod = require(script.Parent.action_phase)
+local visibility_mod = require(script.Parent.visibility)
 local tutorial_map = require(script.tutorial).tutorial_map
 local testing_maps = require(script.testing)
 
@@ -15,7 +16,7 @@ type World = types.World
 
 function my_map(): World
 	-- Build the map
-	local magic = 5
+	local magic = 10
 
 	local world = world_mod.new_world_from_extents {
 		{ min = -magic, max = magic },
@@ -156,7 +157,7 @@ function prepare_preset(fn: (...any) -> World): (...any) -> World
 		local world = result[1]
 		updates_mod.flush_updates(world)
 		computed_mod.compute_presence(world)
-		computed_mod.compute_visibility(world)
+		visibility_mod.compute_visibility(world)
 		computed_mod.compute_systems(world)
 		return unpack(result)
 	end
@@ -167,4 +168,5 @@ return {
 	my_map = prepare_preset(my_map),
 	all_entities = prepare_preset(testing_maps.all_entities),
 	blank_map = prepare_preset(testing_maps.blank_map),
+	stress_test = prepare_preset(testing_maps.stress_test),
 }

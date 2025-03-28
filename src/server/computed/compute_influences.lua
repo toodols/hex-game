@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
-local server_entity_mod = require(ServerScriptService.Server.entity)
+local server_entity_registry = require(ServerScriptService.Server.entity.registry).registry
 type World = types.World
 
 function compute_influences(world: World)
@@ -9,7 +9,7 @@ function compute_influences(world: World)
 		cell.server_data.influences = {}
 	end
 	for _, entity in world:active_entities() do
-		local behavior = server_entity_mod.registry[entity.type]
+		local behavior = server_entity_registry[entity.type]
 		if behavior.influences then
 			behavior.influences(entity, world)
 		end

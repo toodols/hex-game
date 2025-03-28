@@ -4,6 +4,8 @@ local types = require(ReplicatedStorage.Shared.types)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local entity_mod = require(ServerScriptService.Server.entity)
 local coords = require(ReplicatedStorage.Shared.coords)
+local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
+local action_phase_mod = require(ServerScriptService.Server.action_phase)
 
 type World = types.World
 
@@ -80,7 +82,46 @@ function blank_map(): World
 	}
 end
 
+function stress_test(): World
+	local world = world_mod.new_world_from_extents {
+		{ min = -20, max = 20 },
+		{ min = -20, max = 20 },
+		{ min = -20, max = 20 },
+	}
+	world.global_configuration.decaying_enabled = false
+	local team1 = world:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Red")
+
+	for encoded_coord, cell in world.cells do
+		local x, y, z = unpack(cell.coordinate)
+		if (x + y) % 2 == 0 then
+			cell.type = "bar_deposit"
+			entity_mod.new_entity({
+				type = "extractor",
+				primary_coordinate = cell.coordinate,
+				owner = team1.id,
+			}, world)
+		else
+			entity_mod.new_entity({
+				type = "stockpile",
+				primary_coordinate = cell.coordinate,
+				owner = team1.id,
+			}, world)
+		end
+	end
+
+	world.turn_schedule = turn_scheduler.new_turn_schedule(function()
+		turn_scheduler.reset_turn_time(world, world.turn_schedule)
+		turn_scheduler.report_turn_time(world)
+	end, function()
+		action_phase_mod.run_action_phase(world)
+	end)
+	turn_scheduler.reset_turn_time(world, world.turn_schedule)
+	turn_scheduler.turn_schedule_resume(world.turn_schedule)
+	return world
+end
+
 return {
 	all_entities = all_entities,
 	blank_map = blank_map,
+	stress_test = stress_test,
 }

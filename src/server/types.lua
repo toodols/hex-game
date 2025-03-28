@@ -25,6 +25,10 @@ export type ActionState = {
 	system_by_cell: { [EncodedCoordinate]: System },
 }
 
+-- this is distinct from shared_types.System
+-- this is a temporal type that stores information
+-- about items/power which is disposed of after one turn
+-- todo: give this a different name
 export type System = {
 	entities: { [EntityId]: boolean },
 	cells: { [EncodedCoordinate]: boolean },
