@@ -430,10 +430,11 @@ function EntityInformation(props: {
 								local candidates = {}
 								for _, coord in coords.neighbors_leq(entity.primary_coordinate, ability.range) do
 									local cell = world:get_cell(coord)
-									if cell and next(cell.entities) then
-										local instance = world.cell_instance_map[coords.encode_coord(coord)]
-										candidates[instance] = coord
+									if not cell or next(cell.entities) == nil then
+										continue
 									end
+									local instance = world.cell_instance_map[coords.encode_coord(coord)]
+									candidates[instance] = coord
 								end
 								table.insert(selection_mode_stack, {
 									type = "select_some_cell",
@@ -468,6 +469,10 @@ function EntityInformation(props: {
 
 								local candidates = {}
 								for _, coord in coords.neighbors_leq(entity.primary_coordinate, ability.range) do
+									local cell = world:get_cell(coord)
+									if not cell then
+										continue
+									end
 									local instance = world.cell_instance_map[coords.encode_coord(coord)]
 									if
 										not instance
@@ -479,6 +484,11 @@ function EntityInformation(props: {
 										)
 									then
 										continue
+									end
+									for influence in cell.influences do
+										if world.entities[influence].type == "taunt" then
+											continue
+										end
 									end
 									candidates[instance] = coord
 								end

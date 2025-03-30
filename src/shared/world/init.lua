@@ -34,7 +34,7 @@ function coords_filter(world: World, values: { CubicCoordinate }): { CubicCoordi
 	return results
 end
 
-function world_new_team(self: World, players: { Player }?, color: TeamColor?, name: string?)
+function new_team(self: World, players: { Player }?, color: TeamColor?, name: string?)
 	table.insert(self.teams, {
 		id = #self.teams + 1,
 		name = name or "Unnamed Team",
@@ -50,7 +50,7 @@ function world_new_team(self: World, players: { Player }?, color: TeamColor?, na
 end
 
 -- Remove entities that are is_destroyed from world.entities to reclaim memory
-function world_purge_dead_entities(world: World)
+function purge_dead_entities(world: World)
 	for entity_id, entity in world.entities do
 		if entity.is_destroyed then
 			world.entities[entity.id] = nil
@@ -177,21 +177,19 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 		quests = {},
 		systems = {},
 		active_entities = world_active_entities,
-		new_team = world_new_team,
-		purge_dead_entities = world_purge_dead_entities,
 		query_entity = world_query_entity,
 		get_cell = world_get_cell,
 	}
 	-- neutral team
 	-- does not impose presence on its neighbors
 	-- certain units can be captured by building a vertex on top of it
-	world.neutral_team = world:new_team({}, {
+	world.neutral_team = new_team(world, {}, {
 		type = "color3",
 		color = Color3.fromRGB(150, 150, 150),
 	}, "Neutral").id
 	world.teams[world.neutral_team].is_player_team = false
 	-- spectator team
-	world.spectator_team = world:new_team({}, {
+	world.spectator_team = new_team(world, {}, {
 		type = "color3",
 		color = Color3.fromRGB(255, 255, 255),
 	}, "Spectator").id
@@ -256,4 +254,6 @@ return {
 	new_world_from_data = new_world_from_data,
 	new_world_empty = new_world_empty,
 	line_of_sight = line_of_sight,
+	new_team = new_team,
+	purge_dead_entities = purge_dead_entities,
 }

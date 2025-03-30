@@ -3,6 +3,8 @@ local RunService = game:GetService "RunService"
 
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
+local team_mod = require(ReplicatedStorage.Shared.team)
+
 local serialize_mod = require(script.Parent.serialize)
 local remotes_mod = require(script.Parent.remotes)
 local visibility = require(script.Parent.visibility)
@@ -75,7 +77,9 @@ function get_updates_for_team(world: World, buffer: { WorldUpdate }, team_id: Te
 		elseif update.type == "ability" then
 			local hit_cell = world:get_cell(update.coordinate)
 			local entity = world.entities[update.entity_id]
-			if hit_cell.owner == team.id or entity.owner == team.id then
+			if
+				team_mod.is_allied(world, hit_cell.owner, team.id) or team_mod.is_allied(world, entity.owner, team_id)
+			then
 				return {
 					type = update.type,
 					entity_id = update.entity_id,

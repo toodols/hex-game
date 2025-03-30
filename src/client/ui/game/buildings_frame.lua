@@ -212,11 +212,11 @@ function BuildingItem(props: {
 							Size = UDim2.new(1, 0, 0, 0),
 							Text = "Requires Research: " .. table.concat(
 								util.table_map(entity_config.required_research, function(research_id)
-									local name = researches_mod.researches[research_id].name
-									if props.researches[name] then
-										return `<font color="rgb(50, 155, 50)">{name}</font>`
+									local research = researches_mod.researches[research_id]
+									if props.researches[research_id] then
+										return `<font color="rgb(50, 155, 50)">{research.name}</font>`
 									else
-										return `<font color="rgb(155, 50, 50)">{name}</font>`
+										return `<font color="rgb(155, 50, 50)">{research.name}</font>`
 									end
 								end),
 								", "
@@ -314,7 +314,6 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 			}):Play()
 		end
 	end, { is_expanded })
-
 	return React.createElement("Frame", {
 		Visible = props.Visible,
 		AnchorPoint = Vector2.new(0.5, 1),

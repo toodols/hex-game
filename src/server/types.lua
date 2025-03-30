@@ -38,4 +38,9 @@ export type System = {
 	team: TeamId,
 }
 
+export type PlayerInfo = {
+	team: TeamId,
+	player: Player?,
+}
+
 return {}

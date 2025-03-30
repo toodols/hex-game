@@ -112,8 +112,10 @@ export type Entity = {
 	-- Whether this building's primary abilities are enabled
 	enabled: boolean?,
 
-	-- for heart and maybe extractor
+	-- for heart and extractor
 	should_output: number?,
+	--- extractor only
+	deposit: CellType?,
 
 	-- entities enter decay when there is no longer a heart
 	decay: number?,
@@ -141,10 +143,11 @@ export type Entity = {
 	queued_decisions: { Decision },
 
 	server_data: {
-		active: boolean?,
 		is_disguise_of: EntityId?,
 		-- whether this entity is always visible regardless of whether the cell it is on is visible
 		always_visible: boolean?,
+		-- whether this entity is always visible for a specific team
+		always_visible_for: { [TeamId]: boolean? },
 		-- timestamp of when it was first requested to be constructed
 		requested_at: number,
 	},
@@ -545,13 +548,11 @@ export type World = {
 
 	entity_configurations: { [string]: EntityConfiguration },
 	global_configuration: GlobalConfiguration,
-
+	--
 	get_cell: (self: World, coordinate: CubicCoordinate) -> HexCell?,
-
 	-- returns table of entities that fit the criteria
 	query_entity: (self: World, props: any) -> { Entity },
-	new_team: (self: World, players: { Player }, color: TeamColor?, name: string?) -> TeamData,
-	purge_dead_entities: (self: World) -> nil,
+	--
 	active_entities: (self: World) -> { [EntityId]: Entity },
 
 	-- get_team_coalition: (self: World, team: TeamId) -> CoalitionData,

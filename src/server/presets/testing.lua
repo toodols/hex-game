@@ -17,9 +17,9 @@ function all_entities(): World
 		{ min = -3, max = 3 },
 	}
 
-	local team1 = world:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "red")
+	local team1 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "red")
 	team1.server_data.visibility = "perfect"
-	local team2 = world:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "blue")
+	local team2 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "blue")
 	team2.is_player_team = false
 
 	local start = { -9, 7, 2 }
@@ -73,8 +73,8 @@ function blank_map(): World
 		{ min = -10, max = 10 },
 	}
 
-	local team1 = world:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "red")
-	local team2 = world:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "blue")
+	local team1 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "red")
+	local team2 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "blue")
 
 	return world, {
 		team1 = team1,
@@ -89,7 +89,7 @@ function stress_test(): World
 		{ min = -20, max = 20 },
 	}
 	world.global_configuration.decaying_enabled = false
-	local team1 = world:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Red")
+	local team1 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Red")
 
 	for encoded_coord, cell in world.cells do
 		local x, y, z = unpack(cell.coordinate)

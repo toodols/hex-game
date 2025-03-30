@@ -221,7 +221,7 @@ function tests.chatgpt_didnt_grift_me() -- (it did)
 		{ min = -5, max = 5 },
 		{ min = -5, max = 5 },
 	}
-	local team1 = world:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) })
+	local team1 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) })
 	team1.server_data.visibility = "perfect"
 
 	local result = world_mod.line_of_sight(world, { -2, 0, 2 }, { 2, 0, -2 })
@@ -279,7 +279,7 @@ function tests.capture_extractor()
 		{ min = -1, max = 1 },
 		{ min = -1, max = 1 },
 	}
-	local team1 = world:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) })
+	local team1 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) })
 	local extractor = entity_mod.new_entity({
 		type = "extractor",
 		primary_coordinate = { 0, 0, 0 },
@@ -307,7 +307,7 @@ end
 
 function tests.stockpile_blueprint_builds()
 	local world = presets.blank_map()
-	local team1 = world:new_team()
+	local team1 = world_mod.new_team(world)
 
 	local extractor = entity_mod.new_entity({
 		type = "extractor",

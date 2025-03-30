@@ -3,6 +3,7 @@ local ServerScriptService = game:GetService "ServerScriptService"
 
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
+local world_mod = require(ReplicatedStorage.Shared.world)
 
 local server_types = require(ServerScriptService.Server.types)
 local server_entity_mod = require(ServerScriptService.Server.entity)
@@ -68,7 +69,7 @@ function queue_blueprints_and_scaffolds(world: World, queue: { EntityAction })
 	end
 end
 
-function remove_occuluded_blueprints(world: World)
+function remove_occluded_blueprints(world: World)
 	-- remove blueprints that are too close to enemies
 	for _, entity in world:active_entities() do
 		if entity.status == "blueprint" then
@@ -175,7 +176,7 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	do_entity_decay(world, action_state)
 
 	computed_mod.compute_presence(world)
-	remove_occuluded_blueprints(world)
+	remove_occluded_blueprints(world)
 
 	for team_id, changed_to_visible in visibility_mod.compute_visibility(world) do
 		for encoded_coord in changed_to_visible do
@@ -209,7 +210,7 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	end
 
 	local updates = updates_mod.flush_updates(world)
-	world:purge_dead_entities()
+	world_mod.purge_dead_entities(world)
 
 	return {
 		elapsed = tick() - t0,

@@ -8,12 +8,15 @@ local researches_mod = require(ReplicatedStorage.Shared.researches)
 type ActionState = server_types.ActionState
 type Entity = types.Entity
 type World = types.World
+type EntityEvent = types.EntityEvent
+type HexCell = types.HexCell
 
 registry_mod.registry.extractor = registry_mod.with_defaults {
 	autogenerates_vertex = true,
 	built_on = { "bar_deposit", "vit_deposit", "rad_deposit", "tar_deposit" },
 	init = function(self: Entity, world: World)
 		self.should_output = 0
+		self.deposit = (world:get_cell(self.primary_coordinate) :: HexCell).type
 	end,
 	tick = function(self: Entity, world: World, action_state: ActionState)
 		local config = world.entity_configurations[self.type]
@@ -65,6 +68,13 @@ registry_mod.registry.extractor = registry_mod.with_defaults {
 			end
 		end
 	end,
+	on_event = function(self: Entity, world: World, event: EntityEvent)
+		if event.event_type == "killed" then
+			local cell = world:get_cell(self.primary_coordinate)
+			assert(cell,"cell not found")
+			cell.type = self.deposit
+		end
+	end
 }
 
 return {}

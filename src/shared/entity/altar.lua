@@ -4,8 +4,8 @@ local with_defaults = registry_mod.with_defaults
 
 registry.altar = with_defaults {
 	type = "altar",
-	name = "Altar",
-	description = "If there is a building on this tile, redirects incoming damage in r=2 to that building. Range may be extended by proxy.",
+	name = "Taunt",
+	description = "While visible, neighboring cells in a range of {entity.altar.range} may not be targeted.",
 	max_health = 3,
 	build_time = 1,
 	cost = {

@@ -114,7 +114,7 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 				CancelButton = React.createElement(
 					"TextButton",
 					themes.theme_button {
-						Visible = selection_mode.type == "select_some_cell"
+						Visible = selection_mode.type == "select_some_cell_attack"
 							or selection_mode.type == "select_direction",
 						Text = "Cancel",
 						Size = UDim2.new(0, 100, 0, 30),

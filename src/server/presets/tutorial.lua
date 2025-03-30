@@ -36,7 +36,12 @@ function tutorial_map()
 		action_phase_mod.run_action_phase(world)
 	end)
 
-	local player_team = world:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Player")
+	local player_team = world_mod.new_team(
+		world,
+		{},
+		{ type = "color3", color = Color3.new(1, 0.392156, 0.392156) },
+		"Player"
+	)
 	player_team.server_data.visibility = "perfect"
 	world:get_cell({ -1, 0, 1 }).type = "bar_deposit"
 	local extractor = entity_mod.new_entity({

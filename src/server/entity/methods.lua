@@ -58,8 +58,8 @@ function autogenerate_vertex(world: World, host: Entity)
 	end
 end
 
--- Creates a new entity on a world
--- And adds relevant events to the updates buffer
+--- Creates a new entity on a world
+--- And adds relevant events to the updates buffer
 function new_entity(entity_: any, world: World): Entity
 	local entity = entity_ :: Entity
 	if not world then
@@ -115,6 +115,10 @@ function new_entity(entity_: any, world: World): Entity
 	entity.server_data.requested_at = if entity.server_data.requested_at ~= nil
 		then entity.server_data.requested_at
 		else os.clock()
+
+	entity.server_data.always_visible_for = if entity.server_data.always_visible_for ~= nil
+		then entity.server_data.always_visible_for
+		else {}
 
 	-- todo: rotate the offsets by the rotation
 	for _, offset in shared_behavior.offsets do

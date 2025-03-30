@@ -23,8 +23,8 @@ function my_map(): World
 		{ min = -magic, max = magic },
 		{ min = -magic, max = magic },
 	}
-	local team1 = world:new_team({}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Red")
-	local team2 = world:new_team({}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "Blue")
+	local team1 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Red")
+	local team2 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "Blue")
 
 	world.turn_schedule = turn_scheduler.new_turn_schedule(function()
 		turn_scheduler.reset_turn_time(world, world.turn_schedule)

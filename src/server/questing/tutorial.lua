@@ -155,7 +155,7 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 					cells = world.cells,
 				})
 				updates_mod.flush_updates(world)
-				wait(1)
+				task.wait(1)
 				quest_methods.quest_advance(self, world)
 			end)
 		end,

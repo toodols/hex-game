@@ -8,8 +8,10 @@ local asset_server = require(ReplicatedStorage.Shared.asset_server)
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local items_mod = require(ReplicatedStorage.Shared.items)
-local client_entity_mod = require(script.Parent.entity)
 local cells_mod = require(ReplicatedStorage.Shared.cells)
+local world_mod = require(ReplicatedStorage.Shared.world)
+local formatting = require(ReplicatedStorage.Shared.formatting)
+local client_entity_mod = require(script.Parent.entity)
 
 local into_vec3 = coords.into_vec3
 local encode_coord = coords.encode_coord
@@ -25,7 +27,9 @@ type EncodedCoordinate = types.EncodedCoordinate
 type WorldUpdate = types.WorldUpdate
 type PartialWorld = types.PartialWorld
 type Item = types.Item
+type EntityEvent = types.EntityEvent
 
+--- Paints, with animation, a cell based on its owner and visibility
 function color_cell(world: World, cell: HexCell)
 	local instance = world.cell_instance_map[coords.encode_coord(cell.coordinate)]
 	local function tween_color(color: Color3)
@@ -50,6 +54,9 @@ function color_cell(world: World, cell: HexCell)
 	end
 end
 
+--- Calls neighbor_changed on entities on all r=1 neighboring cells of the given coordinates <br>
+--- Necessary for `vertex` entities to properly display connections to other vertices <br>
+--- This uses a set to avoid adjacent cells calling .neighbor_changed twice on the same entity
 function update_neighbors(world: World, coordinates: { CubicCoordinate })
 	local neighbor_set = {}
 	for _, coord in coordinates do
@@ -73,18 +80,21 @@ function update_neighbors(world: World, coordinates: { CubicCoordinate })
 	end
 end
 
-function create_cell_instance(world: World, cell: HexCell)
+--- Create an instance for a single cell, as well as attaching necessary references
+--- between this instance and the data-facing cell
+function create_cell_instance(world: World, cell: HexCell): Model
 	local instance = cells_mod.cell_models[cell.type]:Clone()
 	instance.Parent = world.cell_instance_root
 	instance:PivotTo(CFrame.new(into_vec3(cell.coordinate) * 4.542 / 2))
-	-- for debugging purposes
-	instance.Name = coords.encode_coord(cell.coordinate)
+	instance.Name = coords.encode_coord(cell.coordinate) -- for debugging
 	world.cell_instance_map[coords.encode_coord(cell.coordinate)] = instance
 	color_cell(world, cell)
 	world.instance_cell_map[instance] = coords.encode_coord(cell.coordinate)
 	return instance
 end
 
+--- Does the initial render of the world provided by the server
+--- - This creates an instance for every cell, and an instance for every entity
 function render_world(world: World)
 	destroy_world_instances(world)
 	local entity_folder = Instance.new "Folder"
@@ -96,18 +106,17 @@ function render_world(world: World)
 	cell_folder.Name = "Cells"
 	world.cell_instance_root = cell_folder
 
-	-- create cell instances
 	for _, cell in world.cells do
 		create_cell_instance(world, cell)
 	end
 
-	-- first pass for entity update
 	for entity_id in world:active_entities() do
 		local entity = world.entities[entity_id]
 		client_entity_mod.update_entity_client(world, nil, entity)
 	end
 end
 
+--- Animates the appearance of a cell by moving it up from below the ground
 function animate_cell_appearance(instance: Model)
 	for _, descendant in instance:GetDescendants() do
 		if descendant:IsA "BasePart" then
@@ -119,6 +128,8 @@ function animate_cell_appearance(instance: Model)
 		end
 	end
 end
+
+--- Animates the removal of a cell by moving it down below the ground
 function animate_cell_removal(instance: Model)
 	for _, descendant in instance:GetDescendants() do
 		if descendant:IsA "BasePart" then
@@ -129,17 +140,20 @@ function animate_cell_removal(instance: Model)
 	end
 end
 
+--- Performs one step of animation on all entity instances that are animatable
 function step_animations(world: World)
 	if world.animation_states == nil then
 		world.animation_states = {}
 	end
 	assert(world.animation_states, "this should never error")
-	-- remove animation states for entities that are gone
+
+	-- remove animation states for entities that are no longer active
 	local new_animation_states = {}
 	for entity_id in world:active_entities() do
 		new_animation_states[entity_id] = world.animation_states[entity_id]
 	end
 	world.animation_states = new_animation_states
+
 	for entity_id, entity in world:active_entities() do
 		local behavior = client_entity_mod.registry[entity.type]
 		if behavior.animate then
@@ -152,12 +166,14 @@ function step_animations(world: World)
 	end
 end
 
-function start_animations(world: World)
+function start_animations(world: World): RBXScriptConnection
 	return RunService.Heartbeat:Connect(function()
 		step_animations(world)
 	end)
 end
 
+--- Removes all instances for this world
+--- Necessary for cleanup during tests
 function destroy_world_instances(world: World)
 	world.cell_instance_map = {}
 	world.entity_instance_map = {}
@@ -169,7 +185,164 @@ function destroy_world_instances(world: World)
 	end
 end
 
-function handle_updates(world: World, updates: { WorldUpdate })
+---
+function produced_item_effect(event: EntityEvent, origin: Vector3)
+	assert(event.event_type == "produced_items", "Event is not produced_items")
+	local item_template = asset_server.load "Effects/Item"
+	for item_type, amount in event.items do
+		for i = 1, amount do
+			local item = item_template:Clone()
+			item.Parent = workspace
+			item.Position = origin + Vector3.new(0, 4, 0)
+			item.Velocity = Vector3.new(math.random(-5, 5), 30, math.random(-5, 5))
+			item.Anchored = false
+			item.Color = items_mod.item_colors[item_type]
+			TweenService:Create(item, TweenInfo.new(2), {
+				Transparency = 1,
+			}):Play()
+			Debris:AddItem(item, 2)
+		end
+	end
+end
+
+function consumed_item_effect(event: EntityEvent, origin: Vector3)
+	assert(event.event_type == "consumed_items", "Event is not consumed_items")
+	local item_template = asset_server.load "Effects/Item"
+	task.spawn(function()
+		for item_type, amount in event.items do
+			for i = 1, amount do
+				local item = item_template:Clone()
+				item.Parent = workspace
+				item.Position = origin + Vector3.new(0, 6, 0)
+				item.Color = items_mod.item_colors[item_type]
+				TweenService:Create(item, TweenInfo.new(0.7, Enum.EasingStyle.Quart), {
+					Position = origin,
+					Transparency = 1,
+				}):Play()
+				Debris:AddItem(item, 0.7)
+				task.wait(0.2)
+			end
+		end
+	end)
+end
+
+function scout_attack_effect(from: Vector3, to: Vector3)
+	local bullet = Instance.new "Part"
+	bullet.Size = Vector3.new(0.5, 0.5, 0.5)
+	bullet.CanCollide = false
+	bullet.Anchored = true
+	bullet.Material = Enum.Material.Neon
+	bullet.Parent = workspace
+	bullet:PivotTo(CFrame.lookAt(from, to))
+	bullet.Anchored = true
+	TweenService:Create(bullet, TweenInfo.new(0.1, Enum.EasingStyle.Linear), {
+		Position = to,
+	}):Play()
+	Debris:AddItem(bullet, 0.3)
+end
+
+function hide_entities(world: World, old: HexCell)
+	for entity_id in old.entities do
+		local entity = world.entities[entity_id]
+		local client_behavior = client_entity_mod.registry[entity.type]
+		if client_behavior.on_hidden then
+			client_behavior.on_hidden(entity, world)
+		end
+		entity.is_destroyed = true
+	end
+end
+
+function handle_cells(world: World, update: WorldUpdate)
+	assert(update.type == "cells", "not a cell update")
+	-- remove cells that no longer exist
+	for old_encoded_coord, old_cell in world.cells do
+		-- todo: this also needs to remove entities on top of the cell
+		if not update.cells[old_encoded_coord] then
+			local instance = world.cell_instance_map[old_encoded_coord]
+			world.cell_instance_map[old_encoded_coord] = nil
+			world.instance_cell_map[instance] = nil
+			animate_cell_removal(instance)
+			Debris:AddItem(instance, 2)
+			world.cells[old_encoded_coord] = nil
+		end
+	end
+
+	for encoded_coord, cell in update.cells do
+		local old = world.cells[encoded_coord]
+		-- add new cells
+		if not old then
+			-- old = cell
+			local instance = create_cell_instance(world, cell)
+			animate_cell_appearance(instance)
+		end
+
+		-- remove entities from cells that have changed to not visible
+		if old.visible_for_team and not cell.visible_for_team then
+			hide_entities(world, old)
+		end
+
+		world.cells[encoded_coord] = cell
+	end
+	for _, cell in world.cells do
+		color_cell(world, cell)
+	end
+end
+
+function item_used_effect(event: EntityEvent, adornee: Instance)
+	local template = asset_server.load "Billboards/Exchange"
+	local instance = template:Clone()
+	instance.Parent = workspace
+	instance.Adornee = adornee
+
+	local function display(symbol: "+" | "-", items: { [Item]: number? }): string
+		return table.concat(
+			util.table_map(util.table_keys(items), function(k)
+				return `{symbol}{items[k]} {items_mod.item_names[k]}`
+			end),
+			"\n"
+		)
+	end
+	if event.event_type == "produced_items" then
+		instance.Amount.Text = formatting.font(display("+", event.items), {
+			color = Color3.fromRGB(163, 229, 160),
+		})
+	elseif event.event_type == "consumed_items" then
+		instance.Amount.Text = formatting.font(display("-", event.items), {
+			color = Color3.fromRGB(229, 107, 107),
+		})
+	else
+		error "bad event type"
+	end
+	TweenService:Create(instance, TweenInfo.new(4), {
+		StudsOffsetWorldSpace = Vector3.new(0, 4, 0),
+	}):Play()
+	TweenService:Create(instance.Amount, TweenInfo.new(4), {
+		TextTransparency = 1,
+	}):Play()
+	Debris:AddItem(instance, 5)
+end
+
+function handle_entity_event(world: World, event: EntityEvent)
+	if event.event_type == "produced_items" or event.event_type == "consumed_items" then
+		local entity_instance = world.entity_instance_map[event.entity_id]
+		if not entity_instance then
+			warn("entity not found", event.entity_id)
+			return
+		end
+
+		item_used_effect(event, entity_instance)
+
+		if event.event_type == "produced_items" then
+			produced_item_effect(event, entity_instance:GetPivot().Position)
+		elseif event.event_type == "consumed_items" then
+			consumed_item_effect(event, entity_instance:GetPivot().Position)
+		end
+	end
+end
+
+--- Some events like entity_event depend on entity_update
+--- In the future
+function sort_updates(updates: { WorldUpdate })
 	table.sort(updates, function(a, b)
 		local order = {
 			turn_timer = 1,
@@ -183,11 +356,17 @@ function handle_updates(world: World, updates: { WorldUpdate })
 		}
 		return (order[a.type] or 5) < (order[b.type] or 5)
 	end)
-	local updated_entities = {}
+end
 
+--- This is the main function that handles when the client receives updates about the world from the server
+--- This includes populating world.entities and world.cells and creating instances
+function handle_updates(world: World, updates: { WorldUpdate })
+	sort_updates(updates)
+
+	local updated_entities = {}
 	for _, update in updates do
+		-- first pass: populate entities and add new, old pair
 		if update.type == "entity_update" then
-			-- should be fine if single threaded
 			local old_entity = world.entities[update.entity.id]
 			world.entities[update.entity.id] = update.entity
 			if update.entity.active ~= false then
@@ -201,126 +380,17 @@ function handle_updates(world: World, updates: { WorldUpdate })
 		elseif update.type == "cell_update" then
 			world.cells[coords.encode_coord(update.cell.coordinate)] = update.cell
 		elseif update.type == "cells" then
-			-- hide cells that are removed
-			for old_encoded_coord, old_cell in world.cells do
-				-- todo: this also needs to remove entities
-				if not update.cells[old_encoded_coord] then
-					local instance = world.cell_instance_map[old_encoded_coord]
-					world.cell_instance_map[old_encoded_coord] = nil
-					world.instance_cell_map[instance] = nil
-					animate_cell_removal(instance)
-					Debris:AddItem(instance, 2)
-					world.cells[old_encoded_coord] = nil
-				end
-			end
-			for encoded_coord, cell in update.cells do
-				if not world.cells[encoded_coord] then
-					world.cells[encoded_coord] = cell
-					local instance = create_cell_instance(world, cell)
-					animate_cell_appearance(instance)
-				end
-
-				if world.cells[encoded_coord].visible_for_team and not cell.visible_for_team then
-					for entity_id in world.cells[encoded_coord].entities do
-						local entity = world.entities[entity_id]
-						local client_behavior = client_entity_mod.registry[entity.type]
-						if client_behavior.on_hidden then
-							client_behavior.on_hidden(entity, world)
-						end
-						entity.is_destroyed = true
-					end
-				end
-				world.cells[encoded_coord] = cell
-			end
-			for _, cell in world.cells do
-				color_cell(world, cell)
-			end
+			handle_cells(world, update)
 		elseif update.type == "entity_event" then
-			local event = update.event
-			if event.event_type == "produced_items" or event.event_type == "consumed_items" then
-				local entity_instance = world.entity_instance_map[event.entity_id]
-				if not entity_instance then
-					warn("entity not found", event.entity_id)
-					continue
-				end
-				local template = asset_server.load "Billboards/Exchange"
-				local instance = template:Clone()
-				instance.Parent = workspace
-				instance.Adornee = entity_instance
-
-				local function display(symbol: "+" | "-", items: { [Item]: number? }): string
-					return table.concat(
-						util.table_map(util.table_keys(items), function(k)
-							return `{symbol}{items[k]} {items_mod.item_names[k]}`
-						end),
-						"\n"
-					)
-				end
-				if event.event_type == "produced_items" then
-					instance.Amount.Text = `<font color="#a3e5a0">{display("+", event.items)}</font>`
-				elseif event.event_type == "consumed_items" then
-					instance.Amount.Text = `<font color="#e56b6b">{display("-", event.items)}</font>`
-				end
-				TweenService:Create(instance, TweenInfo.new(4), {
-					StudsOffsetWorldSpace = Vector3.new(0, 4, 0),
-				}):Play()
-				TweenService:Create(instance.Amount, TweenInfo.new(4), {
-					TextTransparency = 1,
-				}):Play()
-				Debris:AddItem(instance, 5)
-
-				if event.event_type == "produced_items" then
-					local item_template = asset_server.load "Effects/Item"
-					for item_type, amount in event.items do
-						for i = 1, amount do
-							local item = item_template:Clone()
-							item.Parent = workspace
-							item.Position = entity_instance:GetPivot().Position + Vector3.new(0, 4, 0)
-							item.Velocity = Vector3.new(math.random(-5, 5), 30, math.random(-5, 5))
-							item.Anchored = false
-							item.Color = items_mod.item_colors[item_type]
-							TweenService:Create(item, TweenInfo.new(2), {
-								Transparency = 1,
-							}):Play()
-							Debris:AddItem(item, 2)
-						end
-					end
-				elseif event.event_type == "consumed_items" then
-					local item_template = asset_server.load "Effects/Item"
-					task.spawn(function()
-						for item_type, amount in event.items do
-							for i = 1, amount do
-								local item = item_template:Clone()
-								item.Parent = workspace
-								item.Position = entity_instance:GetPivot().Position + Vector3.new(0, 6, 0)
-								item.Color = items_mod.item_colors[item_type]
-								TweenService:Create(item, TweenInfo.new(0.7, Enum.EasingStyle.Quart), {
-									Position = entity_instance:GetPivot().Position,
-									Transparency = 1,
-								}):Play()
-								Debris:AddItem(item, 0.7)
-								wait(0.2)
-							end
-						end
-					end)
-				end
-			end
+			handle_entity_event(world, update.event)
 		elseif update.type == "ability" then
+			local cell_instance = world.cell_instance_map[coords.encode_coord(update.coordinate)]
+			local entity_instance = world.entity_instance_map[update.entity_id]
 			if update.ability_type == "scout_attack" or update.ability_type == "turret_attack" then
-				local cell_instance = world.cell_instance_map[coords.encode_coord(update.coordinate)]
-				local entity_instance = world.entity_instance_map[update.entity_id]
-				local bullet = Instance.new "Part"
-				bullet.Size = Vector3.new(0.5, 0.5, 0.5)
-				bullet.CanCollide = false
-				bullet.Anchored = true
-				bullet.Material = Enum.Material.Neon
-				bullet.Parent = workspace
-				bullet:PivotTo(entity_instance:GetPivot())
-				bullet.Anchored = true
-				TweenService:Create(bullet, TweenInfo.new(0.1, Enum.EasingStyle.Linear), {
-					Position = cell_instance:FindFirstChild("Base").Position + Vector3.new(0, 2, 0),
-				}):Play()
-				Debris:AddItem(bullet, 0.3)
+				scout_attack_effect(
+					entity_instance:GetPivot().Position,
+					cell_instance:FindFirstChild("Base").Position + Vector3.new(0, 2, 0)
+				)
 			end
 		elseif update.type == "turn_skips" then
 			world.needed_skips = update.needed_skips
@@ -334,7 +404,7 @@ function handle_updates(world: World, updates: { WorldUpdate })
 		end
 	end
 
-	-- second pass: create instances for these things
+	-- second pass: create the instances for the entities
 	for _, entry in updated_entities do
 		local old_entity = entry.old
 		local new_entity = entry.new
@@ -347,8 +417,7 @@ function handle_updates(world: World, updates: { WorldUpdate })
 		update_neighbors(world, new_entity.coordinates)
 	end
 	world.world_update_signal.send(updates)
-
-	world:purge_dead_entities()
+	world_mod.purge_dead_entities(world)
 end
 
 return {
