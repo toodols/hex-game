@@ -23,7 +23,6 @@
 - [ ] Add actual preview for ItemsFilterPreview
 - [ ] Building cards in expanded view should expand horizontally when hovered
 - [ ] Make lobby ui look better
-- [ ] Split `server/router`
 - [ ] Split `client/ui/game/entity_information`
 - [ ] Add keybinds for ui
 - [ ] Add settings menu 
@@ -43,3 +42,4 @@
 # Complete
 - [x] Remove power from the game. It's too complicated.
 - [x] Make `phony` functional
+- [x] Split `server/router`
