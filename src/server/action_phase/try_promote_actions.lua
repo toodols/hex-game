@@ -12,7 +12,6 @@ local server_entity_mod = require(ServerScriptService.Server.entity)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
 
 type World = types.World
-type System = server_types.System
 type ActionState = server_types.ActionState
 type EntityAction = types.EntityAction
 

@@ -259,29 +259,32 @@ function on_client_interaction(
 	local dirty_entities = {}
 
 	for _, entry in data do
-		handle_interaction(world, entry, player_info)
+		local dirty = handle_interaction(world, entry, player_info)
+		for entity_id in dirty do
+			dirty_entities[entity_id] = true
+		end
 	end
 
 	-- reset actions for scout if it no longer has a line of sight
 	-- don't know what can possibly cause this but...
-	for _, entity in world:active_entities() do
-		if entity.type == "scout" then
-			local extracted = util.table_extract(entity.queued_decisions, function(action)
-				if action.type == "scout" then
-					if
-						not world_mod.line_of_sight(world, entity.primary_coordinate, action.coordinate, entity.owner)
-					then
-						return true
-					end
-				end
-				return false
-			end)
-			if #extracted > 0 then
-				warn("Scout lost line of sight", data)
-				dirty_entities[entity.id] = true
-			end
-		end
-	end
+	-- for _, entity in world:active_entities() do
+	-- 	if entity.type == "scout" then
+	-- 		local extracted = util.table_extract(entity.queued_decisions, function(action)
+	-- 			if action.type == "scout_attack" then
+	-- 				if
+	-- 					not world_mod.line_of_sight(world, entity.primary_coordinate, action.coordinate, entity.owner)
+	-- 				then
+	-- 					return true
+	-- 				end
+	-- 			end
+	-- 			return false
+	-- 		end)
+	-- 		if #extracted > 0 then
+	-- 			warn("Scout lost line of sight", data)
+	-- 			dirty_entities[entity.id] = true
+	-- 		end
+	-- 	end
+	-- end
 
 	for entity_id in dirty_entities do
 		updates_mod.add_update(world, {

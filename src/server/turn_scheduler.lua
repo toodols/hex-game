@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local updates_mod = require(script.Parent.updates)
 local new_signal = require(ReplicatedStorage.Shared.signal).new_signal
+local action_phase_mod = require(script.Parent.action_phase)
 
 type World = types.World
 type TurnSchedule = types.TurnSchedule
@@ -136,6 +137,17 @@ function new_turn_schedule(get_end_time: () -> number, run_turn: () -> ()): Turn
 	return schedule
 end
 
+function bootstrap(world: World)
+	world.turn_schedule = new_turn_schedule(function()
+		reset_turn_time(world, world.turn_schedule :: TurnSchedule)
+		report_turn_time(world)
+	end, function()
+		action_phase_mod.run_action_phase(world)
+	end)
+	reset_turn_time(world, world.turn_schedule :: TurnSchedule)
+	turn_schedule_resume(world.turn_schedule :: TurnSchedule)
+end
+
 return {
 	new_turn_schedule = new_turn_schedule,
 	turn_schedule_resume = turn_schedule_resume,
@@ -145,4 +157,5 @@ return {
 	turn_schedule_stop = turn_schedule_stop,
 	turn_schedule_kill = turn_schedule_kill,
 	report_turn_time = report_turn_time,
+	bootstrap = bootstrap,
 }

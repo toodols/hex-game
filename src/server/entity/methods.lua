@@ -33,7 +33,7 @@ end
 function autogenerate_vertex(world: World, host: Entity)
 	if #world:query_entity { coordinate = host.primary_coordinate, type = "vertex", owner = host.owner } == 0 then
 		-- the status is the highest status among buildings that come with vertex
-		-- principally used when buildings spawn in already completed, and the wires that come with must also be completed
+		-- principally used when buildings spawn in already completed, and the vertex that come with must also be completed
 		local status = "blueprint"
 		for _, entity in world:query_entity { coordinate = host.primary_coordinate, owner = host.owner } do
 			if registry[entity.type].autogenerates_vertex then

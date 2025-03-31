@@ -17,12 +17,13 @@ local context_mod = require(ReplicatedStorage.Client.ui.context)
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 
-local Hitpoints = require(script.Parent.hitpoints).Hitpoints
 local ItemFiltersPreview = require(script.Parent.item_filters).ItemFiltersPreview
 local ActionButton = require(script.Parent.action_button).ActionButton
 local Items = require(script.Parent.items).Items
 local HighlightOnHover = require(script.Parent.highlight_on_hover).HighlightOnHover
 local ResearchPreview = require(script.Parent.research).ResearchPreview
+
+local Hitpoints = require(script.hitpoints).Hitpoints
 
 local MainContext = context_mod.MainContext
 local Corner = util_components.Corner

@@ -11,6 +11,7 @@ type EffectiveDamage = types.DamageResult
 type ResearchId = types.ResearchId
 type EncodedCoordinate = types.EncodedCoordinate
 type Damage = types.Damage
+type System = types.System
 
 export type DamageResult = {
 	-- whether to propagate damage to the next layer(s)
@@ -20,18 +21,12 @@ export type DamageResult = {
 }
 export type ActionState = {
 	will_be_destroyed_entities: { [EntityId]: boolean },
-	systems: { System },
-	system_by_entity_id: { [EntityId]: System },
-	system_by_cell: { [EncodedCoordinate]: System },
+	systems: { SystemExtended },
+	system_by_entity_id: { [EntityId]: SystemExtended },
+	system_by_cell: { [EncodedCoordinate]: SystemExtended },
 }
 
--- this is distinct from shared_types.System
--- this is a temporal type that stores information
--- about items/power which is disposed of after one turn
--- todo: give this a different name
-export type System = {
-	entities: { [EntityId]: boolean },
-	cells: { [EncodedCoordinate]: boolean },
+export type SystemExtended = System & {
 	overflow_items: { Item },
 	power: number,
 	has_heart: boolean,

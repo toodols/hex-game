@@ -7,7 +7,6 @@ local systems_mod = require(ServerScriptService.Server.systems)
 local items_mod = require(ReplicatedStorage.Shared.items)
 
 type World = types.World
-type System = server_types.System
 type ActionState = server_types.ActionState
 type EntityAction = types.EntityAction
 

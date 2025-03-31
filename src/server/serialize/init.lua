@@ -5,10 +5,8 @@ local visibility_mod = require(script.Parent.visibility)
 local coords = require(ReplicatedStorage.Shared.coords)
 local quest_methods = require(script.Parent.questing.quest)
 local team_mod = require(ReplicatedStorage.Shared.team)
-local computed_mod = require(script.Parent.computed)
-
-local cell_visibility = visibility_mod.cell_visibility
-local entity_visibility = visibility_mod.entity_visibility
+local compute_systems = require(script.Parent.systems.compute_systems).compute_systems
+local serialize_entity_for_team = require(script.serialize_entity).serialize_entity_for_team
 
 type Entity = types.Entity
 type World = types.World
@@ -45,44 +43,15 @@ function serialize_team(world: World, team: TeamData): TeamData
 	return copy :: TeamData
 end
 
-function serialize_entity_for_team(world: World, entity: Entity, team: TeamId): Entity?
-	local team_data = world.teams[team]
-	assert(team_data, "no team")
-	if entity_visibility(world, entity, team) then
-		local to_copy = entity
-		local copy = {}
-		for k, v in to_copy do
-			if k == "server_data" then
-			elseif k == "queued_decisions" then
-				if team_mod.is_allied(world, entity.owner, team) then
-					copy[k] = v
-				else
-					copy[k] = {}
-				end
-			else
-				copy[k] = v
-			end
-		end
-		if entity.server_data.is_disguise_of then
-			local host = world.entities[entity.server_data.is_disguise_of]
-			if not team_mod.is_allied(world, host.owner, team) then
-				copy.active = true
-			end
-		end
-		return copy :: Entity
-	end
-	return nil
-end
-
 function serialize_cell_for_team(world: World, cell: HexCell, team: TeamId): HexCell | nil
 	local team_data = world.teams[team]
-	local visible_for_team = cell_visibility(cell.server_data.visibility[team])
+	local visible_for_team = visibility_mod.cell_visibility(cell.server_data.visibility[team])
 	local influences = {}
 
 	for entity_id in cell.server_data.influences do
 		local entity = world.entities[entity_id]
 		-- if this entity is visible, replicate the influence
-		if entity_visibility(world, entity, team) then
+		if visibility_mod.entity_visibility(world, entity, team) then
 			influences[entity_id] = true
 		end
 	end
@@ -139,7 +108,7 @@ function serialize_system_for_team(world: World, system: System, team: TeamId): 
 end
 
 function serialize_world_for_team(world: World, team: TeamId): PartialWorld
-	world.systems = computed_mod.compute_systems(world)
+	world.systems = compute_systems(world)
 	local entities: { [EntityId]: Entity } = {}
 	for entity_id, entity in world.entities do
 		local serialized = serialize_entity_for_team(world, entity, team)

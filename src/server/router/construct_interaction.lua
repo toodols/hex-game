@@ -11,13 +11,13 @@ local server_entity_mod = require(ServerScriptService.Server.entity)
 type World = types.World
 type Interaction = types.Interaction
 type PlayerInfo = server_types.PlayerInfo
-
-function construct_interaction(world: World, entry: Interaction, player_info: PlayerInfo)
+type EntityId = types.EntityId
+function construct_interaction(world: World, entry: Interaction, player_info: PlayerInfo): { [EntityId]: boolean }
 	assert(entry.type == "construct", "Expected entry to be a construct interaction")
 	-- the cell exists
 	local cell = world:get_cell(entry.coordinate)
 	if not cell then
-		return
+		return {}
 	end
 
 	-- and does not have the presence of an enemy
@@ -30,7 +30,7 @@ function construct_interaction(world: World, entry: Interaction, player_info: Pl
 			end
 		end
 		if has_enemy_presence then
-			return
+			return {}
 		end
 	end
 
@@ -49,26 +49,26 @@ function construct_interaction(world: World, entry: Interaction, player_info: Pl
 			end
 		)
 	then
-		return
+		return {}
 	end
 
 	-- and is visible to the player team
 	if not cell_visibility(cell.server_data.visibility[player_info.team]) then
-		return
+		return {}
 	end
 
 	-- and the entity is allowed to be built on the cell
 	local server_behavior = server_entity_mod.registry[entry.entity_type]
 	if #server_behavior.built_on > 0 then
 		if not table.find(server_behavior.built_on, cell.type) then
-			return
+			return {}
 		end
 	end
 
 	-- and can be built by the player
 	local entity_config = world.entity_configurations[entry.entity_type]
 	if not entity_config.buildable then
-		return
+		return {}
 	end
 
 	local entity = server_entity_mod.new_entity({

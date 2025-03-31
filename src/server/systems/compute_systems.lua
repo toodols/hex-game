@@ -6,6 +6,7 @@ type World = types.World
 type CubicCoordinate = types.CubicCoordinate
 type EncodedCoordinate = types.EncodedCoordinate
 type System = types.System
+type EntityId = types.EntityId
 
 function compute_systems(world: World): { System }
 	local systems: { { CubicCoordinate } } = {}
@@ -79,14 +80,14 @@ function compute_systems(world: World): { System }
 
 	-- convert system from a collection of connected coordinates to a collection of connected entities
 	local entities_set = {}
-	local result = {}
+	local result: { System } = {}
 	for _, system in systems do
 		local system_entities_set = {}
-		local cells = {}
+		local cells: { [EncodedCoordinate]: boolean } = {}
 		for _, coord in system do
 			local cell = world:get_cell(coord)
 			assert(cell, "cell not found")
-			cells[coords.encode_coord(coord)] = cell
+			cells[coords.encode_coord(coord)] = true
 			for entity_id in cell.entities do
 				if world.entities[entity_id].status == "complete" then
 					entities_set[entity_id] = true
@@ -94,9 +95,9 @@ function compute_systems(world: World): { System }
 				end
 			end
 		end
-		local entities = {}
+		local entities: { [EntityId]: boolean } = {}
 		for entity_id in system_entities_set do
-			entities[entity_id] = world.entities[entity_id]
+			entities[entity_id] = true
 		end
 
 		table.insert(result, { entities = entities, cells = cells })

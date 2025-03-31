@@ -7,8 +7,8 @@ local entity_mod = require(script.Parent.entity)
 local computed_mod = require(script.Parent.computed)
 local updates_mod = require(script.Parent.updates)
 local turn_scheduler = require(script.Parent.turn_scheduler)
-local action_phase_mod = require(script.Parent.action_phase)
 local visibility_mod = require(script.Parent.visibility)
+local systems = require(script.Parent.systems)
 local tutorial_map = require(script.tutorial).tutorial_map
 local testing_maps = require(script.testing)
 
@@ -26,14 +26,7 @@ function my_map(): World
 	local team1 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Red")
 	local team2 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "Blue")
 
-	world.turn_schedule = turn_scheduler.new_turn_schedule(function()
-		turn_scheduler.reset_turn_time(world, world.turn_schedule)
-		turn_scheduler.report_turn_time(world)
-	end, function()
-		action_phase_mod.run_action_phase(world)
-	end)
-	turn_scheduler.reset_turn_time(world, world.turn_schedule)
-	turn_scheduler.turn_schedule_resume(world.turn_schedule)
+	turn_scheduler.bootstrap(world)
 
 	for _, cell in world.cells do
 		if math.random() < 0.0015 then
@@ -158,7 +151,7 @@ function prepare_preset(fn: (...any) -> World): (...any) -> World
 		updates_mod.flush_updates(world)
 		computed_mod.compute_presence(world)
 		visibility_mod.compute_visibility(world)
-		computed_mod.compute_systems(world)
+		systems.compute_systems(world)
 		return unpack(result)
 	end
 end
@@ -169,4 +162,5 @@ return {
 	all_entities = prepare_preset(testing_maps.all_entities),
 	blank_map = prepare_preset(testing_maps.blank_map),
 	stress_test = prepare_preset(testing_maps.stress_test),
+	map_with_infinite_source = prepare_preset(testing_maps.map_with_infinite_source),
 }

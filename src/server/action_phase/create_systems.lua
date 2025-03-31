@@ -2,17 +2,17 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
-local computed_mod = require(ServerScriptService.Server.computed)
+local systems_mod = require(ServerScriptService.Server.systems)
 
 type World = types.World
 type ActionState = server_types.ActionState
-type System = server_types.System
+type System = server_types.SystemExtended
 
 function create_systems(world: World, action_state: ActionState)
 	local systems = {}
 	local system_by_entity_id = {}
 	local system_by_cell = {}
-	for _, system_data in computed_mod.compute_systems(world) do
+	for _, system_data in systems_mod.compute_systems(world) do
 		local system = {
 			entities = system_data.entities,
 			cells = system_data.cells,

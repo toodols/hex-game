@@ -528,8 +528,8 @@ export type EntityAction =
 	| Decision
 
 export type System = {
-	entities: { [EntityId]: Entity },
-	cells: { [EncodedCoordinate]: HexCell },
+	entities: { [EntityId]: boolean },
+	cells: { [EncodedCoordinate]: boolean },
 }
 
 export type World = {

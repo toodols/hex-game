@@ -23,7 +23,7 @@ type EntityId = types.EntityId
 type ActionState = server_types.ActionState
 type EntityAction = types.EntityAction
 type TeamId = types.TeamId
-type System = server_types.System
+type SystemExtended = server_types.SystemExtended
 
 function portals_tick(world: World)
 	for _, cell in world.cells do

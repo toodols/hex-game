@@ -1,24 +1,23 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local TweenService = game:GetService "TweenService"
 local UserInputService = game:GetService "UserInputService"
-local Players = game:GetService "Players"
 
-local asset_server = require(ReplicatedStorage.Shared.asset_server)
 local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
-local formatting = require(ReplicatedStorage.Shared.formatting)
-local team = require(ReplicatedStorage.Shared.team)
 local coords = require(ReplicatedStorage.Shared.coords)
 
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
-local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
+
 local ActionButton = require(script.Parent.action_button).ActionButton
 local Items = require(script.Parent.items).Items
-local Corner = util_components.Corner
+local ResearchPreview = require(script.research_preview).ResearchPreview
+local Icon = require(script.icon).Icon
+local Aside = require(script.aside).Aside
 
+local Corner = util_components.Corner
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
 type Entity = types.Entity
@@ -27,152 +26,6 @@ type World = types.World
 type EntityId = types.EntityId
 type Icon = types.Icon
 type TeamData = types.TeamData
-
-function Icon(props: {
-	ZIndex: number?,
-	LayoutOrder: number?,
-	Size: UDim2?,
-	icon: Icon,
-})
-	local ref = React.useRef(nil :: any)
-	local icon = props.icon
-	local ZIndex = props.ZIndex
-	local Size = props.Size or UDim2.new(1, 0, 1, 0)
-	React.useEffect(function()
-		if icon and icon.type == "model" then
-			ref.current:ClearAllChildren()
-			local template = asset_server.load(icon.model)
-			local model = template:Clone()
-			model.Parent = ref.current
-			model:PivotTo(CFrame.new(0, -1, -4))
-		end
-	end, { icon })
-
-	if not icon then
-		return React.createElement(React.Fragment)
-	end
-
-	if icon.type == "model" then
-		return React.createElement("ViewportFrame", {
-			Size = Size,
-			BackgroundTransparency = 1,
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, 0, 0.5, 0),
-			ref = ref,
-			ZIndex = ZIndex,
-			LayoutOrder = props.LayoutOrder,
-		})
-	elseif icon.type == "image" then
-		return React.createElement("ImageLabel", {
-			Size = Size,
-			BackgroundTransparency = 1,
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, 0, 0.5, 0),
-			Image = icon.image,
-			ZIndex = ZIndex,
-			LayoutOrder = props.LayoutOrder,
-		})
-	else
-		return React.createElement(React.Fragment)
-	end
-end
-
-function Aside(props: { state: ResearchState, on_add: () -> (), on_remove: () -> () })
-	local world = React.useContext(MainContext).world
-	return React.createElement(
-		"Frame",
-		themes.theme_solid {
-			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, 0, 0.5, 0),
-			Size = UDim2.new(0, 200, 0, 0),
-			AutomaticSize = Enum.AutomaticSize.Y,
-			ZIndex = 2,
-			ClipsDescendants = true,
-		},
-		{
-			Corner = React.createElement(Corner),
-			VerticalLayout = React.createElement("UIListLayout", {
-				SortOrder = Enum.SortOrder.LayoutOrder,
-			}),
-			Stroke = React.createElement("UIStroke", {
-				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-				Color = Color3.fromRGB(255, 255, 255),
-				LineJoinMode = Enum.LineJoinMode.Round,
-				Thickness = 1,
-				Transparency = 0.9,
-			}),
-			Container = React.createElement(
-				"Frame",
-				{
-					BackgroundTransparency = 1,
-					Size = UDim2.new(1, 0, 0, 0),
-					AutomaticSize = Enum.AutomaticSize.Y,
-				},
-				{
-					Padding = React.createElement("UIPadding", {
-						PaddingLeft = UDim.new(0, 10),
-						PaddingRight = UDim.new(0, 10),
-						PaddingBottom = UDim.new(0, 10),
-					}),
-					VerticalLayout = React.createElement("UIListLayout", {
-						SortOrder = Enum.SortOrder.LayoutOrder,
-						Padding = UDim.new(0, 4),
-					}),
-					Title = React.createElement(
-						"TextLabel",
-						themes.theme_title {
-							Text = props.state.name,
-							TextXAlignment = Enum.TextXAlignment.Center,
-							Size = UDim2.new(1, 0, 0, 30),
-							LayoutOrder = 1,
-						}
-					),
-					Description = React.createElement(
-						"TextLabel",
-						themes.theme_description {
-							Text = formatting.format_text(world, props.state.description),
-							Size = UDim2.new(1, 0, 0, 40),
-							LayoutOrder = 2,
-						}
-					),
-				},
-				if props.state.status ~= "complete"
-					then {
-						Items = React.createElement(Items, {
-							items = props.state.cost,
-							LayoutOrder = 3,
-						}),
-					}
-					else {},
-				if props.state.status == "complete" or props.state.status == "researching"
-					then {
-						CompletedLabel = React.createElement(
-							"TextLabel",
-							themes.theme_description {
-								Text = if props.state.status == "complete" then "Complete" else "Researching",
-								Size = UDim2.new(1, 0, 0, 40),
-								LayoutOrder = 4,
-							}
-						),
-					}
-					else {}
-			),
-		},
-		if props.state.status == "incomplete"
-			then {
-				AddButton = React.createElement(ActionButton, {
-					Size = UDim2.new(1, 0, 0, 20),
-					Text = "Add Research",
-					LayoutOrder = 3,
-					color = Color3.fromRGB(200, 200, 200),
-					on_click = function()
-						props.on_add()
-					end,
-				}),
-			}
-			else {}
-	)
-end
 
 local TRANSFORM_SIZE = 5000
 function Node(props: { state: ResearchState, on_click: () -> () })
@@ -568,114 +421,6 @@ function ResearchBottom(props: {
 			}),
 		}
 	)
-end
-
-function ResearchPreview(props: {
-	LayoutOrder: number?,
-	entity_id: EntityId,
-	click: () -> (),
-})
-	local world = React.useContext(MainContext).world
-	local entity = hooks.use_synced_entity(props.entity_id)
-	local is_owner = entity.owner == (team.team_of(world, Players.LocalPlayer) :: TeamData).id
-
-	return React.createElement("TextButton", {
-		BackgroundTransparency = 0.9,
-		Size = UDim2.new(0, 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.XY,
-		LayoutOrder = props.LayoutOrder,
-		[React.Event.MouseButton1Click] = props.click,
-		Text = "",
-		AutoButtonColor = false,
-		[React.Event.MouseEnter] = function(current)
-			TweenService:Create(current, TweenInfo.new(0.5), {
-				BackgroundColor3 = Color3.new(0.0588235, 0.898039, 0),
-			}):Play()
-		end,
-		[React.Event.MouseLeave] = function(current)
-			TweenService:Create(current, TweenInfo.new(0.5), {
-				BackgroundColor3 = Color3.fromRGB(163, 162, 165),
-			}):Play()
-		end,
-	}, {
-		Padding = React.createElement("UIPadding", {
-			PaddingLeft = UDim.new(0, 5),
-			PaddingRight = UDim.new(0, 5),
-			PaddingBottom = UDim.new(0, 5),
-		}),
-		VerticalLayout = React.createElement("UIListLayout", {
-			SortOrder = Enum.SortOrder.LayoutOrder,
-		}),
-
-		-- SizeConstraint = React.createElement("UISizeConstraint", {
-		-- 	MinSize = Vector2.new(80, 0),
-		-- }),
-		Stroke = if is_owner
-			then React.createElement("UIStroke", {
-				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-				Color = Color3.fromRGB(255, 255, 255),
-				LineJoinMode = Enum.LineJoinMode.Round,
-				Thickness = 1,
-				Transparency = 0.9,
-			})
-			else nil,
-		Corner = React.createElement(Corner),
-		ResearchLabel = React.createElement(
-			"TextLabel",
-			themes.theme_description {
-				Text = "Research",
-				Size = UDim2.new(1, 0, 0, 20),
-				TextColor3 = Color3.new(0.0588235, 0.898039, 0),
-			}
-		),
-		Container = React.createElement(
-			"Frame",
-			{
-				BackgroundTransparency = 1,
-				Size = UDim2.new(1, 0, 0, 30),
-			},
-			{
-				HorizontalLayout = React.createElement("UIListLayout", {
-					FillDirection = Enum.FillDirection.Horizontal,
-					VerticalAlignment = Enum.VerticalAlignment.Center,
-					Padding = UDim.new(0, 5),
-					SortOrder = Enum.SortOrder.LayoutOrder,
-				}),
-			},
-			if #entity.researches.queue == 0
-				then {
-					TextLabel = React.createElement(
-						"TextLabel",
-						themes.theme_description {
-							LayoutOrder = 2,
-							Text = "<i>No researches in queue</i>",
-							Size = UDim2.new(0, 0, 0, 20),
-						}
-					),
-				}
-				else util.table_map(entity.researches.queue, function(research_id, idx)
-					local state = entity.researches.states[research_id]
-					return React.createElement("Frame", {
-						LayoutOrder = idx + 2,
-						Size = UDim2.new(0, 30, 0, 30),
-						BackgroundTransparency = 1,
-					}, {
-						Icon = React.createElement(Icon, {
-							Size = UDim2.new(0, 30, 0, 30),
-							icon = state.icon,
-						}),
-						Corner = React.createElement(Corner),
-						Stroke = React.createElement("UIStroke", {
-							ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-							Color = Color3.fromRGB(255, 255, 255),
-							LineJoinMode = Enum.LineJoinMode.Round,
-							Thickness = 1,
-							Transparency = 0.9,
-						}),
-					})
-				end)
-		),
-	})
 end
 
 return {

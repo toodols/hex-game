@@ -65,6 +65,25 @@ function all_entities(): World
 	return world
 end
 
+function map_with_infinite_source()
+	local world = world_mod.new_world_from_extents {
+		{ min = -10, max = 10 },
+		{ min = -10, max = 10 },
+		{ min = -10, max = 10 },
+	}
+	local team1 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "red")
+	local team2 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "blue")
+
+	entity_mod.new_entity({
+		type = "infinite_source",
+		primary_coordinate = { 0, 0, 0 },
+		owner = team1.id,
+	}, world)
+
+	turn_scheduler.bootstrap(world)
+	return world
+end
+
 -- 10x10x10 empty world with 2 teams
 function blank_map(): World
 	local world = world_mod.new_world_from_extents {
@@ -109,14 +128,7 @@ function stress_test(): World
 		end
 	end
 
-	world.turn_schedule = turn_scheduler.new_turn_schedule(function()
-		turn_scheduler.reset_turn_time(world, world.turn_schedule)
-		turn_scheduler.report_turn_time(world)
-	end, function()
-		action_phase_mod.run_action_phase(world)
-	end)
-	turn_scheduler.reset_turn_time(world, world.turn_schedule)
-	turn_scheduler.turn_schedule_resume(world.turn_schedule)
+	turn_scheduler.bootstrap(world)
 	return world
 end
 
@@ -124,4 +136,5 @@ return {
 	all_entities = all_entities,
 	blank_map = blank_map,
 	stress_test = stress_test,
+	map_with_infinite_source = map_with_infinite_source,
 }

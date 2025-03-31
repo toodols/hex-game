@@ -9,30 +9,32 @@ local coords = require(ReplicatedStorage.Shared.coords)
 type World = types.World
 type Interaction = types.Interaction
 type PlayerInfo = server_types.PlayerInfo
+type EntityId = types.EntityId
 
-function ability_interaction(world: World, entry: Interaction, player_info: PlayerInfo)
+function ability_interaction(world: World, entry: Interaction, player_info: PlayerInfo): { [EntityId]: boolean }
 	assert(entry.type == "ability", "Expected entry to be an ability interaction")
 	local entity = world.entities[entry.entity_id]
 	if not entity or not entity.active or entity.owner ~= player_info.team or entity.status ~= "complete" then
 		-- error_type.mistake
-		return
+		return {}
 	end
 	local entity_config = world.entity_configurations[entity.type]
 	local ability = entity_config.abilities[entry.ability_type]
 	if not ability then
-		return
+		return {}
 	end
 	if entry.ability_type == "scout_attack" or entry.ability_type == "turret_attack" then
 		local cell = world:get_cell(entry.coordinate)
 		if not cell then
-			return
+			return {}
 		end
 		local in_range = coords.coords_dist(entity.primary_coordinate, entry.coordinate) <= ability.range
 			and world_mod.line_of_sight(world, entity.primary_coordinate, entry.coordinate, player_info.team)
 		if not in_range then
-			return
+			return {}
 		end
-		for influence in cell.influences do
+		-- prevent cells with influence from taunt from being targeted
+		for influence in cell.server_data.influences do
 			if world.entities[influence].type == "taunt" then
 				continue
 			end

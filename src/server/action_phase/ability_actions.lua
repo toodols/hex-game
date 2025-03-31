@@ -13,7 +13,6 @@ local server_util = require(ServerScriptService.Server.util)
 local visibility_mod = require(ServerScriptService.Server.visibility)
 
 type World = types.World
-type System = server_types.System
 type ActionState = server_types.ActionState
 
 function handle_ability_actions(world: World, action_state: ActionState)

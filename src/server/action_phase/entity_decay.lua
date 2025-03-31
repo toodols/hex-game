@@ -77,7 +77,7 @@ function do_entity_decay(world: World, action_state: ActionState)
 				entity = entity,
 			})
 			if entity.decay >= 3 then
-				if entity.type == "wires" then
+				if entity.type == "vertex" then
 					server_entity_mod.remove_entity(world, entity)
 				else
 					entity.owner = world.neutral_team

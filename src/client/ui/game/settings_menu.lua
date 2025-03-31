@@ -1,16 +1,16 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local React = require(ReplicatedStorage.Packages.react)
-local types = require(ReplicatedStorage.Shared.types)
-local util = require(ReplicatedStorage.Shared.util)
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local Corner = require(ReplicatedStorage.Client.ui.util_components).Corner
-
+local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 function SettingsMenu()
+	local context = React.useContext(MainContext)
+	local world = context.world
 	return React.createElement(
 		"Frame",
 		themes.theme_background {
-			Size = UDim2.new(1, -20, 1, -20),
 			BackgroundTransparency = 1,
+			Size = UDim2.new(1, -20, 1, -20),
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.new(0.5, 0, 0.5, 0),
 		},
@@ -56,13 +56,19 @@ function SettingsMenu()
 					Padding = UDim.new(0, 4),
 					SortOrder = Enum.SortOrder.LayoutOrder,
 				}),
-				Text = React.createElement(
-					"TextLabel",
-					themes.theme_label {
+				Debug = React.createElement(
+					"TextButton",
+					themes.theme_button {
 						Size = UDim2.new(1, 0, 0, 40),
-						Text = "tba",
+						Text = "Debug",
+						LayoutOrder = 1,
+						[React.Event.MouseButton1Click] = function()
+							print(world)
+						end,
 					},
-					{}
+					{
+						Corner = React.createElement(Corner),
+					}
 				),
 			}),
 		}

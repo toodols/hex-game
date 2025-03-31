@@ -8,7 +8,6 @@ local util = require(ReplicatedStorage.Shared.util)
 local systems_mod = require(ServerScriptService.Server.systems)
 
 type World = types.World
-type System = server_types.System
 type ActionState = server_types.ActionState
 type EntityAction = types.EntityAction
 
@@ -17,6 +16,7 @@ function handle_advance_research_actions(world: World, action_state: ActionState
 		return action.type == "advance_research"
 	end)
 	for _, action in advance_research_actions do
+		local succeeded = false
 		local entity = world.entities[action.entity_id]
 		local system = action_state.system_by_entity_id[action.entity_id]
 		if not entity or entity.is_destroyed then
@@ -29,7 +29,7 @@ function handle_advance_research_actions(world: World, action_state: ActionState
 				if not systems_mod.system_has_items(world, action_state, system, research_state.cost) then
 					break
 				end
-
+				succeeded = true
 				for item_type, amount in research_state.cost do
 					systems_mod.system_consume_item_type(world, action_state, system, item_type, amount)
 				end
@@ -52,6 +52,7 @@ function handle_advance_research_actions(world: World, action_state: ActionState
 					type = "entity_update",
 					entity = entity,
 				})
+				succeeded = true
 			end
 
 			if research_state.progress == research_state.time then
@@ -73,6 +74,10 @@ function handle_advance_research_actions(world: World, action_state: ActionState
 		local _finished = util.table_extract(entity.researches.queue, function(research_id)
 			return entity.researches.states[research_id].status == "complete"
 		end)
+		-- push unfinished research back into queue
+		if not succeeded then
+			table.insert(world.action_queue, action)
+		end
 	end
 end
 

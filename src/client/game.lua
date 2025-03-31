@@ -361,18 +361,11 @@ end
 --- This is the main function that handles when the client receives updates about the world from the server
 --- This includes populating world.entities and world.cells and creating instances
 function handle_updates(world: World, updates: { WorldUpdate })
-	sort_updates(updates)
-
+	-- cannot mutate updates
 	local updated_entities = {}
+
 	for _, update in updates do
-		-- first pass: populate entities and add new, old pair
-		if update.type == "entity_update" then
-			local old_entity = world.entities[update.entity.id]
-			world.entities[update.entity.id] = update.entity
-			if update.entity.active ~= false then
-				table.insert(updated_entities, { old = old_entity, new = update.entity })
-			end
-		elseif update.type == "turn_timer" then
+		if update.type == "turn_timer" then
 			world.turn_schedule = update.schedule
 		elseif update.type == "turn" then
 			world.highest_turn = update.turn
@@ -381,26 +374,25 @@ function handle_updates(world: World, updates: { WorldUpdate })
 			world.cells[coords.encode_coord(update.cell.coordinate)] = update.cell
 		elseif update.type == "cells" then
 			handle_cells(world, update)
-		elseif update.type == "entity_event" then
-			handle_entity_event(world, update.event)
-		elseif update.type == "ability" then
-			local cell_instance = world.cell_instance_map[coords.encode_coord(update.coordinate)]
-			local entity_instance = world.entity_instance_map[update.entity_id]
-			if update.ability_type == "scout_attack" or update.ability_type == "turret_attack" then
-				scout_attack_effect(
-					entity_instance:GetPivot().Position,
-					cell_instance:FindFirstChild("Base").Position + Vector3.new(0, 2, 0)
-				)
-			end
 		elseif update.type == "turn_skips" then
-			world.needed_skips = update.needed_skips
 			world.current_skips = update.current_skips
-			-- world.can_skip = update.can_skip
+			world.needed_skips = update.needed_skips
 		elseif update.type == "teams" then
 			world.teams = update.teams
 			world.coalitions = update.coalitions
 		elseif update.type == "quest_update" then
 			world.quests[update.quest.id] = update.quest
+		end
+	end
+
+	-- first pass: populate entities and add new, old pair
+	for _, update in updates do
+		if update.type == "entity_update" then
+			local old_entity = world.entities[update.entity.id]
+			world.entities[update.entity.id] = update.entity
+			if update.entity.active ~= false then
+				table.insert(updated_entities, { old = old_entity, new = update.entity })
+			end
 		end
 	end
 
@@ -416,6 +408,23 @@ function handle_updates(world: World, updates: { WorldUpdate })
 		local new_entity = entry.new
 		update_neighbors(world, new_entity.coordinates)
 	end
+
+	-- process final events (ones that depend on entity instances being known)
+	for _, update in updates do
+		if update.type == "entity_event" then
+			handle_entity_event(world, update.event)
+		elseif update.type == "ability" then
+			local cell_instance = world.cell_instance_map[coords.encode_coord(update.coordinate)]
+			local entity_instance = world.entity_instance_map[update.entity_id]
+			if update.ability_type == "scout_attack" or update.ability_type == "turret_attack" then
+				scout_attack_effect(
+					entity_instance:GetPivot().Position,
+					cell_instance:FindFirstChild("Base").Position + Vector3.new(0, 2, 0)
+				)
+			end
+		end
+	end
+
 	world.world_update_signal.send(updates)
 	world_mod.purge_dead_entities(world)
 end
