@@ -1,14 +1,13 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
-local registry_mod = require(script.Parent.registry)
 local coords = require(ReplicatedStorage.Shared.coords)
-local registry = registry_mod.registry
-local with_defaults = registry_mod.with_defaults
+local entity_mod = require(ServerScriptService.Server.entity)
 
 type Entity = types.Entity
 type World = types.World
 
-registry.altar = with_defaults {
+entity_mod.registry.altar = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	on_completed = function(self: Entity, world: World) end,
 	influences = function(self: Entity, world: World)

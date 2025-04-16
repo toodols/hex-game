@@ -91,7 +91,7 @@ function my_map(): World
 	world:get_cell({ magic, 0, -magic }).type = "bar_deposit"
 	world:get_cell({ -magic, 0, magic }).type = "bar_deposit"
 
-	-- local extractor = entity_mod.new_entity({
+	-- local extractor = entity_methods.new_entity({
 	-- 	type = "extractor",
 	-- 	primary_coordinate = { magic - 1, -magic + 1, 0 },
 	-- 	owner = team1.id,
@@ -116,7 +116,7 @@ function my_map(): World
 
 	-- world:get_cell({ magic - 1, -magic + 1, 0 }).type = "bar_deposit"
 
-	-- local extractor2 = entity_mod.new_entity({
+	-- local extractor2 = entity_methods.new_entity({
 	-- 	type = "extractor",
 	-- 	primary_coordinate = { 1 - magic, magic - 1, 0 },
 	-- 	owner = team2.id,

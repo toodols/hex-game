@@ -1,14 +1,12 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
-local world_mod = require(ReplicatedStorage.Shared.world)
-local coords = require(ReplicatedStorage.Shared.coords)
 local is_allied = require(ReplicatedStorage.Shared.team).is_allied
 
-local server_entity_mod = require(script.Parent.entity)
 local server_types = require(script.Parent.types)
 local updates_mod = require(script.Parent.updates)
-local effect_methods = require(script.Parent.effect.methods)
+local effect_mod = require(script.Parent.effect)
+local entity_mod = require(script.Parent.entity)
 
 type Damage = types.Damage
 type DamageResult = types.DamageResult
@@ -74,7 +72,7 @@ function apply_entity_damage(entity: Entity, amount: number, piercing: boolean):
 		end
 	end
 
-	effect_methods.purge_destroyed_effects(entity)
+	effect_mod.purge_destroyed_effects(entity)
 
 	local effective = math.min(amount, entity.health)
 	total += effective
@@ -257,7 +255,7 @@ end
 function destroy_entities(world: World, results: DamageResult)
 	for entity_id, result in results do
 		if result.lethal then
-			server_entity_mod.remove_entity(world, world.entities[entity_id])
+			entity_mod.remove_entity(world, world.entities[entity_id])
 		end
 	end
 end

@@ -1,6 +1,5 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
-local util = require(ReplicatedStorage.Shared.util)
 
 type HexCell = types.HexCell
 type World = types.World

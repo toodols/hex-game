@@ -1,4 +1,4 @@
--- game.server.lua
+-- This is the init script for game.server.lua
 
 local RunService = game:GetService "RunService"
 local ServerScriptService = game:GetService "ServerScriptService"
@@ -35,6 +35,10 @@ clone_assets({
 	Effects = true,
 }, server_assets, destination)
 
+-- Load entities and effects into their registries
+require(ServerScriptService.Server.effects)
+require(ServerScriptService.Server.entities)
+
 local tests = require(ServerScriptService.Server.tests)
 local remotes_mod = require(ServerScriptService.Server.remotes)
 local router_mod = require(ServerScriptService.Server.router)
@@ -43,6 +47,7 @@ local presets = require(ServerScriptService.Server.presets)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 local updates_mod = require(ServerScriptService.Server.updates)
 local server_util = require(ServerScriptService.Server.util)
+
 if RunService:IsStudio() then
 	tests.run_tests()
 end

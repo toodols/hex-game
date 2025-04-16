@@ -1,9 +1,8 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
-local registry_mod = require(script.Parent.registry)
 local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
-local researches_mod = require(ReplicatedStorage.Shared.researches)
+local entity_mod = require(ServerScriptService.Server.entity)
 
 type ActionState = server_types.ActionState
 type Entity = types.Entity
@@ -11,7 +10,7 @@ type World = types.World
 type EntityEvent = types.EntityEvent
 type HexCell = types.HexCell
 
-registry_mod.registry.extractor = registry_mod.with_defaults {
+entity_mod.registry.extractor = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	built_on = { "bar_deposit", "vit_deposit", "rad_deposit", "tar_deposit" },
 	init = function(self: Entity, world: World)
@@ -71,10 +70,10 @@ registry_mod.registry.extractor = registry_mod.with_defaults {
 	on_event = function(self: Entity, world: World, event: EntityEvent)
 		if event.event_type == "killed" then
 			local cell = world:get_cell(self.primary_coordinate)
-			assert(cell,"cell not found")
+			assert(cell, "cell not found")
 			cell.type = self.deposit
 		end
-	end
+	end,
 }
 
 return {}

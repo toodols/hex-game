@@ -5,7 +5,7 @@ local server_types = require(ServerScriptService.Server.types)
 local server_util = require(ServerScriptService.Server.util)
 local util = require(ReplicatedStorage.Shared.util)
 local updates_mod = require(ServerScriptService.Server.updates)
-local server_entity_mod = require(ServerScriptService.Server.entity)
+local entity_mod = require(ServerScriptService.Server.entity)
 
 type World = types.World
 type ActionState = server_types.ActionState
@@ -78,7 +78,7 @@ function do_entity_decay(world: World, action_state: ActionState)
 			})
 			if entity.decay >= 3 then
 				if entity.type == "vertex" then
-					server_entity_mod.remove_entity(world, entity)
+					entity_mod.remove_entity(world, entity)
 				else
 					entity.owner = world.neutral_team
 					entity.decay = 0

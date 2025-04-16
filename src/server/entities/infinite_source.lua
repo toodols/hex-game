@@ -1,11 +1,10 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
-local registry_mod = require(script.Parent.registry)
-local registry = registry_mod.registry
-local server_types = require(ServerScriptService.Server.types)
-local with_defaults = registry_mod.with_defaults
 local util = require(ReplicatedStorage.Shared.util)
+
+local entity_mod = require(ServerScriptService.Server.entity)
+local server_types = require(ServerScriptService.Server.types)
 
 type Entity = types.Entity & {
 	mode: "passive" | "active",
@@ -13,7 +12,7 @@ type Entity = types.Entity & {
 type World = types.World
 type ActionState = server_types.ActionState
 
-registry.infinite_source = with_defaults {
+entity_mod.registry.infinite_source = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	init = function(self: Entity, world: World)
 		self.mode = "passive"

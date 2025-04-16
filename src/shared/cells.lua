@@ -1,6 +1,6 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local load = require(ReplicatedStorage.Shared.asset_server).load
-local font = require(ReplicatedStorage.Shared.formatting.methods).font
+local font = require(ReplicatedStorage.Shared.util).font
 local item_colors = require(ReplicatedStorage.Shared.items).item_colors
 
 local cell_names = {

@@ -1,9 +1,10 @@
 local ServerScriptService = game:GetService "ServerScriptService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local presets = require(ServerScriptService.Server.presets)
 local client_game_mod = require(ReplicatedStorage.Client.game)
 local game_ui = require(ReplicatedStorage.Client.ui.game)
+local presets = require(ServerScriptService.Server.presets)
 local cleanup = require(ServerScriptService.Server.cleanup).cleanup
+
 local tests = {}
 
 function tests.render_world()

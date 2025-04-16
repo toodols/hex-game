@@ -227,14 +227,8 @@ function consumed_item_effect(event: EntityEvent, origin: Vector3)
 end
 
 function scout_attack_effect(from: Vector3, to: Vector3)
-	local bullet = Instance.new "Part"
-	bullet.Size = Vector3.new(0.5, 0.5, 0.5)
-	bullet.CanCollide = false
-	bullet.Anchored = true
-	bullet.Material = Enum.Material.Neon
-	bullet.Parent = workspace
-	bullet:PivotTo(CFrame.lookAt(from, to))
-	bullet.Anchored = true
+	local bullet_template = asset_server.load "Effects/Bullet"
+	local bullet = bullet_template:Clone()
 	TweenService:Create(bullet, TweenInfo.new(0.1, Enum.EasingStyle.Linear), {
 		Position = to,
 	}):Play()
@@ -303,11 +297,11 @@ function item_used_effect(event: EntityEvent, adornee: Instance)
 		)
 	end
 	if event.event_type == "produced_items" then
-		instance.Amount.Text = formatting.font(display("+", event.items), {
+		instance.Amount.Text = util.font(display("+", event.items), {
 			color = Color3.fromRGB(163, 229, 160),
 		})
 	elseif event.event_type == "consumed_items" then
-		instance.Amount.Text = formatting.font(display("-", event.items), {
+		instance.Amount.Text = util.font(display("-", event.items), {
 			color = Color3.fromRGB(229, 107, 107),
 		})
 	else

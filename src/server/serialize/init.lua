@@ -3,7 +3,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local visibility_mod = require(script.Parent.visibility)
 local coords = require(ReplicatedStorage.Shared.coords)
-local quest_methods = require(script.Parent.questing.quest)
+local questing = require(script.Parent.questing)
 local team_mod = require(ReplicatedStorage.Shared.team)
 local compute_systems = require(script.Parent.systems.compute_systems).compute_systems
 local serialize_entity_for_team = require(script.serialize_entity).serialize_entity_for_team
@@ -126,7 +126,7 @@ function serialize_world_for_team(world: World, team: TeamId): PartialWorld
 			return serialize_team(world, other_team)
 		end),
 		quests = util.table_map(world.quests, function(quest)
-			return quest_methods.quest_serialize(quest, world)
+			return questing.quest_serialize(quest, world)
 		end),
 		systems = util.table_filter_map(world.systems, function(system)
 			return serialize_system_for_team(world, system, team)

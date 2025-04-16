@@ -6,14 +6,14 @@ local util = require(ReplicatedStorage.Shared.util)
 local coords = require(ReplicatedStorage.Shared.coords)
 
 local updates_mod = require(ServerScriptService.Server.updates)
-local effect_methods = require(ServerScriptService.Server.effect.methods)
-local registry_mod = require(script.Parent.registry)
+local effect_mod = require(ServerScriptService.Server.effect)
+local entity_mod = require(ServerScriptService.Server.entity)
 
 type Entity = types.Entity
 type World = types.World
 type EntityEvent = types.EntityEvent
 
-registry_mod.registry.solution = registry_mod.with_defaults {
+entity_mod.registry.solution = entity_mod.with_defaults {
 	init = function(self: Entity, world: World)
 		self.decayable = false
 	end,
@@ -35,7 +35,7 @@ registry_mod.registry.solution = registry_mod.with_defaults {
 						affected_entity.health + config.abilities.solution_use.heal_amount
 					)
 
-					effect_methods.add_effect(affected_entity, {
+					effect_mod.add_effect(affected_entity, {
 						type = "shield",
 						health = config.abilities.solution_use.shield_health,
 						duration = config.abilities.solution_use.shield_duration,
@@ -51,7 +51,7 @@ registry_mod.registry.solution = registry_mod.with_defaults {
 	},
 	on_event = function(self: Entity, world: World, event: EntityEvent)
 		if event.event_type == "killed" then
-			registry_mod.registry[self.type].abilities.solution_use(self, world)
+			entity_mod.registry[self.type].abilities.solution_use(self, world)
 		end
 	end,
 }

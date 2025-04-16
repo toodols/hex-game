@@ -5,8 +5,9 @@ local entity_mod = require(ServerScriptService.Server.entity)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 local action_phase_mod = require(ServerScriptService.Server.action_phase)
+
 type World = types.World
-local tutorial_quest = require(ServerScriptService.Server.questing).tutorial
+local quests = require(ServerScriptService.Server.quests)
 
 function tutorial_map()
 	local world = world_mod.new_world_from_extents {
@@ -54,7 +55,7 @@ function tutorial_map()
 		primary_coordinate = { 1, 0, -1 },
 		owner = player_team.id,
 	}, world)
-	world.quests.tutorial = tutorial_quest(world)
+	world.quests.tutorial = quests.tutorial(world)
 	return world
 end
 

@@ -9,6 +9,7 @@ local turn_scheduler = require(script.Parent.turn_scheduler)
 local server_entity_mod = require(script.Parent.entity)
 local updates_mod = require(script.Parent.updates)
 local server_types = require(script.Parent.types)
+local entity_mod = require(script.Parent.entity)
 
 local ability_interaction = require(script.ability_interaction).ability_interaction
 local construct_interaction = require(script.construct_interaction).construct_interaction
@@ -51,7 +52,7 @@ function remove_unsupported_vertices(world: World, entity: Entity)
 			end
 			if not supported then
 				for _, vertex in vertices do
-					server_entity_mod.remove_entity(world, vertex)
+					entity_mod.remove_entity(world, vertex)
 				end
 			end
 		end
@@ -158,7 +159,7 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 			updates_mod.flush_updates(world)
 			return { [entity.id] = true }
 		else
-			server_entity_mod.remove_entity(world, entity)
+			entity_mod.remove_entity(world, entity)
 			remove_unsupported_vertices(world, entity)
 			return {}
 		end

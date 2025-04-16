@@ -1,0 +1,16 @@
+require(script.vertex)
+require(script.stockpile)
+require(script.extractor)
+require(script.factory)
+require(script.generator)
+require(script.laboratory)
+require(script.infinite_source)
+require(script.proxy)
+require(script.heart)
+require(script.vault)
+require(script.solution)
+require(script.witness)
+require(script.altar)
+require(script.misc)
+
+return {}

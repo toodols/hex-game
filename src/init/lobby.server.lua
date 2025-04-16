@@ -81,6 +81,12 @@ function room_membership_changed(room: Room)
 
 				-- what if we signed the data to make it tamper proof
 				local code = TeleportService:ReserveServer(placeids.game)
+				-- local options = Instance.new "TeleportOptions"
+				-- options.ReservedServerAccessCode = code
+				-- options:SetTeleportData {
+				-- 	room = room,
+				-- }
+				-- TeleportService:TeleportAsync(placeids.game, code, party, options)
 				TeleportService:TeleportToPrivateServer(placeids.game, code, party, nil, { room = room })
 			end)
 		else

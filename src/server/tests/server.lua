@@ -11,9 +11,9 @@ local archive = require(ServerScriptService.Server.archive)
 local presets = require(ServerScriptService.Server.presets)
 local cleanup = require(ServerScriptService.Server.cleanup).cleanup
 local action_phase_mod = require(ServerScriptService.Server.action_phase)
-local entity_mod = require(ServerScriptService.Server.entity)
 local damage_mod = require(ServerScriptService.Server.damage)
 local effect_mod = require(ServerScriptService.Server.effect)
+local entity_mod = require(ServerScriptService.Server.entity)
 
 local assert_eq = util.assert_eq
 

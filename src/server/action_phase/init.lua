@@ -9,9 +9,10 @@ local server_types = require(ServerScriptService.Server.types)
 local server_entity_mod = require(ServerScriptService.Server.entity)
 local updates_mod = require(ServerScriptService.Server.updates)
 local computed_mod = require(ServerScriptService.Server.computed)
-local quest_methods = require(ServerScriptService.Server.questing.quest)
-local effects_mod = require(ServerScriptService.Server.effect)
+local questing = require(ServerScriptService.Server.questing)
+local effect_mod = require(ServerScriptService.Server.effect)
 local visibility_mod = require(ServerScriptService.Server.visibility)
+local entity_mod = require(ServerScriptService.Server.entity)
 
 local do_entity_decay = require(script.entity_decay).do_entity_decay
 local new_action_state = require(script.new_action_state).new_action_state
@@ -82,32 +83,18 @@ function remove_occluded_blueprints(world: World)
 					return false
 				end)
 			then
-				server_entity_mod.remove_entity(world, entity)
+				entity_mod.remove_entity(world, entity)
 			end
 		end
 	end
 end
 
-function status_effects_tick(world: World)
-	local effects = effects_mod.effects
+function status_effects_tick(world: World, action_state: ActionState)
 	for entity_id, entity in world:active_entities() do
 		if next(entity.effects) == nil then
 			continue
 		end
-		for _, effect in entity.effects do
-			if effects[effect.type] then
-				if effects[effect.type].tick then
-					effects[effect.type].tick(world, entity, effect)
-				end
-			end
-			if effect.duration ~= nil then
-				effect.duration -= 1
-				if effect.duration <= 0 then
-					effect.is_destroyed = true
-				end
-			end
-		end
-		effects_mod.purge_destroyed_effects(entity)
+		effect_mod.tick_effects(world, action_state, entity)
 		updates_mod.add_update(world, {
 			type = "entity_update",
 			entity = entity,
@@ -136,7 +123,7 @@ function delete_deconstructed_entities(world: World, queue: { EntityAction })
 			continue
 		end
 
-		server_entity_mod.remove_entity(world, entity)
+		entity_mod.remove_entity(world, entity)
 	end
 end
 
@@ -165,11 +152,11 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	create_systems(world, action_state)
 	process_queue(world, action_state)
 
-	status_effects_tick(world)
+	status_effects_tick(world, action_state)
 
 	-- destroy entities marked for destruction
 	for entity_id in action_state.will_be_destroyed_entities do
-		server_entity_mod.remove_entity(world, world.entities[entity_id])
+		entity_mod.remove_entity(world, world.entities[entity_id])
 	end
 
 	create_systems(world, action_state)
@@ -206,7 +193,7 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	})
 
 	for _, quest in world.quests do
-		quest_methods.quest_update(quest, world)
+		questing.quest_update(quest, world)
 	end
 
 	local updates = updates_mod.flush_updates(world)

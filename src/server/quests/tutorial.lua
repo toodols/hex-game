@@ -2,7 +2,7 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local world_mod = require(ReplicatedStorage.Shared.world)
-local quest_methods = require(script.Parent.quest)
+local questing = require(ServerScriptService.Server.questing)
 local updates_mod = require(ServerScriptService.Server.updates)
 local computed_mod = require(ServerScriptService.Server.computed)
 local visibility_mod = require(ServerScriptService.Server.visibility)
@@ -46,7 +46,7 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 					end),
 					", "
 				)}`
-				quest_methods.quest_change_state(self, "error", world)
+				questing.quest_change_state(self, "error", world)
 				return
 			end
 		end,
@@ -63,7 +63,7 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 				unlisten()
 				turn_scheduler.turn_schedule_stop(world.turn_schedule)
 				turn_scheduler.report_turn_time(world)
-				quest_methods.quest_advance(self, world)
+				questing.quest_advance(self, world)
 			end)
 		end,
 	},
@@ -73,7 +73,7 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 			assert(world.turn_schedule, "no turn schedule")
 			if #(world:query_entity { type = "stockpile" }) == 0 then
 				self.details.error_message = "stockpile not found"
-				quest_methods.quest_change_state(self, "error", world)
+				questing.quest_change_state(self, "error", world)
 				return
 			end
 			turn_scheduler.reset_turn_time(world, world.turn_schedule)
@@ -86,14 +86,14 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 				if not stockpile then
 					unlisten()
 					self.details.error_message = "stockpile not found"
-					quest_methods.quest_change_state(self, "error", world)
+					questing.quest_change_state(self, "error", world)
 					return
 				end
 				if #stockpile.inventory.items == 5 then
 					unlisten()
 					turn_scheduler.turn_schedule_stop(world.turn_schedule)
 					turn_scheduler.report_turn_time(world)
-					quest_methods.quest_advance(self, world)
+					questing.quest_advance(self, world)
 				end
 			end)
 		end,
@@ -116,14 +116,14 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 				if not scout then
 					unlisten()
 					self.details.error_message = "scout not found"
-					quest_methods.quest_change_state(self, "error", world)
+					questing.quest_change_state(self, "error", world)
 					return
 				end
 				if scout.status == "complete" then
 					unlisten()
 					turn_scheduler.turn_schedule_stop(world.turn_schedule)
 					turn_scheduler.report_turn_time(world)
-					quest_methods.quest_advance(self, world)
+					questing.quest_advance(self, world)
 				end
 			end)
 		end,
@@ -156,7 +156,7 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 				})
 				updates_mod.flush_updates(world)
 				task.wait(1)
-				quest_methods.quest_advance(self, world)
+				questing.quest_advance(self, world)
 			end)
 		end,
 	},
@@ -279,7 +279,7 @@ local stages_data: { [string]: QuestStage } = {
 }
 
 function tutorial(world: World): Quest
-	local quest = quest_methods.new_quest {
+	local quest = questing.new_quest {
 		id = "tutorial",
 		title = "Tutorial",
 		stages_data = stages_data,
@@ -292,7 +292,7 @@ function tutorial(world: World): Quest
 	quest.quest_update_signal.listen(function()
 		updates_mod.add_update(world, {
 			type = "quest_update",
-			quest = quest_methods.quest_serialize(quest, world),
+			quest = questing.quest_serialize(quest, world),
 		})
 		updates_mod.flush_updates(world)
 	end)

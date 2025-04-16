@@ -257,6 +257,10 @@ function assert_eq(a, b, msg)
 	end
 end
 
+function font(text: string, props: { color: Color3? }): string
+	return `<font{if props.color then ` color="#{props.color:ToHex()}"` else ""}>{text}</font>`
+end
+
 return {
 	table_from_entries = table_from_entries,
 	table_filter = table_filter,
@@ -281,4 +285,5 @@ return {
 	range = range,
 	timer = timer,
 	assert_eq = assert_eq,
+	font = font,
 }

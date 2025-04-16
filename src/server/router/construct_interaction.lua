@@ -6,6 +6,7 @@ local util = require(ReplicatedStorage.Shared.util)
 
 local server_types = require(ServerScriptService.Server.types)
 local cell_visibility = require(ServerScriptService.Server.visibility).cell_visibility
+local entity_mod = require(ServerScriptService.Server.entity)
 local server_entity_mod = require(ServerScriptService.Server.entity)
 
 type World = types.World
@@ -71,7 +72,7 @@ function construct_interaction(world: World, entry: Interaction, player_info: Pl
 		return {}
 	end
 
-	local entity = server_entity_mod.new_entity({
+	local entity = entity_mod.new_entity({
 		type = entry.entity_type,
 		owner = player_info.team,
 		rotation = entry.rotation,

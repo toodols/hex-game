@@ -2,10 +2,9 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local world_mod = require(ReplicatedStorage.Shared.world)
-local entity_mod = require(ServerScriptService.Server.entity)
 local coords = require(ReplicatedStorage.Shared.coords)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
-local action_phase_mod = require(ServerScriptService.Server.action_phase)
+local entity_mod = require(ServerScriptService.Server.entity)
 
 type World = types.World
 

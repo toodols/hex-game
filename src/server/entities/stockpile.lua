@@ -1,8 +1,9 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
-local registry_mod = require(script.Parent.registry)
-local registry = registry_mod.registry
-local with_defaults = registry_mod.with_defaults
+local entity_mod = require(ServerScriptService.Server.entity)
+local registry = entity_mod.registry
+local with_defaults = entity_mod.with_defaults
 
 type Entity = types.Entity
 type World = types.World

@@ -1,13 +1,12 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
-local registry_mod = require(script.Parent.registry)
-local registry = registry_mod.registry
-local with_defaults = registry_mod.with_defaults
+local entity_mod = require(ServerScriptService.Server.entity)
 
 type Entity = types.Entity
 type World = types.World
 
-registry.vault = with_defaults {
+entity_mod.registry.vault = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	init = function(self: Entity, world: World)
 		local config = world.entity_configurations[self.type]

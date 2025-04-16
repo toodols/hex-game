@@ -4,16 +4,13 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
 local coords = require(ReplicatedStorage.Shared.coords)
-
-local registry_mod = require(script.Parent.registry)
-local registry = registry_mod.registry
-local with_defaults = registry_mod.with_defaults
+local entity_mod = require(ServerScriptService.Server.entity)
 
 type Entity = types.Entity
 type World = types.World
 type ActionState = server_types.ActionState
 
-registry.generator = with_defaults {
+entity_mod.registry.generator = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	on_completed = function(self: Entity, world: World) end,
 	tick = function(self: Entity, world: World, action_state: ActionState)

@@ -1,20 +1,65 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local shared_registry_mod = require(ReplicatedStorage.Shared.entity.registry)
 local coords = require(ReplicatedStorage.Shared.coords)
-local server_util = require(ServerScriptService.Server.util)
-local server_types = require(ServerScriptService.Server.types)
-local updates_mod = require(ServerScriptService.Server.updates)
 
-local registry = require(script.Parent.registry).registry
+local server_util = require(script.Parent.util)
+local server_types = require(script.Parent.types)
+local updates_mod = require(script.Parent.updates)
 
+type Damage = types.Damage
+type HexCell = types.HexCell
 type World = types.World
+type PartialWorld = types.PartialWorld
 type Entity = types.Entity
-type CubicCoordinate = types.CubicCoordinate
-type WorldUpdate = types.WorldUpdate
 type ActionState = server_types.ActionState
+type CellType = types.CellType
+type TeamId = types.TeamId
+type CubicCoordinate = types.CubicCoordinate
+type DamageResult = server_types.DamageResult
+type EntityEvent = types.EntityEvent
+
+export type ServerEntityBehavior = {
+	autogenerates_vertex: boolean?,
+	decayable: boolean,
+	type: string,
+
+	abilities: { [string]: (self: Entity, world: World) -> () },
+	built_on: { CellType },
+
+	illuminates: (self: Entity, world: World) -> { CubicCoordinate },
+	influences: ((self: Entity, world: World) -> ())?,
+	init: (self: Entity, world: World) -> (),
+	on_completed: (self: Entity, world: World) -> (),
+	on_event: (self: Entity, world: World, event: EntityEvent, action_state: ActionState) -> (),
+	-- laboratory only
+	on_research_completed: (self: Entity, world: World, research_id: string) -> ()?,
+
+	--- called at the start of every action phase
+	tick: (self: Entity, world: World, action_state: ActionState?) -> (),
+}
+
+local registry: { [string]: ServerEntityBehavior } = {}
+
+local noop = function() end
+
+function with_defaults(behavior: any): ServerEntityBehavior
+	behavior.init = behavior.init or noop
+	behavior.tick = behavior.tick or noop
+	if behavior.decayable == nil then
+		behavior.decayable = true
+	end
+	behavior.on_completed = behavior.on_completed or noop
+	behavior.built_on = behavior.built_on or {}
+	behavior.influences = behavior.influences or noop
+	behavior.on_event = behavior.on_event or noop
+	behavior.abilities = behavior.abilities or {}
+	behavior.illuminates = function(self, world)
+		return {}
+	end
+	return behavior
+end
 
 function entity_can_deconstruct(entity: Entity, world: World)
 	local cell = world:get_cell(entity.primary_coordinate)
@@ -93,7 +138,7 @@ function new_entity(entity_: any, world: World): Entity
 		cost = shared_behavior.cost,
 		cost_fulfilled = {},
 		decay = 0,
-		decayable = true,
+		decayable = shared_behavior.decayable,
 		effects = {},
 		enabled = true,
 		health = shared_behavior.max_health,
@@ -167,4 +212,7 @@ return {
 	remove_entity = remove_entity,
 	autogenerates_vertex = autogenerate_vertex,
 	new_entity = new_entity,
+	with_defaults = with_defaults,
+	entity_can_deconstruct = entity_can_deconstruct,
+	registry = registry,
 }

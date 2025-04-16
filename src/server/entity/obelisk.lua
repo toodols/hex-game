@@ -1,7 +1,0 @@
-local registry_mod = require(script.Parent.registry)
-
-registry_mod.registry.obelisk = registry_mod.with_defaults {
-	autogenerates_vertex = true,
-}
-
-return {}
