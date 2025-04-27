@@ -1,5 +1,6 @@
 {
 	"name": "hex-game-lobby",
+	"servePlaceIds": [18215168959],
 	"tree": {
 		"$className": "DataModel",
 		"ReplicatedStorage": {
@@ -15,7 +16,10 @@
 		},
 		"ServerScriptService": {
 			"Server": {
-				"$path": "src/server"
+				"$path": "src/server",
+				"pow": {
+					"$path": "../pow/package.project.json"
+				}
 			},
 			"server_init": {
 				"$path": "src/init/lobby.server.lua"

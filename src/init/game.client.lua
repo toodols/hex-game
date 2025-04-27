@@ -10,14 +10,12 @@ local types = require(ReplicatedStorage.Shared.types)
 require(ReplicatedStorage.Client.entity_impls)
 require(ReplicatedStorage.Shared.entity_impls)
 
-print(require(ReplicatedStorage.Client.entity).registry)
-print(require(ReplicatedStorage.Shared.entity).registry)
-
 type World = types.World
 type WorldUpdate = types.WorldUpdate
 
 local world_data = get_world_data_remote:InvokeServer()
 local world = world_mod.new_world_from_data(world_data)
+_G.world = world
 
 game_mod.render_world(world)
 
@@ -26,6 +24,7 @@ local connection = world_updates_remote.OnClientEvent:Connect(function(updates: 
 end)
 
 local ui = init_game_ui(world)
+world.ui = ui
 
 game_mod.start_animations(world)
 

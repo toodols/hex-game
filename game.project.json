@@ -1,5 +1,6 @@
 {
 	"name": "hex-game-game",
+	"servePlaceIds": [96418171483264],
 	"tree": {
 		"$className": "DataModel",
 		"ReplicatedStorage": {
@@ -15,7 +16,10 @@
 		},
 		"ServerScriptService": {
 			"Server": {
-				"$path": "src/server"
+				"$path": "src/server",
+				"pow": {
+					"$path": "../pow/package.project.json"
+				}
 			},
 			"server_init": {
 				"$path": "src/init/game.server.lua"

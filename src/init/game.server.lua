@@ -49,6 +49,21 @@ local presets = require(ServerScriptService.Server.presets)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 local updates_mod = require(ServerScriptService.Server.updates)
 local server_util = require(ServerScriptService.Server.util)
+local pow = require(ServerScriptService.Server.pow)
+local pow_ext = ServerScriptService.Server.pow_ext
+
+print "run init on pow"
+print(pow)
+pow.init {
+	permissions = {
+		owner = {
+			["195294332"] = 5,
+		},
+	},
+	extras = pow_ext,
+}
+
+print "done"
 
 if RunService:IsStudio() then
 	tests.run_tests()

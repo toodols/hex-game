@@ -7,7 +7,7 @@ function load<T>(path: string): T?
 			and ReplicatedStorage:FindFirstChild "ReplicatedAssets"
 		or ServerStorage:FindFirstChild "Assets"
 
-	assert(current_instance, `{path} is nil`)
+	assert(current_instance, `Cannot find assets folder`)
 	for _, segment in segments do
 		current_instance = current_instance:FindFirstChild(segment)
 		if not current_instance then

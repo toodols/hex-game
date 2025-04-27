@@ -17,7 +17,7 @@ end
 
 function tests.render_ui()
 	local world = presets.my_map()
-	local ui = game_ui.init_ui(world, Instance.new "Folder")
+	local ui = game_ui.init_ui(world, Instance.new "ScreenGui")
 
 	ui.destroy()
 	cleanup(world)

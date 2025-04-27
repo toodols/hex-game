@@ -67,215 +67,219 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 		},
 	}, {
 		TileAlerts = React.createElement(TileAlerts),
-		MainGui = React.createElement("ScreenGui", {
-			ResetOnSpawn = false,
-			ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-			IgnoreGuiInset = true,
+
+		Research = submenu.type == "research" and React.createElement(Research, {
+			entity_id = submenu.entity_id,
+			on_close = function()
+				set_submenu {}
+			end,
+		}),
+
+		Center = React.createElement("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundTransparency = 1,
+			Position = UDim2.new(0.5, 0, 0.5, 0),
+			Size = UDim2.new(1, 0, 1, 0),
 		}, {
-			Research = submenu.type == "research" and React.createElement(Research, {
-				entity_id = submenu.entity_id,
-				on_close = function()
-					set_submenu {}
-				end,
+			PlayerList = React.createElement(PlayerList),
+			SettingsMenu = if settings_open then React.createElement(SettingsMenu) else nil,
+		}),
+		TopCenter = React.createElement(TopCenter),
+		BottomCenter = React.createElement("Frame", {
+			AnchorPoint = Vector2.new(0.5, 1),
+			BackgroundTransparency = 1,
+			Position = UDim2.new(0.5, 0, 1, -20),
+			Size = UDim2.new(1, 0, 1, 0),
+			Active = false,
+			ZIndex = 2,
+		}, {
+			BuildingsFrame = submenu.type == "build" and React.createElement(BuildingsFrame, {
+				cell = submenu.cell,
 			}),
+		}),
+		BottomLeft = React.createElement("Frame", {
+			AnchorPoint = Vector2.new(0, 1),
+			BackgroundTransparency = 1,
+			Position = UDim2.new(0, 20, 1, -20),
+		}, {
+			HorizontalLayout = React.createElement("UIListLayout", {
+				FillDirection = Enum.FillDirection.Horizontal,
+				Padding = UDim.new(0, 10),
+				SortOrder = Enum.SortOrder.LayoutOrder,
+				VerticalAlignment = Enum.VerticalAlignment.Bottom,
+			}),
+		}, {
+			CancelButton = React.createElement(
+				"TextButton",
+				themes.theme_button {
+					Visible = selection_mode.type == "select_some_cell_attack"
+						or selection_mode.type == "select_direction",
+					Text = "Cancel",
+					Size = UDim2.new(0, 100, 0, 30),
+					BackgroundColor3 = Color3.fromRGB(13, 13, 13),
+					BackgroundTransparency = 0.2,
+					[React.Event.MouseButton1Click] = function()
+						props.selection_mode_stack[#props.selection_mode_stack] = nil
+						force_update()
+					end,
+				},
+				{
+					Corner = React.createElement(Corner),
+				}
+			),
+			SelectedCellFrame = if selection_mode.type == "select_cells"
+				then React.createElement(SelectedCellFrame, {
+					selected_cells = util.table_map(util.table_keys(selection_mode.selected), function(k)
+						return coords.decode_coord(props.world.instance_cell_map[k])
+					end),
+					toggle_submenu = function(menu)
+						set_submenu(function(current)
+							return if util.deep_equal(current, menu) then {} else menu
+						end)
+					end,
+				})
+				else nil,
+			OneEntityFrame = if selection_mode.type == "show_one_entity"
+				then React.createElement("Frame", {
+					AnchorPoint = Vector2.new(0, 1),
+					BackgroundTransparency = 1,
+					Position = UDim2.new(-250, 250, 20, -20),
+					Size = UDim2.new(0, 250, 0, 300),
+				}, {
 
-			Center = React.createElement("Frame", {
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				BackgroundTransparency = 1,
-				Position = UDim2.new(0.5, 0, 0.5, 0),
-				Size = UDim2.new(1, 0, 1, 0),
-			}, {
-				PlayerList = React.createElement(PlayerList),
-				SettingsMenu = if settings_open then React.createElement(SettingsMenu) else nil,
-			}),
-			TopCenter = React.createElement(TopCenter),
-			BottomCenter = React.createElement("Frame", {
-				AnchorPoint = Vector2.new(0.5, 1),
-				BackgroundTransparency = 1,
-				Position = UDim2.new(0.5, 0, 1, -20),
-				Size = UDim2.new(1, 0, 1, 0),
-				Active = false,
-				ZIndex = 2,
-			}, {
-				BuildingsFrame = submenu.type == "build" and React.createElement(BuildingsFrame, {
-					cell = submenu.cell,
-				}),
-			}),
-			BottomLeft = React.createElement("Frame", {
-				AnchorPoint = Vector2.new(0, 1),
-				BackgroundTransparency = 1,
-				Position = UDim2.new(0, 20, 1, -20),
-			}, {
-				HorizontalLayout = React.createElement("UIListLayout", {
-					FillDirection = Enum.FillDirection.Horizontal,
-					Padding = UDim.new(0, 10),
-					SortOrder = Enum.SortOrder.LayoutOrder,
-					VerticalAlignment = Enum.VerticalAlignment.Bottom,
-				}),
-			}, {
-				CancelButton = React.createElement(
-					"TextButton",
-					themes.theme_button {
-						Visible = selection_mode.type == "select_some_cell_attack"
-							or selection_mode.type == "select_direction",
-						Text = "Cancel",
-						Size = UDim2.new(0, 100, 0, 30),
-						BackgroundColor3 = Color3.fromRGB(13, 13, 13),
-						BackgroundTransparency = 0.2,
-						[React.Event.MouseButton1Click] = function()
-							props.selection_mode_stack[#props.selection_mode_stack] = nil
-							force_update()
-						end,
-					},
-					{
-						Corner = React.createElement(Corner),
-					}
-				),
-				SelectedCellFrame = if selection_mode.type == "select_cells"
-					then React.createElement(SelectedCellFrame, {
-						selected_cells = util.table_map(util.table_keys(selection_mode.selected), function(k)
-							return coords.decode_coord(props.world.instance_cell_map[k])
-						end),
-						toggle_submenu = function(menu)
-							set_submenu(function(current)
-								return if util.deep_equal(current, menu) then {} else menu
-							end)
-						end,
-					})
-					else nil,
-				OneEntityFrame = if selection_mode.type == "show_one_entity"
-					then React.createElement("Frame", {
-						AnchorPoint = Vector2.new(0, 1),
-						BackgroundTransparency = 1,
-						Position = UDim2.new(-250, 250, 20, -20),
-						Size = UDim2.new(0, 250, 0, 300),
-					}, {
-
-						VerticalLayout = React.createElement("UIListLayout", {
-							HorizontalAlignment = Enum.HorizontalAlignment.Center,
-							SortOrder = Enum.SortOrder.LayoutOrder,
-							VerticalAlignment = Enum.VerticalAlignment.Bottom,
-						}),
-						Corner = React.createElement(Corner),
-						Header = React.createElement(
-							"Frame",
-							themes.theme_solid {
-								LayoutOrder = 1,
-								Size = UDim2.new(1, 0, 0, 40),
-							},
-							{
-								Corner = React.createElement(Corner),
-								BackButton = React.createElement(
-									"TextButton",
-									themes.theme_button {
-										Text = "Back",
-										Size = UDim2.new(1, 0, 1, 0),
-										[React.Event.MouseButton1Click] = function()
-											props.selection_mode_stack[#props.selection_mode_stack] = nil
-											force_update()
-										end,
-									}
-								),
-							}
-						),
-						Content = React.createElement(
-							"Frame",
-							themes.theme_background {
-								AnchorPoint = Vector2.new(0.5, 0.5),
-								AutomaticSize = Enum.AutomaticSize.Y,
-								LayoutOrder = 2,
-								Position = UDim2.new(0.5, 0, 0.5, 0),
-								Size = UDim2.new(1, 0, 0, 0),
-							},
-							{
-								VerticalLayout = React.createElement("UIListLayout", {
-									Padding = UDim.new(0, 4),
-									SortOrder = Enum.SortOrder.LayoutOrder,
-								}),
-								Padding = React.createElement("UIPadding", {
-									PaddingBottom = UDim.new(0, 4),
-									PaddingLeft = UDim.new(0, 4),
-									PaddingRight = UDim.new(0, 4),
-									PaddingTop = UDim.new(0, 4),
-								}),
-							},
-							{
-								Info = React.createElement(EntityInformation, {
-									entity_id = selection_mode.entity_id,
-									compressed = false,
-									on_compress = function() end,
-									on_select = function() end,
-									toggle_submenu = function(menu)
-										set_submenu(function(current)
-											return if util.deep_equal(current, menu) then {} else menu
-										end)
+					VerticalLayout = React.createElement("UIListLayout", {
+						HorizontalAlignment = Enum.HorizontalAlignment.Center,
+						SortOrder = Enum.SortOrder.LayoutOrder,
+						VerticalAlignment = Enum.VerticalAlignment.Bottom,
+					}),
+					Corner = React.createElement(Corner),
+					Header = React.createElement(
+						"Frame",
+						themes.theme_solid {
+							LayoutOrder = 1,
+							Size = UDim2.new(1, 0, 0, 40),
+						},
+						{
+							Corner = React.createElement(Corner),
+							BackButton = React.createElement(
+								"TextButton",
+								themes.theme_button {
+									Text = "Back",
+									Size = UDim2.new(1, 0, 1, 0),
+									[React.Event.MouseButton1Click] = function()
+										props.selection_mode_stack[#props.selection_mode_stack] = nil
+										force_update()
 									end,
-								}),
-							}
-						),
-					})
-					else nil,
-				Recipes = if submenu.type == "recipes"
-					then React.createElement(Recipes, {
-						entity_id = submenu.entity_id,
-						on_close = function()
-							set_submenu {}
-						end,
-					})
-					else nil,
-				ItemFilters = if submenu.type == "item_filters"
-					then React.createElement(ItemFilters, {
-						entity_id = submenu.entity_id,
-					})
-					else nil,
-			}),
-		}, {
-			BottomRight = React.createElement("Frame", {
-				AnchorPoint = Vector2.new(1, 1),
-				BackgroundTransparency = 1,
-				Position = UDim2.new(1, -20, 1, -20),
-			}, {
-
-				HorizontalLayout = React.createElement("UIListLayout", {
-					FillDirection = Enum.FillDirection.Horizontal,
-					HorizontalAlignment = Enum.HorizontalAlignment.Right,
-					Padding = UDim.new(0, 10),
-					SortOrder = Enum.SortOrder.LayoutOrder,
-					VerticalAlignment = Enum.VerticalAlignment.Bottom,
-				}),
-
-				Settings = React.createElement(
-					"Frame",
-					themes.theme_solid {
-						LayoutOrder = 1,
-						Size = UDim2.new(0, 40, 0, 40),
-					},
-					{
-						ImageButton = React.createElement("ImageButton", {
+								}
+							),
+						}
+					),
+					Content = React.createElement(
+						"Frame",
+						themes.theme_background {
 							AnchorPoint = Vector2.new(0.5, 0.5),
-							BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-							BackgroundTransparency = 1,
-							BorderColor3 = Color3.fromRGB(0, 0, 0),
-							BorderSizePixel = 0,
-							Image = "rbxassetid://4062402439",
-							ImageColor3 = Color3.fromRGB(255, 255, 255),
+							AutomaticSize = Enum.AutomaticSize.Y,
+							LayoutOrder = 2,
 							Position = UDim2.new(0.5, 0, 0.5, 0),
-							Size = UDim2.new(1, -10, 1, -10),
-							[React.Event.MouseButton1Click] = function()
-								set_settings_open(not settings_open)
-							end,
-						}),
+							Size = UDim2.new(1, 0, 0, 0),
+						},
+						{
+							VerticalLayout = React.createElement("UIListLayout", {
+								Padding = UDim.new(0, 4),
+								SortOrder = Enum.SortOrder.LayoutOrder,
+							}),
+							Padding = React.createElement("UIPadding", {
+								PaddingBottom = UDim.new(0, 4),
+								PaddingLeft = UDim.new(0, 4),
+								PaddingRight = UDim.new(0, 4),
+								PaddingTop = UDim.new(0, 4),
+							}),
+						},
+						{
+							Info = React.createElement(EntityInformation, {
+								entity_id = selection_mode.entity_id,
+								compressed = false,
+								on_compress = function() end,
+								on_select = function() end,
+								toggle_submenu = function(menu)
+									set_submenu(function(current)
+										return if util.deep_equal(current, menu) then {} else menu
+									end)
+								end,
+							}),
+						}
+					),
+				})
+				else nil,
+			Recipes = if submenu.type == "recipes"
+				then React.createElement(Recipes, {
+					entity_id = submenu.entity_id,
+					on_close = function()
+						set_submenu {}
+					end,
+				})
+				else nil,
+			ItemFilters = if submenu.type == "item_filters"
+				then React.createElement(ItemFilters, {
+					entity_id = submenu.entity_id,
+				})
+				else nil,
+		}),
+	}, {
+		BottomRight = React.createElement("Frame", {
+			AnchorPoint = Vector2.new(1, 1),
+			BackgroundTransparency = 1,
+			Position = UDim2.new(1, -20, 1, -20),
+		}, {
 
-						Corner = React.createElement(Corner),
-					}
-				),
+			HorizontalLayout = React.createElement("UIListLayout", {
+				FillDirection = Enum.FillDirection.Horizontal,
+				HorizontalAlignment = Enum.HorizontalAlignment.Right,
+				Padding = UDim.new(0, 10),
+				SortOrder = Enum.SortOrder.LayoutOrder,
+				VerticalAlignment = Enum.VerticalAlignment.Bottom,
 			}),
+
+			Settings = React.createElement(
+				"Frame",
+				themes.theme_solid {
+					LayoutOrder = 1,
+					Size = UDim2.new(0, 40, 0, 40),
+				},
+				{
+					ImageButton = React.createElement("ImageButton", {
+						AnchorPoint = Vector2.new(0.5, 0.5),
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						BorderSizePixel = 0,
+						Image = "rbxassetid://4062402439",
+						ImageColor3 = Color3.fromRGB(255, 255, 255),
+						Position = UDim2.new(0.5, 0, 0.5, 0),
+						Size = UDim2.new(1, -10, 1, -10),
+						[React.Event.MouseButton1Click] = function()
+							set_settings_open(not settings_open)
+						end,
+					}),
+
+					Corner = React.createElement(Corner),
+				}
+			),
 		}),
 	})
 end
 
-function init_ui(world: World, root_instance: Instance?)
-	local root = ReactRoblox.createRoot(root_instance or Players.LocalPlayer.PlayerGui)
+function init_ui(world: World, root_instance_: ScreenGui?)
+	local root_instance = root_instance_
+	if root_instance == nil then
+		root_instance = Instance.new "ScreenGui"
+		root_instance.Name = "MainGui"
+		root_instance.ResetOnSpawn = false
+		root_instance.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		root_instance.IgnoreGuiInset = true
+		root_instance.Parent = Players.LocalPlayer:WaitForChild "PlayerGui"
+	end
+	local root = ReactRoblox.createRoot(root_instance)
 	local selection_mode_stack: { SelectionMode } = {
 		{
 			type = "select_cells",
@@ -324,7 +328,7 @@ function init_ui(world: World, root_instance: Instance?)
 		highlight.Adornee = highlight.Parent
 	end
 
-	local function update()
+	local function update_selected()
 		refresh_highlight(hover_highlight, {})
 		local selection_mode = selection_mode_stack[#selection_mode_stack]
 		if selection_mode.type == "select_cells" then
@@ -412,7 +416,7 @@ function init_ui(world: World, root_instance: Instance?)
 					cursor_instance = cursor_instance.Parent
 				end
 			end
-			update()
+			update_selected()
 		end)
 
 		-- on select
@@ -473,6 +477,14 @@ function init_ui(world: World, root_instance: Instance?)
 	}))
 
 	return {
+		root = root,
+		update = function()
+			root:render(React.createElement(Main, {
+				world = world,
+				selection_mode_stack = selection_mode_stack,
+			}))
+		end,
+		selection_mode_stack = selection_mode_stack,
 		destroy = function()
 			if RunService:IsClient() then
 				render_stepped_connection:Disconnect()
