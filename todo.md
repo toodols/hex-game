@@ -3,7 +3,6 @@
 - [ ] Display scores in player list
 - [ ] Add an end screen when only one team is left, then send players to lobby
 - [ ] Improve map generation to be less random or add handmade maps
-- [ ] `scout` should physically turn to face its target when attacking
 - [ ] Items in inventories with incompatible filters should be moved to different inventories
 - [ ] Make `suggestion` functional
 - [ ] Make `altar` functional
@@ -40,6 +39,7 @@
 	- [x] Add `infected` status effect
 
 # Complete
+- [x] `scout` should physically turn to face its target when attacking
 - [x] Remove power from the game. It's too complicated.
 - [x] Make `phony` functional
 - [x] Split `server/router`

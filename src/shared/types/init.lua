@@ -12,8 +12,9 @@ export type Room = {
 	starting_at: number?,
 }
 
--- game types
-export type CubicCoordinate = { number } -- A cubic coordinate is {x, y, z} where x+y+z = 0
+--- {x, y, z} where x,y,z: number and x+y+z = 0 <br/>
+--- The z component can be derived but exists for completeness
+export type CubicCoordinate = { number }
 export type EncodedCoordinate = string
 
 export type Signal<T> = {

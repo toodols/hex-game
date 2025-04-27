@@ -24,7 +24,9 @@ function coords_sub(c1: CubicCoordinate, c2: CubicCoordinate): CubicCoordinate
 	}
 end
 
--- Encodes a CubicCoordinate into a string
+--- Encodes a CubicCoordinate into a string
+--- Makes no guarantees on the output format, only that
+--- - `forall coord: CubicCoordinate. coord == decode_coord(encode_coord(coord))`
 function encode_coord(coord: CubicCoordinate): EncodedCoordinate
 	return string.format("%d %d", coord[1], coord[2])
 end
