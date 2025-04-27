@@ -304,7 +304,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 	React.useEffect(function()
 		if is_expanded then
 			TweenService:Create(expanded_content_ref.current, TweenInfo.new(0.3), {
-				Size = UDim2.new(1, 0, 0, 700),
+				Size = UDim2.new(1, 0, 1, 0),
 				ScrollBarImageTransparency = 0,
 			}):Play()
 		else
@@ -321,15 +321,19 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 		BorderColor3 = Color3.fromRGB(27, 42, 53),
 		LayoutOrder = 2,
 		Position = UDim2.new(0.5, 0, 1, 0),
-		Size = UDim2.new(0, 1000, 0, 300),
+		Size = UDim2.new(0, 1000, 0.8, 0),
 		ref = ref,
 	}, {
-		VeritcalLayout = React.createElement("UIListLayout", {
+		VerticalLayout = React.createElement("UIListLayout", {
 			FillDirection = Enum.FillDirection.Vertical,
 			SortOrder = Enum.SortOrder.LayoutOrder,
 			VerticalAlignment = Enum.VerticalAlignment.Bottom,
+			Padding = UDim.new(0, 1),
 		}),
 	}, {
+		SizeConstraint = React.createElement("UISizeConstraint", {
+			MinSize = Vector2.new(0, 300),
+		}),
 		Content = React.createElement(
 			"Frame",
 			{
@@ -463,6 +467,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 				ScrollBarImageTransparency = 1,
 				ScrollBarThickness = 2,
 				Size = UDim2.new(1, 0, 0, 0),
+				CanvasSize = UDim2.new(1, 0, 0, 0),
 				AutomaticCanvasSize = Enum.AutomaticSize.Y,
 			},
 			{

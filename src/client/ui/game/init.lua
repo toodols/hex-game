@@ -93,6 +93,8 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 				AnchorPoint = Vector2.new(0.5, 1),
 				BackgroundTransparency = 1,
 				Position = UDim2.new(0.5, 0, 1, -20),
+				Size = UDim2.new(1, 0, 1, 0),
+				Active = false,
 				ZIndex = 2,
 			}, {
 				BuildingsFrame = submenu.type == "build" and React.createElement(BuildingsFrame, {

@@ -76,7 +76,7 @@ function world_query_entity(world: World, props: any): { Entity }
 			return false
 		end
 		for k, v in props do
-			if k == "coordinate" then
+			if k == "coordinate" or k == "query_global" then
 				continue
 			end
 			if not util.deep_equal(entity[k], v) then
@@ -100,12 +100,14 @@ function world_query_entity(world: World, props: any): { Entity }
 			end
 		end
 	else
-		warn "query_entity without coordinate is bad"
-		warn(debug.traceback())
-		for _, entity in world.entities do
-			if pred(entity) then
-				table.insert(results, entity)
+		if props.query_global then
+			for _, entity in world.entities do
+				if pred(entity) then
+					table.insert(results, entity)
+				end
 			end
+		else
+			error "query_entity without coordinate requires explicit .query_global prop"
 		end
 	end
 	return results
@@ -223,10 +225,10 @@ function empty_cell(coord: CubicCoordinate): HexCell
 		entities = {},
 		coordinate = coord,
 		type = "basic",
+		influences = {},
 		server_data = {
 			presence = {},
 			visibility = {},
-			influences = {},
 		},
 	}
 end

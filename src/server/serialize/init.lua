@@ -48,7 +48,7 @@ function serialize_cell_for_team(world: World, cell: HexCell, team: TeamId): Hex
 	local visible_for_team = visibility_mod.cell_visibility(cell.server_data.visibility[team])
 	local influences = {}
 
-	for entity_id in cell.server_data.influences do
+	for entity_id in cell.influences do
 		local entity = world.entities[entity_id]
 		-- if this entity is visible, replicate the influence
 		if visibility_mod.entity_visibility(world, entity, team) then

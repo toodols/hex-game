@@ -273,6 +273,24 @@ function tests.chatgpt_didnt_grift_me() -- (it did)
 	cleanup(world)
 end
 
+function tests.decaying()
+	local world, teams = presets.my_map()
+
+	local heart = (world:query_entity { type = "heart", query_global = true, owner = teams.team1.id })[1]
+	table.insert(heart.queued_decisions, {
+		type = "deconstruct",
+	})
+	local scout = world:query_entity({ type = "scout", query_global = true, owner = teams.team1.id })[1]
+
+	for i = 1, 4 do
+		action_phase_mod.run_action_phase(world)
+	end
+
+	assert(scout.owner == world.neutral_team, "scout should be neutral team after decaying")
+
+	cleanup(world)
+end
+
 function tests.capture_extractor()
 	local world = world_mod.new_world_from_extents {
 		{ min = -1, max = 1 },
@@ -339,7 +357,6 @@ function tests.deconstruct_stockpile()
 
 	table.insert(stockpile.queued_decisions, {
 		type = "deconstruct",
-		entity_id = stockpile.id,
 	})
 
 	action_phase_mod.run_action_phase(world)
@@ -438,7 +455,6 @@ function tests.deconstruct_building_preserves_vertex()
 	assert_eq(#world:query_entity { type = "vertex", coordinate = { 0, 0, 0 } }, 1, "vertex not generated")
 	table.insert(scout.queued_decisions, {
 		type = "deconstruct",
-		entity_id = scout.id,
 	})
 	action_phase_mod.run_action_phase(world)
 	assert_eq(#world:query_entity { type = "vertex", coordinate = { 0, 0, 0 } }, 1, "vertex not preserved")
@@ -476,7 +492,6 @@ function tests.scout_attack_each_other()
 		type = "ability",
 		ability_type = "scout_attack",
 		coordinate = { 1, -1, 0 },
-		entity_id = scout.id,
 	})
 
 	action_phase_mod.run_action_phase(world)
@@ -495,13 +510,11 @@ function tests.scout_attack_each_other()
 			type = "ability",
 			ability_type = "scout_attack",
 			coordinate = { 1, -1, 0 },
-			entity_id = scout.id,
 		})
 		table.insert(scout2.queued_decisions, {
 			type = "ability",
 			ability_type = "scout_attack",
 			coordinate = { -1, 1, 0 },
-			entity_id = scout2.id,
 		})
 		action_phase_mod.run_action_phase(world)
 	end
@@ -518,22 +531,20 @@ function tests.correct_phony_updates()
 
 	local phony =
 		entity_mod.new_entity({ type = "phony", owner = teams.team2.id, primary_coordinate = { 0, 0, 0 } }, world)
-	local scout =
-		entity_mod.new_entity({ type = "scout", owner = teams.team2.id, primary_coordinate = { 1, 0, -1 } }, world)
+	local disguise_target =
+		entity_mod.new_entity({ type = "stockpile", owner = teams.team2.id, primary_coordinate = { 1, 0, -1 } }, world)
 
 	local enemy =
 		entity_mod.new_entity({ type = "scout", owner = teams.team1.id, primary_coordinate = { -2, 0, 2 } }, world)
 
-	phony.queued_decisions = {
-		{
-			type = "ability",
-			ability_type = "disguise",
-			entity_id = phony.id,
-			coordinate = scout.primary_coordinate,
-		},
-	}
+	table.insert(phony.queued_decisions, {
+		type = "ability",
+		ability_type = "disguise",
+		coordinate = disguise_target.primary_coordinate,
+	})
 
 	local result = action_phase_mod.run_action_phase(world)
+
 	assert(
 		util.table_any(result.updates[teams.team1.id], function(update)
 			return update.type == "entity_update"
@@ -567,6 +578,26 @@ function tests.archive_world()
 	local decompressed = archive.decompress_world(compressed)
 
 	cleanup(world)
+end
+
+-- a visible scout firing should be have its ability usage be visible to the team
+function tests.correct_scout_updates()
+	local world, teams = presets.blank_map()
+	spawn_entity(world, "infinite_source")
+	local scout = spawn_entity(world, "scout")
+	table.insert(scout.queued_decisions, {
+		type = "ability",
+		ability_type = "scout_attack",
+		coordinate = { 1, -1, 0 },
+	})
+
+	local result = action_phase_mod.run_action_phase(world)
+	assert(
+		util.table_any(result.updates[teams.team1.id], function(update)
+			return update.type == "ability"
+		end),
+		"Did not find ability in updates for team1"
+	)
 end
 
 return tests

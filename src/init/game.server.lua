@@ -36,8 +36,10 @@ clone_assets({
 }, server_assets, destination)
 
 -- Load entities and effects into their registries
-require(ServerScriptService.Server.effects)
-require(ServerScriptService.Server.entities)
+require(ServerScriptService.Server.effect_impls)
+require(ServerScriptService.Server.entity_impls)
+require(ReplicatedStorage.Shared.entity_impls)
+require(ReplicatedStorage.Client.entity_impls) -- client also needs to be loaded for server-sided tests that deal with the client
 
 local tests = require(ServerScriptService.Server.tests)
 local remotes_mod = require(ServerScriptService.Server.remotes)
@@ -78,7 +80,7 @@ function start_game(teleport_data: { room: types.Room }?)
 	local players_config = room and room.players
 	print("Starting game with teleport data", game.HttpService:JSONEncode(teleport_data))
 	main_world = presets[if room then room.map else "my_map"]()
-	-- main_world = presets.map_with_infinite_source()
+	-- main_world = tests.server.decaying()
 
 	_G.world = main_world
 

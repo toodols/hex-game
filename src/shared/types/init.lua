@@ -197,18 +197,12 @@ export type HexCell = {
 
 	influences: {
 		[EntityId]: boolean,
-	}?,
+	},
 	server_data: {
 		-- a presence is imposed by an enemy team, and prevents a player from building on that cell
 		presence: {
 			[TeamId]: boolean,
 		},
-
-		-- an influence are created by support buildings, and provide boosts to nearby entities
-		influences: {
-			[EntityId]: boolean,
-		},
-
 		visibility: {
 			[TeamId]: CellTeamVisibility,
 		},

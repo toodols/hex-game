@@ -141,7 +141,10 @@ function my_map(): World
 	-- world:get_cell({ 1 - magic, magic - 1, 0 }).type = "bar_deposit"
 	stockpile2.inventory.items = { "bar", "bar", "rad", "bar", "rad" }
 
-	return world
+	return world, {
+		team1 = team1,
+		team2 = team2,
+	}
 end
 
 function prepare_preset(fn: (...any) -> World): (...any) -> World

@@ -6,7 +6,7 @@ type World = types.World
 
 function compute_influences(world: World)
 	for _, cell in world.cells do
-		cell.server_data.influences = {}
+		cell.influences = {}
 	end
 	for _, entity in world:active_entities() do
 		local behavior = entity_mod.registry[entity.type]

@@ -26,14 +26,14 @@ end
 
 -- Encodes a CubicCoordinate into a string
 function encode_coord(coord: CubicCoordinate): EncodedCoordinate
-	return tostring((coord[1] + 1000) * 10000 + (coord[2] + 1000))
+	return string.format("%d %d", coord[1], coord[2])
 end
 
 --  Decodes a string back into a CubicCoordinate
 function decode_coord(s: EncodedCoordinate): CubicCoordinate
-	local n = tonumber(s)
-	local x = math.floor(n / 10000) - 1000
-	local y = (n % 10000) - 1000
+	local res = string.split(s, " ")
+	local x = tonumber(res[1])
+	local y = tonumber(res[2])
 	local z = -x - y
 	return { x, y, z }
 end

@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
-local shared_registry_mod = require(ReplicatedStorage.Shared.entity.registry)
+local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local coords = require(ReplicatedStorage.Shared.coords)
 
 local server_util = require(script.Parent.util)
@@ -67,7 +67,7 @@ function entity_can_deconstruct(entity: Entity, world: World)
 	if
 		entity.type == "vertex"
 		and not util.table_any(cell.entities, function(_, entity_id)
-			return shared_registry_mod.registry[world.entities[entity_id].type].layer > shared_registry_mod.layer.vertex
+			return shared_entity_mod.registry[world.entities[entity_id].type].layer > shared_entity_mod.LAYER.vertex
 		end)
 	then
 		return false
@@ -111,7 +111,7 @@ function new_entity(entity_: any, world: World): Entity
 		error "argument 2 not provided"
 	end
 	local server_behavior = registry[entity.type]
-	local shared_behavior = shared_registry_mod.registry[entity.type]
+	local shared_behavior = shared_entity_mod.registry[entity.type]
 	local cell
 	if entity.primary_coordinate then
 		cell = world:get_cell(entity.primary_coordinate)
@@ -138,7 +138,7 @@ function new_entity(entity_: any, world: World): Entity
 		cost = shared_behavior.cost,
 		cost_fulfilled = {},
 		decay = 0,
-		decayable = shared_behavior.decayable,
+		decayable = server_behavior.decayable,
 		effects = {},
 		enabled = true,
 		health = shared_behavior.max_health,

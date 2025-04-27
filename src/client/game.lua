@@ -5,13 +5,12 @@ local RunService = game:GetService "RunService"
 
 local coords = require(ReplicatedStorage.Shared.coords)
 local asset_server = require(ReplicatedStorage.Shared.asset_server)
-local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local items_mod = require(ReplicatedStorage.Shared.items)
 local cells_mod = require(ReplicatedStorage.Shared.cells)
 local world_mod = require(ReplicatedStorage.Shared.world)
-local formatting = require(ReplicatedStorage.Shared.formatting)
 local client_entity_mod = require(script.Parent.entity)
+local visuals = require(script.Parent.visuals)
 
 local into_vec3 = coords.into_vec3
 local encode_coord = coords.encode_coord
@@ -185,56 +184,6 @@ function destroy_world_instances(world: World)
 	end
 end
 
----
-function produced_item_effect(event: EntityEvent, origin: Vector3)
-	assert(event.event_type == "produced_items", "Event is not produced_items")
-	local item_template = asset_server.load "Effects/Item"
-	for item_type, amount in event.items do
-		for i = 1, amount do
-			local item = item_template:Clone()
-			item.Parent = workspace
-			item.Position = origin + Vector3.new(0, 4, 0)
-			item.Velocity = Vector3.new(math.random(-5, 5), 30, math.random(-5, 5))
-			item.Anchored = false
-			item.Color = items_mod.item_colors[item_type]
-			TweenService:Create(item, TweenInfo.new(2), {
-				Transparency = 1,
-			}):Play()
-			Debris:AddItem(item, 2)
-		end
-	end
-end
-
-function consumed_item_effect(event: EntityEvent, origin: Vector3)
-	assert(event.event_type == "consumed_items", "Event is not consumed_items")
-	local item_template = asset_server.load "Effects/Item"
-	task.spawn(function()
-		for item_type, amount in event.items do
-			for i = 1, amount do
-				local item = item_template:Clone()
-				item.Parent = workspace
-				item.Position = origin + Vector3.new(0, 6, 0)
-				item.Color = items_mod.item_colors[item_type]
-				TweenService:Create(item, TweenInfo.new(0.7, Enum.EasingStyle.Quart), {
-					Position = origin,
-					Transparency = 1,
-				}):Play()
-				Debris:AddItem(item, 0.7)
-				task.wait(0.2)
-			end
-		end
-	end)
-end
-
-function scout_attack_effect(from: Vector3, to: Vector3)
-	local bullet_template = asset_server.load "Effects/Bullet"
-	local bullet = bullet_template:Clone()
-	TweenService:Create(bullet, TweenInfo.new(0.1, Enum.EasingStyle.Linear), {
-		Position = to,
-	}):Play()
-	Debris:AddItem(bullet, 0.3)
-end
-
 function hide_entities(world: World, old: HexCell)
 	for entity_id in old.entities do
 		local entity = world.entities[entity_id]
@@ -250,7 +199,6 @@ function handle_cells(world: World, update: WorldUpdate)
 	assert(update.type == "cells", "not a cell update")
 	-- remove cells that no longer exist
 	for old_encoded_coord, old_cell in world.cells do
-		-- todo: this also needs to remove entities on top of the cell
 		if not update.cells[old_encoded_coord] then
 			local instance = world.cell_instance_map[old_encoded_coord]
 			world.cell_instance_map[old_encoded_coord] = nil
@@ -258,6 +206,14 @@ function handle_cells(world: World, update: WorldUpdate)
 			animate_cell_removal(instance)
 			Debris:AddItem(instance, 2)
 			world.cells[old_encoded_coord] = nil
+		end
+
+		for _, entity_id in old_cell.entities do
+			local entity = world.entities[entity_id]
+			if entity then
+				local client_behavior = client_entity_mod.registry[entity.type]
+				client_behavior.on_hidden(entity, world)
+			end
 		end
 	end
 
@@ -282,40 +238,6 @@ function handle_cells(world: World, update: WorldUpdate)
 	end
 end
 
-function item_used_effect(event: EntityEvent, adornee: Instance)
-	local template = asset_server.load "Billboards/Exchange"
-	local instance = template:Clone()
-	instance.Parent = workspace
-	instance.Adornee = adornee
-
-	local function display(symbol: "+" | "-", items: { [Item]: number? }): string
-		return table.concat(
-			util.table_map(util.table_keys(items), function(k)
-				return `{symbol}{items[k]} {items_mod.item_names[k]}`
-			end),
-			"\n"
-		)
-	end
-	if event.event_type == "produced_items" then
-		instance.Amount.Text = util.font(display("+", event.items), {
-			color = Color3.fromRGB(163, 229, 160),
-		})
-	elseif event.event_type == "consumed_items" then
-		instance.Amount.Text = util.font(display("-", event.items), {
-			color = Color3.fromRGB(229, 107, 107),
-		})
-	else
-		error "bad event type"
-	end
-	TweenService:Create(instance, TweenInfo.new(4), {
-		StudsOffsetWorldSpace = Vector3.new(0, 4, 0),
-	}):Play()
-	TweenService:Create(instance.Amount, TweenInfo.new(4), {
-		TextTransparency = 1,
-	}):Play()
-	Debris:AddItem(instance, 5)
-end
-
 function handle_entity_event(world: World, event: EntityEvent)
 	if event.event_type == "produced_items" or event.event_type == "consumed_items" then
 		local entity_instance = world.entity_instance_map[event.entity_id]
@@ -324,12 +246,12 @@ function handle_entity_event(world: World, event: EntityEvent)
 			return
 		end
 
-		item_used_effect(event, entity_instance)
+		visuals.used_item_text(event, entity_instance)
 
 		if event.event_type == "produced_items" then
-			produced_item_effect(event, entity_instance:GetPivot().Position)
+			visuals.produced_item_effect(event, entity_instance:GetPivot().Position)
 		elseif event.event_type == "consumed_items" then
-			consumed_item_effect(event, entity_instance:GetPivot().Position)
+			visuals.consumed_item_effect(event, entity_instance:GetPivot().Position)
 		end
 	end
 end
@@ -411,10 +333,7 @@ function handle_updates(world: World, updates: { WorldUpdate })
 			local cell_instance = world.cell_instance_map[coords.encode_coord(update.coordinate)]
 			local entity_instance = world.entity_instance_map[update.entity_id]
 			if update.ability_type == "scout_attack" or update.ability_type == "turret_attack" then
-				scout_attack_effect(
-					entity_instance:GetPivot().Position,
-					cell_instance:FindFirstChild("Base").Position + Vector3.new(0, 2, 0)
-				)
+				visuals.scout_attack_effect(entity_instance, cell_instance)
 			end
 		end
 	end

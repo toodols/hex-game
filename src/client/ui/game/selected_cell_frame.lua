@@ -28,7 +28,7 @@ function best_uncompressed_entity(world: World, entities_set: { [EntityId]: true
 			continue
 		end
 		if
-			world.entity_configurations[entity.type].layer == shared_entity_mod.layer.building
+			world.entity_configurations[entity.type].layer == shared_entity_mod.LAYER.building
 			or not candidate_uncompressed_entity_layer
 		then
 			candidate_uncompressed_entity = entity_id

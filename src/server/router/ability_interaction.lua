@@ -34,7 +34,7 @@ function ability_interaction(world: World, entry: Interaction, player_info: Play
 			return {}
 		end
 		-- prevent cells with influence from taunt from being targeted
-		for influence in cell.server_data.influences do
+		for influence in cell.influences do
 			if world.entities[influence].type == "taunt" then
 				continue
 			end

@@ -9,7 +9,7 @@ type ResearchId = types.ResearchId
 
 function get_cell_researches(world: World, cell: HexCell, team: TeamId)
 	local researches_set: { [ResearchId]: boolean } = {}
-	local influences = if RunService:IsServer() then cell.server_data.influences else cell.influences
+	local influences = if RunService:IsServer() then cell.influences else cell.influences
 	for entity_id in influences do
 		local entity = world.entities[entity_id]
 		if not entity then

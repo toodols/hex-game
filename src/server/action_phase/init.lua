@@ -40,9 +40,12 @@ function portals_tick(world: World)
 	end
 end
 
+-- add all entities' queued_decisions into the global action queue
 function queue_entity_decisions(world: World, queue: { EntityAction })
 	for _, entity in world:active_entities() do
 		for _, decision in entity.queued_decisions do
+			decision.entity_id = entity.id
+			
 			table.insert(queue, decision)
 			updates_mod.add_update(world, {
 				type = "entity_update",

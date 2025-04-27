@@ -155,7 +155,7 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 
 		-- -- compile all the altars that have influence on this cell
 		-- local altars = {}
-		-- for entity_id in cell.server_data.influences do
+		-- for entity_id in cell.influences do
 		-- 	local entity = world.entities[entity_id]
 		-- 	if
 		-- 		entity.type == "altar"

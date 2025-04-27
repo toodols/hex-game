@@ -38,6 +38,16 @@ function process_queue(world: World, action_state: ActionState)
 		return true
 	end
 
+	-- prevent silly mistakes like table.insert(action_queue, {{ type = "ability" }}) by ensuring that
+	-- all actions have a type
+	-- i would love to do an exhaustive check against every possible action type, but this takes effort
+	for _, action in world.action_queue do
+		if action.type == nil then
+			print(action)
+			error "^ not an action"
+		end
+	end
+
 	repeat
 		old_queue = {}
 		for _, action in world.action_queue do
