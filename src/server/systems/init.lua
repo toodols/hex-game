@@ -142,7 +142,6 @@ function system_add_items(world: World, action_state: ActionState, system: Syste
 	end
 end
 
-
 return {
 	system_consume_item_type = system_consume_item_type,
 	system_has_items = system_has_items,

@@ -89,7 +89,7 @@ function autogenerate_vertex(world: World, host: Entity)
 				end
 			end
 		end
-		local entity = new_entity({
+		local _vertex = new_entity({
 			type = "vertex",
 			primary_coordinate = host.primary_coordinate,
 			status = status,
@@ -179,7 +179,7 @@ function new_entity(entity_: any, world: World): Entity
 	if entity.status == "complete" then
 		server_behavior.on_completed(entity, world)
 	end
-	if server_behavior.autogenerates_vertex then
+	if server_behavior.autogenerates_vertex and entity.owner ~= world.neutral_team then
 		autogenerate_vertex(world, entity)
 	end
 

@@ -153,54 +153,6 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 
 		local entities = get_attackable_entities(world, cell, damage)
 
-		-- -- compile all the altars that have influence on this cell
-		-- local altars = {}
-		-- for entity_id in cell.influences do
-		-- 	local entity = world.entities[entity_id]
-		-- 	if
-		-- 		entity.type == "altar"
-		-- 		-- altar on the cell being attacked does not count
-		-- 		and not coords.coords_eq(entity.primary_coordinate, target)
-		-- 	then
-		-- 		table.insert(altars, entity)
-		-- 	end
-		-- end
-
-		-- -- oldest entities take precedence
-		-- table.sort(altars, function(a, b)
-		-- 	return a.server_data.requested_at < b.server_data.requested_at
-		-- end)
-
-		-- local done = false
-		-- for _, entity in entities do
-		-- 	for _, altar in altars do
-		-- 		if is_allied(world, entity.owner, altar.owner) then
-		-- 			local new_attackables =
-		-- 				get_attackable_entities(world, world:get_cell(altar.primary_coordinate) :: HexCell, damage)
-
-		-- 			-- if the altar is at the top, logically there is nothing to sacrifice
-		-- 			-- do not retarget.
-		-- 			if new_attackables[1] == altar then
-		-- 				continue
-		-- 			end
-
-		-- 			-- all the entities ABOVE but excluding the altar may be targeted
-		-- 			entities = {}
-		-- 			for other_entity in new_attackables do
-		-- 				if other_entity == altar then
-		-- 					break
-		-- 				end
-		-- 				table.insert(entities, other_entity)
-		-- 			end
-		-- 			done = true
-		-- 			break
-		-- 		end
-		-- 		if done then
-		-- 			break
-		-- 		end
-		-- 	end
-		-- end
-
 		for _, entity in entities do
 			local health = if damage.piercing then entity.health else shared_entity_mod.get_effective_health(entity)
 			local effective = math.clamp(if damage.nonlethal then health - 1 else health, 0, gauge)

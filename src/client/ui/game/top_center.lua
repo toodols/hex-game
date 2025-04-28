@@ -38,10 +38,14 @@ function TopCenter()
 			if not bar_ref.current then
 				return
 			end
-			local current_time = workspace:GetServerTimeNow()
 
 			local schedule = world.turn_schedule
 			if schedule and schedule.end_time ~= math.huge and schedule.end_time ~= 0 then
+				if not schedule.running then
+					display_ref.current.Text = "--"
+					return
+				end
+				local current_time = workspace:GetServerTimeNow()
 				local diff = schedule.end_time - schedule.start_time
 				local end_time_sync = schedule.start_time_sync + diff
 				bar_ref.current.Size = UDim2.new((current_time - schedule.start_time_sync) / diff, 0, 1, 0)

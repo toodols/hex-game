@@ -4,9 +4,7 @@ local TweenService = game:GetService "TweenService"
 local RunService = game:GetService "RunService"
 
 local coords = require(ReplicatedStorage.Shared.coords)
-local asset_server = require(ReplicatedStorage.Shared.asset_server)
 local types = require(ReplicatedStorage.Shared.types)
-local items_mod = require(ReplicatedStorage.Shared.items)
 local cells_mod = require(ReplicatedStorage.Shared.cells)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local client_entity_mod = require(script.Parent.entity)
@@ -242,7 +240,7 @@ function handle_entity_event(world: World, event: EntityEvent)
 	if event.event_type == "produced_items" or event.event_type == "consumed_items" then
 		local entity_instance = world.entity_instance_map[event.entity_id]
 		if not entity_instance then
-			warn("entity not found", event.entity_id)
+			warn("entity not found", event.entity_id, "when handling event", event.event_type)
 			return
 		end
 

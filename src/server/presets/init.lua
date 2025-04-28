@@ -13,6 +13,7 @@ local tutorial_map = require(script.tutorial).tutorial_map
 local testing_maps = require(script.testing)
 
 type World = types.World
+type TeamData = types.TeamData
 
 function my_map(): World
 	-- Build the map
@@ -101,12 +102,12 @@ function my_map(): World
 		owner = team1.id,
 		primary_coordinate = { magic - 1, -magic + 2, -1 },
 	}, world)
-	local scout = entity_mod.new_entity({
+	local _scout = entity_mod.new_entity({
 		type = "scout",
 		primary_coordinate = { magic - 2, -magic + 2, 0 },
 		owner = team1.id,
 	}, world)
-	local heart = entity_mod.new_entity({
+	local _heart = entity_mod.new_entity({
 		type = "heart",
 		primary_coordinate = { magic - 1, -magic + 1, 0 },
 		owner = team1.id,
@@ -127,12 +128,12 @@ function my_map(): World
 		primary_coordinate = { -magic + 1, magic - 2, 1 },
 		owner = team2.id,
 	}, world)
-	local scout2 = entity_mod.new_entity({
+	local _scout2 = entity_mod.new_entity({
 		type = "scout",
 		primary_coordinate = { 2 - magic, magic - 2, 0 },
 		owner = team2.id,
 	}, world)
-	local heart2 = entity_mod.new_entity({
+	local _heart2 = entity_mod.new_entity({
 		type = "heart",
 		primary_coordinate = { 1 - magic, magic - 1, 0 },
 		owner = team2.id,
@@ -147,7 +148,7 @@ function my_map(): World
 	}
 end
 
-function prepare_preset(fn: (...any) -> World): (...any) -> World
+function prepare_preset(fn: (...any) -> World): (...any) -> (World, { [string]: TeamData })
 	return function(...)
 		local result = { fn(...) }
 		local world = result[1]

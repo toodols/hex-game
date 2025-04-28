@@ -47,8 +47,8 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 					", "
 				)}`
 				questing.quest_change_state(self, "error", world)
-				return
 			end
+			return false
 		end,
 	},
 	complete_vertex_blueprint = {

@@ -41,7 +41,7 @@ end
 
 function get_effective_health(entity: Entity): number
 	local health = entity.health
-	for _, effect in pairs(entity.effects) do
+	for _, effect in entity.effects do
 		if effect.type == "shield" then
 			health += effect.health
 		end

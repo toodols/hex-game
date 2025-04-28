@@ -263,6 +263,7 @@ function EntityInformation(props: {
 							"TextLabel",
 							themes.theme_description {
 								LayoutOrder = 5,
+								TextColor3 = Color3.fromRGB(255, 82, 82),
 								Size = UDim2.new(1, 0, 0, 20),
 								Text = "Decay: " .. tostring(entity.decay),
 							}
@@ -454,11 +455,11 @@ function EntityInformation(props: {
 							end,
 						})
 						else nil,
-					AttackButton = entity.active ~= false
-						and entity.owner == player_team.id
-						and (entity.type == "scout" or entity.type == "turret")
-						and entity.status == "complete"
-						and React.createElement(ActionButton, {
+					AttackButton = if entity.active ~= false
+							and entity.owner == player_team.id
+							and (entity.type == "scout" or entity.type == "turret")
+							and entity.status == "complete"
+						then React.createElement(ActionButton, {
 							color = Color3.fromRGB(255, 120, 120),
 							Text = "Attack",
 							LayoutOrder = 0,
@@ -508,11 +509,12 @@ function EntityInformation(props: {
 									end,
 								})
 							end,
-						}),
-					UseButton = entity.active ~= false
-						and entity.owner == player_team.id
-						and entity.type == "solution"
-						and React.createElement(ActionButton, {
+						})
+						else nil,
+					UseButton = if entity.active ~= false
+							and entity.owner == player_team.id
+							and entity.type == "solution"
+						then React.createElement(ActionButton, {
 							color = Color3.fromRGB(255, 255, 120),
 							Text = "Activate",
 							LayoutOrder = 1,
@@ -525,10 +527,12 @@ function EntityInformation(props: {
 									},
 								}
 							end,
-						}),
-					DeconstructButton = entity.active ~= false
-						and entity.owner == player_team.id
-						and React.createElement(ActionButton, {
+						})
+						else nil,
+					DeconstructButton = if entity.active ~= false
+							and entity.owner == player_team.id
+							and not entity.is_decaying
+						then React.createElement(ActionButton, {
 							color = Color3.fromRGB(255, 82, 82),
 							Text = if is_deconstructing then "Cancel Deconstruct" else "Deconstruct",
 							LayoutOrder = 1,
@@ -550,11 +554,12 @@ function EntityInformation(props: {
 									}
 								end
 							end,
-						}),
-					ToggleEnableButton = entity.active ~= false
-						and entity.owner == player_team.id
-						and shared_behavior.can_disable
-						and React.createElement(ActionButton, {
+						})
+						else nil,
+					ToggleEnableButton = if entity.active ~= false
+							and entity.owner == player_team.id
+							and shared_behavior.can_disable
+						then React.createElement(ActionButton, {
 							color = Color3.fromRGB(255, 255, 120),
 							Text = if entity.enabled then "Disable" else "Enable",
 							LayoutOrder = 2,
@@ -567,12 +572,13 @@ function EntityInformation(props: {
 									},
 								}
 							end,
-						}),
-					OpenRecipeButton = entity.active ~= false
-						and entity.owner == player_team.id
-						and (entity.type == "factory")
-						and entity.status == "complete"
-						and React.createElement(ActionButton, {
+						})
+						else nil,
+					OpenRecipeButton = if entity.active ~= false
+							and entity.owner == player_team.id
+							and (entity.type == "factory")
+							and entity.status == "complete"
+						then React.createElement(ActionButton, {
 							color = Color3.fromRGB(255, 255, 120),
 							Text = "Open Recipes",
 							LayoutOrder = 3,
@@ -582,7 +588,8 @@ function EntityInformation(props: {
 									entity_id = entity.id,
 								}
 							end,
-						}),
+						})
+						else nil,
 					VerticalLayout = React.createElement("UIListLayout", {
 						Padding = UDim.new(0, 2),
 						SortOrder = Enum.SortOrder.LayoutOrder,

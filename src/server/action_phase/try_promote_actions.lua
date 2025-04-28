@@ -39,7 +39,7 @@ function handle_try_promote_actions(world: World, action_state: ActionState)
 			-- can promote if it is neighboring a system
 			for encoded_neighbor, neighbor in server_util.get_neighbors_set(world, entity.coordinates) do
 				local system = action_state.system_by_cell[encoded_neighbor]
-				if system ~= nil then
+				if system ~= nil and system.team == entity.owner then
 					table.insert(valid_systems, system)
 				end
 			end

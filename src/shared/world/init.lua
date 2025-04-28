@@ -133,6 +133,9 @@ end
 
 function world_active_entities(self: World): { [EntityId]: Entity }
 	return util.table_filter(self.entities, function(entity)
+		if entity.is_destroyed then
+			return false
+		end
 		if entity.server_data then
 			return entity.active
 		else

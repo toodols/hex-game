@@ -9,7 +9,6 @@ type World = types.World
 entity_mod.registry.vault = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	init = function(self: Entity, world: World)
-		local config = world.entity_configurations[self.type]
 		if not self.inventory then
 			self.inventory = {
 				filter = {

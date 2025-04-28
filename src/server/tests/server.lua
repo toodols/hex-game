@@ -600,4 +600,43 @@ function tests.correct_scout_updates()
 	)
 end
 
+function tests.deconstructing_heart_doesnt_produce_item()
+	local world, teams = presets.my_map()
+	local heart = world:query_entity({ type = "heart", query_global = true, owner = teams.team1.id })[1]
+	table.insert(heart.queued_decisions, {
+		type = "deconstruct",
+	})
+
+	local result = action_phase_mod.run_action_phase(world)
+	local updates = result.updates[teams.team1.id]
+
+	assert(not util.table_any(updates, function(update)
+		return update.type == "entity_event"
+			and update.event.entity_id == heart.id
+			and update.event.event_type == "produced_items"
+	end), "Heart should not produce item on deconstruction")
+	cleanup(world)
+end
+
+function tests.no_blueprint_item_stealing()
+	local world, teams = presets.blank_map()
+	local cache = entity_mod.new_entity({
+		type = "stockpile",
+		primary_coordinate = { 0, 0, 0 },
+		owner = teams.team1.id,
+	}, world)
+	cache.inventory.items = { "vit", "vit", "vit", "vit", "vit" }
+
+	local solution = entity_mod.new_entity({
+		type = "solution",
+		primary_coordinate = { 1, -1, 0 },
+		owner = teams.team2.id,
+		status = "blueprint",
+	}, world)
+
+	local _result = action_phase_mod.run_action_phase(world)
+	-- local updates = result.updates[teams.team2.id]
+	assert_eq(solution.status, "blueprint", "solution should not be built")
+end
+
 return tests
