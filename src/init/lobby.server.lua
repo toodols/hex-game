@@ -200,7 +200,6 @@ end)
 
 Players.PlayerAdded:Connect(function(plr)
 	local join_data = plr:GetJoinData()
-	print(join_data)
 end)
 
 Players.PlayerRemoving:Connect(function(plr: Player)

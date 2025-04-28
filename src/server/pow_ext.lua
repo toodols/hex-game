@@ -227,6 +227,7 @@ return function()
 		server_run = function(context)
 			local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 			local world = _G.world
+
 			turn_scheduler.turn_schedule_resume(world.turn_schedule)
 			turn_scheduler.report_turn_time(world)
 		end,

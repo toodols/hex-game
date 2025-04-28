@@ -20,7 +20,14 @@ end
 
 -- Resumes the turn schedule
 function turn_schedule_resume(schedule: TurnSchedule)
+	if schedule.running then
+		return
+	end
 	schedule.running = true
+	local diff = if schedule.now ~= nil then os.clock() - schedule.now else 0
+	schedule.start_time += diff
+	schedule.end_time += diff
+	schedule.start_time_sync += diff
 	if schedule.wait_thread then
 		task.cancel(schedule.wait_thread)
 	end
@@ -29,7 +36,11 @@ end
 
 -- Pauses the turn schedule
 function turn_schedule_stop(schedule: TurnSchedule)
+	if not schedule.running then
+		return
+	end
 	schedule.running = false
+	schedule.now = os.clock()
 	if schedule.wait_thread then
 		task.cancel(schedule.wait_thread)
 	end
@@ -54,6 +65,11 @@ function recalculate_skips(world: World)
 
 	if #world.skipped >= needed_skips and world.turn_schedule ~= nil then
 		world.skipped = {}
+		updates_mod.add_update(world, {
+			type = "turn_skips",
+			current_skips = 0,
+			needed_skips = needed_skips,
+		})
 		turn_schedule_skip(world.turn_schedule)
 	else
 		world.needed_skips = needed_skips

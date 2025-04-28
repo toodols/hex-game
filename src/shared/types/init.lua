@@ -373,6 +373,9 @@ export type WorldUpdate =
 		needed_skips: number,
 	}
 	| {
+		type: "turn_completed",
+	}
+	| {
 		type: "ability",
 		ability_type: string,
 		entity_id: EntityId,
@@ -405,6 +408,7 @@ export type TurnSchedule = {
 	get_end_time: () -> number,
 	start_time: number,
 	end_time: number,
+	now: number?,
 	start_time_sync: number,
 	run_turn: () -> (),
 	turn_ran_signal: Signal<nil>,

@@ -21,15 +21,26 @@ function TopCenter()
 	end, 0)
 	local bar_ref = React.useRef(nil)
 	local display_ref = React.useRef(nil)
+	local timer_ref = React.useRef(nil)
+	local do_animation = React.useRef(false)
+
 	React.useEffect(function()
 		local cleanup = world.world_update_signal.listen(function(updates)
 			for _, update in updates do
+				local do_update = false
 				if
 					update.type == "turn_timer"
 					or update.type == "turn"
 					or update.type == "turn_skips"
 					or update.type == "quest_update"
+					or update.type == "turn_completed"
 				then
+					if update.type == "turn_completed" then
+						do_animation.current = true
+					end
+					do_update = true
+				end
+				if do_update then
 					force_update(nil)
 				end
 			end
@@ -63,6 +74,21 @@ function TopCenter()
 			connection:Disconnect()
 		end
 	end, {})
+
+	React.useEffect(function()
+		if do_animation.current then
+			do_animation.current = false
+			if timer_ref.current then
+				timer_ref.current.BackgroundColor3 = Color3.fromRGB(57, 57, 57)
+				local tween = game:GetService("TweenService"):Create(
+					timer_ref.current,
+					TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+					{ BackgroundColor3 = Color3.fromRGB(13, 13, 13) }
+				)
+				tween:Play()
+			end
+		end
+	end)
 
 	return React.createElement("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0),
@@ -131,6 +157,7 @@ function TopCenter()
 				BackgroundTransparency = 0.2,
 				BorderColor3 = Color3.fromRGB(0, 0, 0),
 				BorderSizePixel = 0,
+				ref = timer_ref,
 				ClipsDescendants = true,
 				LayoutOrder = 2,
 				Size = UDim2.new(0, 500, 0, 40),

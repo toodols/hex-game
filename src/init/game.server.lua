@@ -139,6 +139,7 @@ function start_game(teleport_data: { room: types.Room }?)
 		auto_add_player(plr)
 		turn_scheduler.recalculate_skips(main_world)
 		republish_teams(main_world)
+		updates_mod.flush_updates(main_world)
 	end)
 	Players.PlayerRemoving:Connect(function(plr)
 		for _, team in main_world.teams do
@@ -148,6 +149,7 @@ function start_game(teleport_data: { room: types.Room }?)
 
 		turn_scheduler.recalculate_skips(main_world)
 		republish_teams(main_world)
+		updates_mod.flush_updates(main_world)
 	end)
 end
 

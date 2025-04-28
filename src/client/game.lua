@@ -68,7 +68,7 @@ function update_neighbors(world: World, coordinates: { CubicCoordinate })
 			for neighbor_entity_id in neighbor_cell.entities do
 				local neighbor_entity = world.entities[neighbor_entity_id]
 				if not neighbor_entity then
-					print("missing", neighbor_entity_id)
+					warn("missing", neighbor_entity_id)
 				end
 				local client_behavior = client_entity_mod.registry[neighbor_entity.type]
 				client_behavior.neighbor_changed(neighbor_entity, world)
@@ -279,6 +279,7 @@ function handle_updates(world: World, updates: { WorldUpdate })
 	local updated_entities = {}
 
 	for _, update in updates do
+		-- print(update.type, update)
 		if update.type == "turn_timer" then
 			world.turn_schedule = update.schedule
 		elseif update.type == "turn" then

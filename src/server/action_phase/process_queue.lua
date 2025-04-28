@@ -43,7 +43,7 @@ function process_queue(world: World, action_state: ActionState)
 	-- i would love to do an exhaustive check against every possible action type, but this takes effort
 	for _, action in world.action_queue do
 		if action.type == nil then
-			print(action)
+			warn(action)
 			error "^ not an action"
 		end
 	end

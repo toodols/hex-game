@@ -194,6 +194,9 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 		turn = world.turn,
 		highest_turn = world.highest_turn,
 	})
+	updates_mod.add_update(world, {
+		type = "turn_completed",
+	})
 
 	for _, quest in world.quests do
 		questing.quest_update(quest, world)
