@@ -23,4 +23,19 @@ export type SelectionMode = {
 	type: "show_one_entity",
 	entity: Entity,
 }
+
+export type Submenu = { type: nil } | {
+	type: "build",
+	cell: CubicCoordinate,
+} | {
+	type: "item_filters",
+	entity_id: EntityId,
+} | {
+	type: "research",
+	entity_id: EntityId,
+} | {
+	type: "recipes",
+	entity_id: EntityId,
+}
+
 return {}

@@ -19,8 +19,18 @@ _G.world = world
 
 game_mod.render_world(world)
 
+local update_queue = {}
+local processing = false
 local connection = world_updates_remote.OnClientEvent:Connect(function(updates: { WorldUpdate })
-	game_mod.handle_updates(world, updates)
+	table.insert(update_queue, updates)
+	if not processing then
+		processing = true
+		while #update_queue > 0 do
+			local first = table.remove(update_queue, 1)
+			game_mod.handle_updates(world, first)
+		end
+		processing = false
+	end
 end)
 
 local ui = init_game_ui(world)

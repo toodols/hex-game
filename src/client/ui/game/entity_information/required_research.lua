@@ -20,7 +20,11 @@ function RequiredResearch(props: {
 	local entity = hooks.use_synced_entity(props.entity_id)
 	local entity_config = world.entity_configurations[entity.type]
 
-	if entity_config.required_research == nil or #entity_config.required_research == 0 then
+	if
+		entity_config.required_research == nil
+		or #entity_config.required_research == 0
+		or entity.status ~= "blueprint"
+	then
 		return nil
 	end
 

@@ -10,6 +10,7 @@ local formatting = require(ReplicatedStorage.Shared.formatting)
 local items_mod = require(ReplicatedStorage.Shared.items)
 local team = require(ReplicatedStorage.Shared.team)
 local coords = require(ReplicatedStorage.Shared.coords)
+local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local client_entity_mod = require(ReplicatedStorage.Client.ui.Parent.entity)
@@ -37,11 +38,34 @@ type WorldUpdate = types.WorldUpdate
 type World = types.World
 type Entity = types.Entity
 
-function ShouldOutput(props: { entity: Entity, LayoutOrder: number? })
+function OutputClock(props: { entity: Entity, LayoutOrder: number? })
+	local shared_behavior = shared_entity_mod.registry[props.entity.type]
+	local cycles_to_output = shared_behavior.cycles_to_output
+	local should_output = props.entity.should_output
+
+	local should_output_ref = React.useRef(should_output)
+	local boxes = React.useRef {}
+
+	React.useState(function()
+		if should_output_ref ~= should_output then
+			local min = math.min(should_output_ref.current, should_output)
+			local max = math.max(should_output_ref.current, should_output)
+			-- 1 -> 0
+			for idx = min + 1, max + 1 do
+				if boxes.current[idx] then
+					boxes.current[idx].BackgroundColor3 = if should_output_ref + 1 >= idx
+						then Color3.fromRGB(128, 128, 128)
+						else Color3.fromRGB(214, 214, 214)
+				end
+			end
+			should_output_ref.current = should_output
+		end
+	end, { should_output })
+
 	return React.createElement(
 		"Frame",
 		{
-			Size = UDim2.new(1, 0, 0, 20),
+			Size = UDim2.new(0.5, 0, 0, 15),
 			BackgroundTransparency = 1,
 			LayoutOrder = props.LayoutOrder,
 		},
@@ -50,12 +74,18 @@ function ShouldOutput(props: { entity: Entity, LayoutOrder: number? })
 				SortOrder = Enum.SortOrder.LayoutOrder,
 				FillDirection = Enum.FillDirection.Horizontal,
 				HorizontalAlignment = Enum.HorizontalAlignment.Center,
-				Padding = UDim.new(0, 10),
+				Padding = UDim.new(0, 5),
 			}),
 		},
-		util.table_map(util.range(2), function()
+		util.table_map(util.table_reverse(util.range(cycles_to_output)), function(idx)
 			return React.createElement("Frame", {
-				Size = UDim2.new(0.5, -10, 1, 0),
+				Size = UDim2.new(1 / cycles_to_output, -2.5, 1, 0),
+				BackgroundColor3 = if should_output_ref.current + 1 >= idx
+					then Color3.fromRGB(128, 128, 128)
+					else Color3.fromRGB(214, 214, 214),
+				ref = function(instance)
+					boxes.current[idx] = instance
+				end,
 			}, {
 				Corner = React.createElement(Corner),
 			})
@@ -68,11 +98,15 @@ function EntityInformation(props: {
 	compressed: boolean,
 	on_compress: () -> (),
 	on_select: () -> (),
-	toggle_submenu: (submenu: any) -> (),
 })
 	local context = React.useContext(MainContext)
 	local world: World = context.world
 	local selection_mode_stack = context.selection_mode_stack
+	local toggle_submenu = function(menu)
+		context.set_submenu(function(current)
+			return if util.deep_equal(current, menu) then {} else menu
+		end)
+	end
 
 	local viewport_ref = React.useRef(nil :: any)
 	local header_ref = React.useRef(nil :: any)
@@ -276,8 +310,8 @@ function EntityInformation(props: {
 							}
 						)
 						else nil,
-					ShouldOutput = if entity.type == "extractor"
-						then React.createElement(ShouldOutput, {
+					OutputClock = if entity.type == "extractor"
+						then React.createElement(OutputClock, {
 							entity = entity,
 							LayoutOrder = 5,
 						})
@@ -372,7 +406,7 @@ function EntityInformation(props: {
 							LayoutOrder = 8,
 							entity_id = entity.id,
 							click = function()
-								props.toggle_submenu {
+								toggle_submenu {
 									type = "item_filters",
 									entity_id = entity.id,
 								}
@@ -387,7 +421,7 @@ function EntityInformation(props: {
 							LayoutOrder = 9,
 							entity_id = entity.id,
 							click = function()
-								props.toggle_submenu {
+								toggle_submenu {
 									type = "research",
 									entity_id = entity.id,
 								}
@@ -581,7 +615,7 @@ function EntityInformation(props: {
 							Text = "Open Recipes",
 							LayoutOrder = 3,
 							on_click = function()
-								props.toggle_submenu {
+								toggle_submenu {
 									type = "recipes",
 									entity_id = entity.id,
 								}

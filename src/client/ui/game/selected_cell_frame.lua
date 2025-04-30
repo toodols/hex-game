@@ -11,6 +11,7 @@ local themes = require(ReplicatedStorage.Client.ui.themes)
 local EntityInformation = require(script.Parent.entity_information).EntityInformation
 local CoordinateLabel = require(script.Parent.coordinate_label).CoordinateLabel
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
+local ui_types = require(ReplicatedStorage.Client.ui.types)
 
 local Corner = util_components.Corner
 
@@ -18,6 +19,7 @@ type CubicCoordinate = types.CubicCoordinate
 type World = types.World
 type EntityId = types.EntityId
 type WorldUpdate = types.WorldUpdate
+type Submenu = ui_types.Submenu
 
 function best_uncompressed_entity(world: World, entities_set: { [EntityId]: true })
 	local candidate_uncompressed_entity: EntityId?
@@ -49,7 +51,7 @@ function entities_from_cells(world: World, selected_cells: { CubicCoordinate })
 	return entities_set
 end
 
-function SelectedCellFrame(props: { toggle_submenu: (submenu: any) -> (), selected_cells: { CubicCoordinate } })
+function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 	local context = React.useContext(MainContext)
 	local world = context.world
 
@@ -63,6 +65,11 @@ function SelectedCellFrame(props: { toggle_submenu: (submenu: any) -> (), select
 	local entities_set = entities_from_cells(world, props.selected_cells)
 	local uncompressed_entity = React.useRef(best_uncompressed_entity(world, entities_set))
 	local gradient_ref = React.useRef(nil)
+	local toggle_submenu = function(menu: Submenu)
+		context.set_submenu(function(current)
+			return if util.deep_equal(current, menu) then {} else menu
+		end)
+	end
 
 	hooks.use_immediate_effect(function()
 		local new_entities = entities_from_cells(world, props.selected_cells)
@@ -129,7 +136,6 @@ function SelectedCellFrame(props: { toggle_submenu: (submenu: any) -> (), select
 					React.createElement(EntityInformation, {
 						entity_id = entity_id,
 						compressed = uncompressed_entity.current ~= entity_id,
-						toggle_submenu = props.toggle_submenu,
 						on_select = function()
 							uncompressed_entity.current = entity_id
 							force_update(nil)
@@ -161,7 +167,7 @@ function SelectedCellFrame(props: { toggle_submenu: (submenu: any) -> (), select
 						BorderSizePixel = 0,
 						ClipsDescendants = true,
 						[React.Event.MouseButton1Click] = function()
-							props.toggle_submenu { type = "build", cell = props.selected_cells[1] }
+							toggle_submenu { type = "build", cell = props.selected_cells[1] }
 						end,
 						Position = UDim2.new(1, 0, 0.5, 0),
 						Size = UDim2.new(0, 89, 0, 40),

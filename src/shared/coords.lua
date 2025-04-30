@@ -24,6 +24,18 @@ function coords_sub(c1: CubicCoordinate, c2: CubicCoordinate): CubicCoordinate
 	}
 end
 
+--- Rotates a CubicCoordinate around the origin counterclockwise 60 degrees `rotation` times
+function rotate_coord(coord: CubicCoordinate, rotation: number): CubicCoordinate
+	local x, y, z = coord[1], coord[2], coord[3]
+	for i = 1, rotation do
+		local temp = x
+		x = -z
+		y = -x
+		z = -temp
+	end
+	return { x, y, z }
+end
+
 --- Encodes a CubicCoordinate into a string
 --- Makes no guarantees on the output format, only that
 --- - `forall coord: CubicCoordinate. coord == decode_coord(encode_coord(coord))`
@@ -181,5 +193,6 @@ return {
 	coords_lerp = coords_lerp,
 	coords_round = coords_round,
 	display_coord = display_coord,
+	rotate_coord = rotate_coord,
 	rotation_to_direction = rotation_to_direction,
 }

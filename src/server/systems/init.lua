@@ -97,6 +97,7 @@ function system_has_items(
 			if inventory and #inventory.items > 0 then
 				return world.entities[entity_id]
 			end
+			return nil
 		end
 	)
 	repeat

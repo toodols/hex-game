@@ -4,6 +4,7 @@ local entity_mod = require(ReplicatedStorage.Shared.entity)
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local coords_mod = require(ReplicatedStorage.Shared.coords)
+local cells_mod = require(ReplicatedStorage.Shared.cells)
 
 type TeamData = types.TeamData
 type World = types.World
@@ -73,7 +74,6 @@ return function()
 		permissions = {},
 		overloads = { { returns = "cells", args = {} } },
 		run = function(context)
-			print "run"
 			local selection = util.table_find_pred(_G.world.ui.selection_mode_stack, function(selection_mode)
 				return selection_mode.type == "select_cells"
 			end)
@@ -95,6 +95,61 @@ return function()
 		overloads = { { returns = "cell", args = {} } },
 		run = function(context)
 			return context.process:run_command("selected_cells").ok[1]
+		end,
+	}
+
+	extra_commands.set_cell_type = {
+		description = "Sets the type of a cell.",
+		permissions = { "admin" },
+		overloads = {
+			{
+				returns = "nil",
+				args = {
+					{
+						name = "type",
+						type = "cell_type",
+						description = "The new type.",
+					},
+				},
+			},
+			{
+				returns = "nil",
+				args = {
+
+					{
+						name = "type",
+						type = "cell_type",
+						description = "The new type.",
+					},
+					{
+						name = "cell",
+						type = "coords",
+						description = "The cell to set the type for.",
+					},
+				},
+			},
+		},
+		run = function(context)
+			local coords = context.args[2]
+			if coords == nil then
+				coords = util.table_map(context.process:run_command("selected_cells").ok, function(cell)
+					return cell.coordinate
+				end)
+			end
+			context:defer { coords = coords }
+		end,
+		server_run = function(context)
+			local world = _G.world
+			local type = context.args[1]
+			local coords = context.client_data.coords
+
+			for _, coord in coords do
+				local cell = world:get_cell(coord)
+				if cell == nil then
+					continue
+				end
+				cell.type = type
+			end
 		end,
 	}
 
@@ -443,7 +498,9 @@ return function()
 			return suggestions
 		end,
 	}
-
+	extra_types.cell_type = {
+		autocomplete_simple = util.table_keys(cells_mod.cell_names),
+	}
 	extra_types.visibility = {
 		autocomplete_simple = { "normal", "perfect", "fogless" },
 	}
@@ -535,6 +592,14 @@ return function()
 			end
 			if is_array_of(value, is_coord) then
 				return { ok = value }
+			end
+			if is_cell(value) then
+				return { ok = { value.coordinate } }
+			end
+			if is_array_of(value, is_cell) then
+				return { ok = util.table_map(value, function(cell)
+					return cell.coordinate
+				end) }
 			end
 			return { err = "cannot coerce " .. typeof(value) .. " to coords" }
 		end,

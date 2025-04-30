@@ -92,6 +92,7 @@ end
 
 --- Does the initial render of the world provided by the server
 --- - This creates an instance for every cell, and an instance for every entity
+--- - This also happens to delete all preexisting instances/maps for the world
 function render_world(world: World)
 	destroy_world_instances(world)
 	local entity_folder = Instance.new "Folder"
@@ -227,6 +228,16 @@ function handle_cells(world: World, update: WorldUpdate)
 		-- remove entities from cells that have changed to not visible
 		if old.visible_for_team and not cell.visible_for_team then
 			hide_entities(world, old)
+		end
+
+		if old.type ~= cell.type then
+			local instance = world.cell_instance_map[encoded_coord]
+			if instance then
+				instance:Destroy()
+			end
+			local new_instance = create_cell_instance(world, cell)
+			world.cell_instance_map[encoded_coord] = new_instance
+			world.instance_cell_map[new_instance] = encoded_coord
 		end
 
 		world.cells[encoded_coord] = cell

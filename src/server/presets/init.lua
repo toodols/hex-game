@@ -11,9 +11,11 @@ local visibility_mod = require(script.Parent.visibility)
 local systems = require(script.Parent.systems)
 local tutorial_map = require(script.tutorial).tutorial_map
 local testing_maps = require(script.testing)
+local util = require(ReplicatedStorage.Shared.util)
 
 type World = types.World
 type TeamData = types.TeamData
+type CubicCoordinate = types.CubicCoordinate
 
 function my_map(): World
 	-- Build the map
@@ -29,74 +31,6 @@ function my_map(): World
 
 	turn_scheduler.bootstrap(world)
 
-	for _, cell in world.cells do
-		if math.random() < 0.0015 then
-			world:get_cell(coords.coords_sub({ 0, 0, 0 }, cell.coordinate)).type = "vit_deposit"
-			cell.type = "vit_deposit"
-		elseif math.random() < 0.003 then
-			world:get_cell(coords.coords_sub({ 0, 0, 0 }, cell.coordinate)).type = "rad_deposit"
-			cell.type = "rad_deposit"
-		elseif math.random() < 0.0045 then
-			world:get_cell(coords.coords_sub({ 0, 0, 0 }, cell.coordinate)).type = "tar_deposit"
-			cell.type = "tar_deposit"
-		elseif math.random() < 0.008 then
-			cell.type = "bar_deposit"
-			world:get_cell(coords.coords_sub({ 0, 0, 0 }, cell.coordinate)).type = "bar_deposit"
-		end
-	end
-
-	for _, coord in
-		{
-			{ 1, -1, 0 },
-			{ -1, 1, 0 },
-			{ 0, -5, 5 },
-			{ 0, -4, 4 },
-			{ 0, 4, -4 },
-			{ 0, 5, -5 },
-			{ -4, 0, 4 },
-			{ 4, 0, -4 },
-			{ 5, 0, -5 },
-			{ -5, 0, 5 },
-		}
-	do
-		entity_mod.new_entity({
-			type = "barrier",
-			primary_coordinate = coord,
-			server_data = {
-				always_visible = true,
-				active = true,
-			},
-		}, world)
-	end
-
-	-- local portals = { { { -5, 5, 0 }, { 5, -5, 0 } } }
-	-- for _, portal_group in portals do
-	-- 	for _, portal in portal_group do
-	-- 		local cell = world:get_cell(portal)
-	-- 		cell.type = "portal"
-	-- 		cell.portal = {
-	-- 			group = portal_group,
-	-- 			open = false,
-	-- 			open_time = 5,
-	-- 			close_time = 5,
-	-- 			steps = 0,
-	-- 		}
-	-- 	end
-	-- end
-
-	world:get_cell({ 0, 0, 0 }).type = "bar_deposit"
-	world:get_cell({ 0, -2, 2 }).type = "rad_deposit"
-	world:get_cell({ 0, 2, -2 }).type = "rad_deposit"
-	world:get_cell({ 2, 0, -2 }).type = "vit_deposit"
-	world:get_cell({ -2, 0, 2 }).type = "vit_deposit"
-	world:get_cell({ magic, 0, -magic }).type = "bar_deposit"
-	world:get_cell({ -magic, 0, magic }).type = "bar_deposit"
-
-	-- local extractor = entity_methods.new_entity({
-	-- 	type = "extractor",
-	-- 	primary_coordinate = { magic - 1, -magic + 1, 0 },
-	-- 	owner = team1.id,
-	-- }, world)
 	local stockpile = entity_mod.new_entity({
 		type = "stockpile",
 		owner = team1.id,
@@ -114,14 +48,6 @@ function my_map(): World
 	}, world)
 
 	stockpile.inventory.items = { "bar", "rad", "rad", "bar", "bar" }
-
-	-- world:get_cell({ magic - 1, -magic + 1, 0 }).type = "bar_deposit"
-
-	-- local extractor2 = entity_methods.new_entity({
-	-- 	type = "extractor",
-	-- 	primary_coordinate = { 1 - magic, magic - 1, 0 },
-	-- 	owner = team2.id,
-	-- }, world)
 
 	local stockpile2 = entity_mod.new_entity({
 		type = "stockpile",
@@ -141,6 +67,84 @@ function my_map(): World
 
 	-- world:get_cell({ 1 - magic, magic - 1, 0 }).type = "bar_deposit"
 	stockpile2.inventory.items = { "bar", "bar", "rad", "bar", "rad" }
+
+	local shuffled_cells = {}
+	for _, cell in world.cells do
+		if cell.coordinate[1] > 0 then
+			table.insert(shuffled_cells, cell)
+		end
+	end
+	shuffled_cells = util.table_shuffle(shuffled_cells)
+
+	local cell_count = #shuffled_cells
+	local bar_deposit_quota = math.ceil(cell_count * 0.05 / 2)
+	local vit_deposit_quota = math.ceil(cell_count * 0.02 / 2)
+	local rad_deposit_quota = math.ceil(cell_count * 0.02 / 2)
+	local tar_deposit_quota = math.ceil(cell_count * 0.02 / 2)
+	local barrier_quota = math.ceil(cell_count * 0.2 / 2)
+
+	local function inverse(coord: CubicCoordinate): CubicCoordinate
+		return { -coord[1], -coord[2], -coord[3] }
+	end
+
+	local idx = 1
+
+	for i = 1, bar_deposit_quota do
+		local cell = shuffled_cells[idx]
+		cell.type = "bar_deposit"
+		local opp = world:get_cell(inverse(cell.coordinate))
+		opp.type = "bar_deposit"
+		idx += 1
+	end
+	for i = 1, vit_deposit_quota do
+		local cell = shuffled_cells[idx]
+		cell.type = "vit_deposit"
+		local opp = world:get_cell(inverse(cell.coordinate))
+		opp.type = "vit_deposit"
+		idx += 1
+	end
+	for i = 1, rad_deposit_quota do
+		local cell = shuffled_cells[idx]
+		cell.type = "rad_deposit"
+		local opp = world:get_cell(inverse(cell.coordinate))
+		opp.type = "rad_deposit"
+		idx += 1
+	end
+	for i = 1, tar_deposit_quota do
+		local cell = shuffled_cells[idx]
+		cell.type = "tar_deposit"
+		local opp = world:get_cell(inverse(cell.coordinate))
+		opp.type = "tar_deposit"
+		idx += 1
+	end
+	for i = 1, barrier_quota do
+		local cell = shuffled_cells[idx]
+		if next(cell.entities) == nil then
+			entity_mod.new_entity({
+				type = "barrier",
+				primary_coordinate = cell.coordinate,
+				server_data = {
+					always_visible = true,
+					active = true,
+				},
+			}, world)
+		end
+		local cell2 = world:get_cell(inverse(cell.coordinate))
+		if next(cell2.entities) == nil then
+			entity_mod.new_entity({
+				type = "barrier",
+				primary_coordinate = cell2.coordinate,
+				server_data = {
+					always_visible = true,
+					active = true,
+				},
+			}, world)
+		end
+		idx += 1
+	end
+
+	local origin = world:get_cell { 0, 0, 0 }
+	origin.type = "bar_deposit"
 
 	return world, {
 		team1 = team1,

@@ -59,6 +59,7 @@ function with_defaults(t: any)
 			local instance: Instance = world.entity_instance_map[self.id]
 			if instance then
 				world.entity_instance_map[self.id] = nil
+				world.instance_entity_map[instance] = nil
 				for _, part in instance:GetDescendants() do
 					if not part:IsA "BasePart" then
 						continue
@@ -75,6 +76,7 @@ function with_defaults(t: any)
 		on_hidden = t.on_hidden or function(self: Entity, world: World)
 			local instance: Instance = world.entity_instance_map[self.id]
 			world.entity_instance_map[self.id] = nil
+			world.instance_entity_map[instance] = nil
 			if instance then
 				instance:Destroy()
 			end
@@ -136,7 +138,6 @@ function create_model_from_type(world: World, entity_type: string): Model
 end
 
 function update_entity_client(world: World, old: Entity?, new: Entity)
-	print("begin update_entity_client", new.type, "instance", world.entity_instance_map[new.id])
 	local client_behavior = registry[new.type]
 	if not client_behavior then
 		error("Unknown entity type: " .. new.type)
@@ -184,7 +185,6 @@ function update_entity_client(world: World, old: Entity?, new: Entity)
 			end
 		end
 	end
-	print("end update_entity_client", new.type)
 end
 
 return {

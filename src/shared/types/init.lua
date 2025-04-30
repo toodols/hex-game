@@ -432,6 +432,9 @@ export type EntityConfiguration = {
 	can_disable: boolean,
 	required_research: { ResearchId }?,
 
+	-- extractor only
+	cycles_to_output: number?,
+
 	-- stockpile only
 	inventory_capacity: number?,
 

@@ -64,6 +64,8 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 			selection_mode_stack = props.selection_mode_stack,
 			quest_effects = quest_effects,
 			force_update = force_update,
+			submenu = submenu,
+			set_submenu = set_submenu,
 		},
 	}, {
 		TileAlerts = React.createElement(TileAlerts),
@@ -132,11 +134,6 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 					selected_cells = util.table_map(util.table_keys(selection_mode.selected), function(k)
 						return coords.decode_coord(props.world.instance_cell_map[k])
 					end),
-					toggle_submenu = function(menu)
-						set_submenu(function(current)
-							return if util.deep_equal(current, menu) then {} else menu
-						end)
-					end,
 				})
 				else nil,
 			OneEntityFrame = if selection_mode.type == "show_one_entity"

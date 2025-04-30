@@ -208,6 +208,28 @@ function remove_entity(world: World, entity: Entity)
 	})
 end
 
+-- todo: make this respect rotation
+function move_entity(world: World, entity: Entity, new_coordinate: CubicCoordinate, rotation: number?)
+	for _, coord in entity.coordinates do
+		local cell = world:get_cell(coord)
+		assert(cell, "cell not found")
+		cell.entities[entity.id] = nil
+	end
+
+	local shared_entity_behavior = shared_entity_mod.registry[entity.type]
+	entity.primary_coordinate = new_coordinate
+
+	for _, coord in shared_entity_behavior.offsets do
+		table.insert(entity.coordinates, coords.coords_add(new_coordinate, coord))
+	end
+
+	for _, coord in entity.coordinates do
+		local cell = world:get_cell(coord)
+		assert(cell, "cell not found")
+		cell.entities[entity.id] = true
+	end
+end
+
 return {
 	remove_entity = remove_entity,
 	autogenerates_vertex = autogenerate_vertex,

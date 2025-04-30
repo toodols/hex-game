@@ -152,6 +152,14 @@ function table_keys<K, V>(tab: { [K]: V }): { K }
 	return keys
 end
 
+function table_values<K, V>(tab: { [K]: V }): { V }
+	local values = {}
+	for _, v in tab do
+		table.insert(values, v)
+	end
+	return values
+end
+
 -- merges two tables: join(a,b) = {...a, ...b}
 function table_join<K, V>(a: { [K]: V }, b: { [K]: V }): { [K]: V }
 	local result = {}
@@ -160,6 +168,17 @@ function table_join<K, V>(a: { [K]: V }, b: { [K]: V }): { [K]: V }
 	end
 	for k, v in b do
 		result[if type(k) == "number" then #a + k else k] = v
+	end
+	return result
+end
+
+--- shuffles a table
+function table_shuffle<T>(tab: { T }): { T }
+	local result = {}
+	for i = #tab, 1, -1 do
+		local j = math.random(i)
+		tab[i], tab[j] = tab[j], tab[i]
+		result[i] = tab[i]
 	end
 	return result
 end
@@ -271,6 +290,7 @@ return {
 	table_every = table_every,
 	table_join = table_join,
 	table_flat = table_flat,
+	table_shuffle = table_shuffle,
 	collect = collect,
 	table_remove_needle = table_remove_needle,
 	table_find_pred = table_find_pred,
@@ -280,6 +300,7 @@ return {
 	table_fold = table_fold,
 	table_any = table_any,
 	table_keys = table_keys,
+	table_values = table_values,
 	table_reverse = table_reverse,
 	table_count_entries = table_count_entries,
 	range = range,

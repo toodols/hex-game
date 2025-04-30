@@ -3,6 +3,7 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
 local entity_mod = require(ServerScriptService.Server.entity)
+local updates_mod = require(ServerScriptService.Server.updates)
 
 type ActionState = server_types.ActionState
 type Entity = types.Entity
@@ -43,7 +44,6 @@ entity_mod.registry.extractor = entity_mod.with_defaults {
 				if items then
 					table.insert(world.action_queue, {
 						type = "exchange",
-						input_power = config.input_power,
 						output_items = items,
 						entity_id = self.id,
 						on_success = function()
@@ -54,6 +54,10 @@ entity_mod.registry.extractor = entity_mod.with_defaults {
 			else
 				ok()
 			end
+			updates_mod.add_update(world, {
+				type = "entity_update",
+				entity = self,
+			})
 		end
 	end,
 	on_event = function(self: Entity, world: World, event: EntityEvent)

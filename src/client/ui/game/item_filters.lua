@@ -250,11 +250,14 @@ function ItemFilters(props: { entity_id: EntityId })
 end
 
 function ItemFiltersPreview(props: { LayoutOrder: number?, entity_id: EntityId, click: () -> () })
-	local world = React.useContext(MainContext).world
+	local context = React.useContext(MainContext)
+	local world: World = context.world
 	local entity = hooks.use_synced_entity(props.entity_id)
 	local inventory = entity.inventory
 	assert(inventory, "inventory nil")
 	local is_owner = entity.owner == (team.team_of(world, Players.LocalPlayer) :: TeamData).id
+
+	local opened = context.submenu.type == "item_filters" and context.submenu.entity_id == props.entity_id
 
 	return React.createElement("TextButton", {
 		BackgroundTransparency = 0.9,
@@ -272,7 +275,7 @@ function ItemFiltersPreview(props: { LayoutOrder: number?, entity_id: EntityId, 
 		Stroke = if is_owner
 			then React.createElement("UIStroke", {
 				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-				Color = Color3.fromRGB(255, 255, 255),
+				Color = if opened then Color3.fromRGB(255, 120, 120) else Color3.fromRGB(255, 255, 255),
 				LineJoinMode = Enum.LineJoinMode.Round,
 				Thickness = 1,
 				Transparency = 0.7,
