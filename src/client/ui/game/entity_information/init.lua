@@ -22,6 +22,7 @@ local ActionButton = require(script.Parent.action_button).ActionButton
 local Items = require(script.Parent.items).Items
 local HighlightOnHover = require(script.Parent.highlight_on_hover).HighlightOnHover
 local ResearchPreview = require(script.Parent.research).ResearchPreview
+local RequiredResearch = require(script.required_research).RequiredResearch
 
 local Hitpoints = require(script.hitpoints).Hitpoints
 
@@ -40,7 +41,7 @@ function ShouldOutput(props: { entity: Entity, LayoutOrder: number? })
 	return React.createElement(
 		"Frame",
 		{
-			Size = UDim2.new(1, 0, 0, 40),
+			Size = UDim2.new(1, 0, 0, 20),
 			BackgroundTransparency = 1,
 			LayoutOrder = props.LayoutOrder,
 		},
@@ -239,14 +240,6 @@ function EntityInformation(props: {
 							Text = formatting.format_text(world, shared_behavior.description),
 						}
 					),
-					-- Rotation = React.createElement(
-					-- 	"TextLabel",
-					-- 	themes.theme_description {
-					-- 		LayoutOrder = 3,
-					-- 		Size = UDim2.new(1, 0, 0, 30),
-					-- 		Text = "Rotation: " .. entity.rotation,
-					-- 	}
-					-- ),
 					StatusLabel = if entity.status ~= "complete"
 						then React.createElement(
 							"TextLabel",
@@ -258,6 +251,10 @@ function EntityInformation(props: {
 							}
 						)
 						else nil,
+					RequiredResearchInfo = React.createElement(RequiredResearch, {
+						entity_id = entity.id,
+						LayoutOrder = 5,
+					}),
 					DecayLabel = if entity.is_decaying
 						then React.createElement(
 							"TextLabel",
@@ -282,6 +279,7 @@ function EntityInformation(props: {
 					ShouldOutput = if entity.type == "extractor"
 						then React.createElement(ShouldOutput, {
 							entity = entity,
+							LayoutOrder = 5,
 						})
 						else nil,
 					Disguised = if entity.disguise

@@ -203,7 +203,7 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	end
 
 	local updates = updates_mod.flush_updates(world)
-	world_mod.purge_dead_entities(world)
+	world_mod.purge_destroyed_entities(world)
 
 	return {
 		elapsed = tick() - t0,

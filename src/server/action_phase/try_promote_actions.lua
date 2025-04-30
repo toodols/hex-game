@@ -59,7 +59,7 @@ function handle_try_promote_actions(world: World, action_state: ActionState)
 			end
 			for _, system in valid_systems do
 				-- is this blueprint researched?
-				local cell_researches = researches_mod.get_cell_researches(world, cell, entity.owner)
+				local cell_researches = researches_mod.get_cells_researches(world, { cell }, entity.owner)
 				if
 					shared_config.required_research
 					and not util.table_every(shared_config.required_research, function(research_id)

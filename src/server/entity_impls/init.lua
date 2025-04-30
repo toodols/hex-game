@@ -10,7 +10,7 @@ require(script.heart)
 require(script.vault)
 require(script.solution)
 require(script.witness)
-require(script.altar)
+require(script.taunt)
 require(script.misc)
 
 return {}

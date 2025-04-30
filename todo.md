@@ -5,7 +5,7 @@
 - [ ] Improve map generation to be less random or add handmade maps
 - [ ] Items in inventories with incompatible filters should be moved to different inventories
 - [ ] Make `suggestion` functional
-- [ ] Make `altar` functional
+- [ ] Make `taunt` functional
 	- [ ] Range should be extendable by proxy
 - [ ] Buildings get different buffs while placed on any of the deposits
 - [ ] Remove `turret`. It's too generic.
@@ -33,6 +33,8 @@
 	- [ ] Vit: Passive Healing
 	- [ ] Rad: +1 Charge
 - [ ] `host` A building that can control time
+- [ ] `sanction` A mine-like building that detonates when built over it
+- [ ] `empath` An offensive building that copies status effects of buildings it kills
 
 # Ongoing
 - [ ] Make `impression` functional

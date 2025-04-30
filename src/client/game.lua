@@ -323,7 +323,6 @@ function handle_updates(world: World, updates: { WorldUpdate })
 		local new_entity = entry.new
 		update_neighbors(world, new_entity.coordinates)
 	end
-
 	-- process final events (ones that depend on entity instances being known)
 	for _, update in updates do
 		if update.type == "entity_event" then
@@ -338,7 +337,7 @@ function handle_updates(world: World, updates: { WorldUpdate })
 	end
 
 	world.world_update_signal.send(updates)
-	world_mod.purge_dead_entities(world)
+	world_mod.purge_destroyed_entities(world)
 end
 
 return {

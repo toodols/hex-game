@@ -1,15 +1,24 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local RunService = game:GetService "RunService"
 local types = require(ReplicatedStorage.Shared.types)
+
 type World = types.World
 type HexCell = types.HexCell
 type TeamId = types.TeamId
 type ResearchState = types.ResearchState
 type ResearchId = types.ResearchId
+type EntityId = types.EntityId
 
-function get_cell_researches(world: World, cell: HexCell, team: TeamId)
+--- Gets all researches on any of the cells for a team
+function get_cells_researches(world: World, cells: { HexCell }, team: TeamId): { [ResearchId]: boolean }
 	local researches_set: { [ResearchId]: boolean } = {}
-	local influences = if RunService:IsServer() then cell.influences else cell.influences
+
+	local influences: { [EntityId]: true } = {}
+	for _, cell in cells do
+		for entity_id in cell.influences do
+			influences[entity_id] = true
+		end
+	end
+
 	for entity_id in influences do
 		local entity = world.entities[entity_id]
 		if not entity then
@@ -40,7 +49,7 @@ function get_cell_researches(world: World, cell: HexCell, team: TeamId)
 	return researches_set
 end
 
-function research_state(props)
+function research_state(props): ResearchState
 	return {
 		precondition = props.precondition or function()
 			return true
@@ -54,10 +63,10 @@ function research_state(props)
 		description = props.description or "",
 		time = props.time or 0,
 		cost = props.cost or {},
-	}
+	} :: ResearchState
 end
 
-function create_researches()
+function create_researches(): { [ResearchId]: ResearchState }
 	return {
 		turret = research_state {
 			coord = { -1, 0, 1 },
@@ -133,26 +142,26 @@ function create_researches()
 			},
 			time = 2,
 		},
-		altar = research_state {
+		taunt = research_state {
 			coord = { 0, 1, -1 },
-			id = "altar",
-			name = "Altar",
+			id = "taunt",
+			name = "Taunt",
 			icon = {
 				type = "model",
-				model = "Entities/Altar",
+				model = "Entities/Taunt",
 			},
-			description = "Allows construction of {entity.altar}",
+			description = "Allows construction of {entity.taunt}",
 			cost = {
 				tek = 3,
 			},
 			time = 2,
 		},
-	} :: { [string]: ResearchState }
+	}
 end
 local researches = create_researches()
 
 return {
-	get_cell_researches = get_cell_researches,
+	get_cells_researches = get_cells_researches,
 	researches = researches,
 	create_researches = create_researches,
 }

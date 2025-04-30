@@ -7,7 +7,7 @@ local entity_mod = require(ServerScriptService.Server.entity)
 type Entity = types.Entity
 type World = types.World
 
-entity_mod.registry.altar = entity_mod.with_defaults {
+entity_mod.registry.taunt = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	on_completed = function(self: Entity, world: World) end,
 	influences = function(self: Entity, world: World)

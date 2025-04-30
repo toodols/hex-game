@@ -1,5 +1,31 @@
 No one is ever going to read this but I'm going to keep it for my sanity.
 
+# April 29, 2025
+I wasted more hours of my life tracking down an obscure bug where an entity instance was not getting destroyed. It turned out it was a combination of 3 innocuous factors:
+1. Updates aren't fully processed instantly. In a previous update I added death animations, and to stagger these death animations I sprinkled a bunch of waits (cause it was convenient for me)
+2. At the end of each update, all entities that are marked as is_destroyed gets "detached" from world.entities, world.entity_instance_map. However, it does not physically destroy the instance (I forgot to or thought I wouldn't need to).
+3. After each action phase, two update "batches" are sent to the client, and these run in parallel because of how remotes work.
+
+So what ends up happening is, if I shoot down a building (say scout) + its underlying vertex, at the end of each action phase, the server tells the client that these two buildings died, and in a separate update batch tells them the timer has reset.
+1. The client processes the first update batch, it reaches the update instances step, calls on_destroy for the scout, and it plays the animation.
+2. This animation, which takes 0.1 seconds, yields the thread, and the vertex is not immediately destroyed 
+3. At the same time, the client starts to process the second update batch, which is just updating the timer.
+4. Second update batch happens instantly, but it still calls purge_destroyed_entities at the very end.
+5. The vertex, whose destroy animation hasn't been played yet, gets its instance detached from the world. 
+6. The first thread resumes after 0.1 seconds, and now tries to play destroy animation on vertex.
+7. Uh oh! It already detached the vertex instance from the second thread, and now it can't find the instance to play the animation on.
+8. Since it can't find the instance, it skips the destroy animation, and the instance is just left there
+
+Alas, the infamous race condition has shown itself in my roblox game.
+
+Why am I writing a blog instead of fixing it? After all, I have to deal with stupid bugs like these on a daily basis. I realize that there's not many easy options for me to patch this. Currently I have 3 changes I would need to make.
+
+1. purge_destroyed_entities should just destroy the instance if it wasn't destroyed as a fail-safe. **done**
+2. Updates strictly happen in sequence, no more parallelism. **This will be a bit of a pain to do**
+3. handle_updates runs instantly, and animations run in a separate thread. **This sounds like a giant pain to do and I don't want to do it**
+
+Any one of these changes would fix these bugs but for full correctness I would need to do all of them. I think the moral of the story here is if you ever get lazy for one moment and dare to add wait()s even for prototyping, you are staring down the barrel of a host of ridiculous bugs like these.
+
 # April 15, 2025
 I've had a lot of issues with dependencies since Roblox won't allow cross requiring.
 For example, damage_mod depends on entity_mod (nigh everything depends on entity_mod) which depends on every entity's implementation, which in turn depends on effect_mod, which depends on every effect's implementation, and something like poison would depend on damage_mod. Thus, a cycle.

@@ -67,12 +67,14 @@ function with_defaults(t: any)
 					part.CanCollide = false
 					part:ApplyImpulse(part:GetMass() * Vector3.new(math.random(-30, 30), 60, math.random(-30, 30)))
 					Debris:AddItem(part, 1)
-					wait(0.1)
+					task.wait(0.1)
 				end
+				instance:Destroy()
 			end
 		end,
 		on_hidden = t.on_hidden or function(self: Entity, world: World)
 			local instance: Instance = world.entity_instance_map[self.id]
+			world.entity_instance_map[self.id] = nil
 			if instance then
 				instance:Destroy()
 			end
@@ -134,6 +136,7 @@ function create_model_from_type(world: World, entity_type: string): Model
 end
 
 function update_entity_client(world: World, old: Entity?, new: Entity)
+	print("begin update_entity_client", new.type, "instance", world.entity_instance_map[new.id])
 	local client_behavior = registry[new.type]
 	if not client_behavior then
 		error("Unknown entity type: " .. new.type)
@@ -181,6 +184,7 @@ function update_entity_client(world: World, old: Entity?, new: Entity)
 			end
 		end
 	end
+	print("end update_entity_client", new.type)
 end
 
 return {

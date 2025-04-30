@@ -82,7 +82,7 @@ local PAGES = {
 				type = "heart",
 			},
 			{
-				type = "altar",
+				type = "taunt",
 			},
 			{
 				type = "phony",
@@ -287,7 +287,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 
 	local cell = world:get_cell(props.cell)
 	assert(cell, "cell is nil")
-	local researches = researches_mod.get_cell_researches(world, cell, player_team.id)
+	local researches = researches_mod.get_cells_researches(world, { cell }, player_team.id)
 
 	React.useEffect(function()
 		page_layout_ref.current:GetPropertyChangedSignal("CurrentPage"):Connect(function()

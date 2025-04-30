@@ -71,39 +71,30 @@ return function()
 	extra_commands.selected_cells = {
 		description = "Gets the selected cells.",
 		permissions = {},
-		overloads = { { returns = "coords", args = {} } },
+		overloads = { { returns = "cells", args = {} } },
 		run = function(context)
+			print "run"
 			local selection = util.table_find_pred(_G.world.ui.selection_mode_stack, function(selection_mode)
 				return selection_mode.type == "select_cells"
 			end)
 			assert(selection, "Did not find select_cells")
-			local cells = selection.selected
-			local coords = {}
-			for cell_instance in cells do
+			local cell_instances = selection.selected
+			local cells = {}
+			for cell_instance in cell_instances do
 				local coord = _G.world.instance_cell_map[cell_instance]
 				assert(coord, "cell_instance not in instance_cell_map")
-				table.insert(coords, coords_mod.decode_coord(coord))
+				table.insert(cells, _G.world.cells[coord])
 			end
-			return coords
+			return cells
 		end,
 	}
 
 	extra_commands.selected_cell = {
 		description = "Gets one selected_cell.",
 		permissions = {},
-		overloads = { { returns = "coord", args = {} } },
+		overloads = { { returns = "cell", args = {} } },
 		run = function(context)
-			local selection = util.table_find_pred(_G.world.ui.selection_mode_stack, function(selection_mode)
-				return selection_mode.type == "select_cells"
-			end)
-			assert(selection, "Did not find select_cells")
-			local cells = selection.selected
-			for cell_instance in cells do
-				local coord = _G.world.instance_cell_map[cell_instance]
-				assert(coord, "cell_instance not in instance_cell_map")
-				return coords_mod.decode_coord(coord)
-			end
-			return nil
+			return context.process:run_command("selected_cells").ok[1]
 		end,
 	}
 
@@ -457,6 +448,53 @@ return function()
 		autocomplete_simple = { "normal", "perfect", "fogless" },
 	}
 
+	local function is_cell(value)
+		return typeof(value) == "table" and value.entities ~= nil
+	end
+
+	local function is_coord(value)
+		return typeof(value) == "table"
+			and typeof(value[1]) == "number"
+			and typeof(value[2]) == "number"
+			and typeof(value[3]) == "number"
+	end
+
+	local function is_array_of(value, type)
+		if typeof(value) ~= "table" then
+			return false
+		end
+		if #value >= 1 then
+			if type(value[1]) then
+				return true
+			end
+		end
+		return false
+	end
+
+	extra_types.cell = {
+		coerce_value = function(value, context)
+			if is_cell(value) then
+				return { ok = value }
+			end
+			if is_array_of(value, is_cell) then
+				return { ok = value[1] }
+			end
+			return { err = "cannot coerce " .. typeof(value) .. " to cell" }
+		end,
+	}
+
+	extra_types.cells = {
+		coerce_value = function(value, context)
+			if is_cell(value) then
+				return { ok = { value } }
+			end
+			if is_array_of(value, is_cell) then
+				return { ok = value }
+			end
+			return { err = "cannot coerce " .. typeof(value) .. " to cells" }
+		end,
+	}
+
 	extra_types.coord = {
 		-- can be `x,y` or `x,y,z`
 		coerce_expression = function(value, context)
@@ -472,25 +510,33 @@ return function()
 			end
 			return { err = "cannot coerce " .. value.type .. " to coord" }
 		end,
+		coerce_value = function(value, context)
+			if is_coord(value) then
+				return { ok = value }
+			end
+			if is_array_of(value, is_coord) then
+				return { ok = value[1] }
+			end
+			if is_cell(value) then
+				return { ok = value.coordinate }
+			end
+			if is_array_of(value, is_cell) then
+				return { ok = value[1].coordinate }
+			end
+			return { err = "cannot coerce " .. typeof(value) .. " to coord" }
+		end,
 	}
 
 	extra_types.coords = {
 		-- if it is a 3-length number array, it is a coord, and can be coerced to a {coord}
 		coerce_value = function(value, context)
-			if typeof(value) == "table" then
-				if
-					#value == 3
-					and typeof(value[1]) == "number"
-					and typeof(value[2]) == "number"
-					and typeof(value[3]) == "number"
-				then
-					return { ok = { value } }
-				else
-					return { ok = value }
-				end
-			else
-				return { err = "cannot coerce " .. typeof(value) .. " to coords" }
+			if is_coord(value) then
+				return { ok = { value } }
 			end
+			if is_array_of(value, is_coord) then
+				return { ok = value }
+			end
+			return { err = "cannot coerce " .. typeof(value) .. " to coords" }
 		end,
 	}
 

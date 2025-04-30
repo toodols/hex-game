@@ -50,12 +50,13 @@ function new_team(self: World, players: { Player }?, color: TeamColor?, name: st
 end
 
 -- Remove entities that are is_destroyed from world.entities to reclaim memory
-function purge_dead_entities(world: World)
+function purge_destroyed_entities(world: World)
 	for entity_id, entity in world.entities do
 		if entity.is_destroyed then
 			world.entities[entity.id] = nil
 			local instance = world.entity_instance_map[entity.id]
 			if instance then
+				instance:Destroy()
 				world.instance_entity_map[instance] = nil
 				world.entity_instance_map[entity.id] = nil
 			end
@@ -260,5 +261,5 @@ return {
 	new_world_empty = new_world_empty,
 	line_of_sight = line_of_sight,
 	new_team = new_team,
-	purge_dead_entities = purge_dead_entities,
+	purge_destroyed_entities = purge_destroyed_entities,
 }

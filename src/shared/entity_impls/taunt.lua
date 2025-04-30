@@ -1,10 +1,10 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local entity_mod = require(ReplicatedStorage.Shared.entity)
 
-entity_mod.registry.altar = entity_mod.with_defaults {
-	type = "altar",
+entity_mod.registry.taunt = entity_mod.with_defaults {
+	type = "taunt",
 	name = "Taunt",
-	description = "While visible, neighboring cells in a range of {entity.altar.range} may not be targeted.",
+	description = "While visible, neighboring cells in a range of {entity.taunt.range} may not be targeted.",
 	max_health = 3,
 	build_time = 1,
 	cost = {
@@ -13,7 +13,7 @@ entity_mod.registry.altar = entity_mod.with_defaults {
 	},
 	range = 2,
 	required_research = {
-		"altar",
+		"taunt",
 	},
 	layer = entity_mod.LAYER.modifier,
 }

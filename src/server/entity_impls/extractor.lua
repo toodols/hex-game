@@ -22,18 +22,7 @@ entity_mod.registry.extractor = entity_mod.with_defaults {
 		if self.status == "complete" and self.enabled and self.owner ~= world.neutral_team then
 			local cell = world:get_cell(self.primary_coordinate)
 
-			-- local cell_researches = researches_mod.get_cell_researches(world, cell, self.owner)
 			local is_boosted = false
-			-- if cell_researches.extractor_boost then
-			-- 	for entity_id in cell.influences do
-			-- 		local entity = world.entities[entity_id]
-			-- 		if entity.type == "generator" and entity.status == "complete" and entity.owner == self.owner then
-			-- 			is_boosted = true
-			-- 		end
-			-- 	end
-			-- end
-
-			-- prevent extractor from missing out on output because there is no power
 			local function ok()
 				self.should_output = ((self.should_output :: any) + 1)
 					% (if is_boosted then 1 else config.cycles_to_output)

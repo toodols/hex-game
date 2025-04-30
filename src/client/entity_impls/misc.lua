@@ -34,8 +34,8 @@ entity_mod.registry.impression = entity_mod.with_defaults {
 	model = asset_server.load "Entities/Impression",
 }
 
-entity_mod.registry.altar = entity_mod.with_defaults {
-	model = asset_server.load "Entities/Altar",
+entity_mod.registry.taunt = entity_mod.with_defaults {
+	model = asset_server.load "Entities/Taunt",
 }
 
 entity_mod.registry.heart = entity_mod.with_defaults {

@@ -17,6 +17,6 @@ require(script.witness)
 require(script.impression)
 require(script.phony)
 require(script.suggestion)
-require(script.altar)
+require(script.taunt)
 
 return {}
