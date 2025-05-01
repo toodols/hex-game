@@ -152,58 +152,6 @@ return function()
 		end,
 	}
 
-	extra_commands.selected_entities_server = {
-		description = "Gets all entities at the given coordinates.",
-		permissions = { "admin" },
-		overloads = {
-			{
-				returns = "entities",
-				args = {},
-			},
-			{
-				returns = "entities",
-				args = {
-					{
-						name = "coords",
-						type = "coords",
-						description = "The coordinates to get the entities from.",
-					},
-				},
-			},
-		},
-		server_run = function(context)
-			local coords
-			if context.args[1] then
-				coords = util.table_map(context.args[1], coords.encode_coord)
-			else
-				coords = {}
-				local selection = util.table_find_pred(_G.world.ui.selection_mode_stack, function(selection_mode)
-					return selection_mode.type == "select_cells"
-				end)
-				if selection == nil then
-					return {}
-				end
-				for cell_instance in selection.selected do
-					local coord = _G.world.instance_cell_map[cell_instance]
-					assert(coord, "cell_instance not in instance_cell_map")
-					table.insert(coords, coord)
-				end
-			end
-			local entities_map = {}
-			for _, encoded_coord in coords do
-				local cell = _G.world.cells[encoded_coord]
-				if cell == nil then
-					continue
-				end
-				for entity_id in cell.entities do
-					entities_map[_G.world.entities[entity_id]] = true
-				end
-			end
-
-			return util.table_keys(entities_map)
-		end,
-	}
-
 	extra_commands.selected_entities = {
 		description = "Gets the selected entities visible to the client.",
 		permissions = {},
@@ -217,29 +165,21 @@ return function()
 			},
 		},
 		run = function(context)
-			local coords
+			local cells
 			if context.args[1] then
-				coords = util.table_map(context.args[1], coords.encode_coord)
+				cells = {}
+				for _, coord in context.args[1] do
+					local cell = _G.world:get_cell(coord)
+					if cell == nil then
+						continue
+					end
+					table.insert(cells, cell)
+				end
 			else
-				coords = {}
-				local selection = util.table_find_pred(_G.world.ui.selection_mode_stack, function(selection_mode)
-					return selection_mode.type == "select_cells"
-				end)
-				if selection == nil then
-					return {}
-				end
-				for cell_instance in selection.selected do
-					local coord = _G.world.instance_cell_map[cell_instance]
-					assert(coord, "cell_instance not in instance_cell_map")
-					table.insert(coords, coord)
-				end
+				cells = context.process:run_command("selected_cells").ok
 			end
 			local entities_map = {}
-			for _, encoded_coord in coords do
-				local cell = _G.world.cells[encoded_coord]
-				if cell == nil then
-					continue
-				end
+			for _, cell in cells do
 				for entity_id in cell.entities do
 					entities_map[_G.world.entities[entity_id]] = true
 				end

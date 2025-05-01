@@ -8,7 +8,7 @@ local util = require(ReplicatedStorage.Shared.util)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local formatting = require(ReplicatedStorage.Shared.formatting)
 local items_mod = require(ReplicatedStorage.Shared.items)
-local team = require(ReplicatedStorage.Shared.team)
+local team_mod = require(ReplicatedStorage.Shared.team)
 local coords = require(ReplicatedStorage.Shared.coords)
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 
@@ -105,7 +105,7 @@ function EntityInformation(props: {
 })
 	local context = React.useContext(MainContext)
 	local world: World = context.world
-	local selection_mode_stack: {SelectionMode} = context.selection_mode_stack
+	local selection_mode_stack: { SelectionMode } = context.selection_mode_stack
 	local toggle_submenu = function(menu)
 		context.set_submenu(function(current)
 			return if util.deep_equal(current, menu) then {} else menu
@@ -172,7 +172,7 @@ function EntityInformation(props: {
 			then Color3.new(0.458823, 0.756862, 1)
 			else if entity.status == "scaffold" then Color3.new(0.6, 1, 0.654901) else Color3.new(1, 1, 1)
 
-	local player_team = team.team_of(world, Players.LocalPlayer)
+	local player_team = team_mod.team_of(world, Players.LocalPlayer)
 
 	return React.createElement("Frame", {
 		BackgroundColor3 = Color3.fromRGB(25, 25, 25),
@@ -465,7 +465,7 @@ function EntityInformation(props: {
 							Text = "Disguise",
 							on_click = function()
 								local ability = shared_behavior.abilities.disguise
-								local candidates: {[EncodedCoordinate]: true} = {}
+								local candidates: { [EncodedCoordinate]: true } = {}
 								for _, coord in coords.neighbors_leq(entity.primary_coordinate, ability.range) do
 									local cell = world:get_cell(coord)
 									if not cell or next(cell.entities) == nil then
@@ -505,7 +505,7 @@ function EntityInformation(props: {
 									else if entity.type == "turret" then "turret_attack" else error "unreachable"
 								local ability = shared_behavior.abilities[ability_name]
 
-								local candidates: {[EncodedCoordinate]: true} = {}
+								local candidates: { [EncodedCoordinate]: true } = {}
 								for _, coord in coords.neighbors_leq(entity.primary_coordinate, ability.range) do
 									local cell = world:get_cell(coord)
 									if not cell then
@@ -514,7 +514,7 @@ function EntityInformation(props: {
 
 									local encoded_coord = coords.encode_coord(coord)
 									if
-									    world.cells[encoded_coord] == nil 
+										world.cells[encoded_coord] == nil
 										or not world_mod.line_of_sight(
 											world,
 											entity.primary_coordinate,
@@ -525,10 +525,16 @@ function EntityInformation(props: {
 										continue
 									end
 
-									for influence in cell.influences do
-										if world.entities[influence].type == "taunt" then
-											continue
+									local has_taunt = util.table_any(cell.influences, function(_, entity_id)
+										local taunt = world.entities[entity_id]
+										if taunt == nil then
+											print("no entity", cell.coordinate, cell)
 										end
+										return taunt.type == "taunt"
+											and not team_mod.is_allied(world, taunt.owner, player_team.id)
+									end)
+									if has_taunt then
+										continue
 									end
 									candidates[encoded_coord] = true
 								end

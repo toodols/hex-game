@@ -143,6 +143,8 @@ export type Entity = {
 	owner: TeamId,
 	queued_decisions: { Decision },
 
+	-- for clients: .always_visible or .always_visible_for[team_id]
+	always_visible: boolean?,
 	server_data: {
 		is_disguise_of: EntityId?,
 		-- whether this entity is always visible regardless of whether the cell it is on is visible

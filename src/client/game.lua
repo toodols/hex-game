@@ -186,6 +186,9 @@ end
 function hide_entities(world: World, old: HexCell)
 	for entity_id in old.entities do
 		local entity = world.entities[entity_id]
+		if entity.always_visible then
+			continue
+		end
 		local client_behavior = client_entity_mod.registry[entity.type]
 		if client_behavior.on_hidden then
 			client_behavior.on_hidden(entity, world)
@@ -198,18 +201,19 @@ function handle_cells(world: World, update: WorldUpdate)
 	assert(update.type == "cells", "not a cell update")
 	-- remove cells that no longer exist
 	for old_encoded_coord, old_cell in world.cells do
-		if not update.cells[old_encoded_coord] then
-			local instance = world.cell_instance_map[old_encoded_coord]
-			world.cell_instance_map[old_encoded_coord] = nil
-			world.instance_cell_map[instance] = nil
-			animate_cell_removal(instance)
-			Debris:AddItem(instance, 2)
-			world.cells[old_encoded_coord] = nil
+		if update.cells[old_encoded_coord] then
+			continue
 		end
+		local instance = world.cell_instance_map[old_encoded_coord]
+		world.cell_instance_map[old_encoded_coord] = nil
+		world.instance_cell_map[instance] = nil
+		animate_cell_removal(instance)
+		Debris:AddItem(instance, 2)
+		world.cells[old_encoded_coord] = nil
 
-		for _, entity_id in old_cell.entities do
+		for entity_id in old_cell.entities do
 			local entity = world.entities[entity_id]
-			if entity then
+			if entity and not entity.always_visible then
 				local client_behavior = client_entity_mod.registry[entity.type]
 				client_behavior.on_hidden(entity, world)
 			end

@@ -165,6 +165,7 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	create_systems(world, action_state)
 	do_entity_decay(world, action_state)
 
+	computed_mod.compute_influences(world) --recompute influences if entities DIE
 	computed_mod.compute_presence(world)
 	remove_occluded_blueprints(world)
 

@@ -142,7 +142,7 @@ function new_entity(entity_: any, world: World): Entity
 		effects = {},
 		enabled = true,
 		health = shared_behavior.max_health,
-		id = server_util.new_global_id(),
+		id = server_util.new_global_id() --[[ .. entity.type ]],
 		is_destroyed = false,
 		max_health = shared_behavior.max_health,
 		name = shared_behavior.name,

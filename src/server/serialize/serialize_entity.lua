@@ -32,6 +32,9 @@ function serialize_entity_for_team(world: World, entity: Entity, team: TeamId): 
 				copy.active = true
 			end
 		end
+		if entity.server_data.always_visible or entity.server_data.always_visible_for[team] then
+			copy.always_visible = true
+		end
 		return copy :: Entity
 	end
 	return nil
