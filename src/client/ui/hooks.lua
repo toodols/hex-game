@@ -22,6 +22,7 @@ function use_synced_entity(entity_id)
 	local context = React.useContext(MainContext)
 	local entity: Entity, set_entity = React.useState(context.world.entities[entity_id])
 	React.useEffect(function()
+		set_entity(context.world.entities[entity_id])
 		local cleanup = context.world.world_update_signal.listen(function(updates)
 			for _, update in updates do
 				if update.type == "entity_update" and update.entity.id == entity_id then
@@ -31,7 +32,7 @@ function use_synced_entity(entity_id)
 			end
 		end)
 		return cleanup
-	end, {})
+	end, { entity_id })
 	return entity, set_entity
 end
 

@@ -81,7 +81,7 @@ function my_map(): World
 	local vit_deposit_quota = math.ceil(cell_count * 0.02 / 2)
 	local rad_deposit_quota = math.ceil(cell_count * 0.02 / 2)
 	local tar_deposit_quota = math.ceil(cell_count * 0.02 / 2)
-	local barrier_quota = math.ceil(cell_count * 0.2 / 2)
+	local barrier_quota = math.ceil(cell_count * 0.3 / 2)
 
 	local function inverse(coord: CubicCoordinate): CubicCoordinate
 		return { -coord[1], -coord[2], -coord[3] }
