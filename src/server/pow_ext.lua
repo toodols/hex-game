@@ -78,12 +78,11 @@ return function()
 				return selection_mode.type == "select_cells"
 			end)
 			assert(selection, "Did not find select_cells")
-			local cell_instances = selection.selected
 			local cells = {}
-			for cell_instance in cell_instances do
-				local coord = _G.world.instance_cell_map[cell_instance]
-				assert(coord, "cell_instance not in instance_cell_map")
-				table.insert(cells, _G.world.cells[coord])
+			for encoded_coord in selection.selected do
+				local cell = _G.world.cells[encoded_coord]
+				assert(cell, encoded_coord .. " not in world.cells")
+				table.insert(cells, cell)
 			end
 			return cells
 		end,
@@ -372,9 +371,8 @@ return function()
 			assert(selection, "Did not find select_cells")
 			selection.selected = {}
 			for _, coord in coords do
-				local cell_instance = world.cell_instance_map[coords_mod.encode_coord(coord)]
-				assert(cell_instance, "cell_instance not in cell_instance_map")
-				selection.selected[cell_instance] = true
+				local encoded_coord = coords_mod.encode_coord(coord)
+				selection.selected[encoded_coord] = true
 			end
 			_G.world.ui.update()
 		end,

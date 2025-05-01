@@ -294,6 +294,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 			set_current_page(page_refs.current[page_layout_ref.current.CurrentPage])
 		end)
 	end, {})
+
 	React.useEffect(function()
 		ref.current.Position = UDim2.new(0.5, 0, 1, 200)
 		TweenService:Create(ref.current, TweenInfo.new(0.3), {
@@ -314,13 +315,14 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 			}):Play()
 		end
 	end, { is_expanded })
+
 	return React.createElement("Frame", {
 		Visible = props.Visible,
 		AnchorPoint = Vector2.new(0.5, 1),
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(27, 42, 53),
 		LayoutOrder = 2,
-		Position = UDim2.new(0.5, 0, 1, 0),
+		Position = UDim2.new(0.5, 0, 1, 200),
 		Size = UDim2.new(0, 1000, 0.8, 0),
 		ref = ref,
 	}, {

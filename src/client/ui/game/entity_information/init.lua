@@ -13,6 +13,7 @@ local coords = require(ReplicatedStorage.Shared.coords)
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
+local ui_types = require(ReplicatedStorage.Client.ui.types)
 local client_entity_mod = require(ReplicatedStorage.Client.ui.Parent.entity)
 local context_mod = require(ReplicatedStorage.Client.ui.context)
 local themes = require(ReplicatedStorage.Client.ui.themes)
@@ -37,6 +38,9 @@ type EntityId = types.EntityId
 type WorldUpdate = types.WorldUpdate
 type World = types.World
 type Entity = types.Entity
+type CubicCoordinate = types.CubicCoordinate
+type EncodedCoordinate = types.EncodedCoordinate
+type SelectionMode = ui_types.SelectionMode
 
 function OutputClock(props: { entity: Entity, LayoutOrder: number? })
 	local shared_behavior = shared_entity_mod.registry[props.entity.type]
@@ -101,7 +105,7 @@ function EntityInformation(props: {
 })
 	local context = React.useContext(MainContext)
 	local world: World = context.world
-	local selection_mode_stack = context.selection_mode_stack
+	local selection_mode_stack: {SelectionMode} = context.selection_mode_stack
 	local toggle_submenu = function(menu)
 		context.set_submenu(function(current)
 			return if util.deep_equal(current, menu) then {} else menu
@@ -461,25 +465,25 @@ function EntityInformation(props: {
 							Text = "Disguise",
 							on_click = function()
 								local ability = shared_behavior.abilities.disguise
-								local candidates = {}
+								local candidates: {[EncodedCoordinate]: true} = {}
 								for _, coord in coords.neighbors_leq(entity.primary_coordinate, ability.range) do
 									local cell = world:get_cell(coord)
 									if not cell or next(cell.entities) == nil then
 										continue
 									end
-									local instance = world.cell_instance_map[coords.encode_coord(coord)]
-									candidates[instance] = coord
+									local encoded_coord = coords.encode_coord(coord)
+									candidates[encoded_coord] = true
 								end
 								table.insert(selection_mode_stack, {
 									type = "select_some_cell",
 									candidates = candidates,
-									on_selected = function(instance)
+									on_selected = function(coord)
 										client_interaction_remote:FireServer {
 											{
 												type = "ability",
 												ability_type = "disguise",
 												entity_id = entity.id,
-												coordinate = candidates[instance],
+												coordinate = coord,
 											},
 										}
 									end,
@@ -501,15 +505,16 @@ function EntityInformation(props: {
 									else if entity.type == "turret" then "turret_attack" else error "unreachable"
 								local ability = shared_behavior.abilities[ability_name]
 
-								local candidates = {}
+								local candidates: {[EncodedCoordinate]: true} = {}
 								for _, coord in coords.neighbors_leq(entity.primary_coordinate, ability.range) do
 									local cell = world:get_cell(coord)
 									if not cell then
 										continue
 									end
-									local instance = world.cell_instance_map[coords.encode_coord(coord)]
+
+									local encoded_coord = coords.encode_coord(coord)
 									if
-										not instance
+									    world.cells[encoded_coord] == nil 
 										or not world_mod.line_of_sight(
 											world,
 											entity.primary_coordinate,
@@ -519,23 +524,24 @@ function EntityInformation(props: {
 									then
 										continue
 									end
+
 									for influence in cell.influences do
 										if world.entities[influence].type == "taunt" then
 											continue
 										end
 									end
-									candidates[instance] = coord
+									candidates[encoded_coord] = true
 								end
 								table.insert(selection_mode_stack, {
 									type = "select_some_cell",
 									candidates = candidates,
-									on_selected = function(instance)
+									on_selected = function(coord)
 										client_interaction_remote:FireServer {
 											{
 												type = "ability",
 												ability_type = ability_name,
 												entity_id = entity.id,
-												coordinate = candidates[instance],
+												coordinate = coord,
 											},
 										}
 									end,

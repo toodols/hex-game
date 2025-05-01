@@ -4,18 +4,18 @@ local types = require(ReplicatedStorage.Shared.types)
 type CubicCoordinate = types.CubicCoordinate
 type Entity = types.Entity
 type EntityId = types.EntityId
+type EncodedCoordinate = types.EncodedCoordinate
 
 export type SelectionMode = {
 	type: "select_cells",
-	selected: { [Instance]: true },
+	selected: { [EncodedCoordinate]: true },
 } | {
-	type: "select_direction",
-	origin: CubicCoordinate,
-	candidates: { [Instance]: { [Instance]: true } },
-	on_selected: (instance: Instance) -> (),
+	type: "select_some_cell",
+	candidates: { [EncodedCoordinate]: true },
+	on_selected: (cell: CubicCoordinate) -> nil,
 } | {
 	type: "show_cells",
-	cells: { [Instance]: true },
+	cells: { [EncodedCoordinate]: true },
 } | {
 	type: "show_one_entity",
 	entity_id: EntityId,

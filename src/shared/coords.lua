@@ -39,6 +39,10 @@ end
 --- Encodes a CubicCoordinate into a string
 --- Makes no guarantees on the output format, only that
 --- - `forall coord: CubicCoordinate. coord == decode_coord(encode_coord(coord))`
+---
+--- <em>This will produce a different value for signed zero `(tostring(0) ~= tostring(-0))`,
+--- but signed zero should only occur for the z (-x-y) component which is not used in encoding
+--- may be motivated to change if that does cause a bug</em>
 function encode_coord(coord: CubicCoordinate): EncodedCoordinate
 	return string.format("%d %d", coord[1], coord[2])
 end
