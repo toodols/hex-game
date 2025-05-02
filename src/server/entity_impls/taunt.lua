@@ -34,7 +34,7 @@ entity_mod.registry.taunt = entity_mod.with_defaults {
 		end
 	end,
 	on_event = function(self: Entity, world: World, event: EntityEvent)
-		if event.entity_id == self.id and event.event_type == "killed" then
+		if event.entity_id == self.id and event.event_type == "destroy" and event.death_type == "killed" then
 			local neighbors = coords_mod.neighbors_leq(self.primary_coordinate, 1)
 			damage_mod.damage_cells(world, neighbors, {
 				type = "physical",

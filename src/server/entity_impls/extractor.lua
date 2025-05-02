@@ -61,7 +61,7 @@ entity_mod.registry.extractor = entity_mod.with_defaults {
 		end
 	end,
 	on_event = function(self: Entity, world: World, event: EntityEvent)
-		if event.event_type == "killed" then
+		if event.entity_id == self.id and event.event_type == "destroy" and event.death_type == "killed" then
 			local cell = world:get_cell(self.primary_coordinate)
 			assert(cell, "cell not found")
 			cell.type = self.deposit

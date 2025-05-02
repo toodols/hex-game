@@ -503,8 +503,10 @@ export type EntityEvent =
 	}
 	-- Entity is killed by damage or other means
 	| {
-		event_type: "killed",
+		event_type: "destroy",
 		entity_id: EntityId,
+		death_type: "deconstructed" | "killed" | "used",
+		damage: Damage?,
 	}
 
 export type EntityAction =

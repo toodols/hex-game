@@ -50,7 +50,7 @@ entity_mod.registry.solution = entity_mod.with_defaults {
 		end,
 	},
 	on_event = function(self: Entity, world: World, event: EntityEvent)
-		if event.event_type == "killed" then
+		if event.entity_id == self.id and event.event_type == "destroy" and event.death_type == "killed" then
 			entity_mod.registry[self.type].abilities.solution_use(self, world)
 		end
 	end,

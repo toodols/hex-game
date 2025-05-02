@@ -125,6 +125,12 @@ function delete_deconstructed_entities(world: World, queue: { EntityAction })
 			table.insert(queue, action)
 			continue
 		end
+		table.insert(world.action_queue, {
+			type = "entity_event",
+			event_type = "destroy",
+			death_type = "deconstructed",
+			entity_id = entity.id,
+		})
 
 		entity_mod.remove_entity(world, entity)
 	end
@@ -153,7 +159,7 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	queue_blueprints_and_scaffolds(world, world.action_queue)
 
 	create_systems(world, action_state)
-	process_queue(world, action_state)
+	local dropped = process_queue(world, action_state)
 
 	status_effects_tick(world, action_state)
 
@@ -209,6 +215,7 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	return {
 		elapsed = tick() - t0,
 		updates = updates,
+		dropped = dropped,
 	}
 end
 

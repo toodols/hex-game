@@ -7,6 +7,7 @@ type Entity = types.Entity
 type World = types.World
 type HexCell = types.HexCell
 type AnimationState = types.AnimationState
+type EntityEvent = types.EntityEvent
 
 local registry: { [string]: ClientEntityBehavior } = {}
 type ClientEntityBehavior = {
@@ -25,7 +26,7 @@ type ClientEntityBehavior = {
 	-- called before `self` is replaced by `new` in `world`
 	update: (self: Entity, world: World, old: Entity) -> (),
 
-	on_destroy: (self: Entity, world: World) -> (),
+	on_destroy: (self: Entity, world: World, event: EntityEvent) -> (),
 	on_hidden: (self: Entity, world: World) -> (),
 
 	animate: ((self: Entity, world: World, animation_state: AnimationState) -> ())?,
@@ -55,9 +56,14 @@ function with_defaults(t: any)
 				end
 			end
 		end,
-		on_destroy = t.on_destroy or function(self: Entity, world: World)
+		on_destroy = t.on_destroy or function(self: Entity, world: World, event: EntityEvent)
+			assert(event.event_type == "destroy", "Not death event")
 			local instance: Instance = world.entity_instance_map[self.id]
-			if instance then
+			if not instance then
+				warn("Can't do death because instance not found " .. self.id)
+				return
+			end
+			if event.death_type == "killed" then
 				world.entity_instance_map[self.id] = nil
 				world.instance_entity_map[instance] = nil
 				for _, part in instance:GetDescendants() do
@@ -70,6 +76,8 @@ function with_defaults(t: any)
 					Debris:AddItem(part, 1)
 					task.wait(0.1)
 				end
+				instance:Destroy()
+			else
 				instance:Destroy()
 			end
 		end,
@@ -143,11 +151,6 @@ function update_entity_client(world: World, old: Entity?, new: Entity)
 		error("Unknown entity type: " .. new.type)
 	end
 	if new.is_destroyed then
-		client_behavior.on_destroy(new, world)
-		for _, coord in new.coordinates do
-			local cell = world:get_cell(coord)
-			cell.entities[new.id] = nil
-		end
 	else
 		if old then
 			local instance = world.entity_instance_map[new.id]

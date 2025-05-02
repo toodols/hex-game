@@ -266,6 +266,10 @@ function handle_entity_event(world: World, event: EntityEvent)
 		elseif event.event_type == "consumed_items" then
 			visuals.consumed_item_effect(event, entity_instance:GetPivot().Position)
 		end
+	elseif event.event_type == "destroy" then
+		local entity = world.entities[event.entity_id]
+		local behavior = client_entity_mod.registry[entity.type]
+		behavior.on_destroy(entity, world, event)
 	end
 end
 
@@ -315,7 +319,7 @@ function handle_updates(world: World, updates: { WorldUpdate })
 		end
 	end
 
-	-- first pass: populate entities and add new, old pair
+	-- populate entities and add new, old pair
 	for _, update in updates do
 		if update.type == "entity_update" then
 			local old_entity = world.entities[update.entity.id]
@@ -326,23 +330,21 @@ function handle_updates(world: World, updates: { WorldUpdate })
 		end
 	end
 
-	-- second pass: create the instances for the entities
+	-- create the instances for the entities
 	for _, entry in updated_entities do
 		local old_entity = entry.old
 		local new_entity = entry.new
 		client_entity_mod.update_entity_client(world, old_entity, new_entity)
 	end
 
-	-- third pass: update neighbors and other stuff
+	-- update neighbors and other stuff
 	for _, entry in updated_entities do
 		local new_entity = entry.new
 		update_neighbors(world, new_entity.coordinates)
 	end
-	-- process final events (ones that depend on entity instances being known)
+
 	for _, update in updates do
-		if update.type == "entity_event" then
-			handle_entity_event(world, update.event)
-		elseif update.type == "ability" then
+		if update.type == "ability" then
 			local cell_instance = world.cell_instance_map[coords.encode_coord(update.coordinate)]
 			local entity_instance = world.entity_instance_map[update.entity_id]
 			if update.ability_type == "scout_attack" or update.ability_type == "turret_attack" then
@@ -351,8 +353,14 @@ function handle_updates(world: World, updates: { WorldUpdate })
 		end
 	end
 
-	world.world_update_signal.send(updates)
+	for _, update in updates do
+		if update.type == "entity_event" then
+			handle_entity_event(world, update.event)
+		end
+	end
+
 	world_mod.purge_destroyed_entities(world)
+	world.world_update_signal.send(updates)
 end
 
 return {

@@ -44,15 +44,22 @@ function scout_attack(world: World, action_state: ActionState, ability: EntityAc
 	assert(cell, "cell not found")
 
 	updates_mod.add_update(world, ability)
-	for entity_id in
-		damage_mod.damage_cells(world, { cell.coordinate }, {
-			type = "flat",
-			amount = if ability.ability_type == "scout_attack" then 2 else 3,
-			from = entity.id,
-			lethal = true,
-			friendly_fire = false,
+
+	local damage = {
+		type = "flat",
+		amount = if ability.ability_type == "scout_attack" then 2 else 3,
+		from = entity.id,
+		lethal = true,
+		friendly_fire = false,
+	}
+	for entity_id in damage_mod.damage_cells(world, { cell.coordinate }, damage) do
+		table.insert(world.action_queue, {
+			type = "entity_event",
+			event_type = "destroy",
+			death_type = "killed",
+			entity_id = entity_id,
+			damage = damage,
 		})
-	do
 		action_state.will_be_destroyed_entities[entity_id] = true
 	end
 end
@@ -143,6 +150,12 @@ function handle_ability_actions(world: World, action_state: ActionState)
 		elseif ability.ability_type == "solution_use" then
 			local entity = world.entities[ability.entity_id]
 			server_entity_mod.registry[entity.type].abilities[ability.ability_type](entity, world)
+			table.insert(world.action_queue, {
+				type = "entity_event",
+				event_type = "destroy",
+				death_type = "used",
+				entity_id = entity.id,
+			})
 			action_state.will_be_destroyed_entities[entity.id] = true
 		elseif ability.ability_type == "disguise" then
 			disguise_ability(world, action_state, ability)

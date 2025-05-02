@@ -14,9 +14,11 @@ local handle_entity_event_actions = require(script.Parent.entity_event_actions).
 
 type World = types.World
 type ActionState = server_types.ActionState
+type EntityAction = types.EntityAction
 
 --- Processes all actions in world.action_queue. requires systems to be created
-function process_queue(world: World, action_state: ActionState)
+--- @return All dropped actions
+function process_queue(world: World, action_state: ActionState): { EntityAction }
 	local old_queue
 	local iterations = 0
 	local MAX_ALLOWED_ITERATIONS = 100
@@ -78,9 +80,10 @@ function process_queue(world: World, action_state: ActionState)
 			end
 		end
 	until should_terminate()
-
+	local dropped = world.action_queue
 	-- clear action queue
 	world.action_queue = {}
+	return dropped
 end
 
 return {

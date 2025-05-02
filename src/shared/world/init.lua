@@ -56,11 +56,9 @@ function purge_destroyed_entities(world: World)
 			world.entities[entity.id] = nil
 			local instance = world.entity_instance_map[entity.id]
 			if instance then
-				warn("This instance was not destroyed!", instance)
-				instance:Destroy()
 				world.instance_entity_map[instance] = nil
-				world.entity_instance_map[entity.id] = nil
 			end
+			world.entity_instance_map[entity.id] = nil
 		end
 	end
 end
