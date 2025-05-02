@@ -13,16 +13,6 @@ type ActionState = server_types.ActionState
 entity_mod.registry.proxy = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	on_completed = function(self: Entity, world: World) end,
-	influences = function(self: Entity, world: World)
-		local config = world.entity_configurations[self.type]
-		local neighbors = coords.neighbors_leq(self.primary_coordinate, config.range)
-		for _, coord in neighbors do
-			local cell = world:get_cell(coord)
-			if cell then
-				cell.influences[self.id] = true
-			end
-		end
-	end,
 }
 
 return {}

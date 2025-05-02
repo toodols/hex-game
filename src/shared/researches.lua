@@ -24,21 +24,7 @@ function get_cells_researches(world: World, cells: { HexCell }, team: TeamId): {
 		if not entity then
 			continue
 		end
-		if entity.type == "proxy" then
-			local proxy_cell = world:get_cell(entity.primary_coordinate)
-			for proxy_influence_id in proxy_cell.entities do
-				if proxy_influence_id ~= entity.id then
-					local proxy_influence = world.entities[proxy_influence_id]
-					if proxy_influence.researches then
-						for research_id, state: ResearchState in proxy_influence.researches.states do
-							if state.status == "complete" then
-								researches_set[research_id] = true
-							end
-						end
-					end
-				end
-			end
-		elseif entity.type == "laboratory" then
+		if entity.type == "laboratory" then
 			for research_id, state: ResearchState in entity.researches.states do
 				if state.status == "complete" then
 					researches_set[research_id] = true
