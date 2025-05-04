@@ -40,10 +40,7 @@ function handle_exchange_actions(world: World, action_state: ActionState)
 				items = input_items,
 			}
 			table.insert(world.action_queue, event)
-			updates_mod.add_update(world, {
-				type = "entity_event",
-				event = event,
-			})
+			updates_mod.add_update(world, event)
 		end
 		system.power -= input_power
 		if exchange_action.on_success then

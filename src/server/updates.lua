@@ -60,11 +60,8 @@ function get_updates_for_team(world: World, buffer: { WorldUpdate }, team_id: Te
 				return nil
 			end
 		elseif update.type == "entity_event" then
-			if visibility.entity_visibility(world, world.entities[update.event.entity_id], team.id) then
-				return {
-					type = update.type,
-					event = update.event,
-				}
+			if visibility.entity_visibility(world, world.entities[update.entity_id], team.id) then
+				return update
 			else
 				return nil
 			end

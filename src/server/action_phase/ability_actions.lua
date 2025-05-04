@@ -40,7 +40,7 @@ function scout_attack(world: World, action_state: ActionState, ability: EntityAc
 		items = cost,
 	}
 	table.insert(world.action_queue, event)
-	updates_mod.add_update(world, { type = "entity_event", event = event })
+	updates_mod.add_update(world, event)
 
 	local cell = world:get_cell(ability.coordinate)
 	assert(cell, "cell not found")
@@ -149,11 +149,7 @@ function handle_ability_actions(world: World, action_state: ActionState)
 				entity_id = entity.id,
 				death_type = "used",
 			}
-
-			updates_mod.add_update(world, {
-				type = "entity_event",
-				event = event,
-			})
+			updates_mod.add_update(world, event)
 			entity.server_data.will_die = { death_type = "used" }
 		elseif ability.ability_type == "disguise" then
 			disguise_ability(world, action_state, ability)

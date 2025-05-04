@@ -88,12 +88,9 @@ function remove_occluded_blueprints(world: World)
 			then
 				updates_mod.add_update(world, {
 					type = "entity_event",
-					event = {
-						type = "entity_event",
-						event_type = "destroy",
-						entity_id = entity.id,
-						death_type = "other",
-					},
+					event_type = "destroy",
+					entity_id = entity.id,
+					death_type = "other",
 				})
 				entity_mod.remove_entity(world, entity)
 			end

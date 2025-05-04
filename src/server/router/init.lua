@@ -54,12 +54,9 @@ function remove_unsupported_vertices(world: World, entity: Entity)
 				for _, vertex in vertices do
 					updates_mod.add_update(world, {
 						type = "entity_event",
-						event = {
-							type = "entity_event",
-							event_type = "destroy",
-							entity_id = vertex.id,
-							death_type = "other",
-						},
+						event_type = "destroy",
+						entity_id = vertex.id,
+						death_type = "other",
 					})
 					entity_mod.remove_entity(world, vertex)
 				end
@@ -170,12 +167,9 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 		else
 			updates_mod.add_update(world, {
 				type = "entity_event",
-				event = {
-					type = "entity_event",
-					event_type = "destroy",
-					entity_id = entity.id,
-					death_type = "deconstruct",
-				},
+				event_type = "destroy",
+				entity_id = entity.id,
+				death_type = "deconstruct",
 			})
 			entity_mod.remove_entity(world, entity)
 			remove_unsupported_vertices(world, entity)

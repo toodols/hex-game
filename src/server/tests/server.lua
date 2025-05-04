@@ -770,9 +770,9 @@ function tests.deconstruct_interaction_gives_destroy_events()
 	assert_eq(
 		util.table_any(result.updates[teams.team1.id], function(update)
 			return update.type == "entity_event"
-				and update.event.entity_id == scout.id
-				and update.event.event_type == "destroy"
-				and update.event.death_type == "deconstruct"
+				and update.entity_id == scout.id
+				and update.event_type == "destroy"
+				and update.death_type == "deconstruct"
 		end),
 		true,
 		"Scout should be destroyed"

@@ -353,7 +353,7 @@ export type WorldUpdate =
 	-- handles add, update, and destruction
 	{ type: "entity_update", entity: Entity, target: TeamTarget }
 	| { type: "entity_created", entity_id: EntityId, target: TeamTarget }
-	| { type: "entity_event", event: EntityEvent, target: TeamTarget }
+	| (EntityEvent & { type: "entity_event", target: TeamTarget })
 	| {
 		type: "cell_update",
 		cell: HexCell,

@@ -174,6 +174,9 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 	for entity_id, value in result do
 		local entity = world.entities[entity_id]
 		apply_entity_damage(entity, value.amount, damage.piercing :: boolean)
+		if entity.health <= 0 then
+			value.lethal = true
+		end
 
 		updates_mod.add_update(world, {
 			type = "entity_update",
@@ -185,20 +188,13 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 			entity_id = entity_id,
 			effective_damage = {
 				source = damage,
-				amount = value,
+				amount = value.amount,
 				entity_id = entity_id,
-				lethal = entity.health <= 0,
+				lethal = value.lethal,
 			},
 		}
 		table.insert(world.action_queue, event)
-		updates_mod.add_update(world, {
-			type = "entity_event",
-			event = event,
-		})
-
-		if entity.health <= 0 then
-			value.lethal = true
-		end
+		updates_mod.add_update(world, event)
 	end
 
 	return result
@@ -215,10 +211,7 @@ function delayed_destruction(world: World, damage_result: DamageResult)
 				entity_id = entity_id,
 				death_type = "killed",
 			}
-			updates_mod.add_update(world, {
-				type = "entity_event",
-				event = event,
-			})
+			updates_mod.add_update(world, event)
 			table.insert(world.action_queue, event)
 			entity.server_data.will_die = {
 				death_type = "killed",

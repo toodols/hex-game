@@ -41,10 +41,7 @@ function handle_advance_research_actions(world: World, action_state: ActionState
 					items = research_state.cost,
 				}
 				table.insert(world.action_queue, event)
-				updates_mod.add_update(world, {
-					type = "entity_event",
-					event = event,
-				})
+				updates_mod.add_update(world, event)
 
 				research_state.cost_is_paid = true
 				updates_mod.add_update(world, {
@@ -72,10 +69,7 @@ function handle_advance_research_actions(world: World, action_state: ActionState
 					entity_id = entity.id,
 					research_id = research_id,
 				}
-				updates_mod.add_update(world, {
-					type = "entity_event",
-					event = event,
-				})
+				updates_mod.add_update(world, event)
 			else
 				break
 			end

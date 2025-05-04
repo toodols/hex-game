@@ -354,7 +354,7 @@ function handle_updates(world: World, updates: { WorldUpdate })
 
 	for _, update in updates do
 		if update.type == "entity_event" then
-			handle_entity_event(world, update.event)
+			handle_entity_event(world, update)
 		end
 	end
 

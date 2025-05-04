@@ -95,10 +95,7 @@ function handle_try_promote_actions(world: World, action_state: ActionState)
 					items = consumed,
 				}
 				table.insert(world.action_queue, event)
-				updates_mod.add_update(world, {
-					type = "entity_event",
-					event = event,
-				})
+				updates_mod.add_update(world, event)
 
 				-- if entity.cost_fulfilled deep_equal entity.cost then entity can promote to
 				if util.deep_equal(entity.cost, entity.cost_fulfilled) then
