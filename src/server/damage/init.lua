@@ -121,6 +121,8 @@ function get_attackable_entities(world: World, cell: HexCell, damage: Damage): {
 			and entity.status ~= "blueprint"
 			-- do not attack friendly entities unless friendly_fire is on
 			and (damage.friendly_fire or not is_allied(world, entity.owner, team))
+			-- ignore entities that will die, but is delayed
+			and entity.server_data.will_die == nil
 		then
 			table.insert(entities, entity)
 		end
@@ -141,11 +143,9 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 		error "todo"
 	end
 
-	local destroyed_entities = {}
-
 	-- different cells may give different damage values to one entity
 	-- this keeps track of the highest damage
-	local damage_values: { [EntityId]: number } = {}
+	local result: DamageResult = {}
 
 	for _, target in targets do
 		local cell = world:get_cell(target)
@@ -157,7 +157,11 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 			local health = if damage.piercing then entity.health else shared_entity_mod.get_effective_health(entity)
 			local effective = math.clamp(if damage.nonlethal then health - 1 else health, 0, gauge)
 			health -= effective
-			damage_values[entity.id] = math.max(damage_values[entity.id] or 0, effective)
+
+			result[entity.id] = {
+				amount = math.max(if result[entity.id] then result[entity.id].amount else 0, effective),
+				lethal = false,
+			}
 
 			gauge -= effective
 			if health > 0 or (effective == 0 and health == 0) then
@@ -167,15 +171,15 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 	end
 
 	-- then apply the damage
-	for entity_id, value in damage_values do
+	for entity_id, value in result do
 		local entity = world.entities[entity_id]
-		apply_entity_damage(entity, value, damage.piercing :: boolean)
+		apply_entity_damage(entity, value.amount, damage.piercing :: boolean)
 
 		updates_mod.add_update(world, {
 			type = "entity_update",
 			entity = entity,
 		})
-		table.insert(world.action_queue, {
+		local event = {
 			type = "entity_event",
 			event_type = "took_damage",
 			entity_id = entity_id,
@@ -185,27 +189,47 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 				entity_id = entity_id,
 				lethal = entity.health <= 0,
 			},
+		}
+		table.insert(world.action_queue, event)
+		updates_mod.add_update(world, {
+			type = "entity_event",
+			event = event,
 		})
 
 		if entity.health <= 0 then
-			destroyed_entities[entity_id] = true
+			value.lethal = true
 		end
 	end
 
-	if damage.from ~= nil then
-		table.insert(world.action_queue, {
-			type = "entity_event",
-			event_type = "dealt_damage",
-			entity_id = damage.from,
-			damage = damage,
-		})
-	end
-
-	return destroyed_entities
+	return result
 end
 
-function destroy_entities(world: World, results: DamageResult)
-	for entity_id, result in results do
+-- marks entities to be destroyed at the end of the turn
+function delayed_destruction(world: World, damage_result: DamageResult)
+	for entity_id, result in damage_result do
+		if result.lethal then
+			local entity = world.entities[entity_id]
+			local event = {
+				type = "entity_event",
+				event_type = "destroy",
+				entity_id = entity_id,
+				death_type = "killed",
+			}
+			updates_mod.add_update(world, {
+				type = "entity_event",
+				event = event,
+			})
+			table.insert(world.action_queue, event)
+			entity.server_data.will_die = {
+				death_type = "killed",
+			}
+		end
+	end
+end
+
+-- immediately destroys entities
+function destroy_entities(world: World, damage_result: DamageResult)
+	for entity_id, result in damage_result do
 		if result.lethal then
 			entity_mod.remove_entity(world, world.entities[entity_id])
 		end
@@ -221,4 +245,5 @@ return {
 	damage_entity = damage_entity,
 	destroy_entities = destroy_entities,
 	damage_entity_destroying = damage_entity_destroying,
+	delayed_destruction = delayed_destruction,
 }

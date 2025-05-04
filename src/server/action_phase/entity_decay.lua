@@ -78,7 +78,7 @@ function do_entity_decay(world: World, action_state: ActionState)
 			})
 			if entity.decay >= 3 then
 				if entity.type == "vertex" then
-					entity_mod.remove_entity(world, entity)
+					entity_mod.remove_entity(world, entity, "other")
 				else
 					entity.owner = world.neutral_team
 					entity.decay = 0

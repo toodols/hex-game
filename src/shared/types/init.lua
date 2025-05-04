@@ -153,6 +153,8 @@ export type Entity = {
 		always_visible_for: { [TeamId]: boolean? },
 		-- timestamp of when it was first requested to be constructed
 		requested_at: number,
+
+		will_die: { death_type: string },
 	},
 }
 
@@ -483,11 +485,6 @@ export type EntityEvent =
 		event_type: "status_changed",
 		entity_id: EntityId,
 	}
-	-- Entity is removed for any reason
-	| {
-		event_type: "removed",
-		entity_id: EntityId,
-	}
 	| {
 		event_type: "created",
 		entity_id: EntityId,
@@ -505,7 +502,7 @@ export type EntityEvent =
 	| {
 		event_type: "destroy",
 		entity_id: EntityId,
-		death_type: "deconstructed" | "killed" | "used",
+		death_type: "deconstruct" | "killed" | "used" | "other",
 		damage: Damage?,
 	}
 

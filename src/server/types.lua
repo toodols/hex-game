@@ -20,7 +20,6 @@ export type DamageResult = {
 	effective: number,
 }
 export type ActionState = {
-	will_be_destroyed_entities: { [EntityId]: boolean },
 	systems: { SystemExtended },
 	system_by_entity_id: { [EntityId]: SystemExtended },
 	system_by_cell: { [EncodedCoordinate]: SystemExtended },

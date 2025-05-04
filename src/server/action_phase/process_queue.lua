@@ -2,6 +2,7 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 
 local server_types = require(ServerScriptService.Server.types)
+local entity_mod = require(ServerScriptService.Server.entity)
 local items_mod = require(ReplicatedStorage.Shared.items)
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
@@ -79,6 +80,8 @@ function process_queue(world: World, action_state: ActionState): { EntityAction 
 				items_mod.inventory_deposit(open_inventory_entity.inventory, system.overflow_items)
 			end
 		end
+
+
 	until should_terminate()
 	local dropped = world.action_queue
 	-- clear action queue

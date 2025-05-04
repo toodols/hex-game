@@ -15,6 +15,7 @@ local action_phase_mod = require(ServerScriptService.Server.action_phase)
 local damage_mod = require(ServerScriptService.Server.damage)
 local effect_mod = require(ServerScriptService.Server.effect)
 local entity_mod = require(ServerScriptService.Server.entity)
+local router = require(ServerScriptService.Server.router)
 
 local assert_eq = util.assert_eq
 
@@ -701,10 +702,81 @@ function tests.proxy()
 	}, world)
 
 	action_phase_mod.run_action_phase(world)
-	print(world:get_cell { 5, -5, 0 })
-	print(world:get_cell { 4, -4, 0 })
-
 	assert_eq(heart.status, "scaffold", "heart should be scaffold")
+end
+
+function tests.taunt_chain_reaction()
+	local world, teams = presets.blank_map()
+	local taunt1 = entity_mod.new_entity({
+		type = "taunt",
+		primary_coordinate = { 0, 0, 0 },
+		owner = teams.team1.id,
+		health = 1,
+	}, world)
+
+	local taunt2 = entity_mod.new_entity({
+		type = "taunt",
+		primary_coordinate = { 1, -1, 0 },
+		owner = teams.team1.id,
+		health = 1,
+	}, world)
+
+	local taunt3 = entity_mod.new_entity({
+		type = "taunt",
+		primary_coordinate = { 2, -2, 0 },
+		owner = teams.team1.id,
+		health = 1,
+	}, world)
+
+	local scout = entity_mod.new_entity({
+		type = "scout",
+		primary_coordinate = { -1, 1, 0 },
+		owner = teams.team2.id,
+	}, world)
+
+	local infinite_source = entity_mod.new_entity({
+		type = "infinite_source",
+		primary_coordinate = { -2, 2, 0 },
+		owner = teams.team2.id,
+	}, world)
+
+	table.insert(scout.queued_decisions, {
+		type = "ability",
+		ability_type = "scout_attack",
+		coordinate = { 0, 0, 0 },
+	})
+
+	action_phase_mod.run_action_phase(world)
+	assert_eq(taunt1.health, 0, "taunt1 should be dead")
+	assert_eq(taunt2.health, 0, "taunt2 should be dead")
+	assert_eq(taunt3.health, 0, "taunt3 should be dead")
+end
+
+function tests.deconstruct_interaction_gives_destroy_events()
+	local world, teams = presets.blank_map()
+	local scout = entity_mod.new_entity({
+		type = "scout",
+		status = "blueprint",
+		primary_coordinate = { 0, 0, 0 },
+		owner = teams.team1.id,
+	}, world)
+	local result = router.on_client_interaction(
+		world,
+		{ player_team = teams.team1, data = { {
+			type = "deconstruct",
+			entity_id = scout.id,
+		} } }
+	)
+	assert_eq(
+		util.table_any(result.updates[teams.team1.id], function(update)
+			return update.type == "entity_event"
+				and update.event.entity_id == scout.id
+				and update.event.event_type == "destroy"
+				and update.event.death_type == "deconstruct"
+		end),
+		true,
+		"Scout should be destroyed"
+	)
 end
 
 return tests

@@ -191,8 +191,8 @@ function new_entity(entity_: any, world: World): Entity
 	return entity
 end
 
--- Marks an entity as destroyed, removing it from the cells it occupies
--- Does not remove it from world.entities
+--- Marks an entity as destroyed, removing it from the cells it occupies
+--- Does not remove it from world.entities
 function remove_entity(world: World, entity: Entity)
 	local cell = world:get_cell(entity.primary_coordinate)
 	assert(cell, "cell not found")
@@ -201,11 +201,6 @@ function remove_entity(world: World, entity: Entity)
 	end
 	entity.is_destroyed = true
 	updates_mod.add_update(world, { type = "entity_update", entity = entity })
-	table.insert(world.action_queue, {
-		event_type = "entity_event",
-		type = "removed",
-		entity_id = entity.id,
-	})
 end
 
 -- todo: make this respect rotation

@@ -5,6 +5,7 @@ local server_types = require(ServerScriptService.Server.types)
 local util = require(ReplicatedStorage.Shared.util)
 local systems_mod = require(ServerScriptService.Server.systems)
 local items_mod = require(ReplicatedStorage.Shared.items)
+local updates_mod = require(ServerScriptService.Server.updates)
 
 type World = types.World
 type ActionState = server_types.ActionState
@@ -32,11 +33,16 @@ function handle_exchange_actions(world: World, action_state: ActionState)
 			for item_type, amount in input_items do
 				systems_mod.system_consume_item_type(world, action_state, system, item_type, amount)
 			end
-			table.insert(world.action_queue, {
+			local event = {
 				type = "entity_event",
 				event_type = "consumed_items",
 				entity_id = exchange_action.entity_id,
 				items = input_items,
+			}
+			table.insert(world.action_queue, event)
+			updates_mod.add_update(world, {
+				type = "entity_event",
+				event = event,
 			})
 		end
 		system.power -= input_power

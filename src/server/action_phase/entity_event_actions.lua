@@ -10,7 +10,10 @@ local util = require(ReplicatedStorage.Shared.util)
 
 type World = types.World
 type ActionState = server_types.ActionState
+type EntityId = types.EntityId
 
+--- Sends entity_events in action_queue to relevant entities (entities with influence + self)
+--- Then adds it to updates
 function handle_entity_event_actions(world: World, action_state: ActionState)
 	for _, event in
 		util.table_extract(world.action_queue, function(action)
@@ -18,29 +21,23 @@ function handle_entity_event_actions(world: World, action_state: ActionState)
 		end)
 	do
 		local source_entity = world.entities[event.entity_id]
-		assert(source_entity ~= nil, "no source entity")
-		local coordinates = coords.neighbors_many_leq(source_entity.coordinates, 1)
-		for _, coord in coordinates do
+		assert(source_entity ~= nil, "no source entity of event")
+		local entities: { [EntityId]: true } = {}
+		entities[source_entity.id] = true
+		for _, coord in source_entity.coordinates do
 			local cell = world:get_cell(coord)
-			if not cell then
-				continue
-			end
-			for entity_id in cell.entities do
-				-- don't send event to self
-				if entity_id == event.entity_id then
-					continue
-				end
-				local entity = world.entities[entity_id]
-				local behavior = server_entity_mod.registry[entity.type]
-				if behavior.on_event then
-					behavior.on_event(entity, world, event, action_state)
-				end
+			assert(cell, "cell not found")
+			for influence in cell.influences do
+				entities[influence] = true
 			end
 		end
-		updates_mod.add_update(world, {
-			type = "entity_event",
-			event = event,
-		})
+		for entity_id in entities do
+			local entity = world.entities[entity_id]
+			local behavior = server_entity_mod.registry[entity.type]
+			if behavior.on_event then
+				behavior.on_event(entity, world, event, action_state)
+			end
+		end
 	end
 end
 

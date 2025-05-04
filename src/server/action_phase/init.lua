@@ -86,6 +86,15 @@ function remove_occluded_blueprints(world: World)
 					return false
 				end)
 			then
+				updates_mod.add_update(world, {
+					type = "entity_event",
+					event = {
+						type = "entity_event",
+						event_type = "destroy",
+						entity_id = entity.id,
+						death_type = "other",
+					},
+				})
 				entity_mod.remove_entity(world, entity)
 			end
 		end
@@ -125,13 +134,13 @@ function delete_deconstructed_entities(world: World, queue: { EntityAction })
 			table.insert(queue, action)
 			continue
 		end
-		table.insert(world.action_queue, {
+		local event = {
 			type = "entity_event",
 			event_type = "destroy",
-			death_type = "deconstructed",
 			entity_id = entity.id,
-		})
-
+			death_type = "deconstruct",
+		}
+		table.insert(queue, event)
 		entity_mod.remove_entity(world, entity)
 	end
 end
@@ -139,6 +148,10 @@ end
 function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	local t0 = tick()
 	local action_state = new_action_state()
+
+	if #world.action_queue > 0 then
+		warn("there are leftover actions in the action queue", world.action_queue)
+	end
 
 	if extra_actions then
 		for _, action in extra_actions do
@@ -163,9 +176,10 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 
 	status_effects_tick(world, action_state)
 
-	-- destroy entities marked for destruction
-	for entity_id in action_state.will_be_destroyed_entities do
-		entity_mod.remove_entity(world, world.entities[entity_id])
+	for _, entity in world:active_entities() do
+		if entity.server_data.will_die then
+			entity_mod.remove_entity(world, entity)
+		end
 	end
 
 	create_systems(world, action_state)

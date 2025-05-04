@@ -34,11 +34,16 @@ function handle_advance_research_actions(world: World, action_state: ActionState
 					systems_mod.system_consume_item_type(world, action_state, system, item_type, amount)
 				end
 
-				table.insert(world.action_queue, {
+				local event = {
 					type = "entity_event",
 					event_type = "consumed_items",
-					items = research_state.cost,
 					entity_id = entity.id,
+					items = research_state.cost,
+				}
+				table.insert(world.action_queue, event)
+				updates_mod.add_update(world, {
+					type = "entity_event",
+					event = event,
 				})
 
 				research_state.cost_is_paid = true
@@ -61,11 +66,15 @@ function handle_advance_research_actions(world: World, action_state: ActionState
 					type = "entity_update",
 					entity = entity,
 				})
-				table.insert(world.action_queue, {
+				local event = {
 					type = "entity_event",
 					event_type = "research_completed",
 					entity_id = entity.id,
 					research_id = research_id,
+				}
+				updates_mod.add_update(world, {
+					type = "entity_event",
+					event = event,
 				})
 			else
 				break

@@ -33,12 +33,14 @@ function scout_attack(world: World, action_state: ActionState, ability: EntityAc
 		systems_mod.system_consume_item_type(world, action_state, system, item_type, amount)
 	end
 
-	table.insert(world.action_queue, {
+	local event = {
 		type = "entity_event",
 		event_type = "consumed_items",
 		entity_id = ability.entity_id,
 		items = cost,
-	})
+	}
+	table.insert(world.action_queue, event)
+	updates_mod.add_update(world, { type = "entity_event", event = event })
 
 	local cell = world:get_cell(ability.coordinate)
 	assert(cell, "cell not found")
@@ -52,16 +54,7 @@ function scout_attack(world: World, action_state: ActionState, ability: EntityAc
 		lethal = true,
 		friendly_fire = false,
 	}
-	for entity_id in damage_mod.damage_cells(world, { cell.coordinate }, damage) do
-		table.insert(world.action_queue, {
-			type = "entity_event",
-			event_type = "destroy",
-			death_type = "killed",
-			entity_id = entity_id,
-			damage = damage,
-		})
-		action_state.will_be_destroyed_entities[entity_id] = true
-	end
+	damage_mod.delayed_destruction(world, damage_mod.damage_cells(world, { cell.coordinate }, damage))
 end
 
 function disguise_ability(world: World, action_state: ActionState, ability: EntityAction)
@@ -150,13 +143,18 @@ function handle_ability_actions(world: World, action_state: ActionState)
 		elseif ability.ability_type == "solution_use" then
 			local entity = world.entities[ability.entity_id]
 			server_entity_mod.registry[entity.type].abilities[ability.ability_type](entity, world)
-			table.insert(world.action_queue, {
+			local event = {
 				type = "entity_event",
 				event_type = "destroy",
-				death_type = "used",
 				entity_id = entity.id,
+				death_type = "used",
+			}
+
+			updates_mod.add_update(world, {
+				type = "entity_event",
+				event = event,
 			})
-			action_state.will_be_destroyed_entities[entity.id] = true
+			entity.server_data.will_die = { death_type = "used" }
 		elseif ability.ability_type == "disguise" then
 			disguise_ability(world, action_state, ability)
 		end
