@@ -442,6 +442,26 @@ function EntityInformation(props: {
 							),
 						})
 						else nil,
+
+					StatusEffects = React.createElement(
+						"TextLabel",
+						themes.theme_description {
+							AutomaticSize = Enum.AutomaticSize.Y,
+							LayoutOrder = 10,
+							Size = UDim2.new(1, 0, 0, 20),
+							Visible = #entity.effects > 0,
+							Text = "Status effects: " .. table.concat(
+								util.table_map(entity.effects, function(v)
+									if v.duration then
+										return v.type .. " (" .. v.duration .. " turns)"
+									else
+										return v.type
+									end
+								end),
+								", "
+							),
+						}
+					),
 				}),
 
 				VerticalLayout = React.createElement("UIListLayout", {

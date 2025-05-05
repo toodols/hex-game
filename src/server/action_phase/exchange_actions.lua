@@ -50,12 +50,14 @@ function handle_exchange_actions(world: World, action_state: ActionState)
 			-- system_add_items mutates output_items so count it beforehand
 			local counted_output_items = items_mod.into_counted_items(output_items)
 			systems_mod.system_add_items(world, action_state, system, output_items)
-			table.insert(world.action_queue, {
+			local event = {
 				type = "entity_event",
 				event_type = "produced_items",
 				entity_id = exchange_action.entity_id,
 				items = counted_output_items,
-			})
+			}
+			table.insert(world.action_queue, event)
+			updates_mod.add_update(world, event)
 		end
 		system.power += output_power
 	end

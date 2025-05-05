@@ -234,7 +234,7 @@ function handle_cells(world: World, update: WorldUpdate)
 			hide_entities(world, old)
 		end
 
-		if old.type ~= cell.type then
+		if old and old.type ~= cell.type then
 			local instance = world.cell_instance_map[encoded_coord]
 			if instance then
 				instance:Destroy()

@@ -203,27 +203,29 @@ function BuildingItem(props: {
 							}),
 						}
 					),
-					RequiredResearch = entity_config.required_research and React.createElement(
-						"TextLabel",
-						themes.theme_description {
-							BackgroundTransparency = 1,
-							LayoutOrder = 4,
-							AutomaticSize = Enum.AutomaticSize.Y,
-							Size = UDim2.new(1, 0, 0, 0),
-							Text = "Requires Research: " .. table.concat(
-								util.table_map(entity_config.required_research, function(research_id)
-									local research = researches_mod.researches[research_id]
-									if props.researches[research_id] then
-										return `<font color="rgb(50, 155, 50)">{research.name}</font>`
-									else
-										return `<font color="rgb(155, 50, 50)">{research.name}</font>`
-									end
-								end),
-								", "
-							),
-							TextSize = 13,
-						}
-					),
+					RequiredResearch = entity_config.required_research
+						and #entity_config.required_research > 0
+						and React.createElement(
+							"TextLabel",
+							themes.theme_description {
+								BackgroundTransparency = 1,
+								LayoutOrder = 4,
+								AutomaticSize = Enum.AutomaticSize.Y,
+								Size = UDim2.new(1, 0, 0, 0),
+								Text = "Requires Research: " .. table.concat(
+									util.table_map(entity_config.required_research, function(research_id)
+										local research = researches_mod.researches[research_id]
+										if props.researches[research_id] then
+											return `<font color="rgb(50, 155, 50)">{research.name}</font>`
+										else
+											return `<font color="rgb(155, 50, 50)">{research.name}</font>`
+										end
+									end),
+									", "
+								),
+								TextSize = 13,
+							}
+						),
 					Items = React.createElement(Items, {
 						items = entity_config.cost,
 						LayoutOrder = 5,
@@ -295,12 +297,16 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 		end)
 	end, {})
 
+	local props_ref = React.useRef(nil)
+	if not util.deep_equal(props_ref.current, props) then
+		props_ref.current = props
+	end
 	React.useEffect(function()
 		ref.current.Position = UDim2.new(0.5, 0, 1, 200)
 		TweenService:Create(ref.current, TweenInfo.new(0.3), {
 			Position = UDim2.new(0.5, 0, 1, 0),
 		}):Play()
-	end, { props })
+	end, { props_ref.current })
 
 	React.useEffect(function()
 		if is_expanded then

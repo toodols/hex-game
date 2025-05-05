@@ -73,7 +73,6 @@ remotes_mod.get_world_data_remote.OnServerInvoke = function(player)
 		task.wait()
 	end
 	local player_team = team_mod.team_of(main_world, player)
-	print("ok", player)
 	local serialized = serialize_mod.serialize_world_for_team(main_world, player_team.id)
 	return serialized
 end :: any

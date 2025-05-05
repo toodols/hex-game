@@ -76,7 +76,7 @@ function scout_attack_effect(entity_instance: PVInstance, cell_instance: PVInsta
 			TweenService:Create(bullet, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 				Transparency = 1,
 				Color = Color3.fromRGB(200, 0, 0),
-				Size = Vector3.new(3, 3, 3),
+				Size = Vector3.new(4, 4, 4),
 			}):Play()
 			Debris:AddItem(bullet, 1)
 		end)

@@ -20,10 +20,7 @@ registry.regeneration = {
 	desirability = "positive",
 	init = function(world: World, entity: Entity, effect: Effect) end,
 	tick = function(world: World, action_state: ActionState, entity: Entity, effect: Effect)
-		damage_mod.damage_entity(world, entity, {
-			type = "healing",
-			amount = 1,
-		})
+		entity.health = math.min(entity.health + 1, entity.max_health)
 	end,
 }
 

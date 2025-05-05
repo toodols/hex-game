@@ -610,9 +610,7 @@ function tests.deconstructing_heart_doesnt_produce_item()
 	local updates = result.updates[teams.team1.id]
 
 	assert(not util.table_any(updates, function(update)
-		return update.type == "entity_event"
-			and update.event.entity_id == heart.id
-			and update.event.event_type == "produced_items"
+		return update.type == "entity_event" and update.entity_id == heart.id and update.event_type == "produced_items"
 	end), "Heart should not produce item on deconstruction")
 	cleanup(world)
 end

@@ -138,6 +138,7 @@ function delete_deconstructed_entities(world: World, queue: { EntityAction })
 			death_type = "deconstruct",
 		}
 		table.insert(queue, event)
+		updates_mod.add_update(world, event)
 		entity_mod.remove_entity(world, entity)
 	end
 end
@@ -172,6 +173,28 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	local dropped = process_queue(world, action_state)
 
 	status_effects_tick(world, action_state)
+
+	for _, entity in world:active_entities() do
+		if entity.type == "vertex" or entity.type == "extractor" then
+			continue
+		end
+		local on_vit = false
+		local on_rad = false
+		for _, coord in entity.coordinates do
+			local cell = world:get_cell(coord)
+			if cell.type == "vit_deposit" then
+				on_vit = true
+			elseif cell.type == "rad_deposit" then
+				on_rad = true
+			end
+		end
+		if on_vit then
+			effect_mod.add_exclusive_effect(entity, {
+				type = "regeneration",
+				duration = 2,
+			})
+		end
+	end
 
 	for _, entity in world:active_entities() do
 		if entity.server_data.will_die then
