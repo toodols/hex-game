@@ -230,7 +230,7 @@ function handle_cells(world: World, update: WorldUpdate)
 		end
 
 		-- remove entities from cells that have changed to not visible
-		if old.visible_for_team and not cell.visible_for_team then
+		if old and old.visible_for_team and not cell.visible_for_team then
 			hide_entities(world, old)
 		end
 
@@ -298,6 +298,7 @@ function handle_updates(world: World, updates: { WorldUpdate })
 	local updated_entities = {}
 
 	for _, update in updates do
+		print(update.type, update)
 		if update.type == "turn_timer" then
 			world.turn_schedule = update.schedule
 		elseif update.type == "turn" then

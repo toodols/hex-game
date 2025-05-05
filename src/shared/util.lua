@@ -243,25 +243,6 @@ function range(n: number)
 	return t
 end
 
-function timer(amount: number, callback: () -> ())
-	local inst: thread
-	local value = {
-		reset = function(new_amount: number?)
-			if inst then
-				task.cancel(inst)
-			end
-			inst = task.delay(new_amount or amount, function()
-				callback()
-			end)
-		end,
-		stop = function()
-			task.cancel(inst)
-		end,
-	}
-	value.reset()
-	return value
-end
-
 function table_count_entries(tab: { [any]: any }): number
 	local count = 0
 	for _ in tab do
@@ -304,7 +285,6 @@ return {
 	table_reverse = table_reverse,
 	table_count_entries = table_count_entries,
 	range = range,
-	timer = timer,
 	assert_eq = assert_eq,
 	font = font,
 }

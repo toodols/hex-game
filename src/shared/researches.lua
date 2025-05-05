@@ -54,20 +54,20 @@ end
 
 function create_researches(): { [ResearchId]: ResearchState }
 	return {
-		turret = research_state {
-			coord = { -1, 0, 1 },
-			id = "turret",
-			name = "Dagger",
-			description = "Allows construction of {entity.turret}",
-			icon = {
-				type = "model",
-				model = "Entities/Turret",
-			},
-			cost = {
-				bar = 4,
-			},
-			time = 1,
-		},
+		-- turret = research_state {
+		-- 	coord = { -1, 0, 1 },
+		-- 	id = "turret",
+		-- 	name = "Dagger",
+		-- 	description = "Allows construction of {entity.turret}",
+		-- 	icon = {
+		-- 		type = "model",
+		-- 		model = "Entities/Turret",
+		-- 	},
+		-- 	cost = {
+		-- 		bar = 4,
+		-- 	},
+		-- 	time = 1,
+		-- },
 		proxy = research_state {
 			coord = { -1, 1, 0 },
 			id = "proxy",

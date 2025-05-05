@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local RunService = game:GetService "RunService"
+local TweenService = game:GetService "TweenService"
 
 local React = require(ReplicatedStorage.Packages.react)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
@@ -23,7 +24,8 @@ function TopCenter()
 	local display_ref = React.useRef(nil)
 	local timer_ref = React.useRef(nil)
 	local do_animation = React.useRef(false)
-
+	local skip_btn_ref = React.useRef(nil)
+	local did_skip = React.useRef(false)
 	React.useEffect(function()
 		local cleanup = world.world_update_signal.listen(function(updates)
 			for _, update in updates do
@@ -34,9 +36,13 @@ function TopCenter()
 					or update.type == "turn_skips"
 					or update.type == "quest_update"
 					or update.type == "turn_completed"
+					or update.type == "turn_skipped"
 				then
 					if update.type == "turn_completed" then
 						do_animation.current = true
+					end
+					if update.type == "turn_skipped" then
+						did_skip.current = true
 					end
 					do_update = true
 				end
@@ -76,11 +82,27 @@ function TopCenter()
 	end, {})
 
 	React.useEffect(function()
+		if did_skip.current or world.current_skips ~= 0 then
+			did_skip.current = false
+			local tween = TweenService:Create(skip_btn_ref.current.Stroke, TweenInfo.new(0.3), {
+				Transparency = 0.4,
+			})
+			tween:Play()
+			tween.Completed:Connect(function()
+				local tween2 = TweenService:Create(skip_btn_ref.current.Stroke, TweenInfo.new(0.3), {
+					Transparency = 1,
+				})
+				tween2:Play()
+			end)
+		end
+	end)
+
+	React.useEffect(function()
 		if do_animation.current then
 			do_animation.current = false
 			if timer_ref.current then
 				timer_ref.current.BackgroundColor3 = Color3.fromRGB(57, 57, 57)
-				local tween = game:GetService("TweenService"):Create(
+				local tween = TweenService:Create(
 					timer_ref.current,
 					TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 					{ BackgroundColor3 = Color3.fromRGB(13, 13, 13) }
@@ -201,6 +223,7 @@ function TopCenter()
 				Text = "",
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 20,
+				ref = skip_btn_ref,
 				[React.Event.MouseButton1Click] = function()
 					client_interaction_remote:FireServer { {
 						type = "skip",
@@ -245,6 +268,13 @@ function TopCenter()
 					Text = `{world.current_skips}/{world.needed_skips}`,
 					TextColor3 = Color3.fromRGB(190, 190, 190),
 					TextSize = 15,
+				}),
+				Stroke = React.createElement("UIStroke", {
+					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+					Color = Color3.fromRGB(159, 255, 103),
+					LineJoinMode = Enum.LineJoinMode.Round,
+					Thickness = 1,
+					Transparency = 1,
 				}),
 			}),
 		}),

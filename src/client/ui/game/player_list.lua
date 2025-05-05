@@ -39,7 +39,8 @@ function TeamSection(props: {
 					SortOrder = Enum.SortOrder.LayoutOrder,
 				}),
 			},
-			util.table_map(props.team.players, function(player)
+			util.table_map(props.team.players, function(user_id)
+				local player = game.Players:GetPlayerByUserId(user_id)
 				return React.createElement("TextLabel", {
 					AutomaticSize = Enum.AutomaticSize.Y,
 					BackgroundTransparency = 1,
@@ -129,9 +130,8 @@ function TeamSection(props: {
 	})
 end
 
-function PlayerList()
+function PlayerList(props: { visible: boolean })
 	local world: World = React.useContext(MainContext).world
-	local visible, set_visible = React.useState(false)
 	local teams, set_teams = React.useState(world.teams)
 
 	React.useEffect(function()
@@ -142,20 +142,7 @@ function PlayerList()
 				end
 			end
 		end)
-		if RunService:IsClient() then
-			ContextActionService:BindAction("player_list", function(actionName, inputState, inputObject)
-				if inputState == Enum.UserInputState.Begin then
-					set_visible(true)
-				elseif inputState == Enum.UserInputState.End then
-					set_visible(false)
-				end
-			end, false, Enum.KeyCode.T)
-		end
-		return function()
-			if RunService:IsClient() then
-				ContextActionService:UnbindAction "player_list"
-			end
-		end
+
 	end, {})
 
 	return React.createElement("Frame", {
@@ -165,7 +152,7 @@ function PlayerList()
 		LayoutOrder = 1,
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 		Size = UDim2.new(1, 0, 0, 0),
-		Visible = visible,
+		Visible = props.visible,
 	}, {
 		VerticalLayout = React.createElement("UIListLayout", {
 			Padding = UDim.new(0, 1),

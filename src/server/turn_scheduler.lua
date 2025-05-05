@@ -24,10 +24,12 @@ function turn_schedule_resume(schedule: TurnSchedule)
 		return
 	end
 	schedule.running = true
-	local diff = if schedule.now ~= nil then os.clock() - schedule.now else 0
-	schedule.start_time += diff
-	schedule.end_time += diff
-	schedule.start_time_sync += diff
+	if schedule.now ~= nil then
+		local diff = os.clock() - schedule.now
+		schedule.start_time += diff
+		schedule.end_time += diff
+		schedule.start_time_sync += diff
+	end
 	if schedule.wait_thread then
 		task.cancel(schedule.wait_thread)
 	end
@@ -70,6 +72,9 @@ function recalculate_skips(world: World)
 			current_skips = 0,
 			needed_skips = needed_skips,
 		})
+		updates_mod.add_update(world, {
+			type = "turn_skipped",
+		})
 		turn_schedule_skip(world.turn_schedule)
 	else
 		world.needed_skips = needed_skips
@@ -98,16 +103,17 @@ function report_turn_time(world: World)
 end
 
 -- Resets the turn time to the beginning (does not report)
-function reset_turn_time(world: World, turn_schedule: TurnSchedule)
+function reset_turn_time(world: World, schedule: TurnSchedule)
 	local count_entities = 0
 	-- todo: simply counting every entity is a terrible way to scale game time
 	for _ in world:active_entities() do
 		count_entities += 1
 	end
 	local wait_time = count_entities * world.speed_multiplier + world.speed_base
-	turn_schedule.start_time_sync = workspace:GetServerTimeNow()
-	turn_schedule.start_time = os.clock()
-	turn_schedule.end_time = os.clock() + wait_time
+	schedule.now = nil
+	schedule.start_time_sync = workspace:GetServerTimeNow()
+	schedule.start_time = os.clock()
+	schedule.end_time = os.clock() + wait_time
 end
 
 function new_turn_schedule(get_end_time: () -> number, run_turn: () -> ()): TurnSchedule
@@ -158,6 +164,8 @@ function bootstrap(world: World)
 		reset_turn_time(world, world.turn_schedule :: TurnSchedule)
 		report_turn_time(world)
 	end, function()
+		world.skipped = {}
+		recalculate_skips(world)
 		action_phase_mod.run_action_phase(world)
 	end)
 	reset_turn_time(world, world.turn_schedule :: TurnSchedule)

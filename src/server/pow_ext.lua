@@ -203,6 +203,35 @@ return function()
 		end,
 	}
 
+	extra_commands.set_game_speed = {
+		description = "Sets the game speed.",
+		permissions = { "admin" },
+		overloads = {
+			{
+				returns = "nil",
+				args = {
+					{
+						name = "Speed Base",
+						type = "number",
+						description = "The speed base in seconds",
+					},
+					{
+						name = "Speed Multiplier",
+						type = "number",
+						description = "The speed multiplier (second * num_entities).",
+					},
+				},
+			},
+		},
+		server_run = function(context)
+			local world = _G.world
+			local speed_base = context.args[1]
+			local speed_multiplier = context.args[2]
+			world.speed_base = speed_base
+			world.speed_multiplier = speed_multiplier
+		end,
+	}
+
 	extra_commands.resume_timer = {
 		description = "Resumes the timer.",
 		permissions = { "admin" },

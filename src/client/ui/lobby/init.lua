@@ -26,6 +26,7 @@ function Lobby()
 
 	React.useEffect(function()
 		local connection = rooms_remote.OnClientEvent:Connect(function(data)
+			print(data)
 			local player_room = nil
 			for _, room in data.rooms do
 				if room.players[tostring(Players.LocalPlayer.UserId)] ~= nil then

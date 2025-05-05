@@ -50,28 +50,32 @@ local maps = {
 local rooms: { [string]: Room } = {}
 
 -- while wait loop not elegant
-local room_timers: { [string]: { stop: () -> (), reset: () -> () } } = {}
+local room_timers: { [string]: thread } = {}
 
 function room_membership_changed(room: Room)
 	if next(room.players) == nil then
 		rooms[room.id] = nil
 		if room_timers[room.id] then
-			room_timers[room.id].stop()
+			task.cancel(room_timers[room.id])
 			room_timers[room.id] = nil
 		end
 	else
 		if
-			not REQUIRES_FILLED_TEAMS
-			or util.table_every(room.teams, function(team, idx)
-				local v = team.is_spectator_team
-					or util.table_any(room.players, function(player)
-						return player.team == idx
-					end)
-				return v
-			end)
+
+			room_timers[room.id] == nil
+			and (
+				not REQUIRES_FILLED_TEAMS
+				or util.table_every(room.teams, function(team, idx)
+					local v = team.is_spectator_team
+						or util.table_any(room.players, function(player)
+							return player.team == idx
+						end)
+					return v
+				end)
+			)
 		then
 			room.starting_at = workspace:GetServerTimeNow() + START_TIME
-			room_timers[room.id] = util.timer(START_TIME, function()
+			room_timers[room.id] = task.delay(START_TIME, function()
 				local party = {}
 				for player_id, data in room.players do
 					local player = Players:GetPlayerByUserId(player_id)
@@ -91,14 +95,11 @@ function room_membership_changed(room: Room)
 			end)
 		else
 			if room_timers[room.id] then
-				room_timers[room.id].stop()
+				task.cancel(room_timers[room.id])
 				room_timers[room.id] = nil
 				room.starting_at = nil
 			end
 		end
-		rooms_remote:FireAllClients {
-			rooms = rooms,
-		}
 	end
 end
 
@@ -157,6 +158,7 @@ rooms_remote.OnServerEvent:Connect(function(plr: Player, props: Props)
 			rooms[props.room_id].players[tostring(plr.UserId)] = {
 				team = "3",
 			}
+			room_membership_changed(rooms[props.room_id])
 			rooms_remote:FireAllClients {
 				rooms = rooms,
 			}

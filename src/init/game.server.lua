@@ -68,10 +68,12 @@ end
 local main_world
 remotes_mod.get_world_data_remote.OnServerInvoke = function(player)
 	-- todo: change this to return nil when world is not set up, and make the client poll instead
+	print(main_world.teams, player)
 	while not main_world or not team_mod.team_of(main_world, player) do
 		task.wait()
 	end
 	local player_team = team_mod.team_of(main_world, player)
+	print("ok", player)
 	local serialized = serialize_mod.serialize_world_for_team(main_world, player_team.id)
 	return serialized
 end :: any
@@ -88,12 +90,24 @@ end
 
 function start_game(teleport_data: { room: types.Room }?)
 	local room = teleport_data and teleport_data.room
+	-- or { map = "my_map", players = { ["-1"] = { team = 4 }, ["-2"] = { team = 3 } } }
 	local players_config = room and room.players
 	print("Starting game with teleport data", game.HttpService:JSONEncode(teleport_data))
+	-- main_world = presets.tutorial_map()
 	main_world = presets[if room then room.map else "my_map"]()
 	-- main_world = tests.server.decaying()
 
 	_G.world = main_world
+
+	local team_instances = {}
+	for i, team_data in main_world.teams do
+		local team = Instance.new "Team"
+		team.Parent = game:GetService "Teams"
+		team.Name = team_data.name
+		-- todo: support color sequence
+		team.TeamColor = BrickColor.new(team_data.color.color)
+		team_instances[i] = team
+	end
 
 	remotes_mod.client_interaction_remote.OnServerEvent:Connect(function(plr: Player, data: { Interaction })
 		local player_team = team_mod.team_of(main_world, plr)
@@ -110,10 +124,15 @@ function start_game(teleport_data: { room: types.Room }?)
 	end)
 
 	local function auto_add_player(plr: Player)
-		if players_config and players_config[plr.UserId] then
-			local team = main_world.teams[players_config[plr.UserId].team]
-			assert(team, "team not found")
-			table.insert(team, plr)
+		if players_config then
+			local config = players_config[tostring(plr.UserId)]
+			local team: TeamData
+			if config and config.team then
+				team = main_world.teams[config.team]
+			else
+				team = main_world.teams[main_world.spectator_team]
+			end
+			table.insert(team.players, plr.UserId)
 		else
 			local team_with_least_players = nil
 			for _, team in main_world.teams do
@@ -125,8 +144,10 @@ function start_game(teleport_data: { room: types.Room }?)
 				end
 			end
 			assert(team_with_least_players, "no teams found")
-			table.insert(team_with_least_players.players, plr)
+			table.insert(team_with_least_players.players, plr.UserId)
 		end
+		local team = team_mod.team_of(main_world, plr)
+		plr.Team = team_instances[team.id]
 	end
 
 	for _, plr in Players:GetPlayers() do
@@ -143,9 +164,9 @@ function start_game(teleport_data: { room: types.Room }?)
 	end)
 	Players.PlayerRemoving:Connect(function(plr)
 		for _, team in main_world.teams do
-			util.table_remove_needle(team.players, plr)
+			util.table_remove_needle(team.players, plr.UserId)
 		end
-		util.table_remove_needle(main_world.skipped, plr)
+		util.table_remove_needle(main_world.skipped, plr.UserId)
 
 		turn_scheduler.recalculate_skips(main_world)
 		republish_teams(main_world)

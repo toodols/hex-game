@@ -1,4 +1,7 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local RunService = game:GetService "RunService"
+local ContextActionService = game:GetService "ContextActionService"
+local TweenService = game:GetService "TweenService"
 
 local React = require(ReplicatedStorage.Packages.react)
 
@@ -28,6 +31,77 @@ local Corner = util_components.Corner
 type World = types.World
 type SelectionMode = ui_types.SelectionMode
 
+function MenuIcon(props: { on_click: () -> (), label: string, icon: string })
+	local ref = React.useRef(nil :: any)
+	local layout_ref = React.useRef(nil :: any)
+	return React.createElement(
+		"TextButton",
+		themes.theme_solid {
+			Text = "",
+			Size = UDim2.new(0, 40, 0, 40),
+			ClipsDescendants = true,
+			ref = ref,
+			[React.Event.MouseButton1Click] = props.on_click,
+			[React.Event.MouseEnter] = function()
+				local width = layout_ref.current.AbsoluteContentSize.X
+				TweenService:Create(ref.current, TweenInfo.new(0.2), {
+					Size = UDim2.new(0, width, 0, 40),
+				}):Play()
+			end,
+			[React.Event.MouseLeave] = function()
+				TweenService:Create(ref.current, TweenInfo.new(0.2), {
+					Size = UDim2.new(0, 40, 0, 40),
+				}):Play()
+			end,
+		},
+		{
+			HorizontalLayout = React.createElement("UIListLayout", {
+				FillDirection = Enum.FillDirection.Horizontal,
+				HorizontalAlignment = Enum.HorizontalAlignment.Right,
+				SortOrder = Enum.SortOrder.LayoutOrder,
+				VerticalAlignment = Enum.VerticalAlignment.Center,
+
+				ref = layout_ref,
+			}),
+			Label = React.createElement(
+				"TextLabel",
+				themes.theme_label {
+					AutomaticSize = Enum.AutomaticSize.X,
+					Size = UDim2.new(0, 0, 1, 0),
+					Text = props.label,
+					TextSize = 14,
+					LayoutOrder = 1,
+				},
+				{
+					Padding = React.createElement("UIPadding", {
+						PaddingLeft = UDim.new(0, 5),
+					}),
+				}
+			),
+			Icon = React.createElement("Frame", {
+				BackgroundTransparency = 1,
+				LayoutOrder = 2,
+				Size = UDim2.new(0, 40, 0, 40),
+				ClipsDescendants = true,
+			}, {
+				ImageButton = React.createElement("ImageLabel", {
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					BackgroundTransparency = 1,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					BorderSizePixel = 0,
+					Image = props.icon,
+					ImageColor3 = Color3.fromRGB(255, 255, 255),
+					Position = UDim2.new(0.5, 0, 0.5, 0),
+					Size = UDim2.new(1, -10, 1, -10),
+				}),
+			}),
+
+			Corner = React.createElement(Corner),
+		}
+	)
+end
+
 function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 	local submenu, set_submenu = React.useState {}
 	hooks.use_immediate_effect(function()
@@ -39,6 +113,7 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 	local _, force_update = React.useReducer(function(x)
 		return x + 1
 	end, 0)
+	local players_visible, set_players_visible = React.useState(false)
 
 	local selection_mode = props.selection_mode_stack[#props.selection_mode_stack]
 
@@ -46,6 +121,23 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 		local quest = props.world.quests[quest_id]
 		return quest.current_stage_data.effects
 	end))
+
+	React.useEffect(function()
+		if RunService:IsClient() then
+			ContextActionService:BindAction("player_list", function(actionName, inputState, inputObject)
+				if inputState == Enum.UserInputState.Begin then
+					set_players_visible(true)
+				elseif inputState == Enum.UserInputState.End then
+					set_players_visible(false)
+				end
+			end, false, Enum.KeyCode.T)
+		end
+		return function()
+			if RunService:IsClient() then
+				ContextActionService:UnbindAction "player_list"
+			end
+		end
+	end, {})
 
 	return React.createElement(MainContext.Provider, {
 		value = {
@@ -72,7 +164,9 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 			Position = UDim2.new(0.5, 0, 0.5, 0),
 			Size = UDim2.new(1, 0, 1, 0),
 		}, {
-			PlayerList = React.createElement(PlayerList),
+			PlayerList = React.createElement(PlayerList, {
+				visible = players_visible,
+			}),
 			SettingsMenu = if settings_open then React.createElement(SettingsMenu) else nil,
 		}),
 		TopCenter = React.createElement(TopCenter),
@@ -103,8 +197,7 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 			CancelButton = React.createElement(
 				"TextButton",
 				themes.theme_button {
-					Visible = selection_mode.type == "select_some_cell_attack"
-						or selection_mode.type == "select_direction",
+					Visible = selection_mode.type == "select_some_cell",
 					Text = "Cancel",
 					Size = UDim2.new(0, 100, 0, 30),
 					BackgroundColor3 = Color3.fromRGB(13, 13, 13),
@@ -218,39 +311,27 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 			Position = UDim2.new(1, -20, 1, -20),
 		}, {
 
-			HorizontalLayout = React.createElement("UIListLayout", {
-				FillDirection = Enum.FillDirection.Horizontal,
+			VerticalLyaout = React.createElement("UIListLayout", {
+				FillDirection = Enum.FillDirection.Vertical,
 				HorizontalAlignment = Enum.HorizontalAlignment.Right,
 				Padding = UDim.new(0, 10),
 				SortOrder = Enum.SortOrder.LayoutOrder,
 				VerticalAlignment = Enum.VerticalAlignment.Bottom,
 			}),
-
-			Settings = React.createElement(
-				"Frame",
-				themes.theme_solid {
-					LayoutOrder = 1,
-					Size = UDim2.new(0, 40, 0, 40),
-				},
-				{
-					ImageButton = React.createElement("ImageButton", {
-						AnchorPoint = Vector2.new(0.5, 0.5),
-						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-						BackgroundTransparency = 1,
-						BorderColor3 = Color3.fromRGB(0, 0, 0),
-						BorderSizePixel = 0,
-						Image = "rbxassetid://4062402439",
-						ImageColor3 = Color3.fromRGB(255, 255, 255),
-						Position = UDim2.new(0.5, 0, 0.5, 0),
-						Size = UDim2.new(1, -10, 1, -10),
-						[React.Event.MouseButton1Click] = function()
-							set_settings_open(not settings_open)
-						end,
-					}),
-
-					Corner = React.createElement(Corner),
-				}
-			),
+			Players = React.createElement(MenuIcon, {
+				icon = "rbxassetid://6035053279",
+				label = "Players",
+				on_click = function()
+					set_players_visible(not players_visible)
+				end,
+			}),
+			Settings = React.createElement(MenuIcon, {
+				label = "Settings",
+				icon = "rbxassetid://6031280882",
+				on_click = function()
+					set_settings_open(not settings_open)
+				end,
+			}),
 		}),
 	})
 end

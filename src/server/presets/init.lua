@@ -77,11 +77,11 @@ function my_map(): World
 	shuffled_cells = util.table_shuffle(shuffled_cells)
 
 	local cell_count = #shuffled_cells
-	local bar_deposit_quota = math.ceil(cell_count * 0.05 / 2)
-	local vit_deposit_quota = math.ceil(cell_count * 0.02 / 2)
-	local rad_deposit_quota = math.ceil(cell_count * 0.02 / 2)
-	local tar_deposit_quota = math.ceil(cell_count * 0.02 / 2)
-	local barrier_quota = math.ceil(cell_count * 0.3 / 2)
+	local bar_deposit_quota = math.ceil(cell_count * 0.04 / 2)
+	local vit_deposit_quota = math.ceil(cell_count * 0.015 / 2)
+	local rad_deposit_quota = math.ceil(cell_count * 0.015 / 2)
+	local tar_deposit_quota = math.ceil(cell_count * 0.015 / 2)
+	local barrier_quota = math.ceil(cell_count * 0.2 / 2)
 
 	local function inverse(coord: CubicCoordinate): CubicCoordinate
 		return { -coord[1], -coord[2], -coord[3] }

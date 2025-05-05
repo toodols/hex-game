@@ -250,11 +250,16 @@ export type TeamData = {
 		-- "fogless" disables cell-level fog of war but not entity-level (like phony)
 		-- "perfect" is admin-level visibility
 		visibility: "normal" | "fogless" | "perfect",
-	}?,
+	},
 	-- is_ai: boolean -- not confident i am capable of implementing ai
 }
 
 export type Decision = {
+	type: "ability",
+	ability_type: string,
+	entity_id: EntityId,
+	coordinate: CubicCoordinate,
+} | {
 	type: "construct",
 	entity_type: string,
 	coordinate: CubicCoordinate,
@@ -266,23 +271,23 @@ export type Decision = {
 	type: "rotate_entity",
 	entity_id: EntityId,
 	rotation: number,
-} | {
-	type: "ability",
-	ability_type: string,
-	entity_id: EntityId,
-	coordinate: CubicCoordinate,
 }
 
 export type Interaction = Decision | {
-	type: "skip",
+	type: "add_research",
+	entity_id: EntityId,
+	research_id: ResearchId,
 } | {
 	type: "cancel_decision",
 	entity_id: EntityId,
 	decision_type: string,
 } | {
-	type: "add_research",
-	entity_id: EntityId,
-	research_id: ResearchId,
+	type: "quest_advance",
+	quest_id: string,
+} | {
+	type: "quest_select_choice",
+	quest_id: string,
+	choice_id: string,
 } | {
 	type: "remove_research",
 	entity_id: EntityId,
@@ -292,28 +297,23 @@ export type Interaction = Decision | {
 	enabled: boolean,
 	entity_id: EntityId,
 } | {
+	type: "set_inventory_filter",
+	entity_id: EntityId,
+	filter: Filter,
+} | {
 	type: "set_recipe",
 	recipe_id: string,
 	entity_id: EntityId,
 } | {
-	type: "quest_advance",
-	quest_id: string,
-} | {
-	type: "quest_select_choice",
-	quest_id: string,
-	choice_id: string,
+	type: "skip",
 } | {
 	type: "tutorial_report_selection",
 	selected: { CubicCoordinate },
-} | {
-	type: "set_inventory_filter",
-	entity_id: EntityId,
-	filter: Filter,
 }
 
 export type Damage = {
 	from: EntityId?,
-	type: "physical" | "healing",
+	damage_type: ("physical" | "healing")?,
 	amount: number,
 	-- Whether this damage ignores shields
 	-- Note piercing still respects layered entities (building above vertex)
@@ -339,83 +339,64 @@ export type Icon = {
 	type: "image",
 	image: string,
 } | {
-	type: "text",
-	text: string,
-} | {
 	type: "model",
 	model: string,
 } | {
 	type: "none",
+} | {
+	type: "text",
+	text: string,
 } | nil
 
 -- A message from Server to Client about the state of the game
 export type WorldUpdate =
 	-- handles add, update, and destruction
-	{ type: "entity_update", entity: Entity, target: TeamTarget }
-	| { type: "entity_created", entity_id: EntityId, target: TeamTarget }
-	| (EntityEvent & { type: "entity_event", target: TeamTarget })
-	| {
+	{ type: "ability", ability_type: string, entity_id: EntityId, coordinate: CubicCoordinate } | { type: "cells", cells: { [EncodedCoordinate]: HexCell }, target: TeamTarget } | {
 		type: "cell_update",
 		cell: HexCell,
 		target: TeamTarget,
-	}
-	| { type: "cells", cells: { [EncodedCoordinate]: HexCell }, target: TeamTarget }
-	| {
-		type: "turn",
-		turn: number,
-		highest_turn: number,
-	}
-	| {
-		type: "turn_timer",
-
-		turn_start_time: number,
-		turn_end_time: number,
-	}
-	| {
-		type: "turn_skips",
-		current_skips: number,
-		needed_skips: number,
-	}
-	| {
-		type: "turn_completed",
-	}
-	| {
-		type: "ability",
-		ability_type: string,
-		entity_id: EntityId,
-		coordinate: CubicCoordinate,
-	}
-	| {
+	} | { type: "entity_created", entity_id: EntityId, target: TeamTarget } | { type: "entity_update", entity: Entity, target: TeamTarget } | (EntityEvent & { type: "entity_event", target: TeamTarget }) | {
 		type: "exchange",
 		input_items: { [Item]: number }?,
 		input_power: number?,
 		output_items: { Item }?,
 		output_power: number?,
-	}
-	| {
+	} | {
+		type: "quest_update",
+		quest: Quest,
+	} | {
 		type: "teams",
 		teams: { [TeamId]: TeamData },
 		coalitions: { [CoalitionId]: CoalitionData },
-		-- } | {
-		-- 	type: "world",
-		-- 	world: PartialWorld,
-	}
-	| {
-		type: "quest_update",
-		quest: Quest,
+	} | {
+		type: "turn",
+		turn: number,
+		highest_turn: number,
+	} | {
+		type: "turn_completed",
+	} | {
+		type: "turn_skipped",
+	} | {
+		type: "turn_skips",
+		current_skips: number,
+		needed_skips: number,
+	} | {
+		type: "turn_timer",
+		turn_start_time: number,
+		turn_end_time: number,
 	}
 
 export type TurnSchedule = {
-	wait_thread: thread,
-	loop_thread: thread,
-	running: boolean,
-	get_end_time: () -> number,
-	start_time: number,
 	end_time: number,
+	get_end_time: () -> number,
+	loop_thread: thread,
 	now: number?,
-	start_time_sync: number,
 	run_turn: () -> (),
+	running: boolean,
+	start_time: number,
+	start_time_sync: number,
 	turn_ran_signal: Signal<nil>,
+	wait_thread: thread,
 }
 
 export type EntityConfiguration = {
@@ -427,10 +408,10 @@ export type EntityConfiguration = {
 	buildable: boolean,
 	build_time: number,
 	abilities: {
-		[string]: {
+		[string]: { -- attack ability
 			range: number,
 			cost: { [Item]: number },
-			damage: number,
+			damage: Damage,
 		},
 	},
 	can_disable: boolean,
@@ -460,51 +441,41 @@ export type GlobalConfiguration = {
 	decaying_enabled: boolean,
 }
 
-export type EntityEvent =
-	{
-		event_type: "dealt_damage",
-		damage: Damage,
-		entity_id: EntityId,
-	}
-	| {
-		event_type: "took_damage",
-		effective_damage: DamageResult,
-		entity_id: EntityId,
-	}
-	| {
-		event_type: "consumed_items",
-		items: { [Item]: number },
-		entity_id: EntityId,
-	}
-	| {
-		event_type: "produced_items",
-		items: { [Item]: number },
-		entity_id: EntityId,
-	}
-	| {
-		event_type: "status_changed",
-		entity_id: EntityId,
-	}
-	| {
-		event_type: "created",
-		entity_id: EntityId,
-	}
-	| {
-		event_type: "update",
-		entity_id: EntityId,
-	}
-	| {
-		event_type: "research_completed",
-		entity_id: EntityId,
-		research_id: ResearchId,
-	}
-	-- Entity is killed by damage or other means
-	| {
-		event_type: "destroy",
-		entity_id: EntityId,
-		death_type: "deconstruct" | "killed" | "used" | "other",
-		damage: Damage?,
-	}
+export type EntityEvent = {
+	event_type: "consumed_items",
+	items: { [Item]: number },
+	entity_id: EntityId,
+} | {
+	event_type: "created",
+	entity_id: EntityId,
+} | {
+	event_type: "dealt_damage",
+	damage: Damage,
+	entity_id: EntityId,
+} | {
+	event_type: "destroy",
+	entity_id: EntityId,
+	death_type: "deconstruct" | "killed" | "used" | "other",
+	damage: Damage?,
+} | {
+	event_type: "produced_items",
+	items: { [Item]: number },
+	entity_id: EntityId,
+} | {
+	event_type: "research_completed",
+	entity_id: EntityId,
+	research_id: ResearchId,
+} | {
+	event_type: "status_changed",
+	entity_id: EntityId,
+} | {
+	event_type: "took_damage",
+	effective_damage: DamageResult,
+	entity_id: EntityId,
+} | {
+	event_type: "update",
+	entity_id: EntityId,
+}
 
 export type EntityAction =
 	-- attempt to fill as much of the blueprint as possible from inventories and overflow
@@ -587,7 +558,8 @@ export type World = {
 	turn: number,
 	highest_turn: number,
 
-	skipped: { Player },
+	-- userids
+	skipped: { number },
 
 	-- read only for client
 	current_skips: number,

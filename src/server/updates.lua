@@ -105,7 +105,8 @@ function flush_updates(world: World): { [TeamId]: { WorldUpdate } }
 	for _, team in world.teams do
 		updates[team.id] = get_updates_for_team(world, buffer, team.id)
 		if #updates[team.id] > 0 then
-			for _, player in team.players do
+			for _, user_id in team.players do
+				local player = game.Players:GetPlayerByUserId(user_id)
 				remotes_mod.world_updates_remote:FireClient(player, updates[team.id])
 			end
 		end

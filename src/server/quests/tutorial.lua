@@ -34,7 +34,7 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 	},
 	build_vertex_on_tile = {
 		progression_requisite = function(self: Quest, world: World)
-			local entities = world:query_entity { coordinate = { 0, 0, 0 } }
+			local entities = world:query_entity { coordinate = { 0, 0, 0 }, query_global = true }
 			if #entities == 1 then
 				if entities[1].type == "vertex" then
 					return true
@@ -71,7 +71,7 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 	advance_until_stockpile_is_filled = {
 		stage_start = function(self: Quest, world: World)
 			assert(world.turn_schedule, "no turn schedule")
-			if #(world:query_entity { type = "stockpile" }) == 0 then
+			if #(world:query_entity { type = "stockpile", query_global = true }) == 0 then
 				self.details.error_message = "stockpile not found"
 				questing.quest_change_state(self, "error", world)
 				return
@@ -82,7 +82,7 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 
 			local unlisten
 			unlisten = world.turn_schedule.turn_ran_signal.listen(function()
-				local stockpile = (world:query_entity { type = "stockpile" })[1]
+				local stockpile = (world:query_entity { type = "stockpile", query_global = true })[1]
 				if not stockpile then
 					unlisten()
 					self.details.error_message = "stockpile not found"
@@ -100,7 +100,7 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 	},
 	build_scout_blueprint = {
 		progression_requisite = function(self: Quest, world: World)
-			return #world:query_entity { type = "scout", status = "blueprint" } == 1
+			return #world:query_entity { type = "scout", status = "blueprint", query_global = true } == 1
 		end,
 	},
 	complete_scout_blueprint = {
@@ -112,7 +112,7 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 
 			local unlisten
 			unlisten = world.turn_schedule.turn_ran_signal.listen(function()
-				local scout = (world:query_entity { type = "scout" })[1]
+				local scout = (world:query_entity { type = "scout", query_global = true })[1]
 				if not scout then
 					unlisten()
 					self.details.error_message = "scout not found"

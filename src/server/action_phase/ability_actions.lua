@@ -4,6 +4,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
 
 local util = require(ReplicatedStorage.Shared.util)
+local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 
 local systems_mod = require(ServerScriptService.Server.systems)
 local damage_mod = require(ServerScriptService.Server.damage)
@@ -46,14 +47,9 @@ function scout_attack(world: World, action_state: ActionState, ability: EntityAc
 	assert(cell, "cell not found")
 
 	updates_mod.add_update(world, ability)
+	local damage = table.clone(shared_entity_mod.registry[entity.type].abilities[ability.ability_type].damage)
+	damage.from = ability.entity_id
 
-	local damage = {
-		type = "flat",
-		amount = if ability.ability_type == "scout_attack" then 2 else 3,
-		from = entity.id,
-		lethal = true,
-		friendly_fire = false,
-	}
 	damage_mod.delayed_destruction(world, damage_mod.damage_cells(world, { cell.coordinate }, damage))
 end
 

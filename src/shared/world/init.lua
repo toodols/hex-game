@@ -53,6 +53,10 @@ end
 function purge_destroyed_entities(world: World)
 	for entity_id, entity in world.entities do
 		if entity.is_destroyed then
+			for _, coord in entity.coordinates do
+				local cell = world:get_cell(coord)
+				cell.entities[entity_id] = nil
+			end
 			world.entities[entity.id] = nil
 			local instance = world.entity_instance_map[entity.id]
 			if instance then
@@ -165,8 +169,8 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 		instance_entity_map = {},
 		entity_instance_map = {},
 		world_update_signal = new_signal(),
-		speed_multiplier = 0.3,
-		speed_base = 15,
+		speed_multiplier = 0.15,
+		speed_base = 10,
 		spectator_visibilities = {},
 		updates_buffer = {},
 		action_queue = {},
@@ -199,6 +203,7 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 		color = Color3.fromRGB(255, 255, 255),
 	}, "Spectator").id
 	world.teams[world.spectator_team].is_spectator_team = true
+	world.teams[world.spectator_team].server_data.visibility = "fogless"
 	world.teams[world.spectator_team].is_player_team = false
 	return world
 end

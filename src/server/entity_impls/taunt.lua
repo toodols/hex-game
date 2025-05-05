@@ -41,7 +41,6 @@ entity_mod.registry.taunt = entity_mod.with_defaults {
 			damage_mod.delayed_destruction(
 				world,
 				damage_mod.damage_cells(world, neighbors, {
-					type = "physical",
 					amount = 2,
 					friendly_fire = true,
 				})

@@ -3,6 +3,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local items_mod = require(ReplicatedStorage.Shared.items)
+local team_mod = require(ReplicatedStorage.Shared.team)
 
 local questing = require(script.Parent.questing)
 local turn_scheduler = require(script.Parent.turn_scheduler)
@@ -222,8 +223,12 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 		return { [entity.id] = true }
 	elseif entry.type == "skip" then
 		assert(player_info.player, "no player")
-		if table.find(world.skipped, player_info.player) == nil then
-			table.insert(world.skipped, player_info.player)
+		local team = team_mod.team_of(world, player_info.player)
+		if not team.is_player_team then
+			return {}
+		end
+		if table.find(world.skipped, player_info.player.UserId) == nil then
+			table.insert(world.skipped, player_info.player.UserId)
 			if world.turn_schedule then
 				turn_scheduler.recalculate_skips(world)
 			end

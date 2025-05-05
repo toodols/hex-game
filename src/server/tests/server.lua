@@ -168,14 +168,12 @@ function tests.damage_scout_with_magic()
 	local scout = spawn_entity(world, "scout")
 
 	damage_mod.damage_entity_destroying(world, scout, {
-		type = "physical",
 		amount = 1,
 	})
 
 	assert_eq(scout.health, scout.max_health - 1, "scout should have 1 less health")
 
 	damage_mod.damage_entity_destroying(world, scout, {
-		type = "physical",
 		amount = 100,
 		nonlethal = true,
 	})
@@ -183,7 +181,6 @@ function tests.damage_scout_with_magic()
 	assert(not scout.is_destroyed, "Nonlethal damage should not destroy the scout")
 
 	damage_mod.damage_entity_destroying(world, scout, {
-		type = "physical",
 		amount = 100,
 	})
 
@@ -197,10 +194,10 @@ function tests.damage_shielded_scout_with_magic()
 
 	local scout = spawn_entity(world, "scout")
 	local shield_effect = effect_mod.add_effect(scout, { type = "shield", health = 3 })
-	damage_mod.damage_entity_destroying(world, scout, { type = "physical", amount = 1 })
+	damage_mod.damage_entity_destroying(world, scout, { amount = 1 })
 	assert_eq(scout.health, scout.max_health, "scout should not have been damaged")
 	assert_eq(shield_effect.health, 2, "shield should have 2 health")
-	damage_mod.damage_entity_destroying(world, scout, { type = "physical", amount = 3 })
+	damage_mod.damage_entity_destroying(world, scout, { amount = 3 })
 	assert(shield_effect.is_destroyed, "shield should have been destroyed")
 	assert_eq(scout.health, scout.max_health - 1, "scout should have 3 less health")
 
@@ -208,7 +205,7 @@ function tests.damage_shielded_scout_with_magic()
 	scout.health = scout.max_health
 	local shield_1 = effect_mod.add_effect(scout, { type = "shield", health = 3 })
 	local shield_2 = effect_mod.add_effect(scout, { type = "shield", health = 3 })
-	damage_mod.damage_entity_destroying(world, scout, { type = "physical", amount = 5 })
+	damage_mod.damage_entity_destroying(world, scout, { amount = 5 })
 
 	assert(shield_1.is_destroyed, "shield 1 should have been destroyed")
 	assert(not shield_2.is_destroyed, "shield 2 should not have been destroyed")
@@ -500,7 +497,7 @@ function tests.scout_attack_each_other()
 
 	assert_eq(
 		scout2.health,
-		scout2.max_health - world.entity_configurations.scout.abilities.scout_attack.damage,
+		scout2.max_health - world.entity_configurations.scout.abilities.scout_attack.damage.amount,
 		"Scout 2 should have been damaged"
 	)
 
