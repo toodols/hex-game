@@ -16,16 +16,12 @@ local function clear_show_cells(context)
 	end)
 end
 
-function into_instance_set(world: World, coords: { CubicCoordinate })
-	local set = {}
+function into_cell_set(coords: { CubicCoordinate })
+	local cell_set = {}
 	for _, coord in coords do
-		local instance = world.cell_instance_map[coords_mod.encode_coord(coord)]
-		if not instance then
-			continue
-		end
-		set[instance] = true
+		cell_set[coords_mod.encode_coord(coord)] = true
 	end
-	return set
+	return cell_set
 end
 
 function HighlightOnHover(props: { Text: string, coords: { CubicCoordinate }, LayoutOrder: number? })
@@ -44,7 +40,7 @@ function HighlightOnHover(props: { Text: string, coords: { CubicCoordinate }, La
 				clear_show_cells(context)
 				table.insert(context.selection_mode_stack, {
 					type = "show_cells",
-					cells = into_instance_set(context.world, props.coords),
+					cells = into_cell_set(props.coords),
 				})
 			end,
 			[React.Event.MouseLeave] = function()

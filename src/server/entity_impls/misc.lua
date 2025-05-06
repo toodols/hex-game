@@ -16,11 +16,8 @@ entity_mod.registry.impression = entity_mod.with_defaults {
 }
 
 entity_mod.registry.obelisk = entity_mod.with_defaults {
-	autogenerates_vertex = true,
-}
-
-entity_mod.registry.phony = entity_mod.with_defaults {
-	autogenerates_vertex = true,
+	-- autogenerates_vertex = true,
+	decayable = false,
 }
 
 entity_mod.registry.scout = entity_mod.with_defaults {

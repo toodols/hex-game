@@ -58,7 +58,9 @@ end
 function recalculate_skips(world: World)
 	local needed_skips = 0
 	for _, team in world.teams do
-		needed_skips += #team.players
+		if team.is_player_team then
+			needed_skips += #team.players
+		end
 	end
 
 	if needed_skips == 0 then

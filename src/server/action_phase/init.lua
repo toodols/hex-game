@@ -164,7 +164,9 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	delete_deconstructed_entities(world, world.action_queue)
 	portals_tick(world)
 
+	visibility_mod.compute_visibility(world)
 	computed_mod.compute_influences(world)
+	computed_mod.compute_presence(world)
 	entities_tick(world, action_state)
 
 	queue_blueprints_and_scaffolds(world, world.action_queue)

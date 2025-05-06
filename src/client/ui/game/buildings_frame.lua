@@ -23,7 +23,6 @@ type CubicCoordinate = types.CubicCoordinate
 type Item = types.Item
 type World = types.World
 type ResearchId = types.ResearchId
-
 local PAGES = {
 	{
 		name = "Page 1",
@@ -91,12 +90,17 @@ local PAGES = {
 	},
 }
 
-function BuildingItem(props: {
-	do_animation: boolean,
-	type: string,
-	cell: CubicCoordinate,
-	researches: { [ResearchId]: boolean },
-})
+local BuildingItem = React.forwardRef(function(
+	props: {
+		do_animation: boolean,
+		type: string,
+		cell: CubicCoordinate,
+		researches: { [ResearchId]: boolean },
+		mouse_enter: () -> (),
+		mouse_leave: () -> (),
+	},
+	ref
+)
 	local world: World = React.useContext(MainContext).world
 	local entity_config = world.entity_configurations[props.type]
 	local button_ref = React.useRef(nil :: any)
@@ -109,6 +113,7 @@ function BuildingItem(props: {
 
 	return React.createElement("Frame", {
 		BackgroundTransparency = 1,
+		ref = ref,
 		Size = UDim2.new(0, 160, 0, if props.do_animation then 0 else 200),
 	}, {
 		TextButton = React.createElement(
@@ -129,6 +134,7 @@ function BuildingItem(props: {
 					}
 				end,
 				[React.Event.MouseEnter] = function()
+					props.mouse_enter()
 					if props.do_animation then
 						TweenService:Create(button_ref.current, TweenInfo.new(0.3), {
 							Position = UDim2.new(0, 0, 0, -200),
@@ -137,6 +143,7 @@ function BuildingItem(props: {
 					end
 				end,
 				[React.Event.MouseLeave] = function()
+					props.mouse_leave()
 					if props.do_animation then
 						TweenService:Create(button_ref.current, TweenInfo.new(0.3), {
 							Position = UDim2.new(0, 0, 0, -30),
@@ -238,9 +245,9 @@ function BuildingItem(props: {
 			}
 		),
 	})
-end
+end)
 
-local BuildingPage = React.forwardRef(function(
+local BuildingPage = function(
 	props: {
 		page: { name: string, items: { type: string } },
 		cell: CubicCoordinate,
@@ -269,13 +276,17 @@ local BuildingPage = React.forwardRef(function(
 			}),
 		},
 		util.table_map(props.page.items, function(item)
-			return React.createElement(
-				BuildingItem,
-				{ do_animation = true, type = item.type, cell = props.cell, researches = props.researches }
-			)
+			return React.createElement(BuildingItem, {
+				do_animation = true,
+				type = item.type,
+				cell = props.cell,
+				researches = props.researches,
+				mouse_enter = function() end,
+				mouse_leave = function() end,
+			})
 		end)
 	)
-end)
+end
 
 function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 	local world: World = React.useContext(MainContext).world
@@ -494,6 +505,8 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 			},
 			util.table_map(util.range(#PAGES), function(page_idx)
 				local page = PAGES[page_idx]
+				local inst = {}
+				local cur
 				return React.createElement(
 					"Frame",
 					{
@@ -508,11 +521,38 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 							SortOrder = Enum.SortOrder.LayoutOrder,
 						}),
 					},
-					util.table_map(page.items, function(item)
+					util.table_map(page.items, function(item, col)
 						return React.createElement(BuildingItem, {
 							type = item.type,
 							researches = researches,
 							cell = props.cell,
+							ref = function(v)
+								inst[col] = v
+							end,
+							mouse_enter = function()
+								cur = col
+								for i, v in inst do
+									if col == i then
+										TweenService:Create(v, TweenInfo.new(0.1), {
+											Size = UDim2.new(0, 160 + 20 * 5, 0, 200),
+										}):Play()
+									else
+										TweenService:Create(v, TweenInfo.new(0.1), {
+											Size = UDim2.new(0, 160 - 20, 0, 200),
+										}):Play()
+									end
+								end
+							end,
+							mouse_leave = function()
+								if cur == col then
+									cur = nil
+									for i, v in inst do
+										TweenService:Create(v, TweenInfo.new(0.1), {
+											Size = UDim2.new(0, 160, 0, 200),
+										}):Play()
+									end
+								end
+							end,
 						})
 					end)
 				)

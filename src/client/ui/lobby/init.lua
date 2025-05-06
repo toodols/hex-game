@@ -88,6 +88,16 @@ function Lobby()
 				}),
 			}),
 		}),
+		Hearts = React.createElement("TextButton", {
+			AnchorPoint = Vector2.new(1, 1),
+			Position = UDim2.new(1, -5, 1, -5),
+			AutomaticSize = Enum.AutomaticSize.XY,
+			BackgroundTransparency = 1,
+			TextXAlignment = Enum.TextXAlignment.Right,
+			Text = "♥︎",
+			TextSize = 15,
+			TextColor3 = Color3.fromRGB(255, 255, 255),
+		}),
 		Rooms = React.createElement("Frame", {
 			AnchorPoint = Vector2.new(0.5, 0),
 			AutomaticSize = Enum.AutomaticSize.XY,

@@ -1,4 +1,7 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ContextActionService = game:GetService "ContextActionService"
+local RunService = game:GetService "RunService"
+
 local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
@@ -92,6 +95,20 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 			force_update(nil)
 		end)
 		return cleanup
+	end, {})
+
+	React.useEffect(function()
+		if RunService:IsClient() then
+			ContextActionService:BindAction("build", function(action_name, input_state, input_object)
+				if input_state == Enum.UserInputState.Begin then
+					toggle_submenu { type = "build", cell = props_ref.current.selected_cells[1] }
+				end
+			end, false, Enum.KeyCode.B)
+			return function()
+				ContextActionService:UnbindAction "build"
+			end
+		end
+		return function() end
 	end, {})
 
 	return React.createElement("Frame", {

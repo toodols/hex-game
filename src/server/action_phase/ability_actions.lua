@@ -65,10 +65,6 @@ function disguise_ability(world: World, action_state: ActionState, ability: Enti
 		return
 	end
 
-	world:query_entity {
-		coordinate = coordinate,
-		status = "complete",
-	}
 	-- get the list of entities, filter the ones visible to this team
 	-- ignore entities that occupy more than one cell and sort it by layer
 	local entities = util.table_filter(
@@ -81,6 +77,7 @@ function disguise_ability(world: World, action_state: ActionState, ability: Enti
 				and #target_entity.coordinates == 1
 		end
 	)
+
 	table.sort(entities, function(a, b)
 		return world.entity_configurations[a.type].layer > world.entity_configurations[b.type].layer
 	end)
@@ -107,6 +104,11 @@ function disguise_ability(world: World, action_state: ActionState, ability: Enti
 		return
 	end
 
+	if top.disguise ~= nil then
+		-- disguise a disguise???
+		top = world.entities[top.disguise]
+	end
+
 	local copied = util.deep_copy(top)
 	copied.disguise = nil
 	copied.active = false
@@ -114,6 +116,7 @@ function disguise_ability(world: World, action_state: ActionState, ability: Enti
 	copied.primary_coordinate = entity.primary_coordinate
 	copied.coordinates = entity.coordinates
 	copied.owner = entity.owner
+	copied.is_destroyed = false
 	copied.server_data.is_disguise_of = entity.id
 	world.entities[copied.id] = copied
 	entity.disguise = copied.id

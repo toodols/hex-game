@@ -26,7 +26,7 @@ function compute_influences(world: World)
 		if next(cell.influences) == nil then
 			continue
 		end
-		local neighbors = coords_mod.neighbors_leq(entity.primary_coordinate, 1)
+		local neighbors = coords_mod.neighbors_leq(entity.primary_coordinate, 2)
 		for _, coord in neighbors do
 			local neighbor_cell = world:get_cell(coord)
 			for influence in cell.influences do

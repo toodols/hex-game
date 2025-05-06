@@ -79,7 +79,8 @@ function create_researches(): { [ResearchId]: ResearchState }
 				model = "Entities/Proxy",
 			},
 			cost = {
-				tek = 4,
+				tek = 2,
+				vit = 1,
 			},
 			time = 2,
 		},
@@ -110,7 +111,8 @@ function create_researches(): { [ResearchId]: ResearchState }
 			},
 			description = "Allows construction of {entity.heart}",
 			cost = {
-				tek = 10,
+				tek = 4,
+				tar = 1,
 			},
 			time = 3,
 		},
@@ -124,7 +126,8 @@ function create_researches(): { [ResearchId]: ResearchState }
 			},
 			description = "Allows construction of {entity.vault}",
 			cost = {
-				tek = 3,
+				tek = 2,
+				bar = 2,
 			},
 			time = 2,
 		},
@@ -138,9 +141,10 @@ function create_researches(): { [ResearchId]: ResearchState }
 			},
 			description = "Allows construction of {entity.taunt}",
 			cost = {
-				tek = 3,
+				tek = 1,
+				pow = 1,
 			},
-			time = 2,
+			time = 1,
 		},
 	}
 end

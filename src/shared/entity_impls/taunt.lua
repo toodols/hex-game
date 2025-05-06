@@ -8,8 +8,8 @@ entity_mod.registry.taunt = entity_mod.with_defaults {
 	max_health = 5,
 	build_time = 2,
 	cost = {
-		pow = 2,
-		bar = 2,
+		pow = 1,
+		bar = 4,
 	},
 	range = 2,
 	required_research = {

@@ -5,10 +5,11 @@ entity_mod.registry.phony = entity_mod.with_defaults {
 	type = "phony",
 	name = "Phony",
 	description = "Can disguise as a different building in a range of {entity.phony.abilities.disguise.range}. On death, generate 1 {item.tek}",
-	max_health = 3,
+	max_health = 1,
 	build_time = 1,
 	cost = {
-		bar = 4,
+		bar = 1,
+		tar = 1,
 	},
 	abilities = {
 		disguise = {

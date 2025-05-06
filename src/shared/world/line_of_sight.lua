@@ -20,7 +20,7 @@ function blocked(world: World, cell: HexCell, team: TeamId?)
 	end
 	for entity_id in cell.entities do
 		local entity = world.entities[entity_id]
-		if entity and entity.owner ~= team then
+		if entity and entity.status == "complete" and entity.owner ~= team and entity.type ~= "vertex" then
 			return true
 		end
 	end

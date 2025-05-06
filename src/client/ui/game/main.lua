@@ -25,6 +25,7 @@ local SelectedCellFrame = require(ReplicatedStorage.Client.ui.game.selected_cell
 local EntityInformation = require(ReplicatedStorage.Client.ui.game.entity_information).EntityInformation
 local Recipes = require(ReplicatedStorage.Client.ui.game.recipes).Recipes
 local ItemFilters = require(ReplicatedStorage.Client.ui.game.item_filters).ItemFilters
+local Credits = require(ReplicatedStorage.Client.ui.game.credits).Credits
 
 local Corner = util_components.Corner
 
@@ -109,6 +110,7 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 	end, { props })
 
 	local settings_open, set_settings_open = React.useState(false)
+	local credits_open, set_credits_open = React.useState(false)
 
 	local _, force_update = React.useReducer(function(x)
 		return x + 1
@@ -168,6 +170,7 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 				visible = players_visible,
 			}),
 			SettingsMenu = if settings_open then React.createElement(SettingsMenu) else nil,
+			Credits = if credits_open then React.createElement(Credits) else nil,
 		}),
 		TopCenter = React.createElement(TopCenter),
 		BottomCenter = React.createElement("Frame", {
@@ -330,6 +333,13 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 				icon = "rbxassetid://6031280882",
 				on_click = function()
 					set_settings_open(not settings_open)
+				end,
+			}),
+			Credits = React.createElement(MenuIcon, {
+				label = "<3",
+				icon = "rbxassetid://6023426974",
+				on_click = function()
+					set_credits_open(not credits_open)
 				end,
 			}),
 		}),

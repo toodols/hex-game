@@ -16,6 +16,7 @@ local damage_mod = require(ServerScriptService.Server.damage)
 local effect_mod = require(ServerScriptService.Server.effect)
 local entity_mod = require(ServerScriptService.Server.entity)
 local router = require(ServerScriptService.Server.router)
+local visibility_mod = require(ServerScriptService.Server.visibility)
 
 local assert_eq = util.assert_eq
 
@@ -772,6 +773,56 @@ function tests.deconstruct_interaction_gives_destroy_events()
 		true,
 		"Scout should be destroyed"
 	)
+end
+
+function tests.phony_generates_bar_on_death()
+	local world, teams = presets.blank_map()
+	world.global_configuration.decaying_enabled = false
+	local scout = entity_mod.new_entity({
+		type = "scout",
+		primary_coordinate = { 0, 0, 0 },
+		owner = teams.team2.id,
+	}, world)
+
+	local stockpile_ammo = entity_mod.new_entity({
+		type = "stockpile",
+		primary_coordinate = { -1, 1, 0 },
+		owner = teams.team2.id,
+	}, world)
+	stockpile_ammo.inventory.items = { "bar" }
+
+	local phony = entity_mod.new_entity({
+		type = "phony",
+		primary_coordinate = { 2, -2, 0 },
+		owner = teams.team1.id,
+	}, world)
+
+	local stockpile = entity_mod.new_entity({
+		type = "stockpile",
+		primary_coordinate = { 3, -3, 0 },
+		owner = teams.team1.id,
+	}, world)
+
+	table.insert(phony.queued_decisions, {
+		type = "ability",
+		ability_type = "disguise",
+		coordinate = scout.primary_coordinate,
+	})
+
+	action_phase_mod.run_action_phase(world)
+
+	assert(phony.disguise ~= nil, "Phony should be disguised")
+
+	table.insert(scout.queued_decisions, {
+		type = "ability",
+		ability_type = "scout_attack",
+		coordinate = phony.primary_coordinate,
+	})
+
+	action_phase_mod.run_action_phase(world)
+	assert(phony.is_destroyed, "Phony should be destroyed")
+
+	assert_eq(stockpile.inventory.items, { "tek" })
 end
 
 return tests

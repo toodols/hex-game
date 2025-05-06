@@ -94,7 +94,7 @@ function start_game(teleport_data: { room: types.Room }?)
 	print("Starting game with teleport data", game.HttpService:JSONEncode(teleport_data))
 	-- main_world = presets.tutorial_map()
 	main_world = presets[if room then room.map else "my_map"]()
-	-- main_world = tests.server.decaying()
+	-- main_world = tests.server.phony_generates_bar_on_death()
 
 	_G.world = main_world
 

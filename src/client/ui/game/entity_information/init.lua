@@ -436,10 +436,13 @@ function EntityInformation(props: {
 					Range = if entity.type == "laboratory"
 						then React.createElement(HighlightOnHover, {
 							Text = `Range: {world.entity_configurations.laboratory.range}`,
-							coords = coords.neighbors_leq(
-								entity.primary_coordinate,
-								world.entity_configurations.laboratory.range :: number
-							),
+							coords = util.table_values(util.table_filter_map(world.cells, function(cell)
+								if cell.influences[entity.id] ~= nil then
+									return cell.coordinate
+								else
+									return nil
+								end
+							end)),
 						})
 						else nil,
 
