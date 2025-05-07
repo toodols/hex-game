@@ -3,10 +3,8 @@
 - [ ] Display scores in player list
 - [ ] Add an end screen when only one team is left, then send players to lobby
 - [ ] Items in inventories with incompatible filters should be moved to different inventories
-- [ ] Make `suggestion` functional
 - [ ] Remove `turret`. It's too generic.
 - [ ] `witness` should indicate its charges
-- [ ] `torch` a building that can illuminate areas
 - [ ] Add `mace`, an artillery-type building
 	- [ ] Warning indicator entity 
 	- [ ] Mace occupies 3 tiles?
@@ -22,7 +20,6 @@
 	- Visibility can be granted or revoked by player teams
 
 - [ ] `host` A building that can control time
-- [ ] `sanction` A mine-like building that detonates when built over it
 - [ ] `empath` An offensive building that copies status effects of buildings it kills
 - [ ] `pocket` A building that can allow buildings to "fast travel"
 
@@ -37,6 +34,8 @@
 - [ ] Add keybinds for ui
 
 # Complete
+- [x] `torch` a building that can illuminate areas
+- [x] Make `suggestion` functional
 - [x] `scout` should physically turn to face its target when attacking
 - [x] Remove power from the game. It's too complicated.
 - [x] Make `phony` functional
