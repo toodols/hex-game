@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local util = require(ReplicatedStorage.Shared.util)
 local formatting = require(ReplicatedStorage.Shared.formatting)
+local coords = require(ReplicatedStorage.Shared.coords)
 local assert_eq = util.assert_eq
 
 local tests = {}
@@ -33,6 +34,23 @@ function tests.formatting()
 			{ condition = false, then_val = "blue", else_val = "red" }
 		),
 		"The sky is red"
+	)
+end
+
+function tests.sector()
+	local r = 0
+	local sector120 = util.table_join(
+		coords.into_set(coords.sector({ 0, 0, 0 }, r, 1)),
+		coords.into_set(coords.sector({ 0, 0, 0 }, r - 1, 1))
+	)
+	assert_eq(
+		sector120,
+		coords.into_set {
+			{ 0, 0, 0 },
+			{ 0, 1, -1 },
+			{ -1, 1, 0 },
+			{ -1, 0, 1 },
+		}
 	)
 end
 

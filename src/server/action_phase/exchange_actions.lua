@@ -40,7 +40,7 @@ function handle_exchange_actions(world: World, action_state: ActionState)
 				items = input_items,
 			}
 			table.insert(world.action_queue, event)
-			updates_mod.add_update(world, event)
+			world:add_update(event)
 		end
 		system.power -= input_power
 		if exchange_action.on_success then
@@ -57,7 +57,7 @@ function handle_exchange_actions(world: World, action_state: ActionState)
 				items = counted_output_items,
 			}
 			table.insert(world.action_queue, event)
-			updates_mod.add_update(world, event)
+			world:add_update(event)
 		end
 		system.power += output_power
 	end

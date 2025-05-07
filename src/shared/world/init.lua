@@ -21,6 +21,7 @@ type TeamColor = types.TeamColor
 type TeamData = types.TeamData
 type EntityConfiguration = types.EntityConfiguration
 type GlobalConfiguration = types.GlobalConfiguration
+type WorldUpdate = types.WorldUpdate
 
 -- Filters all values that are inside the world
 function coords_filter(world: World, values: { CubicCoordinate }): { CubicCoordinate }
@@ -117,6 +118,15 @@ function world_query_entity(world: World, props: any): { Entity }
 	return results
 end
 
+function world_add_update(self: World, update: WorldUpdate)
+	if update.type == "entity_update" then
+		if update.entity == nil then
+			error "event.entity is nil"
+		end
+	end
+	table.insert(self.updates_buffer, update)
+end
+
 function world_get_cell(self: World, coord: CubicCoordinate): HexCell?
 	return self.cells[encode_coord(coord)]
 end
@@ -187,6 +197,7 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 		systems = {},
 		active_entities = world_active_entities,
 		query_entity = world_query_entity,
+		add_update = world_add_update,
 		get_cell = world_get_cell,
 	}
 	-- neutral team

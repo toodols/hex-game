@@ -14,6 +14,10 @@ export type SelectionMode = {
 	candidates: { [EncodedCoordinate]: true },
 	on_selected: (cell: CubicCoordinate) -> nil,
 } | {
+	type: "select_some_cell_group",
+	candidates: { [EncodedCoordinate]: { EncodedCoordinate } },
+	on_selected: (cell: CubicCoordinate) -> nil,
+} | {
 	type: "show_cells",
 	cells: { [EncodedCoordinate]: true },
 } | {

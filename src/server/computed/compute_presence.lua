@@ -10,6 +10,9 @@ function compute_presence(world: World)
 		local owner
 		for entity_id in cell.entities do
 			local entity = world.entities[entity_id]
+			if entity.incorporeal then
+				continue
+			end
 			if entity.owner ~= neutral_team and entity.status ~= "blueprint" and not entity.is_destroyed then
 				owner = entity.owner
 			end

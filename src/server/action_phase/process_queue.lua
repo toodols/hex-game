@@ -81,6 +81,12 @@ function process_queue(world: World, action_state: ActionState): { EntityAction 
 			end
 		end
 
+		local run_late_actions = util.table_extract(world.action_queue, function(value)
+			return value.type == "run_late"
+		end)
+		for _, action in run_late_actions do
+			action.run(world, world.entities[action.entity_id])
+		end
 
 	until should_terminate()
 	local dropped = world.action_queue

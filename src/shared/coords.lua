@@ -5,6 +5,15 @@ local util = require(ReplicatedStorage.Shared.util)
 type CubicCoordinate = types.CubicCoordinate
 type EncodedCoordinate = types.EncodedCoordinate
 
+local rotation_to_direction = {
+	[1] = { 0, 1, -1 },
+	[2] = { 1, 0, -1 },
+	[3] = { 1, -1, 0 },
+	[4] = { 0, -1, 1 },
+	[5] = { -1, 0, 1 },
+	[0] = { -1, 1, 0 },
+}
+
 function coords_eq(c1: CubicCoordinate, c2: CubicCoordinate): boolean
 	return c1[1] == c2[1] and c1[2] == c2[2] and c1[3] == c2[3]
 end
@@ -22,6 +31,23 @@ function coords_sub(c1: CubicCoordinate, c2: CubicCoordinate): CubicCoordinate
 		c1[2] - c2[2],
 		c1[3] - c2[3],
 	}
+end
+
+function sector(origin: CubicCoordinate, rotation: number, radius: number): { CubicCoordinate }
+	local d1 = rotation_to_direction[rotation % 6]
+	local d2 = rotation_to_direction[(rotation + 1) % 6]
+	local results = {}
+
+	for i = 0, radius do
+		for j = 0, radius - i do
+			local x = origin[1] + d1[1] * i + d2[1] * j
+			local y = origin[2] + d1[2] * i + d2[2] * j
+			local z = origin[3] + d1[3] * i + d2[3] * j
+			table.insert(results, { x, y, z })
+		end
+	end
+
+	return results
 end
 
 --- Rotates a CubicCoordinate around the origin counterclockwise 60 degrees `rotation` times
@@ -59,15 +85,6 @@ end
 function display_coord(coord: CubicCoordinate): string
 	return string.format("(%d, %d, %d)", coord[1], coord[2], coord[3])
 end
-
-local rotation_to_direction = {
-	[1] = { 0, 1, -1 },
-	[2] = { 1, 0, -1 },
-	[3] = { 1, -1, 0 },
-	[4] = { 0, -1, 1 },
-	[5] = { -1, 0, 1 },
-	[0] = { -1, 1, 0 },
-}
 
 -- i am pretty certain neighbors_eq is broken
 -- returns neighbors at a radius. can give neighbors that are out of bounds
@@ -126,6 +143,22 @@ end
 
 function coords_dist(c1: CubicCoordinate, c2: CubicCoordinate): number
 	return math.max(math.abs(c1[1] - c2[1]), math.abs(c1[2] - c2[2]), math.abs(c1[3] - c2[3]))
+end
+
+function into_set(coords: { CubicCoordinate }): { [EncodedCoordinate]: boolean }
+	local set = {}
+	for _, coord in coords do
+		set[encode_coord(coord)] = true
+	end
+	return set
+end
+
+function from_set(set: { [EncodedCoordinate]: boolean }): { CubicCoordinate }
+	local result = {}
+	for coord in set do
+		table.insert(result, decode_coord(coord))
+	end
+	return result
 end
 
 -- Converts position into vec3 at y=0
@@ -198,5 +231,8 @@ return {
 	coords_round = coords_round,
 	display_coord = display_coord,
 	rotate_coord = rotate_coord,
+	sector = sector,
+	into_set = into_set,
+	from_set = from_set,
 	rotation_to_direction = rotation_to_direction,
 }

@@ -14,5 +14,9 @@ require(script.taunt)
 require(script.vault)
 require(script.vertex)
 require(script.witness)
+require(script.suggestion)
+require(script.torch)
+require(script.scout)
+
 
 return {}

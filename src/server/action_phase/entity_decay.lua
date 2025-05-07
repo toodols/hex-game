@@ -72,10 +72,10 @@ function do_entity_decay(world: World, action_state: ActionState)
 		if should_decay then
 			entity.is_decaying = true
 			entity.decay += 1
-			updates_mod.add_update(world, {
+			world:add_update {
 				type = "entity_update",
 				entity = entity,
-			})
+			}
 			if entity.decay >= 3 then
 				if entity.type == "vertex" then
 					entity_mod.remove_entity(world, entity)
@@ -89,10 +89,10 @@ function do_entity_decay(world: World, action_state: ActionState)
 			if entity.is_decaying then
 				entity.is_decaying = false
 				entity.decay = 0
-				updates_mod.add_update(world, {
+				world:add_update {
 					type = "entity_update",
 					entity = entity,
-				})
+				}
 			end
 		end
 	end

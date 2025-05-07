@@ -182,10 +182,10 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 				value.lethal = true
 			end
 
-			updates_mod.add_update(world, {
+			world:add_update {
 				type = "entity_update",
 				entity = entity,
-			})
+			}
 			local event = {
 				type = "entity_event",
 				event_type = "took_damage",
@@ -198,7 +198,7 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 				},
 			}
 			table.insert(world.action_queue, event)
-			updates_mod.add_update(world, event)
+			world:add_update(event)
 		end
 
 		return result
@@ -218,7 +218,7 @@ function delayed_destruction(world: World, damage_result: DamageResult)
 				entity_id = entity_id,
 				death_type = "killed",
 			}
-			updates_mod.add_update(world, event)
+			world:add_update(event)
 			table.insert(world.action_queue, event)
 			entity.server_data.will_die = {
 				death_type = "killed",

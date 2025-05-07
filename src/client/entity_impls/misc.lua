@@ -66,4 +66,6 @@ entity_mod.registry.extractor = entity_mod.with_defaults {
 	model = asset_server.load "Entities/Extractor",
 }
 
+
+
 return {}

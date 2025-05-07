@@ -47,10 +47,10 @@ function queue_entity_decisions(world: World, queue: { EntityAction })
 			decision.entity_id = entity.id
 
 			table.insert(queue, decision)
-			updates_mod.add_update(world, {
+			world:add_update {
 				type = "entity_update",
 				entity = entity,
-			})
+			}
 		end
 		entity.queued_decisions = {}
 	end
@@ -86,12 +86,12 @@ function remove_occluded_blueprints(world: World)
 					return false
 				end)
 			then
-				updates_mod.add_update(world, {
+				world:add_update {
 					type = "entity_event",
 					event_type = "destroy",
 					entity_id = entity.id,
 					death_type = "other",
-				})
+				}
 				entity_mod.remove_entity(world, entity)
 			end
 		end
@@ -104,10 +104,10 @@ function status_effects_tick(world: World, action_state: ActionState)
 			continue
 		end
 		effect_mod.tick_effects(world, action_state, entity)
-		updates_mod.add_update(world, {
+		world:add_update {
 			type = "entity_update",
 			entity = entity,
-		})
+		}
 	end
 end
 
@@ -138,7 +138,7 @@ function delete_deconstructed_entities(world: World, queue: { EntityAction })
 			death_type = "deconstruct",
 		}
 		table.insert(queue, event)
-		updates_mod.add_update(world, event)
+		world:add_update(event)
 		entity_mod.remove_entity(world, entity)
 	end
 end
@@ -168,13 +168,12 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	computed_mod.compute_influences(world)
 	computed_mod.compute_presence(world)
 	entities_tick(world, action_state)
+	status_effects_tick(world, action_state)
 
 	queue_blueprints_and_scaffolds(world, world.action_queue)
 
 	create_systems(world, action_state)
 	local dropped = process_queue(world, action_state)
-
-	status_effects_tick(world, action_state)
 
 	for _, entity in world:active_entities() do
 		if entity.type == "vertex" or entity.type == "extractor" then
@@ -215,31 +214,31 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 		for encoded_coord in changed_to_visible do
 			local cell = world.cells[encoded_coord]
 			for entity_id in cell.entities do
-				updates_mod.add_update(world, {
+				world:add_update {
 					type = "entity_update",
 					entity = world.entities[entity_id],
 					targets = {
 						team_id,
 					},
-				})
+				}
 			end
 		end
 	end
 
-	updates_mod.add_update(world, {
+	world:add_update {
 		type = "cells",
 		cells = world.cells,
-	})
+	}
 
 	world.turn += 1
-	updates_mod.add_update(world, {
+	world:add_update {
 		type = "turn",
 		turn = world.turn,
 		highest_turn = world.highest_turn,
-	})
-	updates_mod.add_update(world, {
+	}
+	world:add_update {
 		type = "turn_completed",
-	})
+	}
 
 	for _, quest in world.quests do
 		questing.quest_update(quest, world)

@@ -40,6 +40,9 @@ local PAGES = {
 			{
 				type = "solution",
 			},
+			{
+				type = "obelisk",
+			},
 		},
 	},
 	{
@@ -71,9 +74,7 @@ local PAGES = {
 			{
 				type = "vault",
 			},
-			{
-				type = "obelisk",
-			},
+
 			{
 				type = "proxy",
 			},
@@ -85,6 +86,9 @@ local PAGES = {
 			},
 			{
 				type = "phony",
+			},
+			{
+				type = "torch",
 			},
 		},
 	},

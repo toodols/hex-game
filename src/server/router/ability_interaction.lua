@@ -5,6 +5,7 @@ local util = require(ReplicatedStorage.Shared.util)
 local server_types = require(ServerScriptService.Server.types)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local coords = require(ReplicatedStorage.Shared.coords)
+local team_mod = require(ReplicatedStorage.Shared.team)
 
 type World = types.World
 type Interaction = types.Interaction
@@ -35,7 +36,8 @@ function ability_interaction(world: World, entry: Interaction, player_info: Play
 		end
 		-- prevent cells with influence from taunt from being targeted
 		for influence in cell.influences do
-			if world.entities[influence].type == "taunt" then
+			local taunt = world.entities[influence]
+			if taunt.type == "taunt" and not team_mod.is_allied(world, taunt.owner, player_info.team) then
 				continue
 			end
 		end

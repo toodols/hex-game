@@ -78,7 +78,7 @@ remotes_mod.get_world_data_remote.OnServerInvoke = function(player)
 end :: any
 
 function republish_teams(world: World)
-	updates_mod.add_update(world, {
+	world:add_update( {
 		type = "teams",
 		teams = util.table_map(world.teams, function(team)
 			return serialize_mod.serialize_team(world, team)

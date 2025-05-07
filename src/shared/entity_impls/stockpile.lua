@@ -11,7 +11,6 @@ entity_mod.registry.stockpile = entity_mod.with_defaults {
 	cost = {
 		bar = 4,
 	},
-	can_capture = true,
 	layer = entity_mod.LAYER.building,
 }
 

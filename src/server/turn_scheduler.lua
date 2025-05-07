@@ -69,30 +69,30 @@ function recalculate_skips(world: World)
 
 	if #world.skipped >= needed_skips and world.turn_schedule ~= nil then
 		world.skipped = {}
-		updates_mod.add_update(world, {
+		world:add_update {
 			type = "turn_skips",
 			current_skips = 0,
 			needed_skips = needed_skips,
-		})
-		updates_mod.add_update(world, {
+		}
+		world:add_update {
 			type = "turn_skipped",
-		})
+		}
 		turn_schedule_skip(world.turn_schedule)
 	else
 		world.needed_skips = needed_skips
 		world.current_skips = #world.skipped
-		updates_mod.add_update(world, {
+		world:add_update {
 			type = "turn_skips",
 			current_skips = #world.skipped,
 			needed_skips = needed_skips,
-		})
+		}
 	end
 end
 
 -- Reports the turn time to the players
 function report_turn_time(world: World)
 	assert(world.turn_schedule, "no turn schedule")
-	updates_mod.add_update(world, {
+	world:add_update {
 		type = "turn_timer",
 		schedule = {
 			start_time_sync = world.turn_schedule.start_time_sync,
@@ -100,7 +100,7 @@ function report_turn_time(world: World)
 			end_time = world.turn_schedule.end_time,
 			running = world.turn_schedule.running,
 		},
-	})
+	}
 	updates_mod.flush_updates(world)
 end
 

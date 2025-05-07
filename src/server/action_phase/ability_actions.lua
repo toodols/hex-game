@@ -41,12 +41,12 @@ function scout_attack(world: World, action_state: ActionState, ability: EntityAc
 		items = cost,
 	}
 	table.insert(world.action_queue, event)
-	updates_mod.add_update(world, event)
+	world:add_update(event)
 
 	local cell = world:get_cell(ability.coordinate)
 	assert(cell, "cell not found")
 
-	updates_mod.add_update(world, ability)
+	world:add_update(ability)
 	local damage = table.clone(shared_entity_mod.registry[entity.type].abilities[ability.ability_type].damage)
 	damage.from = ability.entity_id
 
@@ -91,16 +91,16 @@ function disguise_ability(world: World, action_state: ActionState, ability: Enti
 	if top == entity then
 		if entity.disguise then
 			world.entities[entity.disguise].is_destroyed = true
-			updates_mod.add_update(world, {
+			world:add_update {
 				type = "entity_update",
 				entity = world.entities[entity.disguise],
-			})
+			}
 		end
 		entity.disguise = nil
-		updates_mod.add_update(world, {
+		world:add_update {
 			type = "disguise",
 			entity_id = entity.id,
-		})
+		}
 		return
 	end
 
@@ -120,15 +120,15 @@ function disguise_ability(world: World, action_state: ActionState, ability: Enti
 	copied.server_data.is_disguise_of = entity.id
 	world.entities[copied.id] = copied
 	entity.disguise = copied.id
-	updates_mod.add_update(world, {
+	world:add_update {
 		type = "entity_update",
 		entity = copied,
-	})
-	updates_mod.add_update(world, {
+	}
+	world:add_update {
 		type = "entity_disguise",
 		entity_id = entity.id,
 		disguise_id = copied.id,
-	})
+	}
 end
 
 function handle_ability_actions(world: World, action_state: ActionState)
@@ -148,7 +148,7 @@ function handle_ability_actions(world: World, action_state: ActionState)
 				entity_id = entity.id,
 				death_type = "used",
 			}
-			updates_mod.add_update(world, event)
+			world:add_update(event)
 			entity.server_data.will_die = { death_type = "used" }
 		elseif ability.ability_type == "disguise" then
 			disguise_ability(world, action_state, ability)

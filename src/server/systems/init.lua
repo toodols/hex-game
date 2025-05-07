@@ -59,10 +59,10 @@ function system_consume_item_type(
 			end)
 			amount -= #extracted
 			net += #extracted
-			updates_mod.add_update(world, {
+			world:add_update {
 				type = "entity_update",
 				entity = inventory_entity,
-			})
+			}
 		end
 	end
 	return net
@@ -127,10 +127,10 @@ function system_add_items(world: World, action_state: ActionState, system: Syste
 	while #open_inventory_entities > 0 and #items > 0 do
 		local target = open_inventory_entities[#open_inventory_entities]
 		if items_mod.inventory_deposit(target.inventory, items) then
-			updates_mod.add_update(world, {
+			world:add_update {
 				type = "entity_update",
 				entity = target,
-			})
+			}
 		else
 			open_inventory_entities[#open_inventory_entities] = nil
 		end

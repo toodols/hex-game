@@ -41,35 +41,35 @@ function handle_advance_research_actions(world: World, action_state: ActionState
 					items = research_state.cost,
 				}
 				table.insert(world.action_queue, event)
-				updates_mod.add_update(world, event)
+				world:add_update(event)
 
 				research_state.cost_is_paid = true
-				updates_mod.add_update(world, {
+				world:add_update {
 					type = "entity_update",
 					entity = entity,
-				})
+				}
 			else
 				research_state.progress += 1
-				updates_mod.add_update(world, {
+				world:add_update {
 					type = "entity_update",
 					entity = entity,
-				})
+				}
 				succeeded = true
 			end
 
 			if research_state.progress == research_state.time then
 				research_state.status = "complete"
-				updates_mod.add_update(world, {
+				world:add_update {
 					type = "entity_update",
 					entity = entity,
-				})
+				}
 				local event = {
 					type = "entity_event",
 					event_type = "research_completed",
 					entity_id = entity.id,
 					research_id = research_id,
 				}
-				updates_mod.add_update(world, event)
+				world:add_update(event)
 			else
 				break
 			end

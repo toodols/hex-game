@@ -1,7 +1,11 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local team_mod = require(ReplicatedStorage.Shared.team)
 local coords = require(ReplicatedStorage.Shared.coords)
+local effect_mod = require(script.Parent.effect)
+local server_entity_mod = require(ServerScriptService.Server.entity)
+
 type TeamId = types.TeamId
 type Entity = types.Entity
 type HexCell = types.HexCell
@@ -58,12 +62,13 @@ function compute_visibility(world: World): { [TeamId]: { [EncodedCoordinate]: bo
 		end
 
 		-- local cell = world:get_cell(entity.primary_coordinate)
-		-- local server_behavior = server_entity_mod.registry[entity.type]
-		local illuminated = coords.neighbors_leq(entity.primary_coordinate, 2)
-		if entity.type == "scout" then
-			illuminated = coords.neighbors_leq(entity.primary_coordinate, 3)
+		local neighbors = coords.neighbors_leq(entity.primary_coordinate, 2)
+		for _, coord in neighbors do
+			add_visibility(coord, entity.owner, "contact")
 		end
-		for _, neighbor_coord in illuminated do
+
+		local server_behavior = server_entity_mod.registry[entity.type]
+		for _, neighbor_coord in server_behavior.illumination(entity, world) do
 			add_visibility(neighbor_coord, entity.owner, "illumination")
 		end
 	end
@@ -102,6 +107,10 @@ function entity_visibility(world: World, entity: Entity, team: TeamId): boolean
 	-- this entity is visible if it is owned by this coalition
 	if team_mod.is_allied(world, entity.owner, team) then
 		return true
+	end
+
+	if #effect_mod.get_effects(entity, "hidden") > 0 then
+		return false
 	end
 
 	if entity.server_data.is_disguise_of ~= nil then

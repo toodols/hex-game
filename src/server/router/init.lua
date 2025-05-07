@@ -53,12 +53,12 @@ function remove_unsupported_vertices(world: World, entity: Entity)
 			end
 			if not supported then
 				for _, vertex in vertices do
-					updates_mod.add_update(world, {
+					world:add_update {
 						type = "entity_event",
 						event_type = "destroy",
 						entity_id = vertex.id,
 						death_type = "other",
-					})
+					}
 					entity_mod.remove_entity(world, vertex)
 				end
 			end
@@ -166,12 +166,12 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 			updates_mod.flush_updates(world)
 			return { [entity.id] = true }
 		else
-			updates_mod.add_update(world, {
+			world:add_update {
 				type = "entity_event",
 				event_type = "destroy",
 				entity_id = entity.id,
 				death_type = "deconstruct",
-			})
+			}
 			entity_mod.remove_entity(world, entity)
 			remove_unsupported_vertices(world, entity)
 			return {}
@@ -305,10 +305,10 @@ function on_client_interaction(
 	-- end
 
 	for entity_id in dirty_entities do
-		updates_mod.add_update(world, {
+		world:add_update {
 			type = "entity_update",
 			entity = world.entities[entity_id],
-		})
+		}
 	end
 
 	for _, quest in world.quests do

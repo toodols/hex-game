@@ -18,5 +18,6 @@ require(script.impression)
 require(script.phony)
 require(script.suggestion)
 require(script.taunt)
+require(script.torch)
 
 return {}

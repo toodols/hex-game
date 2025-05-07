@@ -16,6 +16,17 @@ type EffectBehavior = {
 }
 local registry: { [string]: EffectBehavior } = {}
 
+local noop = function() end
+function with_defaults(effect: EffectBehavior): EffectBehavior
+	return {
+		description = effect.description,
+		desirability = effect.desirability or "neutral",
+		init = effect.init or noop,
+		tick = effect.tick or noop,
+		remove = effect.remove or noop,
+	}
+end
+
 function get_effects(entity: Entity, effect_type: string): { Effect }
 	local effects = {}
 	for _, effect in entity.effects do
@@ -86,4 +97,5 @@ return {
 	purge_destroyed_effects = purge_destroyed_effects,
 	tick_effects = tick_effects,
 	registry = registry,
+	with_defaults = with_defaults,
 }

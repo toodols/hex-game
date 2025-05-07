@@ -90,7 +90,7 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 				or world.entities[uncompressed_entity.current].is_destroyed
 			then
 				uncompressed_entity.current =
-					best_uncompressed_entity(world, entities_from_cells(world, props.selected_cells))
+					best_uncompressed_entity(world, entities_from_cells(world, props_ref.current.selected_cells))
 			end
 			force_update(nil)
 		end)

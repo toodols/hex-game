@@ -54,10 +54,10 @@ entity_mod.registry.extractor = entity_mod.with_defaults {
 			else
 				ok()
 			end
-			updates_mod.add_update(world, {
+			world:add_update {
 				type = "entity_update",
 				entity = self,
-			})
+			}
 		end
 	end,
 	on_event = function(self: Entity, world: World, event: EntityEvent)

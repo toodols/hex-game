@@ -150,10 +150,10 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 				visibility_mod.compute_visibility(world)
 				computed_mod.compute_presence(world)
 
-				updates_mod.add_update(world, {
+				world:add_update {
 					type = "cells",
 					cells = world.cells,
-				})
+				}
 				updates_mod.flush_updates(world)
 				task.wait(1)
 				questing.quest_advance(self, world)
@@ -290,10 +290,10 @@ function tutorial(world: World): Quest
 	}
 	quest.tutorial_player_selection = {}
 	quest.quest_update_signal.listen(function()
-		updates_mod.add_update(world, {
+		world:add_update {
 			type = "quest_update",
 			quest = questing.quest_serialize(quest, world),
-		})
+		}
 		updates_mod.flush_updates(world)
 	end)
 	return quest

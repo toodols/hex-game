@@ -6,7 +6,6 @@ local coords = require(ReplicatedStorage.Shared.coords)
 
 local server_util = require(script.Parent.util)
 local server_types = require(script.Parent.types)
-local updates_mod = require(script.Parent.updates)
 
 type Damage = types.Damage
 type HexCell = types.HexCell
@@ -27,8 +26,9 @@ export type ServerEntityBehavior = {
 
 	abilities: { [string]: (self: Entity, world: World) -> () },
 	built_on: { CellType },
+	incorporeal: boolean?,
 
-	illuminates: (self: Entity, world: World) -> { CubicCoordinate },
+	illumination: (self: Entity, world: World) -> { CubicCoordinate },
 	influences: ((self: Entity, world: World) -> ())?,
 	init: (self: Entity, world: World) -> (),
 	on_completed: (self: Entity, world: World) -> (),
@@ -52,13 +52,13 @@ function with_defaults(behavior: any): ServerEntityBehavior
 	end
 	behavior.on_completed = behavior.on_completed or noop
 	behavior.built_on = behavior.built_on or {}
-	behavior.influences = behavior.influences or noop
+	-- behavior.influences = behavior.influences
 	behavior.on_event = behavior.on_event or noop
 	behavior.abilities = behavior.abilities or {}
-	behavior.illuminates = function(self, world)
+	behavior.illumination = behavior.illumination or function(self, world)
 		return {}
 	end
-	return behavior
+	return behavior :: ServerEntityBehavior
 end
 
 function entity_can_deconstruct(entity: Entity, world: World)
@@ -134,6 +134,7 @@ function new_entity(entity_: any, world: World): Entity
 	local defaults = {
 		active = true,
 		build_time = shared_behavior.build_time,
+		incorporeal = server_behavior.incorporeal,
 		coordinates = { entity.primary_coordinate },
 		cost = shared_behavior.cost,
 		cost_fulfilled = {},
@@ -183,11 +184,11 @@ function new_entity(entity_: any, world: World): Entity
 		autogenerate_vertex(world, entity)
 	end
 
-	updates_mod.add_update(world, { type = "entity_update", entity = entity })
-	updates_mod.add_update(world, {
+	world:add_update { type = "entity_update", entity = entity }
+	world:add_update {
 		type = "entity_created",
 		entity_id = entity.id,
-	})
+	}
 	return entity
 end
 
@@ -200,7 +201,7 @@ function remove_entity(world: World, entity: Entity)
 		cell.entities[entity.id] = nil
 	end
 	entity.is_destroyed = true
-	updates_mod.add_update(world, { type = "entity_update", entity = entity })
+	world:add_update { type = "entity_update", entity = entity }
 end
 
 -- todo: make this respect rotation

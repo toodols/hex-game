@@ -41,10 +41,10 @@ entity_mod.registry.solution = entity_mod.with_defaults {
 						duration = config.abilities.solution_use.shield_duration,
 					})
 
-					updates_mod.add_update(world, {
+					world:add_update {
 						type = "entity_update",
 						entity = affected_entity,
-					})
+					}
 				end
 			end
 		end,

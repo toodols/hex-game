@@ -15,7 +15,6 @@ entity_mod.registry.vault = entity_mod.with_defaults {
 	required_research = {
 		"vault",
 	},
-	can_capture = true,
 	layer = entity_mod.LAYER.building,
 }
 

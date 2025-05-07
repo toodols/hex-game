@@ -5,10 +5,10 @@ entity_mod.registry.obelisk = entity_mod.with_defaults {
 	type = "obelisk",
 	name = "Obelisk",
 	description = "Yes",
-	max_health = 5,
+	max_health = 4,
 	build_time = 0,
 	cost = {
-		bar = 3,
+		bar = 2,
 	},
 	layer = entity_mod.LAYER.building,
 }

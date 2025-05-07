@@ -29,7 +29,7 @@ entity_mod.registry.vertex = entity_mod.with_defaults {
 					error "there should not be a neutral vertex"
 				end
 				entity.owner = self.owner
-				updates_mod.add_update(world, { type = "entity_update", entity = entity })
+				world:add_update { type = "entity_update", entity = entity }
 			end
 		end
 	end,

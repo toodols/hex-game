@@ -415,6 +415,8 @@ export type EntityConfiguration = {
 		},
 	},
 	can_disable: boolean,
+	incorporeal: true?,
+
 	required_research: { ResearchId }?,
 
 	-- extractor only
@@ -475,6 +477,9 @@ export type EntityEvent = {
 } | {
 	event_type: "update",
 	entity_id: EntityId,
+} | {
+	event_type: "promoted",
+	entity_id: EntityId,
 }
 
 export type EntityAction =
@@ -497,6 +502,11 @@ export type EntityAction =
 		output_items: { Item }?,
 		output_power: number?,
 		on_success: (world: World) -> (),
+	}
+	| {
+		type: "run_late",
+		entity_id: EntityId,
+		run: (world: World, entity: Entity) -> (),
 	}
 	| (EntityEvent & { type: "entity_event" })
 	| Decision
@@ -526,6 +536,7 @@ export type World = {
 	get_cell: (self: World, coordinate: CubicCoordinate) -> HexCell?,
 	-- returns table of entities that fit the criteria
 	query_entity: (self: World, props: any) -> { Entity },
+	add_update: (self: World, update: WorldUpdate) -> (),
 	--
 	active_entities: (self: World) -> { [EntityId]: Entity },
 

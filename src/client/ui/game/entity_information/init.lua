@@ -514,6 +514,19 @@ function EntityInformation(props: {
 							end,
 						})
 						else nil,
+					-- Rotate = if entity.active ~= false
+					-- 		and entity.type == "torch"
+					-- 		and entity.owner == player_team.id
+					-- 	then React.createElement(ActionButton, {
+					-- 		color = Color3.fromRGB(255, 255, 120),
+					-- 		Text = "Rotate",
+					-- 		LayoutOrder = 0,
+					-- 		on_click = function()
+
+					-- 		end,
+					-- 	})
+					-- 	else nil,
+
 					AttackButton = if entity.active ~= false
 							and entity.owner == player_team.id
 							and (entity.type == "scout" or entity.type == "turret")

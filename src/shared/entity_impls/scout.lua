@@ -24,7 +24,6 @@ entity_mod.registry.scout = entity_mod.with_defaults {
 			},
 		},
 	},
-	can_capture = true,
 	layer = entity_mod.LAYER.building,
 }
 

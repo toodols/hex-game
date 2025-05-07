@@ -60,7 +60,7 @@ function serialize_cell_for_team(world: World, cell: HexCell, team: TeamId): Hex
 		local entities = {}
 		for entity_id in cell.entities do
 			local entity = world.entities[entity_id]
-			if team_mod.is_allied(world, entity.owner, team) or entity.status ~= "blueprint" then
+			if visibility_mod.entity_visibility(world, entity, team) then
 				if entity.disguise then
 					if
 						team_data.server_data.visibility == "perfect" or team_mod.is_allied(world, team, entity.owner)

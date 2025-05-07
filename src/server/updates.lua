@@ -115,17 +115,7 @@ function flush_updates(world: World): { [TeamId]: { WorldUpdate } }
 	return updates
 end
 
-function add_update(world: World, event: WorldUpdate)
-	if event.type == "entity_update" then
-		if event.entity == nil then
-			error "event.entity is nil"
-		end
-	end
-	table.insert(world.updates_buffer, event)
-end
-
 return {
 	get_updates_for_team = get_updates_for_team,
 	flush_updates = flush_updates,
-	add_update = add_update,
 }

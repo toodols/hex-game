@@ -199,6 +199,17 @@ end
 
 function handle_cells(world: World, update: WorldUpdate)
 	assert(update.type == "cells", "not a cell update")
+
+	-- remove entities from cells that are no longer visible
+	for coord, cell in world.cells do
+		for old_entity_id in cell.entities do
+			if update.cells[coord] and not update.cells[coord].entities[old_entity_id] then
+				local client_behavior = client_entity_mod.registry[world.entities[old_entity_id].type]
+				client_behavior.on_hidden(world.entities[old_entity_id], world)
+			end
+		end
+	end
+
 	-- remove cells that no longer exist
 	for old_encoded_coord, old_cell in world.cells do
 		if update.cells[old_encoded_coord] then

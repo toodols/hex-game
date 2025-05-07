@@ -19,7 +19,6 @@ entity_mod.registry.phony = entity_mod.with_defaults {
 	-- required_research = {
 	-- 	"phony",
 	-- },
-	can_capture = true,
 	layer = entity_mod.LAYER.building,
 }
 
