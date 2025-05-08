@@ -164,13 +164,22 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	delete_deconstructed_entities(world, world.action_queue)
 	portals_tick(world)
 
-	visibility_mod.compute_visibility(world)
+	local first_changes = visibility_mod.compute_visibility(world)
 	computed_mod.compute_influences(world)
 	computed_mod.compute_presence(world)
 	entities_tick(world, action_state)
 	status_effects_tick(world, action_state)
 
 	queue_blueprints_and_scaffolds(world, world.action_queue)
+
+	for _, entity in world:active_entities() do
+		if entity.status == "complete" and entity.owner ~= world.neutral_team and entity.researches ~= nil then
+			table.insert(world.action_queue, {
+				type = "advance_research",
+				entity_id = entity.id,
+			})
+		end
+	end
 
 	create_systems(world, action_state)
 	local dropped = process_queue(world, action_state)
@@ -210,9 +219,19 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	computed_mod.compute_presence(world)
 	remove_occluded_blueprints(world)
 
-	for team_id, changed_to_visible in visibility_mod.compute_visibility(world) do
-		for encoded_coord in changed_to_visible do
-			local cell = world.cells[encoded_coord]
+	visibility_mod.compute_visibility(world)
+
+	-- add entity update for all cells that are now visible to a team
+	-- only do this for changed_to_true that was set this turn that are still visible
+	for _, cell in world.cells do
+		for team_id, visibility in cell.server_data.visibility do
+			if not visibility.changed_to_true then
+				continue
+			end
+			visibility.changed_to_true = false
+			if not visibility_mod.cell_visibility(visibility) then
+				continue
+			end
 			for entity_id in cell.entities do
 				world:add_update {
 					type = "entity_update",

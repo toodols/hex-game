@@ -99,7 +99,7 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 			or not entity.active
 			or entity.owner ~= player_info.team
 			or entity.status ~= "complete"
-			or entity.type ~= "laboratory"
+			or entity.researches == nil
 			or not entity.researches.states[entry.research_id]
 		then
 			-- error_type.mistake
@@ -131,7 +131,7 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 			or not entity.active
 			or entity.owner ~= player_info.team
 			or entity.status ~= "complete"
-			or entity.type ~= "laboratory"
+			or entity.researches == nil
 			or not entity.researches.states[entry.research_id]
 		then
 			-- error_type.mistake

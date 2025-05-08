@@ -87,7 +87,7 @@ function CreateRoom(props: { expanded: boolean, set_expanded: (boolean) -> () })
 							"TextLabel",
 							themes.theme_title {
 								Size = UDim2.new(1, 0, 0, 25),
-								Text = "My Map",
+								Text = "Standard",
 								TextSize = 18,
 							}
 						),
@@ -96,6 +96,14 @@ function CreateRoom(props: { expanded: boolean, set_expanded: (boolean) -> () })
 							themes.theme_title {
 								Size = UDim2.new(1, 0, 0, 25),
 								Text = "Tutorial",
+								TextSize = 18,
+							}
+						),
+						lightning = React.createElement(
+							"TextLabel",
+							themes.theme_title {
+								Size = UDim2.new(1, 0, 0, 25),
+								Text = "Standard Lightning",
 								TextSize = 18,
 							}
 						),

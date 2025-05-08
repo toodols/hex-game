@@ -825,4 +825,25 @@ function tests.phony_generates_bar_on_death()
 	assert_eq(stockpile.inventory.items, { "tek" })
 end
 
+function tests.visibility_change_gets_entity_update()
+	local world, teams = presets.blank_map()
+	world.global_configuration.decaying_enabled = false
+	local scout = entity_mod.new_entity({
+		type = "scout",
+		primary_coordinate = { 0, 0, 0 },
+		owner = teams.team1.id,
+	}, world)
+
+	action_phase_mod.run_action_phase(world)
+
+	teams.team2.server_data.visibility = "fogless"
+	local result = action_phase_mod.run_action_phase(world)
+	assert(
+		util.table_any(result.updates[teams.team2.id], function(update)
+			return update.type == "entity_update" and update.entity.id == scout.id
+		end),
+		"Did not get an entity_update for scout"
+	)
+end
+
 return tests

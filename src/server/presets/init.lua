@@ -152,6 +152,13 @@ function my_map(): World
 	}
 end
 
+function lightning()
+	local world, teams = my_map()
+	world.speed_base = 6
+	world.speed_multiplier = 0.01
+	return world, teams
+end
+
 function prepare_preset(fn: (...any) -> World): (...any) -> (World, { [string]: TeamData })
 	return function(...)
 		local result = { fn(...) }
@@ -166,6 +173,7 @@ end
 
 return {
 	tutorial_map = prepare_preset(tutorial_map),
+	lightning = prepare_preset(lightning),
 	my_map = prepare_preset(my_map),
 	all_entities = prepare_preset(testing_maps.all_entities),
 	blank_map = prepare_preset(testing_maps.blank_map),

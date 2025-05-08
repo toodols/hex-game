@@ -5,6 +5,7 @@ local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local coords_mod = require(ReplicatedStorage.Shared.coords)
 local cells_mod = require(ReplicatedStorage.Shared.cells)
+local world_mod = require(ReplicatedStorage.Shared.world)
 
 type TeamData = types.TeamData
 type World = types.World
@@ -69,35 +70,20 @@ return function()
 		end,
 	}
 
-	extra_commands.selected_cells = {
-		description = "Gets the selected cells.",
+	extra_commands.selected = {
+		description = "Gets coords of selected",
 		permissions = {},
-		overloads = { { returns = "cells", args = {} } },
+		overloads = { { returns = "coords", args = {} } },
 		run = function(context)
 			local selection = util.table_find_pred(_G.world.ui.selection_mode_stack, function(selection_mode)
 				return selection_mode.type == "select_cells"
 			end)
 			assert(selection, "Did not find select_cells")
-			local cells = {}
-			for encoded_coord in selection.selected do
-				local cell = _G.world.cells[encoded_coord]
-				assert(cell, encoded_coord .. " not in world.cells")
-				table.insert(cells, cell)
-			end
-			return cells
+			return coords_mod.from_set(selection.selected)
 		end,
 	}
 
-	extra_commands.selected_cell = {
-		description = "Gets one selected_cell.",
-		permissions = {},
-		overloads = { { returns = "cell", args = {} } },
-		run = function(context)
-			return context.process:run_command("selected_cells").ok[1]
-		end,
-	}
-
-	extra_commands.set_cell_type = {
+	extra_commands.cell_type = {
 		description = "Sets the type of a cell.",
 		permissions = { "admin" },
 		overloads = {
@@ -130,11 +116,7 @@ return function()
 		},
 		run = function(context)
 			local coords = context.args[2]
-			if coords == nil then
-				coords = util.table_map(context.process:run_command("selected_cells").ok, function(cell)
-					return cell.coordinate
-				end)
-			end
+			coords = coords or context.process:run_command("selected").ok
 			context:defer { coords = coords }
 		end,
 		server_run = function(context)
@@ -145,6 +127,7 @@ return function()
 			for _, coord in coords do
 				local cell = world:get_cell(coord)
 				if cell == nil then
+					print("cant find cell " .. coord[1] .. "," .. coord[2] .. "," .. coord[3])
 					continue
 				end
 				cell.type = type
@@ -154,32 +137,26 @@ return function()
 
 	extra_commands.selected_entities = {
 		description = "Gets the selected entities visible to the client.",
-		permissions = {},
+		permissions = { "moderator" },
 		overloads = {
 			{ returns = "entities", args = {} },
 			{
 				returns = "entities",
 				args = {
-					{ name = "cells", type = "coords", description = "The cells to get the entities from." },
+					{ name = "coords", type = "coords", description = "The cells to get the entities from." },
 				},
 			},
 		},
 		run = function(context)
-			local cells
+			local coords
 			if context.args[1] then
-				cells = {}
-				for _, coord in context.args[1] do
-					local cell = _G.world:get_cell(coord)
-					if cell == nil then
-						continue
-					end
-					table.insert(cells, cell)
-				end
+				coords = world_mod.coords_filter(_G.world, context.args[1])
 			else
-				cells = context.process:run_command("selected_cells").ok
+				coords = context.process:run_command("selected").ok
 			end
 			local entities_map = {}
-			for _, cell in cells do
+			for _, coord in coords do
+				local cell = _G.world:get_cell(coord)
 				for entity_id in cell.entities do
 					entities_map[_G.world.entities[entity_id]] = true
 				end
@@ -262,7 +239,7 @@ return function()
 
 	extra_commands.query_entity = {
 		description = "Queries an entity by type",
-		permissions = {},
+		permissions = { "moderator" },
 		overloads = {
 			{
 				returns = "entities",
@@ -397,7 +374,7 @@ return function()
 
 	extra_commands.spawn_entity = {
 		description = "spawn_entity",
-		permissions = {},
+		permissions = { "admin" },
 		overloads = {
 			{
 				returns = "nil",
@@ -420,13 +397,36 @@ return function()
 					},
 				},
 			},
+			{
+				returns = "nil",
+				args = {
+
+					{
+						name = "entity_type",
+						type = "entity_type",
+						description = "The type of entity to spawn.",
+					},
+					{
+						name = "owner",
+						type = "team",
+						description = "The team that owns the entity.",
+					},
+				},
+			},
 		},
+		run = function(context)
+			local coord = context.args[3]
+			if coord == nil then
+				coord = context.process:run_command("selected").ok[1]
+			end
+			context:defer { coord = coord }
+		end,
 		server_run = function(context)
 			local world = _G.world
 			local server_entity_mod = require(ServerScriptService.Server.entity)
 			local entity_type = context.args[1]
 			local team = context.args[2]
-			local coord = context.args[3]
+			local coord = context.client_data.coord
 			server_entity_mod.new_entity({
 				type = entity_type,
 				primary_coordinate = coord,

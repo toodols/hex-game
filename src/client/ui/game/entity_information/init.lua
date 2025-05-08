@@ -41,6 +41,77 @@ type Entity = types.Entity
 type CubicCoordinate = types.CubicCoordinate
 type EncodedCoordinate = types.EncodedCoordinate
 type SelectionMode = ui_types.SelectionMode
+type HexCell = types.HexCell
+
+function AttackButton(props: { entity_id: EntityId })
+	local context = React.useContext(MainContext)
+	local world: World = context.world
+	local selection_mode_stack: { SelectionMode } = context.selection_mode_stack
+	local entity = hooks.use_synced_entity(props.entity_id)
+	local shared_behavior = shared_entity_mod.registry[entity.type]
+	local player_team = team_mod.team_of(world, Players.LocalPlayer)
+
+	return React.createElement(ActionButton, {
+		color = Color3.fromRGB(255, 120, 120),
+		Text = "Attack",
+		LayoutOrder = 0,
+		on_click = function()
+			local ability_name = if entity.type == "scout"
+				then "scout_attack"
+				else if entity.type == "turret" then "turret_attack" else error "unreachable"
+			local ability = shared_behavior.abilities[ability_name]
+
+			local candidates: { [EncodedCoordinate]: true } = {}
+			for _, coord in
+				world_mod.coords_filter(world, coords.neighbors_leq(entity.primary_coordinate, ability.range))
+			do
+				if not world_mod.line_of_sight(world, entity.primary_coordinate, coord, player_team.id) then
+					continue
+				end
+
+				candidates[coords.encode_coord(coord)] = true
+			end
+
+			local taunts_on_cell: { [EntityId]: Entity } = util.table_filter_map(
+				(world:get_cell(entity.primary_coordinate) :: HexCell).influences,
+				function(_, taunt_id)
+					local taunt = world.entities[taunt_id]
+					if
+						taunt.type == "taunt"
+						and candidates[coords.encode_coord(taunt.primary_coordinate)]
+						and not team_mod.is_allied(world, taunt.owner, player_team.id)
+						and taunt.owner ~= world.neutral_team
+					then
+						return taunt
+					end
+					return nil
+				end
+			)
+
+			if next(taunts_on_cell) ~= nil then
+				candidates = {}
+				for _, taunt in taunts_on_cell do
+					candidates[coords.encode_coord(taunt.primary_coordinate)] = true
+				end
+			end
+
+			table.insert(selection_mode_stack, {
+				type = "select_some_cell",
+				candidates = candidates,
+				on_selected = function(coord)
+					client_interaction_remote:FireServer {
+						{
+							type = "ability",
+							ability_type = ability_name,
+							entity_id = entity.id,
+							coordinate = coord,
+						},
+					}
+				end,
+			})
+		end,
+	})
+end
 
 function OutputClock(props: { entity: Entity, LayoutOrder: number? })
 	local shared_behavior = shared_entity_mod.registry[props.entity.type]
@@ -69,7 +140,7 @@ function OutputClock(props: { entity: Entity, LayoutOrder: number? })
 	return React.createElement(
 		"Frame",
 		{
-			Size = UDim2.new(0.5, 0, 0, 15),
+			Size = UDim2.new(0.5, 0, 0, 10),
 			BackgroundTransparency = 1,
 			LayoutOrder = props.LayoutOrder,
 		},
@@ -419,7 +490,7 @@ function EntityInformation(props: {
 						else nil,
 
 					ResearchPreview = if entity.owner == player_team.id
-							and (entity.type == "laboratory")
+							and (entity.researches ~= nil)
 							and entity.status == "complete"
 						then React.createElement(ResearchPreview, {
 							LayoutOrder = 9,
@@ -531,69 +602,14 @@ function EntityInformation(props: {
 							and entity.owner == player_team.id
 							and (entity.type == "scout" or entity.type == "turret")
 							and entity.status == "complete"
-						then React.createElement(ActionButton, {
-							color = Color3.fromRGB(255, 120, 120),
-							Text = "Attack",
-							LayoutOrder = 0,
-							on_click = function()
-								local ability_name = if entity.type == "scout"
-									then "scout_attack"
-									else if entity.type == "turret" then "turret_attack" else error "unreachable"
-								local ability = shared_behavior.abilities[ability_name]
-
-								local candidates: { [EncodedCoordinate]: true } = {}
-								for _, coord in coords.neighbors_leq(entity.primary_coordinate, ability.range) do
-									local cell = world:get_cell(coord)
-									if not cell then
-										continue
-									end
-
-									local encoded_coord = coords.encode_coord(coord)
-									if
-										world.cells[encoded_coord] == nil
-										or not world_mod.line_of_sight(
-											world,
-											entity.primary_coordinate,
-											coord,
-											player_team.id
-										)
-									then
-										continue
-									end
-
-									local has_taunt = util.table_any(cell.influences, function(_, entity_id)
-										local taunt = world.entities[entity_id]
-										if taunt == nil then
-											print("no entity", cell.coordinate, cell)
-										end
-										return taunt.type == "taunt"
-											and not team_mod.is_allied(world, taunt.owner, player_team.id)
-									end)
-									if has_taunt then
-										continue
-									end
-									candidates[encoded_coord] = true
-								end
-								table.insert(selection_mode_stack, {
-									type = "select_some_cell",
-									candidates = candidates,
-									on_selected = function(coord)
-										client_interaction_remote:FireServer {
-											{
-												type = "ability",
-												ability_type = ability_name,
-												entity_id = entity.id,
-												coordinate = coord,
-											},
-										}
-									end,
-								})
-							end,
+						then React.createElement(AttackButton, {
+							entity_id = entity.id,
 						})
 						else nil,
+
 					UseButton = if entity.active ~= false
 							and entity.owner == player_team.id
-							and entity.type == "solution"
+							and (entity.type == "solution")
 						then React.createElement(ActionButton, {
 							color = Color3.fromRGB(255, 255, 120),
 							Text = "Activate",

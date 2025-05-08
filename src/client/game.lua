@@ -309,7 +309,6 @@ function handle_updates(world: World, updates: { WorldUpdate })
 	local updated_entities = {}
 
 	for _, update in updates do
-		print(update.type, update)
 		if update.type == "turn_timer" then
 			world.turn_schedule = update.schedule
 		elseif update.type == "turn" then
@@ -358,6 +357,10 @@ function handle_updates(world: World, updates: { WorldUpdate })
 		if update.type == "ability" then
 			local cell_instance = world.cell_instance_map[coords.encode_coord(update.coordinate)]
 			local entity_instance = world.entity_instance_map[update.entity_id]
+			if entity_instance == nil then
+				warn("entity not found", update.entity_id, "when handling ability", update.ability_type)
+				return
+			end
 			if update.ability_type == "scout_attack" or update.ability_type == "turret_attack" then
 				visuals.scout_attack_effect(entity_instance, cell_instance)
 			end

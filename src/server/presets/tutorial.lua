@@ -34,6 +34,8 @@ function tutorial_map()
 		turn_scheduler.reset_turn_time(world, world.turn_schedule)
 		turn_scheduler.report_turn_time(world)
 	end, function()
+		world.skipped = {}
+		turn_scheduler.recalculate_skips(world)
 		action_phase_mod.run_action_phase(world)
 	end)
 

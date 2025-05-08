@@ -33,6 +33,7 @@ clone_assets({
 	Tiles = true,
 	Billboards = true,
 	Effects = true,
+	Items = true,
 }, server_assets, destination)
 
 -- Load entities and effects into their registries
@@ -68,7 +69,6 @@ end
 local main_world
 remotes_mod.get_world_data_remote.OnServerInvoke = function(player)
 	-- todo: change this to return nil when world is not set up, and make the client poll instead
-	print(main_world.teams, player)
 	while not main_world or not team_mod.team_of(main_world, player) do
 		task.wait()
 	end
@@ -78,13 +78,13 @@ remotes_mod.get_world_data_remote.OnServerInvoke = function(player)
 end :: any
 
 function republish_teams(world: World)
-	world:add_update( {
+	world:add_update {
 		type = "teams",
 		teams = util.table_map(world.teams, function(team)
 			return serialize_mod.serialize_team(world, team)
 		end),
 		coalitions = world.coalitions,
-	})
+	}
 end
 
 function start_game(teleport_data: { room: types.Room }?)
@@ -127,8 +127,9 @@ function start_game(teleport_data: { room: types.Room }?)
 			local config = players_config[tostring(plr.UserId)]
 			local team: TeamData
 			if config and config.team then
-				team = main_world.teams[config.team]
-			else
+				team = main_world.teams[tonumber(config.team)]
+			end
+			if not team then
 				team = main_world.teams[main_world.spectator_team]
 			end
 			table.insert(team.players, plr.UserId)

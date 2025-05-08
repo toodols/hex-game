@@ -14,14 +14,19 @@ type CellTeamVisibility = types.CellTeamVisibility
 type CubicCoordinate = types.CubicCoordinate
 type EncodedCoordinate = types.EncodedCoordinate
 
--- Computes cell visibility for each team and returns a set of cells for each team that has changed to visible
-function compute_visibility(world: World): { [TeamId]: { [EncodedCoordinate]: boolean } }
-	local changed_to_visible: { [TeamId]: { [EncodedCoordinate]: boolean } } = {}
-	local old_vis: { [EncodedCoordinate]: { [TeamId]: any } } = {}
-	-- reset server_data.visibility for all cells
+-- Computes cell visibility for each team
+-- This also sets changed_to_true field of visibility
+function compute_visibility(world: World)
+	local old_vis: { [EncodedCoordinate]: { [TeamId]: boolean } } = {}
+	-- reset server_data.visibility for all cells, except for changed_to_true
 	for encoded_coord, cell in world.cells do
-		old_vis[encoded_coord] = cell.server_data.visibility
-		cell.server_data.visibility = {}
+		old_vis[encoded_coord] = {}
+		for team_id, visibility in cell.server_data.visibility do
+			old_vis[encoded_coord][team_id] = cell_visibility(visibility)
+			visibility = {
+				["changed_to_true"] = visibility.changed_to_true,
+			}
+		end
 	end
 
 	local function add_visibility(coord: CubicCoordinate, team_id: TeamId, type: string)
@@ -30,12 +35,11 @@ function compute_visibility(world: World): { [TeamId]: { [EncodedCoordinate]: bo
 		if not cell then
 			return
 		end
-		changed_to_visible[team_id] = changed_to_visible[team_id] or {}
-		old_vis[encoded_coord] = old_vis[encoded_coord] or {}
-		if not cell_visibility(old_vis[encoded_coord][team_id]) then
-			changed_to_visible[team_id][encoded_coord] = true
-		end
+
 		cell.server_data.visibility[team_id] = cell.server_data.visibility[team_id] or {}
+		if not old_vis[encoded_coord][team_id] then
+			cell.server_data.visibility[team_id].changed_to_true = true
+		end
 		cell.server_data.visibility[team_id][type] = true
 	end
 
@@ -75,20 +79,16 @@ function compute_visibility(world: World): { [TeamId]: { [EncodedCoordinate]: bo
 
 	for _, team in world.teams do
 		if team.server_data.visibility == "fogless" or team.server_data.visibility == "perfect" then
-			changed_to_visible[team.id] = changed_to_visible[team.id] or {}
 			for _, cell in world.cells do
 				local encoded_coord = coords.encode_coord(cell.coordinate)
-				old_vis[encoded_coord] = old_vis[encoded_coord] or {}
-				if not cell_visibility(old_vis[encoded_coord][team.id]) then
-					changed_to_visible[team.id][encoded_coord] = true
-				end
 				cell.server_data.visibility[team.id] = cell.server_data.visibility[team.id] or {}
+				if not old_vis[encoded_coord][team.id] then
+					cell.server_data.visibility[team.id].changed_to_true = true
+				end
 				cell.server_data.visibility[team.id].fogless = true
 			end
 		end
 	end
-
-	return changed_to_visible
 end
 
 function cell_visibility(visibility: CellTeamVisibility?)

@@ -58,8 +58,8 @@ function process_queue(world: World, action_state: ActionState): { EntityAction 
 		end
 
 		handle_exchange_actions(world, action_state)
-		handle_ability_actions(world, action_state)
 		handle_try_promote_actions(world, action_state)
+		handle_ability_actions(world, action_state)
 		handle_advance_research_actions(world, action_state)
 		handle_entity_event_actions(world, action_state)
 

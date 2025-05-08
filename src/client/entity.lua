@@ -84,8 +84,8 @@ function with_defaults(t: any)
 		on_hidden = t.on_hidden or function(self: Entity, world: World)
 			local instance: Instance = world.entity_instance_map[self.id]
 			world.entity_instance_map[self.id] = nil
-			world.instance_entity_map[instance] = nil
 			if instance then
+				world.instance_entity_map[instance] = nil
 				instance:Destroy()
 			end
 		end,

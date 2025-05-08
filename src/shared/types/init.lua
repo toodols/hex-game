@@ -185,6 +185,9 @@ export type CellTeamVisibility = {
 	portal: boolean?,
 	-- illuminated by scout, or (later on) torch
 	illumination: boolean?,
+
+	-- set by compute_visibility so action_phase can generate a minimal list of entity updates
+	changed_to_true: boolean?,
 }
 
 export type HexCell = {
@@ -325,13 +328,12 @@ export type Damage = {
 }
 
 export type DamageResult = {
-	[EntityId]: {
 		-- target
 		amount: number,
 		-- whether the damage killed this entity
 		lethal: boolean,
-	},
-}
+	}
+
 
 type TeamTarget = "everyone" | { TeamId }
 
@@ -451,13 +453,10 @@ export type EntityEvent = {
 	event_type: "created",
 	entity_id: EntityId,
 } | {
-	event_type: "dealt_damage",
-	damage: Damage,
-	entity_id: EntityId,
-} | {
 	event_type: "destroy",
 	entity_id: EntityId,
 	death_type: "deconstruct" | "killed" | "used" | "other",
+	damage_result: DamageResult?,
 	damage: Damage?,
 } | {
 	event_type: "produced_items",
@@ -472,7 +471,8 @@ export type EntityEvent = {
 	entity_id: EntityId,
 } | {
 	event_type: "took_damage",
-	effective_damage: DamageResult,
+	damage_result: DamageResult,
+	damage: Damage,
 	entity_id: EntityId,
 } | {
 	event_type: "update",

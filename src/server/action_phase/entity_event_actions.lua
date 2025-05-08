@@ -10,7 +10,7 @@ type World = types.World
 type ActionState = server_types.ActionState
 type EntityId = types.EntityId
 
---- Sends entity_events in action_queue to relevant entities (entities with influence + self)
+--- Sends entity_events in action_queue to relevant entities (entities and their influencers (!!))
 --- Then adds it to updates
 function handle_entity_event_actions(world: World, action_state: ActionState)
 	for _, event in
@@ -29,6 +29,21 @@ function handle_entity_event_actions(world: World, action_state: ActionState)
 				entities[influence] = true
 			end
 		end
+
+		-- for events with damage (killed, took_damage),
+		-- the entity that dealt the damage is also considered a "target" of the event
+		if event.damage and event.damage.from then
+			entities[event.damage.from] = true
+			local from_entity = world.entities[event.damage.from]
+			for _, coord in from_entity.coordinates do
+				local cell = world:get_cell(coord)
+				assert(cell, "cell not found")
+				for influence in cell.influences do
+					entities[influence] = true
+				end
+			end
+		end
+
 		for entity_id in entities do
 			local entity = world.entities[entity_id]
 			local behavior = server_entity_mod.registry[entity.type]

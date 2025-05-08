@@ -17,11 +17,13 @@ entity_mod.registry.torch = entity_mod.with_defaults {
 		self.rotation = 0
 	end,
 	tick = function(self: Entity, world: World)
-		self.rotation = (self.rotation + 1) % 6
-		world:add_update {
-			type = "entity_update",
-			entity = self,
-		}
+		if self.status == "complete" then
+			self.rotation = (self.rotation + 1) % 6
+			world:add_update {
+				type = "entity_update",
+				entity = self,
+			}
+		end
 	end,
 	illumination = function(self: Entity, world: World)
 		return coords_mod.from_set(

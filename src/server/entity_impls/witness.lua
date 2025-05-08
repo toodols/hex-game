@@ -16,7 +16,8 @@ entity_mod.registry.witness = entity_mod.with_defaults {
 	end,
 	on_completed = function(self: Entity, world: World) end,
 	on_event = function(self: Entity, world: World, event: EntityEvent, action_state: ActionState)
-		if event.event_type ~= "dealt_damage" then
+		-- todo: fix
+		if event.event_type == "took_damage" then
 			return
 		end
 		local entity = world.entities[event.entity_id]

@@ -14,12 +14,7 @@ type ActionState = server_types.ActionState
 entity_mod.registry.laboratory = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	tick = function(self: Entity, world: World, action_state: ActionState)
-		if self.status == "complete" and self.owner ~= world.neutral_team then
-			table.insert(world.action_queue, {
-				type = "advance_research",
-				entity_id = self.id,
-			})
-		end
+
 	end,
 	influences = function(self: Entity, world: World)
 		local config = world.entity_configurations[self.type]
@@ -34,7 +29,7 @@ entity_mod.registry.laboratory = entity_mod.with_defaults {
 	init = function(self: Entity, world: World)
 		self.researches = {
 			queue = {},
-			states = researches_mod.create_researches(),
+			states = researches_mod.create_laboratory_researches(),
 		}
 	end,
 }

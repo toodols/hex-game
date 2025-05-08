@@ -17,12 +17,7 @@ function compute_influences(world: World)
 		end
 
 		local behavior = entity_mod.registry[entity.type]
-		if entity.type == "taunt" then
-			print(entity.id)
-			print(behavior)
-		end
 		if behavior.influences then
-			print "has influences"
 			behavior.influences(entity, world)
 		end
 	end

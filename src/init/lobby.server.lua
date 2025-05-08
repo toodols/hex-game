@@ -12,7 +12,7 @@ local placeids = require(ReplicatedStorage.Shared.placeids).placeids
 
 type Room = types.Room
 
-local START_TIME = if RunService:IsStudio() then 5 else 10
+local START_TIME = if RunService:IsStudio() then 5 else 20
 local REQUIRES_FILLED_TEAMS = if RunService:IsStudio() then true else true
 
 local rooms_remote = Instance.new "RemoteEvent"
@@ -21,6 +21,23 @@ rooms_remote.Parent = ReplicatedStorage
 
 local maps = {
 	my_map = {
+		teams = {
+			["2"] = {
+				color = Color3.fromRGB(97, 97, 97),
+				name = "Spectator",
+				is_spectator_team = true,
+			},
+			["3"] = {
+				color = Color3.fromRGB(255, 49, 49),
+				name = "Red",
+			},
+			["4"] = {
+				color = Color3.fromRGB(48, 48, 255),
+				name = "Blue",
+			},
+		},
+	},
+	lightning = {
 		teams = {
 			["2"] = {
 				color = Color3.fromRGB(97, 97, 97),
@@ -61,38 +78,36 @@ function room_membership_changed(room: Room)
 		end
 	else
 		if
-
-			room_timers[room.id] == nil
-			and (
-				not REQUIRES_FILLED_TEAMS
-				or util.table_every(room.teams, function(team, idx)
-					local v = team.is_spectator_team
-						or util.table_any(room.players, function(player)
-							return player.team == idx
-						end)
-					return v
-				end)
-			)
-		then
-			room.starting_at = workspace:GetServerTimeNow() + START_TIME
-			room_timers[room.id] = task.delay(START_TIME, function()
-				local party = {}
-				for player_id, data in room.players do
-					local player = Players:GetPlayerByUserId(player_id)
-					assert(player, "Player not found")
-					table.insert(party, player)
-				end
-
-				-- what if we signed the data to make it tamper proof
-				local code = TeleportService:ReserveServer(placeids.game)
-				-- local options = Instance.new "TeleportOptions"
-				-- options.ReservedServerAccessCode = code
-				-- options:SetTeleportData {
-				-- 	room = room,
-				-- }
-				-- TeleportService:TeleportAsync(placeids.game, code, party, options)
-				TeleportService:TeleportToPrivateServer(placeids.game, code, party, nil, { room = room })
+			not REQUIRES_FILLED_TEAMS
+			or util.table_every(room.teams, function(team, idx)
+				local v = team.is_spectator_team
+					or util.table_any(room.players, function(player)
+						return player.team == idx
+					end)
+				return v
 			end)
+		then
+			if room_timers[room.id] == nil then
+				room.starting_at = workspace:GetServerTimeNow() + START_TIME
+				room_timers[room.id] = task.delay(START_TIME, function()
+					local party = {}
+					for player_id, data in room.players do
+						local player = Players:GetPlayerByUserId(player_id)
+						assert(player, "Player not found")
+						table.insert(party, player)
+					end
+
+					-- what if we signed the data to make it tamper proof
+					local code = TeleportService:ReserveServer(placeids.game)
+					-- local options = Instance.new "TeleportOptions"
+					-- options.ReservedServerAccessCode = code
+					-- options:SetTeleportData {
+					-- 	room = room,
+					-- }
+					-- TeleportService:TeleportAsync(placeids.game, code, party, options)
+					TeleportService:TeleportToPrivateServer(placeids.game, code, party, nil, { room = room })
+				end)
+			end
 		else
 			if room_timers[room.id] then
 				task.cancel(room_timers[room.id])

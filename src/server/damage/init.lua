@@ -80,7 +80,7 @@ function apply_entity_damage(entity: Entity, amount: number, piercing: boolean):
 	return total
 end
 
-function damage_entity(world: World, entity: Entity, damage: Damage): DamageResult
+function damage_entity(world: World, entity: Entity, damage: Damage): (DamageResult, Damage)
 	damage.nonlethal = damage.nonlethal or false
 	damage.friendly_fire = damage.friendly_fire or false
 	damage.piercing = damage.piercing or false
@@ -94,7 +94,7 @@ function damage_entity(world: World, entity: Entity, damage: Damage): DamageResu
 				amount = effective,
 				lethal = false,
 			},
-		}
+		}, damage
 	elseif damage.damage_type == "physical" then
 		local health = if damage.piercing then entity.health else shared_entity_mod.get_effective_health(entity)
 		local gauge = damage.amount
@@ -107,7 +107,7 @@ function damage_entity(world: World, entity: Entity, damage: Damage): DamageResu
 		return { [entity.id] = {
 			amount = effective,
 			lethal = health <= 0 and not damage.nonlethal,
-		} }
+		} }, damage
 	else
 		error("unknown damage type " .. damage.damage_type :: any)
 	end
@@ -138,7 +138,7 @@ function get_attackable_entities(world: World, cell: HexCell, damage: Damage): {
 	return entities
 end
 
-function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage): DamageResult
+function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage): { [EntityId]: DamageResult }
 	damage.nonlethal = damage.nonlethal or false
 	damage.friendly_fire = damage.friendly_fire or false
 	damage.piercing = damage.piercing or false
@@ -149,7 +149,7 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 	elseif damage.damage_type == "physical" then
 		-- different cells may give different damage values to one entity
 		-- this keeps track of the highest damage
-		local result: DamageResult = {}
+		local damage_results: { [EntityId]: DamageResult } = {}
 
 		for _, target in targets do
 			local cell = world:get_cell(target)
@@ -162,8 +162,11 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 				local effective = math.clamp(if damage.nonlethal then health - 1 else health, 0, gauge)
 				health -= effective
 
-				result[entity.id] = {
-					amount = math.max(if result[entity.id] then result[entity.id].amount else 0, effective),
+				damage_results[entity.id] = {
+					amount = math.max(
+						if damage_results[entity.id] then damage_results[entity.id].amount else 0,
+						effective
+					),
 					lethal = false,
 				}
 
@@ -175,11 +178,11 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 		end
 
 		-- then apply the damage
-		for entity_id, value in result do
+		for entity_id, damage_result in damage_results do
 			local entity = world.entities[entity_id]
-			apply_entity_damage(entity, value.amount, damage.piercing :: boolean)
+			apply_entity_damage(entity, damage_result.amount, damage.piercing :: boolean)
 			if entity.health <= 0 then
-				value.lethal = true
+				damage_result.lethal = true
 			end
 
 			world:add_update {
@@ -190,33 +193,31 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 				type = "entity_event",
 				event_type = "took_damage",
 				entity_id = entity_id,
-				effective_damage = {
-					source = damage,
-					amount = value.amount,
-					entity_id = entity_id,
-					lethal = value.lethal,
-				},
+				damage = damage,
+				damage_result = damage_results,
 			}
 			table.insert(world.action_queue, event)
 			world:add_update(event)
 		end
 
-		return result
+		return damage_results
 	else
 		error("unknown damage type " .. damage.damage_type :: any)
 	end
 end
 
 -- marks entities to be destroyed at the end of the turn
-function delayed_destruction(world: World, damage_result: DamageResult)
-	for entity_id, result in damage_result do
-		if result.lethal then
+function delayed_destruction(world: World, damage_results: { [EntityId]: DamageResult }, damage: Damage?)
+	for entity_id, damage_result in damage_results do
+		if damage_result.lethal then
 			local entity = world.entities[entity_id]
 			local event = {
 				type = "entity_event",
 				event_type = "destroy",
 				entity_id = entity_id,
 				death_type = "killed",
+				damage = damage,
+				damage_result = damage_result,
 			}
 			world:add_update(event)
 			table.insert(world.action_queue, event)
@@ -228,7 +229,7 @@ function delayed_destruction(world: World, damage_result: DamageResult)
 end
 
 -- immediately destroys entities
-function destroy_entities(world: World, damage_result: DamageResult)
+function destroy_entities(world: World, damage_result: DamageResult, _damage: Damage?)
 	for entity_id, result in damage_result do
 		if result.lethal then
 			entity_mod.remove_entity(world, world.entities[entity_id])

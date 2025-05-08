@@ -24,7 +24,7 @@ function get_cells_researches(world: World, cells: { HexCell }, team: TeamId): {
 		if not entity then
 			continue
 		end
-		if entity.type == "laboratory" then
+		if entity.researches ~= nil then
 			for research_id, state: ResearchState in entity.researches.states do
 				if state.status == "complete" then
 					researches_set[research_id] = true
@@ -52,7 +52,7 @@ function research_state(props): ResearchState
 	} :: ResearchState
 end
 
-function create_researches(): { [ResearchId]: ResearchState }
+function create_laboratory_researches(): { [ResearchId]: ResearchState }
 	return {
 		-- turret = research_state {
 		-- 	coord = { -1, 0, 1 },
@@ -148,10 +148,31 @@ function create_researches(): { [ResearchId]: ResearchState }
 		},
 	}
 end
-local researches = create_researches()
+
+function create_heart_researches()
+	return {
+		create_rad = research_state {
+			coord = { 0, 0, 0 },
+			id = "create_rad",
+			name = "Create Rad",
+			icon = {
+				type = "model",
+				model = "Items/Rad",
+			},
+			description = "Heart begins producing rad at 1 every 2 turns.",
+			cost = {
+				bar = 5,
+			},
+			time = 2,
+		},
+	}
+end
+
+local researches = create_laboratory_researches()
 
 return {
 	get_cells_researches = get_cells_researches,
 	researches = researches,
-	create_researches = create_researches,
+	create_laboratory_researches = create_laboratory_researches,
+	create_heart_researches = create_heart_researches,
 }

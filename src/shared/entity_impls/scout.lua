@@ -9,6 +9,7 @@ entity_mod.registry.scout = entity_mod.with_defaults {
 	build_time = 2,
 	cost = {
 		bar = 4,
+		rad = 1,
 	},
 	abilities = {
 		scout_attack = {
