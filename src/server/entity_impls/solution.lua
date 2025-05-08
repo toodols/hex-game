@@ -18,7 +18,7 @@ entity_mod.registry.solution = entity_mod.with_defaults {
 		self.decayable = false
 	end,
 	abilities = {
-		solution_use = function(self: Entity, world: World)
+		solution_activate = function(self: Entity, world: World)
 			local config = world.entity_configurations[self.type]
 			for _, cell in
 				util.table_filter_map(coords.neighbors_many_leq(self.coordinates, 1), function(coord)
@@ -32,13 +32,13 @@ entity_mod.registry.solution = entity_mod.with_defaults {
 					-- and this ignores layers
 					affected_entity.health = math.max(
 						affected_entity.max_health,
-						affected_entity.health + config.abilities.solution_use.heal_amount
+						affected_entity.health + config.abilities.solution_activate.heal_amount
 					)
 
 					effect_mod.add_effect(affected_entity, {
 						type = "shield",
-						health = config.abilities.solution_use.shield_health,
-						duration = config.abilities.solution_use.shield_duration,
+						health = config.abilities.solution_activate.shield_health,
+						duration = config.abilities.solution_activate.shield_duration,
 					})
 
 					world:add_update {
@@ -51,7 +51,7 @@ entity_mod.registry.solution = entity_mod.with_defaults {
 	},
 	on_event = function(self: Entity, world: World, event: EntityEvent)
 		if event.entity_id == self.id and event.event_type == "destroy" and event.death_type == "killed" then
-			entity_mod.registry[self.type].abilities.solution_use(self, world)
+			entity_mod.registry[self.type].abilities.solution_activate(self, world)
 		end
 	end,
 }

@@ -41,7 +41,7 @@ function ability_interaction(world: World, entry: Interaction, player_info: Play
 				continue
 			end
 		end
-	elseif entry.ability_type == "solution_use" then
+	elseif entry.ability_type == "solution_activate" then
 		--ok
 	end
 	util.table_extract(entity.queued_decisions, function(decision)

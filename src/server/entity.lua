@@ -115,7 +115,7 @@ function new_entity(entity_: any, world: World): Entity
 	local cell
 	if entity.primary_coordinate then
 		cell = world:get_cell(entity.primary_coordinate)
-		if not cell then
+		if cell == nil then
 			error("No cell at " .. coords.encode_coord(entity.primary_coordinate))
 		end
 	else

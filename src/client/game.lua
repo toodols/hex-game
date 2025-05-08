@@ -200,19 +200,31 @@ end
 function handle_cells(world: World, update: WorldUpdate)
 	assert(update.type == "cells", "not a cell update")
 
-	-- remove entities from cells that are no longer visible
-	for coord, cell in world.cells do
-		for old_entity_id in cell.entities do
-			if update.cells[coord] and not update.cells[coord].entities[old_entity_id] then
-				local client_behavior = client_entity_mod.registry[world.entities[old_entity_id].type]
-				client_behavior.on_hidden(world.entities[old_entity_id], world)
-			end
+	for encoded_coord, cell in update.cells do
+		local old = world.cells[encoded_coord]
+		-- add new cells
+		if not old then
+			-- old = cell
+			local instance = create_cell_instance(world, cell)
+			animate_cell_appearance(instance)
 		end
+
+		if old and old.type ~= cell.type then
+			local instance = world.cell_instance_map[encoded_coord]
+			if instance then
+				instance:Destroy()
+			end
+			local new_instance = create_cell_instance(world, cell)
+			world.cell_instance_map[encoded_coord] = new_instance
+			world.instance_cell_map[new_instance] = encoded_coord
+		end
+
+		world.cells[encoded_coord] = cell
 	end
 
 	-- remove cells that no longer exist
 	for old_encoded_coord, old_cell in world.cells do
-		if update.cells[old_encoded_coord] then
+		if update.cells[old_encoded_coord] ~= nil then
 			continue
 		end
 		local instance = world.cell_instance_map[old_encoded_coord]
@@ -231,32 +243,6 @@ function handle_cells(world: World, update: WorldUpdate)
 		end
 	end
 
-	for encoded_coord, cell in update.cells do
-		local old = world.cells[encoded_coord]
-		-- add new cells
-		if not old then
-			-- old = cell
-			local instance = create_cell_instance(world, cell)
-			animate_cell_appearance(instance)
-		end
-
-		-- remove entities from cells that have changed to not visible
-		if old and old.visible_for_team and not cell.visible_for_team then
-			hide_entities(world, old)
-		end
-
-		if old and old.type ~= cell.type then
-			local instance = world.cell_instance_map[encoded_coord]
-			if instance then
-				instance:Destroy()
-			end
-			local new_instance = create_cell_instance(world, cell)
-			world.cell_instance_map[encoded_coord] = new_instance
-			world.instance_cell_map[new_instance] = encoded_coord
-		end
-
-		world.cells[encoded_coord] = cell
-	end
 	for _, cell in world.cells do
 		color_cell(world, cell)
 	end

@@ -154,12 +154,12 @@ function create_heart_researches()
 		create_rad = research_state {
 			coord = { 0, 0, 0 },
 			id = "create_rad",
-			name = "Create Rad",
+			name = "Advanced Synthesis",
 			icon = {
 				type = "model",
 				model = "Items/Rad",
 			},
-			description = "Heart begins producing rad at 1 every 2 turns.",
+			description = "{entity.heart} begins producing 1 {item.rad} every 2 turns.",
 			cost = {
 				bar = 5,
 			},

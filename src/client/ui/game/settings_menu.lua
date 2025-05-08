@@ -60,7 +60,6 @@ function Rebindable(props: {
 							connection_ref.current:Disconnect()
 						end
 						connection_ref.current = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-							print(input, gameProcessed)
 							if input.UserInputType == Enum.UserInputType.Keyboard then
 								if input.KeyCode == Enum.KeyCode.Escape then
 									set_key(Enum.KeyCode.Unknown)

@@ -17,9 +17,7 @@ function try_to_convert(world: World, entity: Entity)
 	end
 
 	local cell = world:get_cell(entity.primary_coordinate)
-	print(cell.entities)
 	for entity_id in cell.entities do
-		print(entity_id)
 		if entity_id == entity.id then
 			continue
 		end

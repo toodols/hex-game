@@ -47,7 +47,7 @@ function line_of_sight(world: World, start: CubicCoordinate, finish: CubicCoordi
 		local ok = false
 		for _, coordinate in coordinates do
 			local cell = world:get_cell(coordinate)
-			if not cell then
+			if cell == nil then
 				error "no cell"
 			end
 			if coords_mod.coords_eq(coordinate, finish) or not blocked(world, cell, team) then

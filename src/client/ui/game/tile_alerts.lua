@@ -15,9 +15,10 @@ local INDICATORS = {
 	researching = { icon = "http://www.roblox.com/asset/?id=6034230640", color = Color3.new(0.0588235, 0.898039, 0) },
 	disconnected = { icon = "rbxassetid://6035056484", color = Color3.new(0.898039, 0, 0) },
 	deconstruction = { icon = "rbxassetid://11768918600", color = Color3.new(0.898039, 0.211765, 0.211765) },
-	construction = { icon = "rbxassetid://6034275725", color = Color3.new(0, 0.584314, 0.898039) },
-	disabled = { icon = "http://www.roblox.com/asset/?id=6031084743", color = Color3.new(0.898039, 0.823529, 0) },
+	construction = { icon = "rbxassetid://6034275725", color = Color3.new(0.039216, 0.619608, 0.117647) },
+	disabled = { icon = "http://www.roblox.com/asset/?id=6031084743", color = Color3.new(0.666667, 0.627451, 0.172549) },
 	disguise = { icon = "http://www.roblox.com/asset/?id=6034467796", color = Color3.fromRGB(113, 172, 196) },
+	activate = { icon = "http://www.roblox.com/asset/?id=6026663705", color = Color3.new(0.898039, 0.823529, 0) },
 }
 
 function IconAndNumber(props: {
@@ -132,6 +133,10 @@ function TileAlerts()
 						if decision.type == "deconstruct" then
 							is_deconstructing = true
 							indicators.deconstruction = (indicators.deconstruction or 0) + 1
+						elseif decision.type == "ability" then
+							if decision.ability_type == "solution_activate" then
+								indicators.activate = (indicators.activate or 0) + 1
+							end
 						end
 					end
 

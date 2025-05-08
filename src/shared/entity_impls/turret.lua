@@ -5,8 +5,8 @@ entity_mod.registry.turret = entity_mod.with_defaults {
 	type = "turret",
 	name = "Dagger",
 	description = "Attacks for {entity.turret.abilities.turret_attack.damage.amount} damage to enemies in a {entity.turret.abilities.turret_attack.range} tile radius. "
-		.. "Costs {entity.turret.abilities.turret_attack.cost} to shoot.",
-	max_health = 7,
+		.. "Costs {entity.turret.abilities.turret_attack.cost} to shoot. On kill, gain +1 max hp.",
+	max_health = 4,
 	build_time = 2,
 	cost = {
 		bar = 3,

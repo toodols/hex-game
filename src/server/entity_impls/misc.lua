@@ -15,10 +15,4 @@ entity_mod.registry.obelisk = entity_mod.with_defaults {
 	decayable = false,
 }
 
-
-
-entity_mod.registry.turret = entity_mod.with_defaults {
-	autogenerates_vertex = true,
-}
-
 return {}

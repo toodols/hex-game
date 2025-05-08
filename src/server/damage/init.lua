@@ -80,7 +80,7 @@ function apply_entity_damage(entity: Entity, amount: number, piercing: boolean):
 	return total
 end
 
-function damage_entity(world: World, entity: Entity, damage: Damage): (DamageResult, Damage)
+function damage_entity(world: World, entity: Entity, damage: Damage): { [EntityId]: DamageResult }
 	damage.nonlethal = damage.nonlethal or false
 	damage.friendly_fire = damage.friendly_fire or false
 	damage.piercing = damage.piercing or false
@@ -94,7 +94,7 @@ function damage_entity(world: World, entity: Entity, damage: Damage): (DamageRes
 				amount = effective,
 				lethal = false,
 			},
-		}, damage
+		}
 	elseif damage.damage_type == "physical" then
 		local health = if damage.piercing then entity.health else shared_entity_mod.get_effective_health(entity)
 		local gauge = damage.amount
@@ -107,7 +107,7 @@ function damage_entity(world: World, entity: Entity, damage: Damage): (DamageRes
 		return { [entity.id] = {
 			amount = effective,
 			lethal = health <= 0 and not damage.nonlethal,
-		} }, damage
+		} }
 	else
 		error("unknown damage type " .. damage.damage_type :: any)
 	end
@@ -194,7 +194,7 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 				event_type = "took_damage",
 				entity_id = entity_id,
 				damage = damage,
-				damage_result = damage_results,
+				damage_result = damage_result,
 			}
 			table.insert(world.action_queue, event)
 			world:add_update(event)
@@ -229,8 +229,8 @@ function delayed_destruction(world: World, damage_results: { [EntityId]: DamageR
 end
 
 -- immediately destroys entities
-function destroy_entities(world: World, damage_result: DamageResult, _damage: Damage?)
-	for entity_id, result in damage_result do
+function destroy_entities(world: World, damage_results: { [EntityId]: DamageResult }, _damage: Damage?)
+	for entity_id, result in damage_results do
 		if result.lethal then
 			entity_mod.remove_entity(world, world.entities[entity_id])
 		end
@@ -238,7 +238,7 @@ function destroy_entities(world: World, damage_result: DamageResult, _damage: Da
 end
 
 function damage_entity_destroying(world: World, entity: Entity, damage: Damage)
-	destroy_entities(world, damage_entity(world, entity, damage))
+	destroy_entities(world, damage_entity(world, entity, damage), damage)
 end
 
 return {

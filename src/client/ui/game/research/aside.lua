@@ -8,7 +8,7 @@ local themes = require(ReplicatedStorage.Client.ui.themes)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local Items = require(ReplicatedStorage.Client.ui.game.items).Items
-local ActionButton = require(ReplicatedStorage.Client.ui.game.action_button).ActionButton
+local TextActionButton = require(ReplicatedStorage.Client.ui.game.action_button).TextActionButton
 local Corner = util_components.Corner
 
 type ResearchState = types.ResearchState
@@ -96,7 +96,7 @@ function Aside(props: { state: ResearchState, on_add: () -> (), on_remove: () ->
 		},
 		if props.state.status == "incomplete"
 			then {
-				AddButton = React.createElement(ActionButton, {
+				AddButton = React.createElement(TextActionButton, {
 					Size = UDim2.new(1, 0, 0, 20),
 					Text = "Add Research",
 					LayoutOrder = 3,

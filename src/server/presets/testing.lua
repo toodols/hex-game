@@ -83,12 +83,13 @@ function map_with_infinite_source()
 	return world
 end
 
--- 10x10x10 empty world with 2 teams
-function blank_map(): World
+-- empty world with 2 teams
+function blank_map(magic: number): World
+	magic = magic or 4
 	local world = world_mod.new_world_from_extents {
-		{ min = -10, max = 10 },
-		{ min = -10, max = 10 },
-		{ min = -10, max = 10 },
+		{ min = -5, max = 5 },
+		{ min = -5, max = 5 },
+		{ min = -5, max = 5 },
 	}
 
 	local team1 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "red")

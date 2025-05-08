@@ -23,7 +23,7 @@ function compute_visibility(world: World)
 		old_vis[encoded_coord] = {}
 		for team_id, visibility in cell.server_data.visibility do
 			old_vis[encoded_coord][team_id] = cell_visibility(visibility)
-			visibility = {
+			cell.server_data.visibility[team_id] = {
 				["changed_to_true"] = visibility.changed_to_true,
 			}
 		end
@@ -32,7 +32,7 @@ function compute_visibility(world: World)
 	local function add_visibility(coord: CubicCoordinate, team_id: TeamId, type: string)
 		local encoded_coord = coords.encode_coord(coord)
 		local cell = world:get_cell(coord)
-		if not cell then
+		if cell == nil then
 			return
 		end
 

@@ -66,6 +66,14 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 	props_ref.current = props
 
 	local entities_set = entities_from_cells(world, props.selected_cells)
+	local entities_ref = React.useRef(nil)
+	entities_ref.current = util.table_keys(entities_set)
+	table.sort(entities_ref.current, function(a, b)
+		local a_layer = world.entity_configurations[world.entities[a].type].layer
+		local b_layer = world.entity_configurations[world.entities[b].type].layer
+		return a_layer > b_layer
+	end)
+
 	local uncompressed_entity = React.useRef(best_uncompressed_entity(world, entities_set))
 	local gradient_ref = React.useRef(nil)
 	local toggle_submenu = function(menu: Submenu)
@@ -104,6 +112,39 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 					toggle_submenu { type = "build", cell = props_ref.current.selected_cells[1] }
 				end
 			end, false, Enum.KeyCode.B)
+
+			ContextActionService:BindAction("next_entity", function(action_name, input_state, input_object)
+				if input_state == Enum.UserInputState.Begin then
+					if uncompressed_entity.current == nil then
+						uncompressed_entity.current = best_uncompressed_entity(
+							world,
+							entities_from_cells(world, props_ref.current.selected_cells)
+						)
+					else
+						local current_idx = table.find(entities_ref.current, uncompressed_entity.current)
+						current_idx = (current_idx % #entities_ref.current) + 1
+						uncompressed_entity.current = entities_ref.current[current_idx]
+					end
+					force_update(nil)
+				end
+			end, false, Enum.KeyCode.RightBracket)
+
+			ContextActionService:BindAction("previous_entity", function(action_name, input_state, input_object)
+				if input_state == Enum.UserInputState.Begin then
+					if uncompressed_entity.current == nil then
+						uncompressed_entity.current = best_uncompressed_entity(
+							world,
+							entities_from_cells(world, props_ref.current.selected_cells)
+						)
+					else
+						local current_idx = table.find(entities_ref.current, uncompressed_entity.current)
+						current_idx = (current_idx - 2 + #entities_ref.current) % #entities_ref.current + 1
+						uncompressed_entity.current = entities_ref.current[current_idx]
+					end
+					force_update(nil)
+				end
+			end, false, Enum.KeyCode.LeftBracket)
+
 			return function()
 				ContextActionService:UnbindAction "build"
 			end
@@ -147,11 +188,12 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 					PaddingTop = UDim.new(0, 4),
 				}),
 			},
-			util.table_from_entries(util.table_map(util.table_keys(entities_set), function(entity_id)
+			util.table_from_entries(util.table_map(entities_ref.current, function(entity_id, idx)
 				return {
 					entity_id,
 					React.createElement(EntityInformation, {
 						entity_id = entity_id,
+						LayoutOrder = idx,
 						compressed = uncompressed_entity.current ~= entity_id,
 						on_select = function()
 							uncompressed_entity.current = entity_id

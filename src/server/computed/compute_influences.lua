@@ -1,8 +1,12 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
-local types = require(ReplicatedStorage.Shared.types)
+
 local entity_mod = require(ServerScriptService.Server.entity)
+
+local types = require(ReplicatedStorage.Shared.types)
 local coords_mod = require(ReplicatedStorage.Shared.coords)
+local world_mod = require(ReplicatedStorage.Shared.world)
+
 type World = types.World
 
 function compute_influences(world: World)
@@ -27,9 +31,8 @@ function compute_influences(world: World)
 		if next(cell.influences) == nil then
 			continue
 		end
-		local neighbors = coords_mod.neighbors_leq(entity.primary_coordinate, 2)
-		for _, coord in neighbors do
-			local neighbor_cell = world:get_cell(coord)
+		local neighbors = world_mod.into_cells(world, coords_mod.neighbors_leq(entity.primary_coordinate, 2))
+		for _, neighbor_cell in neighbors do
 			for influence in cell.influences do
 				neighbor_cell.influences[influence] = true
 			end

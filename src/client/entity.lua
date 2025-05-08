@@ -60,7 +60,7 @@ function with_defaults(t: any)
 			assert(event.event_type == "destroy", "Not death event")
 			local instance: Instance = world.entity_instance_map[self.id]
 			if not instance then
-				warn("Can't do death because instance not found " .. self.id)
+				warn("Can't do death for" .. self.id .. " (" .. self.type .. ") because instance not found ")
 				return
 			end
 			if event.death_type == "killed" then

@@ -11,7 +11,7 @@ entity_mod.registry.solution = entity_mod.with_defaults {
 		vit = 2,
 	},
 	abilities = {
-		solution_use = {
+		solution_activate = {
 			shield_health = 1,
 			shield_duration = 3,
 			heal_amount = 2,

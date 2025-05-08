@@ -5,8 +5,8 @@ local new_signal = require(ReplicatedStorage.Shared.signal).new_signal
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local line_of_sight = require(script.line_of_sight).line_of_sight
 
-local coords = require(script.Parent.coords)
-local encode_coord = coords.encode_coord
+local coords_mod = require(script.Parent.coords)
+local encode_coord = coords_mod.encode_coord
 
 type CubicCoordinate = types.CubicCoordinate
 type Extents = types.Extents
@@ -30,6 +30,17 @@ function coords_filter(world: World, values: { CubicCoordinate }): { CubicCoordi
 		local key = encode_coord(v)
 		if world.cells[key] then
 			table.insert(results, v)
+		end
+	end
+	return results
+end
+
+function into_cells(world: World, coords: { CubicCoordinate }): { HexCell }
+	local results = {}
+	for _, coord in coords do
+		local cell = world:get_cell(coord)
+		if cell then
+			table.insert(results, cell)
 		end
 	end
 	return results
@@ -92,7 +103,7 @@ function world_query_entity(world: World, props: any): { Entity }
 	end
 	if props.coordinate then
 		local cell = world:get_cell(props.coordinate)
-		if not cell then
+		if cell == nil then
 			return {}
 		end
 		local entities = cell.entities
@@ -270,6 +281,7 @@ end
 
 return {
 	coords_filter = coords_filter,
+	into_cells = into_cells,
 	empty_cell = empty_cell,
 	new_world_from_extents = new_world_from_extents,
 	new_world_from_data = new_world_from_data,

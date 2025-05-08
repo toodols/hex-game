@@ -127,7 +127,6 @@ return function()
 			for _, coord in coords do
 				local cell = world:get_cell(coord)
 				if cell == nil then
-					print("cant find cell " .. coord[1] .. "," .. coord[2] .. "," .. coord[3])
 					continue
 				end
 				cell.type = type

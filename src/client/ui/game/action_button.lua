@@ -1,8 +1,9 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local React = require(ReplicatedStorage.Packages.react)
 local TweenService = game:GetService "TweenService"
+local Corner = require(ReplicatedStorage.Client.ui.util_components).Corner
 
-function ActionButton(
+function TextActionButton(
 	props: {
 		color: Color3,
 		Text: string,
@@ -53,6 +54,51 @@ function ActionButton(
 	})
 end
 
+function SquareActionButton(props: {
+	on_click: () -> (),
+	color: Color3,
+	Image: string,
+	LayoutOrder: number?,
+	ImageColor3: Color3,
+})
+	return React.createElement("TextButton", {
+		Size = UDim2.new(0, 40, 0, 40),
+		Text = "",
+		BackgroundColor3 = Color3.fromRGB(71, 71, 71),
+		BackgroundTransparency = 0.8,
+		[React.Event.MouseEnter] = function(current)
+			TweenService:Create(current, TweenInfo.new(0.5), {
+				BackgroundColor3 = props.color,
+			}):Play()
+		end,
+		[React.Event.MouseLeave] = function(current)
+			TweenService:Create(current, TweenInfo.new(0.5), {
+				BackgroundColor3 = Color3.fromRGB(71, 71, 71),
+			}):Play()
+		end,
+		LayoutOrder = props.LayoutOrder,
+		[React.Event.MouseButton1Click] = props.on_click,
+	}, {
+		Stroke = React.createElement("UIStroke", {
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+			Color = Color3.fromRGB(255, 255, 255),
+			LineJoinMode = Enum.LineJoinMode.Round,
+			Thickness = 1,
+			Transparency = 0.9,
+		}),
+		Corner = React.createElement(Corner),
+		Icon = React.createElement("ImageLabel", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			ImageColor3 = props.ImageColor3,
+			Image = props.Image,
+			Size = UDim2.new(0.5, 0, 0.5, 0),
+			Position = UDim2.new(0.5, 0, 0.5, 0),
+			BackgroundTransparency = 1,
+		}),
+	})
+end
+
 return {
-	ActionButton = React.forwardRef(ActionButton),
+	TextActionButton = React.forwardRef(TextActionButton),
+	SquareActionButton = SquareActionButton,
 }

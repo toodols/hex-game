@@ -11,7 +11,7 @@ local themes = require(ReplicatedStorage.Client.ui.themes)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 
-local ActionButton = require(script.Parent.action_button).ActionButton
+local TextActionButton = require(script.Parent.action_button).TextActionButton
 local Items = require(script.Parent.items).Items
 local ResearchPreview = require(script.research_preview).ResearchPreview
 local Icon = require(script.icon).Icon
@@ -328,13 +328,20 @@ function ResearchBottom(props: {
 										PaddingBottom = UDim.new(0, 5),
 										PaddingTop = UDim.new(0, 5),
 									}),
-									Title = React.createElement("TextLabel", {
-										BackgroundTransparency = 1,
-										TextSize = 14,
-										Size = UDim2.new(1, 0, 0, 30),
-										TextColor3 = Color3.fromRGB(255, 255, 255),
-										Text = state.name,
-									}),
+									Title = React.createElement(
+										"TextLabel",
+										themes.theme_title {
+											BackgroundTransparency = 1,
+											Size = UDim2.new(1, 0, 0, 30),
+											TextColor3 = Color3.fromRGB(255, 255, 255),
+											Text = state.name,
+										},
+										{
+											Padding = React.createElement("UIPadding", {
+												PaddingLeft = UDim.new(0, 5),
+											}),
+										}
+									),
 									VerticalLayout = React.createElement("UIListLayout", {
 										Padding = UDim.new(0, 4),
 										SortOrder = Enum.SortOrder.LayoutOrder,
@@ -357,7 +364,7 @@ function ResearchBottom(props: {
 										}),
 									}
 							),
-							RemoveButton = React.createElement(ActionButton, {
+							RemoveButton = React.createElement(TextActionButton, {
 								color = Color3.fromRGB(200, 0, 0),
 								Size = UDim2.new(1, 0, 0, 20),
 								LayoutOrder = 2,

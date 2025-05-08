@@ -19,18 +19,23 @@ local context_mod = require(ReplicatedStorage.Client.ui.context)
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 
-local ItemFiltersPreview = require(script.Parent.item_filters).ItemFiltersPreview
-local ActionButton = require(script.Parent.action_button).ActionButton
+local TextActionButton = require(script.Parent.action_button).TextActionButton
 local Items = require(script.Parent.items).Items
 local HighlightOnHover = require(script.Parent.highlight_on_hover).HighlightOnHover
 local ResearchPreview = require(script.Parent.research).ResearchPreview
 local RequiredResearch = require(script.required_research).RequiredResearch
+local action_buttons = require(script.action_buttons)
 
 local Hitpoints = require(script.hitpoints).Hitpoints
 
 local MainContext = context_mod.MainContext
 local Corner = util_components.Corner
 local Separator = util_components.Separator
+
+local DeconstructButton = action_buttons.DeconstructButton
+local DisguiseButton = action_buttons.DisguiseButton
+local FilterButton = action_buttons.FilterButton
+local AttackButton = action_buttons.AttackButton
 
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
@@ -42,76 +47,6 @@ type CubicCoordinate = types.CubicCoordinate
 type EncodedCoordinate = types.EncodedCoordinate
 type SelectionMode = ui_types.SelectionMode
 type HexCell = types.HexCell
-
-function AttackButton(props: { entity_id: EntityId })
-	local context = React.useContext(MainContext)
-	local world: World = context.world
-	local selection_mode_stack: { SelectionMode } = context.selection_mode_stack
-	local entity = hooks.use_synced_entity(props.entity_id)
-	local shared_behavior = shared_entity_mod.registry[entity.type]
-	local player_team = team_mod.team_of(world, Players.LocalPlayer)
-
-	return React.createElement(ActionButton, {
-		color = Color3.fromRGB(255, 120, 120),
-		Text = "Attack",
-		LayoutOrder = 0,
-		on_click = function()
-			local ability_name = if entity.type == "scout"
-				then "scout_attack"
-				else if entity.type == "turret" then "turret_attack" else error "unreachable"
-			local ability = shared_behavior.abilities[ability_name]
-
-			local candidates: { [EncodedCoordinate]: true } = {}
-			for _, coord in
-				world_mod.coords_filter(world, coords.neighbors_leq(entity.primary_coordinate, ability.range))
-			do
-				if not world_mod.line_of_sight(world, entity.primary_coordinate, coord, player_team.id) then
-					continue
-				end
-
-				candidates[coords.encode_coord(coord)] = true
-			end
-
-			local taunts_on_cell: { [EntityId]: Entity } = util.table_filter_map(
-				(world:get_cell(entity.primary_coordinate) :: HexCell).influences,
-				function(_, taunt_id)
-					local taunt = world.entities[taunt_id]
-					if
-						taunt.type == "taunt"
-						and candidates[coords.encode_coord(taunt.primary_coordinate)]
-						and not team_mod.is_allied(world, taunt.owner, player_team.id)
-						and taunt.owner ~= world.neutral_team
-					then
-						return taunt
-					end
-					return nil
-				end
-			)
-
-			if next(taunts_on_cell) ~= nil then
-				candidates = {}
-				for _, taunt in taunts_on_cell do
-					candidates[coords.encode_coord(taunt.primary_coordinate)] = true
-				end
-			end
-
-			table.insert(selection_mode_stack, {
-				type = "select_some_cell",
-				candidates = candidates,
-				on_selected = function(coord)
-					client_interaction_remote:FireServer {
-						{
-							type = "ability",
-							ability_type = ability_name,
-							entity_id = entity.id,
-							coordinate = coord,
-						},
-					}
-				end,
-			})
-		end,
-	})
-end
 
 function OutputClock(props: { entity: Entity, LayoutOrder: number? })
 	local shared_behavior = shared_entity_mod.registry[props.entity.type]
@@ -171,6 +106,7 @@ end
 function EntityInformation(props: {
 	entity_id: EntityId,
 	compressed: boolean,
+	LayoutOrder: number?,
 	on_compress: () -> (),
 	on_select: () -> (),
 })
@@ -251,7 +187,7 @@ function EntityInformation(props: {
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
 		ClipsDescendants = true,
-		LayoutOrder = -shared_behavior.layer,
+		LayoutOrder = props.LayoutOrder,
 		Position = UDim2.new(0, 0, 0, 0),
 		ZIndex = 2,
 		ref = ref,
@@ -428,6 +364,7 @@ function EntityInformation(props: {
 							}
 						)
 						else nil,
+
 					Items = if entity.inventory
 						then React.createElement("Frame", {
 							BackgroundTransparency = 1,
@@ -475,19 +412,6 @@ function EntityInformation(props: {
 						LayoutOrder = 7,
 						Size = UDim2.new(1, 0, 0, 5),
 					}),
-
-					ItemFiltersPreview = if entity.inventory
-						then React.createElement(ItemFiltersPreview, {
-							LayoutOrder = 8,
-							entity_id = entity.id,
-							click = function()
-								toggle_submenu {
-									type = "item_filters",
-									entity_id = entity.id,
-								}
-							end,
-						})
-						else nil,
 
 					ResearchPreview = if entity.owner == player_team.id
 							and (entity.researches ~= nil)
@@ -551,44 +475,61 @@ function EntityInformation(props: {
 					LayoutOrder = 2,
 					Size = UDim2.new(1, 0, 0, 30),
 				}, {
-					DisguiseButton = if entity.active ~= false
-							and entity.owner == player_team.id
-							and entity.type == "phony"
-						then React.createElement(ActionButton, {
-							color = Color3.fromRGB(113, 172, 196),
-							Text = "Disguise",
-							on_click = function()
-								local ability = shared_behavior.abilities.disguise
-								local candidates: { [EncodedCoordinate]: true } = {}
-								for _, coord in coords.neighbors_leq(entity.primary_coordinate, ability.range) do
-									local cell = world:get_cell(coord)
-									if not cell or next(cell.entities) == nil then
-										continue
-									end
-									local encoded_coord = coords.encode_coord(coord)
-									candidates[encoded_coord] = true
-								end
-								table.insert(selection_mode_stack, {
-									type = "select_some_cell",
-									candidates = candidates,
-									on_selected = function(coord)
-										client_interaction_remote:FireServer {
-											{
-												type = "ability",
-												ability_type = "disguise",
-												entity_id = entity.id,
-												coordinate = coord,
-											},
-										}
-									end,
-								})
-							end,
-						})
-						else nil,
+					ActionButtons = React.createElement("Frame", {
+						BackgroundTransparency = 1,
+						Size = UDim2.new(1, 0, 0, 70),
+					}, {
+						SidePad = React.createElement("UIPadding", {
+							PaddingLeft = UDim.new(0, 15),
+							PaddingRight = UDim.new(0, 15),
+						}),
+						HorizontalLayout = React.createElement("UIListLayout", {
+							SortOrder = Enum.SortOrder.LayoutOrder,
+							FillDirection = Enum.FillDirection.Horizontal,
+							VerticalAlignment = Enum.VerticalAlignment.Center,
+							Padding = UDim.new(0, 10),
+						}),
+						DeconstructButton = if entity.active ~= false
+								and entity.owner == player_team.id
+								and not entity.is_decaying
+							then React.createElement(DeconstructButton, {
+								entity_id = entity.id,
+								LayoutOrder = 1,
+							})
+							else nil,
+						AttackButton = if entity.active ~= false
+								and entity.owner == player_team.id
+								and (entity.type == "scout" or entity.type == "turret")
+								and entity.status == "complete"
+							then React.createElement(AttackButton, {
+								entity_id = entity.id,
+								LayoutOrder = 2,
+							})
+							else nil,
+
+						DisguiseButton = if entity.active ~= false
+								and entity.owner == player_team.id
+								and entity.type == "phony"
+							then React.createElement(DisguiseButton, {
+								entity_id = entity.id,
+								LayoutOrder = 2,
+							})
+							else nil,
+
+						FilterButton = if entity.active ~= false
+								and entity.owner == player_team.id
+								and entity.inventory ~= nil
+							then React.createElement(FilterButton, {
+								entity_id = entity.id,
+								LayoutOrder = 3,
+							})
+							else nil,
+					}),
+
 					-- Rotate = if entity.active ~= false
 					-- 		and entity.type == "torch"
 					-- 		and entity.owner == player_team.id
-					-- 	then React.createElement(ActionButton, {
+					-- 	then React.createElement(TextActionButton, {
 					-- 		color = Color3.fromRGB(255, 255, 120),
 					-- 		Text = "Rotate",
 					-- 		LayoutOrder = 0,
@@ -598,19 +539,10 @@ function EntityInformation(props: {
 					-- 	})
 					-- 	else nil,
 
-					AttackButton = if entity.active ~= false
-							and entity.owner == player_team.id
-							and (entity.type == "scout" or entity.type == "turret")
-							and entity.status == "complete"
-						then React.createElement(AttackButton, {
-							entity_id = entity.id,
-						})
-						else nil,
-
 					UseButton = if entity.active ~= false
 							and entity.owner == player_team.id
 							and (entity.type == "solution")
-						then React.createElement(ActionButton, {
+						then React.createElement(TextActionButton, {
 							color = Color3.fromRGB(255, 255, 120),
 							Text = "Activate",
 							LayoutOrder = 1,
@@ -618,44 +550,18 @@ function EntityInformation(props: {
 								client_interaction_remote:FireServer {
 									{
 										type = "ability",
-										ability_type = "solution_use",
+										ability_type = "solution_activate",
 										entity_id = entity.id,
 									},
 								}
 							end,
 						})
 						else nil,
-					DeconstructButton = if entity.active ~= false
-							and entity.owner == player_team.id
-							and not entity.is_decaying
-						then React.createElement(ActionButton, {
-							color = Color3.fromRGB(255, 82, 82),
-							Text = if is_deconstructing then "Cancel Deconstruct" else "Deconstruct",
-							LayoutOrder = 1,
-							on_click = function()
-								if is_deconstructing then
-									client_interaction_remote:FireServer {
-										{
-											type = "cancel_decision",
-											entity_id = entity.id,
-											decision_type = "deconstruct",
-										},
-									}
-								else
-									client_interaction_remote:FireServer {
-										{
-											type = "deconstruct",
-											entity_id = entity.id,
-										},
-									}
-								end
-							end,
-						})
-						else nil,
+
 					ToggleEnableButton = if entity.active ~= false
 							and entity.owner == player_team.id
 							and shared_behavior.can_disable
-						then React.createElement(ActionButton, {
+						then React.createElement(TextActionButton, {
 							color = Color3.fromRGB(255, 255, 120),
 							Text = if entity.enabled then "Disable" else "Enable",
 							LayoutOrder = 2,
@@ -674,7 +580,7 @@ function EntityInformation(props: {
 							and entity.owner == player_team.id
 							and (entity.type == "factory")
 							and entity.status == "complete"
-						then React.createElement(ActionButton, {
+						then React.createElement(TextActionButton, {
 							color = Color3.fromRGB(255, 255, 120),
 							Text = "Open Recipes",
 							LayoutOrder = 3,

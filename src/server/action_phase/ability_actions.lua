@@ -50,7 +50,7 @@ function scout_attack(world: World, action_state: ActionState, ability: EntityAc
 	local damage = table.clone(shared_entity_mod.registry[entity.type].abilities[ability.ability_type].damage)
 	damage.from = ability.entity_id
 
-	damage_mod.delayed_destruction(world, damage_mod.damage_cells(world, { cell.coordinate }, damage))
+	damage_mod.delayed_destruction(world, damage_mod.damage_cells(world, { cell.coordinate }, damage), damage)
 end
 
 function disguise_ability(world: World, action_state: ActionState, ability: EntityAction)
@@ -139,7 +139,7 @@ function handle_ability_actions(world: World, action_state: ActionState)
 	do
 		if ability.ability_type == "scout_attack" or ability.ability_type == "turret_attack" then
 			scout_attack(world, action_state, ability)
-		elseif ability.ability_type == "solution_use" then
+		elseif ability.ability_type == "solution_activate" then
 			local entity = world.entities[ability.entity_id]
 			server_entity_mod.registry[entity.type].abilities[ability.ability_type](entity, world)
 			local event = {

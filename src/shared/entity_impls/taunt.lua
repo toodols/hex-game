@@ -11,7 +11,7 @@ entity_mod.registry.taunt = entity_mod.with_defaults {
 		pow = 1,
 		bar = 4,
 	},
-	range = 2,
+	range = 3,
 	required_research = {
 		"taunt",
 	},

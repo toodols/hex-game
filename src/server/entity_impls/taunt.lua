@@ -2,9 +2,10 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local coords_mod = require(ReplicatedStorage.Shared.coords)
+local world_mod = require(ReplicatedStorage.Shared.world)
+
 local entity_mod = require(ServerScriptService.Server.entity)
 local damage_mod = require(ServerScriptService.Server.damage)
-local util = require(ReplicatedStorage.Shared.util)
 local server_types = require(ServerScriptService.Server.types)
 
 type Entity = types.Entity
@@ -16,23 +17,11 @@ entity_mod.registry.taunt = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	on_completed = function(self: Entity, world: World) end,
 	influences = function(self: Entity, world: World)
+		print "influences for taunt"
 		local config = world.entity_configurations[self.type]
-		local neighbors = coords_mod.neighbors_leq(self.primary_coordinate, config.range)
-		for _, coord in neighbors do
-			if coords_mod.coords_eq(coord, self.primary_coordinate) then
-				continue
-			end
-			local cell = world:get_cell(coord)
-			if cell then
-				if
-					util.table_any(cell.entities, function(_, entity_id)
-						return world.entities[entity_id].type == "taunt"
-					end)
-				then
-					continue
-				end
-				cell.influences[self.id] = true
-			end
+		local neighbors = world_mod.into_cells(world, coords_mod.neighbors_leq(self.primary_coordinate, config.range))
+		for _, cell in neighbors do
+			cell.influences[self.id] = true
 		end
 	end,
 	on_event = function(self: Entity, world: World, event: EntityEvent, action_state: ActionState)
@@ -48,6 +37,5 @@ entity_mod.registry.taunt = entity_mod.with_defaults {
 		end
 	end,
 }
-print(entity_mod.registry.taunt)
 
 return {}

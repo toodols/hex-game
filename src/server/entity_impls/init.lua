@@ -17,6 +17,6 @@ require(script.witness)
 require(script.suggestion)
 require(script.torch)
 require(script.scout)
-
+require(script.turret)
 
 return {}
