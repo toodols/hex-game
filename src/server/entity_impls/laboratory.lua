@@ -11,11 +11,11 @@ type Entity = types.Entity
 type World = types.World
 type ActionState = server_types.ActionState
 
+local research_item = researches_mod.research_item
+
 entity_mod.registry.laboratory = entity_mod.with_defaults {
 	autogenerates_vertex = true,
-	tick = function(self: Entity, world: World, action_state: ActionState)
-
-	end,
+	tick = function(self: Entity, world: World, action_state: ActionState) end,
 	influences = function(self: Entity, world: World)
 		local config = world.entity_configurations[self.type]
 		local neighbors = coords.neighbors_leq(self.primary_coordinate, config.range)
@@ -28,9 +28,34 @@ entity_mod.registry.laboratory = entity_mod.with_defaults {
 	end,
 	init = function(self: Entity, world: World)
 		self.researches = {
-			queue = {},
-			states = researches_mod.create_laboratory_researches(),
-		}
+		queue = {},
+		states = {
+			-- turret = research_item {
+			-- 	coord = { -1, 0, 1 },
+			-- 	id = "turret",
+			-- },
+			proxy = research_item {
+				coord = { -1, 1, 0 },
+				id = "proxy",
+			},
+			-- extractor_boost = research_item {
+			-- 	coord = { 1, 0, -1 },
+			-- 	id = "extractor_boost",
+			-- },
+			heart = research_item {
+				coord = { 0, -1, 1 },
+				id = "heart",
+			},
+			vault = research_item {
+				coord = { 1, -1, 0 },
+				id = "vault",
+			},
+			taunt = research_item {
+				coord = { 0, 1, -1 },
+				id = "taunt",
+			},
+		},
+	}
 	end,
 }
 

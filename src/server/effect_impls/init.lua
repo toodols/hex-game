@@ -15,41 +15,27 @@ type ActionState = server_types.ActionState
 registry.shield = effect_mod.with_defaults {}
 
 registry.regeneration = effect_mod.with_defaults {
-	description = "Gains +1 hitpoint every turn",
-	desirability = "positive",
 	tick = function(world: World, action_state: ActionState, entity: Entity, effect: Effect)
+		-- todo: replace this to use damage_mod
 		entity.health = math.min(entity.health + 1, entity.max_health)
 	end,
 }
 
 -- Todo: some negative debuff that comes with being infected
 registry.infected = effect_mod.with_defaults {
-	desirability = "negative",
 	tick = function()
 		-- todo: spread to other cells
 	end,
 }
 
 -- being hidden will still impose a presence
-registry.hidden = effect_mod.with_defaults {
-	desirability = "positive",
-	description = "This entity is hidden from the enemy",
-}
+registry.hidden = effect_mod.with_defaults {}
 
-registry.inventory_lock = effect_mod.with_defaults {
-	desirability = "negative",
-	description = "This entity cannot use its inventory",
-}
+registry.inventory_lock = effect_mod.with_defaults {}
 
-registry.taunt_immunity = effect_mod.with_defaults {
-	desirability = "positive",
-	description = "This entity cannot be taunted",
-}
+registry.taunt_immunity = effect_mod.with_defaults {}
 
-registry.increase_damage = effect_mod.with_defaults {
-	desirability = "positive",
-	description = "This entity does more damage",
-}
+registry.increase_damage = effect_mod.with_defaults {}
 
 return {
 	registry = registry,

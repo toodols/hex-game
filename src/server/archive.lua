@@ -71,7 +71,7 @@ local all_symbols = enum {
 	"requested_at",
 	"can_deconstruct",
 
-	-- ResearchState symbols
+	-- ResearchItem symbols
 	"cost",
 	"cost_is_paid",
 	"time",

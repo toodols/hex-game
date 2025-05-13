@@ -37,9 +37,10 @@ clone_assets({
 }, server_assets, destination)
 
 -- Load entities and effects into their registries
+require(ReplicatedStorage.Shared.effect_impls)
+require(ReplicatedStorage.Shared.entity_impls)
 require(ServerScriptService.Server.effect_impls)
 require(ServerScriptService.Server.entity_impls)
-require(ReplicatedStorage.Shared.entity_impls)
 require(ReplicatedStorage.Client.entity_impls) -- client also needs to be loaded for server-sided tests that deal with the client
 
 local tests = require(ServerScriptService.Server.tests)
@@ -94,7 +95,7 @@ function start_game(teleport_data: { room: types.Room }?)
 	print("Starting game with teleport data", game.HttpService:JSONEncode(teleport_data))
 	-- main_world = presets.tutorial_map()
 	main_world = presets[if room then room.map else "my_map"]()
-	-- main_world = tests.server.phony_generates_bar_on_death()
+	-- main_world = tests.server.phony_generates_tek_on_death()
 
 	_G.world = main_world
 

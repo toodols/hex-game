@@ -19,7 +19,6 @@ local context_mod = require(ReplicatedStorage.Client.ui.context)
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 
-local TextActionButton = require(script.Parent.action_button).TextActionButton
 local Items = require(script.Parent.items).Items
 local HighlightOnHover = require(script.Parent.highlight_on_hover).HighlightOnHover
 local ResearchPreview = require(script.Parent.research).ResearchPreview
@@ -36,6 +35,9 @@ local DeconstructButton = action_buttons.DeconstructButton
 local DisguiseButton = action_buttons.DisguiseButton
 local FilterButton = action_buttons.FilterButton
 local AttackButton = action_buttons.AttackButton
+local OpenRecipeButton = action_buttons.OpenRecipeButton
+local ToggleEnableButton = action_buttons.ToggleEnableButton
+local UseButton = action_buttons.UseButton
 
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
@@ -307,7 +309,19 @@ function EntityInformation(props: {
 								LayoutOrder = 5,
 								TextColor3 = Color3.fromRGB(255, 82, 82),
 								Size = UDim2.new(1, 0, 0, 20),
-								Text = "Decay: " .. tostring(entity.decay),
+								Text = "Decay: " .. tostring(entity.decay) .. "/ 3",
+							}
+						)
+						else nil,
+
+					DisabledLabel = if entity.enabled == false
+						then React.createElement(
+							"TextLabel",
+							themes.theme_description {
+								LayoutOrder = 5,
+								TextColor3 = Color3.fromRGB(255, 255, 120),
+								Size = UDim2.new(1, 0, 0, 20),
+								Text = "This building is disabled.",
 							}
 						)
 						else nil,
@@ -317,7 +331,7 @@ function EntityInformation(props: {
 							themes.theme_description {
 								LayoutOrder = 5,
 								Size = UDim2.new(1, 0, 0, 20),
-								Text = "Turns until built: " .. tostring(entity.build_time),
+								Text = "Turns Left: " .. tostring(entity.build_time),
 							}
 						)
 						else nil,
@@ -524,6 +538,33 @@ function EntityInformation(props: {
 								LayoutOrder = 3,
 							})
 							else nil,
+
+						UseButton = if entity.active ~= false
+								and entity.owner == player_team.id
+								and (entity.type == "solution")
+							then React.createElement(UseButton, {
+								entity_id = entity.id,
+								LayoutOrder = 4,
+							})
+							else nil,
+
+						ToggleEnableButton = if entity.active ~= false
+								and entity.owner == player_team.id
+								and shared_behavior.can_disable
+							then React.createElement(ToggleEnableButton, {
+								entity_id = entity.id,
+								LayoutOrder = 2,
+							})
+							else nil,
+						OpenRecipeButton = if entity.active ~= false
+								and entity.owner == player_team.id
+								and (entity.type == "factory")
+								and entity.status == "complete"
+							then React.createElement(OpenRecipeButton, {
+								entity_id = entity.id,
+								LayoutOrder = 5,
+							})
+							else nil,
 					}),
 
 					-- Rotate = if entity.active ~= false
@@ -539,59 +580,6 @@ function EntityInformation(props: {
 					-- 	})
 					-- 	else nil,
 
-					UseButton = if entity.active ~= false
-							and entity.owner == player_team.id
-							and (entity.type == "solution")
-						then React.createElement(TextActionButton, {
-							color = Color3.fromRGB(255, 255, 120),
-							Text = "Activate",
-							LayoutOrder = 1,
-							on_click = function()
-								client_interaction_remote:FireServer {
-									{
-										type = "ability",
-										ability_type = "solution_activate",
-										entity_id = entity.id,
-									},
-								}
-							end,
-						})
-						else nil,
-
-					ToggleEnableButton = if entity.active ~= false
-							and entity.owner == player_team.id
-							and shared_behavior.can_disable
-						then React.createElement(TextActionButton, {
-							color = Color3.fromRGB(255, 255, 120),
-							Text = if entity.enabled then "Disable" else "Enable",
-							LayoutOrder = 2,
-							on_click = function()
-								client_interaction_remote:FireServer {
-									{
-										type = "set_entity_enabled",
-										entity_id = entity.id,
-										enabled = not entity.enabled,
-									},
-								}
-							end,
-						})
-						else nil,
-					OpenRecipeButton = if entity.active ~= false
-							and entity.owner == player_team.id
-							and (entity.type == "factory")
-							and entity.status == "complete"
-						then React.createElement(TextActionButton, {
-							color = Color3.fromRGB(255, 255, 120),
-							Text = "Open Recipes",
-							LayoutOrder = 3,
-							on_click = function()
-								toggle_submenu {
-									type = "recipes",
-									entity_id = entity.id,
-								}
-							end,
-						})
-						else nil,
 					VerticalLayout = React.createElement("UIListLayout", {
 						Padding = UDim.new(0, 2),
 						SortOrder = Enum.SortOrder.LayoutOrder,

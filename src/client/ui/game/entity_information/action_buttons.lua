@@ -51,6 +51,7 @@ function AttackButton(props: { entity_id: EntityId, LayoutOrder: number? })
 						type = "cancel_decision",
 						decision_type = "ability",
 						entity_id = entity.id,
+						ability_type = ability_name,
 					},
 				}
 				return
@@ -227,10 +228,97 @@ function RotateButton(props: { entity_id: EntityId, LayoutOrder: number? })
 	})
 end
 
+-- UseButton: Activates the "solution" entity's ability.
+function UseButton(props: { entity_id: EntityId, LayoutOrder: number? })
+	local entity = hooks.use_synced_entity(props.entity_id)
+
+	local is_using = util.table_any(entity.queued_decisions, function(v)
+		return v.type == "ability" and v.ability_type == "solution_activate"
+	end)
+	return React.createElement(SquareActionButton, {
+		Image = "http://www.roblox.com/asset/?id=6026663699",
+		LayoutOrder = props.LayoutOrder,
+		color = Color3.fromRGB(255, 255, 120),
+		ImageColor3 = if is_using then Color3.fromRGB(255, 255, 120) else Color3.fromRGB(200, 200, 200),
+		on_click = function()
+			if is_using then
+				client_interaction_remote:FireServer {
+					{
+						type = "cancel_decision",
+						entity_id = entity.id,
+						decision_type = "ability",
+						ability_type = "solution_activate",
+					},
+				}
+				return
+			else
+				client_interaction_remote:FireServer {
+					{
+						type = "ability",
+						ability_type = "solution_activate",
+						entity_id = entity.id,
+					},
+				}
+			end
+		end,
+	})
+end
+
+-- ToggleEnableButton: Toggles the enabled state of an entity, lights up when enabled.
+function ToggleEnableButton(props: { entity_id: EntityId, LayoutOrder: number? })
+	local entity = hooks.use_synced_entity(props.entity_id)
+
+	local enabled = entity.enabled
+	return React.createElement(SquareActionButton, {
+		Image = "http://www.roblox.com/asset/?id=6031084743",
+		LayoutOrder = props.LayoutOrder,
+		color = Color3.fromRGB(255, 255, 120),
+		ImageColor3 = if not enabled then Color3.fromRGB(255, 255, 120) else Color3.fromRGB(200, 200, 200),
+		on_click = function()
+			client_interaction_remote:FireServer {
+				{
+					type = "set_entity_enabled",
+					entity_id = entity.id,
+					enabled = not enabled,
+				},
+			}
+		end,
+	})
+end
+
+-- OpenRecipeButton: Opens the recipes submenu for a factory entity.
+function OpenRecipeButton(props: { entity_id: EntityId, LayoutOrder: number? })
+	local entity = hooks.use_synced_entity(props.entity_id)
+	local context = React.useContext(MainContext)
+	local toggle_submenu = function(menu)
+		context.set_submenu(function(current)
+			return if util.deep_equal(current, menu) then {} else menu
+		end)
+	end
+
+	local opened = context.submenu.type == "recipes" and context.submenu.entity_id == props.entity_id
+
+	return React.createElement(SquareActionButton, {
+		Image = "http://www.roblox.com/asset/?id=6035190838",
+		LayoutOrder = props.LayoutOrder,
+		color = Color3.fromRGB(255, 255, 120),
+		ImageColor3 = if opened then Color3.fromRGB(255, 255, 120) else Color3.fromRGB(200, 200, 200),
+		on_click = function()
+			toggle_submenu {
+				type = "recipes",
+				entity_id = entity.id,
+			}
+		end,
+	})
+end
+
 return {
 	AttackButton = AttackButton,
 	DisguiseButton = DisguiseButton,
 	FilterButton = FilterButton,
 	RotateButton = RotateButton,
 	DeconstructButton = DeconstructButton,
+	UseButton = UseButton,
+	ToggleEnableButton = ToggleEnableButton,
+	OpenRecipeButton = OpenRecipeButton,
 }

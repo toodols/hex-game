@@ -11,9 +11,9 @@ local Items = require(ReplicatedStorage.Client.ui.game.items).Items
 local TextActionButton = require(ReplicatedStorage.Client.ui.game.action_button).TextActionButton
 local Corner = util_components.Corner
 
-type ResearchState = types.ResearchState
+type ResearchItem = types.ResearchItem
 
-function Aside(props: { state: ResearchState, on_add: () -> (), on_remove: () -> () })
+function Aside(props: { state: ResearchItem, on_add: () -> (), on_remove: () -> () })
 	local world = React.useContext(MainContext).world
 	return React.createElement(
 		"Frame",

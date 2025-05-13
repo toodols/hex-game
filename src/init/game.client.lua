@@ -7,8 +7,10 @@ local world_mod = require(ReplicatedStorage.Shared.world)
 local game_mod = require(ReplicatedStorage.Client.game)
 local init_game_ui = require(ReplicatedStorage.Client.ui.game).init_ui
 local types = require(ReplicatedStorage.Shared.types)
+
 require(ReplicatedStorage.Client.entity_impls)
 require(ReplicatedStorage.Shared.entity_impls)
+require(ReplicatedStorage.Shared.effect_impls)
 
 type World = types.World
 type WorldUpdate = types.WorldUpdate

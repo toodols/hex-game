@@ -4,9 +4,88 @@ local types = require(ReplicatedStorage.Shared.types)
 type World = types.World
 type HexCell = types.HexCell
 type TeamId = types.TeamId
-type ResearchState = types.ResearchState
+type ResearchItem = types.ResearchItem
 type ResearchId = types.ResearchId
 type EntityId = types.EntityId
+type ResearchState = types.ResearchState
+
+-- All researches
+local researches = {
+	--[[
+	Example:
+	["turret"] = {
+		icon = { type = "model", model = "Entities/Turret" },
+		name = "Dagger",
+		description = "Allows construction of {entity.turret}",
+		cost = { bar = 4 },
+		time = 1,
+	},
+	]]
+	proxy = {
+		icon = {
+			type = "model",
+			model = "Entities/Proxy",
+		},
+		name = "Proxy",
+		description = "Allows construction of {entity.proxy}",
+		cost = {
+			tek = 2,
+			vit = 1,
+		},
+		time = 2,
+	},
+	heart = {
+		icon = {
+			type = "model",
+			model = "Entities/Heart",
+		},
+		name = "Monarch",
+		description = "Allows construction of {entity.heart}",
+		cost = {
+			tek = 4,
+			tar = 1,
+		},
+		time = 3,
+	},
+	vault = {
+		icon = {
+			type = "model",
+			model = "Entities/Vault",
+		},
+		name = "Vault",
+		description = "Allows construction of {entity.vault}",
+		cost = {
+			tek = 2,
+			bar = 2,
+		},
+		time = 2,
+	},
+	taunt = {
+		icon = {
+			type = "model",
+			model = "Entities/Taunt",
+		},
+		name = "Taunt",
+		description = "Allows construction of {entity.taunt}",
+		cost = {
+			tek = 1,
+			pow = 1,
+		},
+		time = 1,
+	},
+	create_rad = {
+		icon = {
+			type = "model",
+			model = "Items/Rad",
+		},
+		name = "Inspiration",
+		description = "{entity.heart} begins producing 1 {item.rad} every 2 turns.",
+		cost = {
+			bar = 5,
+		},
+		time = 2,
+	},
+}
 
 --- Gets all researches on any of the cells for a team
 function get_cells_researches(world: World, cells: { HexCell }, team: TeamId): { [ResearchId]: boolean }
@@ -25,7 +104,7 @@ function get_cells_researches(world: World, cells: { HexCell }, team: TeamId): {
 			continue
 		end
 		if entity.researches ~= nil then
-			for research_id, state: ResearchState in entity.researches.states do
+			for research_id, state: ResearchItem in entity.researches.states do
 				if state.status == "complete" then
 					researches_set[research_id] = true
 				end
@@ -35,144 +114,26 @@ function get_cells_researches(world: World, cells: { HexCell }, team: TeamId): {
 	return researches_set
 end
 
-function research_state(props): ResearchState
+function research_item(props): ResearchItem
+	local preset = researches[props.id] or {}
 	return {
 		precondition = props.precondition or function()
 			return true
 		end,
 		coord = props.coord,
 		status = props.status or "incomplete",
-		icon = props.icon,
+		icon = preset.icon,
 		id = props.id,
 		progress = 0,
-		name = props.name or "",
-		description = props.description or "",
-		time = props.time or 0,
-		cost = props.cost or {},
-	} :: ResearchState
+		name = preset.name or "",
+		description = preset.description or "",
+		time = preset.time or 0,
+		cost = preset.cost or {},
+	} :: ResearchItem
 end
-
-function create_laboratory_researches(): { [ResearchId]: ResearchState }
-	return {
-		-- turret = research_state {
-		-- 	coord = { -1, 0, 1 },
-		-- 	id = "turret",
-		-- 	name = "Dagger",
-		-- 	description = "Allows construction of {entity.turret}",
-		-- 	icon = {
-		-- 		type = "model",
-		-- 		model = "Entities/Turret",
-		-- 	},
-		-- 	cost = {
-		-- 		bar = 4,
-		-- 	},
-		-- 	time = 1,
-		-- },
-		proxy = research_state {
-			coord = { -1, 1, 0 },
-			id = "proxy",
-			name = "Proxy",
-			description = "Allows construction of {entity.proxy}",
-
-			icon = {
-				type = "model",
-				model = "Entities/Proxy",
-			},
-			cost = {
-				tek = 2,
-				vit = 1,
-			},
-			time = 2,
-		},
-		-- extractor_boost = research_state {
-		-- 	coord = { 1, 0, -1 },
-		-- 	id = "extractor_boost",
-		-- 	name = "Boosted Spout",
-		-- 	icon = {
-		-- 		type = "model",
-		-- 		model = "Entities/Extractor",
-		-- 	},
-		-- 	description = "{entity.extractor} create up to +1 items when adjacent to a {entity.generator}.",
-		-- 	cost = {
-		-- 		tek = 6,
-		-- 	},
-		-- 	time = 2,
-		-- 	-- precondition = function(_world, ent)
-		-- 	-- 	return ent.researches.states.turret.status ~= "complete"
-		-- 	-- end,
-		-- },
-		heart = research_state {
-			coord = { 0, -1, 1 },
-			id = "heart",
-			name = "Monarch",
-			icon = {
-				type = "model",
-				model = "Entities/Heart",
-			},
-			description = "Allows construction of {entity.heart}",
-			cost = {
-				tek = 4,
-				tar = 1,
-			},
-			time = 3,
-		},
-		vault = research_state {
-			coord = { 1, -1, 0 },
-			id = "vault",
-			name = "Vault",
-			icon = {
-				type = "model",
-				model = "Entities/Vault",
-			},
-			description = "Allows construction of {entity.vault}",
-			cost = {
-				tek = 2,
-				bar = 2,
-			},
-			time = 2,
-		},
-		taunt = research_state {
-			coord = { 0, 1, -1 },
-			id = "taunt",
-			name = "Taunt",
-			icon = {
-				type = "model",
-				model = "Entities/Taunt",
-			},
-			description = "Allows construction of {entity.taunt}",
-			cost = {
-				tek = 1,
-				pow = 1,
-			},
-			time = 1,
-		},
-	}
-end
-
-function create_heart_researches()
-	return {
-		create_rad = research_state {
-			coord = { 0, 0, 0 },
-			id = "create_rad",
-			name = "Advanced Synthesis",
-			icon = {
-				type = "model",
-				model = "Items/Rad",
-			},
-			description = "{entity.heart} begins producing 1 {item.rad} every 2 turns.",
-			cost = {
-				bar = 5,
-			},
-			time = 2,
-		},
-	}
-end
-
-local researches = create_laboratory_researches()
 
 return {
 	get_cells_researches = get_cells_researches,
+	research_item = research_item,
 	researches = researches,
-	create_laboratory_researches = create_laboratory_researches,
-	create_heart_researches = create_heart_researches,
 }

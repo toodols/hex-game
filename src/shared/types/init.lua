@@ -51,7 +51,7 @@ export type Recipe = {
 
 export type ResearchId = string
 
-export type ResearchState = {
+export type ResearchItem = {
 	cost: { [Item]: number },
 	cost_is_paid: boolean,
 	time: number,
@@ -66,10 +66,10 @@ export type ResearchState = {
 	precondition: (world: World, entity: Entity) -> boolean,
 }
 
-export type Researches = {
+export type ResearchState = {
 	queue: { ResearchId },
 	states: {
-		[string]: ResearchState,
+		[string]: ResearchItem,
 	},
 }
 
@@ -124,7 +124,7 @@ export type Entity = {
 	decayable: boolean?,
 
 	-- laboratory only
-	researches: Researches?,
+	researches: ResearchState?,
 
 	-- Witness only
 	charges: number?,
@@ -284,6 +284,7 @@ export type Interaction = Decision | {
 	type: "cancel_decision",
 	entity_id: EntityId,
 	decision_type: string,
+	ability_type: string?,
 } | {
 	type: "quest_advance",
 	quest_id: string,
@@ -328,12 +329,11 @@ export type Damage = {
 }
 
 export type DamageResult = {
-		-- target
-		amount: number,
-		-- whether the damage killed this entity
-		lethal: boolean,
-	}
-
+	-- target
+	amount: number,
+	-- whether the damage killed this entity
+	lethal: boolean,
+}
 
 type TeamTarget = "everyone" | { TeamId }
 

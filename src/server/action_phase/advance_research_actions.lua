@@ -24,13 +24,13 @@ function handle_advance_research_actions(world: World, action_state: ActionState
 		end
 
 		for _, research_id in entity.researches.queue do
-			local research_state = entity.researches.states[research_id]
-			if not research_state.cost_is_paid then
-				if not systems_mod.system_has_items(world, action_state, system, research_state.cost) then
+			local research_item = entity.researches.states[research_id]
+			if not research_item.cost_is_paid then
+				if not systems_mod.system_has_items(world, action_state, system, research_item.cost) then
 					break
 				end
 				succeeded = true
-				for item_type, amount in research_state.cost do
+				for item_type, amount in research_item.cost do
 					systems_mod.system_consume_item_type(world, action_state, system, item_type, amount)
 				end
 
@@ -38,18 +38,18 @@ function handle_advance_research_actions(world: World, action_state: ActionState
 					type = "entity_event",
 					event_type = "consumed_items",
 					entity_id = entity.id,
-					items = research_state.cost,
+					items = research_item.cost,
 				}
 				table.insert(world.action_queue, event)
 				world:add_update(event)
 
-				research_state.cost_is_paid = true
+				research_item.cost_is_paid = true
 				world:add_update {
 					type = "entity_update",
 					entity = entity,
 				}
 			else
-				research_state.progress += 1
+				research_item.progress += 1
 				world:add_update {
 					type = "entity_update",
 					entity = entity,
@@ -57,8 +57,8 @@ function handle_advance_research_actions(world: World, action_state: ActionState
 				succeeded = true
 			end
 
-			if research_state.progress == research_state.time then
-				research_state.status = "complete"
+			if research_item.progress == research_item.time then
+				research_item.status = "complete"
 				world:add_update {
 					type = "entity_update",
 					entity = entity,

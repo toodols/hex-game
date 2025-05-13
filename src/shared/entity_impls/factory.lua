@@ -36,20 +36,13 @@ entity_mod.registry.factory = entity_mod.with_defaults {
 		tar_to_tek = {
 			layout_order = 3,
 			input_items = {
-				tar = 2,
+				tar = 3,
 			},
 			output_items = {
 				"tek",
 				"rad",
-			},
-		},
-		bar_to_tek = {
-			layout_order = 3,
-			input_items = {
-				bar = 4,
-			},
-			output_items = {
-				"tek",
+				"vit",
+				"bar",
 			},
 		},
 	},

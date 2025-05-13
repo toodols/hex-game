@@ -89,7 +89,11 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 			return {}
 		end
 		util.table_extract(entity.queued_decisions, function(decision)
-			return decision.type == entry.decision_type
+			if entry.ability_type then
+				return decision.type == entry.decision_type and decision.ability_type == entry.ability_type
+			else
+				return decision.type == entry.decision_type
+			end
 		end)
 		return { [entity.id] = true }
 	elseif entry.type == "add_research" then
@@ -115,12 +119,12 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 			return {}
 		end
 
-		local research_state = entity.researches.states[entry.research_id]
-		if research_state.status ~= "incomplete" or not research_state.precondition(world, entity) then
+		local research_item = entity.researches.states[entry.research_id]
+		if research_item.status ~= "incomplete" or not research_item.precondition(world, entity) then
 			return {}
 		end
 
-		research_state.status = "researching"
+		research_item.status = "researching"
 		table.insert(entity.researches.queue, entry.research_id)
 		return { [entity.id] = true }
 	elseif entry.type == "remove_research" then

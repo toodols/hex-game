@@ -21,14 +21,14 @@ local Corner = util_components.Corner
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
 type Entity = types.Entity
-type ResearchState = types.ResearchState
+type ResearchItem = types.ResearchItem
 type World = types.World
 type EntityId = types.EntityId
 type Icon = types.Icon
 type TeamData = types.TeamData
 
 local TRANSFORM_SIZE = 5000
-function Node(props: { state: ResearchState, on_click: () -> () })
+function Node(props: { state: ResearchItem, on_click: () -> () })
 	local icon = props.state.icon
 	local scale = 80
 	local ratio = scale / 52 / TRANSFORM_SIZE

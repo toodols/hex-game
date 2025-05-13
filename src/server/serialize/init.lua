@@ -92,7 +92,7 @@ function serialize_cell_for_team(world: World, cell: HexCell, team: TeamId): Hex
 			entities = util.table_filter(cell.entities, function(_, entity_id)
 				local entity = world.entities[entity_id]
 				-- if one of its coordinates is visible or it is .server_data.always_visible
-				return entity.server_data.always_visible
+				return entity.server_data.always_visible or team_mod.is_allied(world, team, entity.owner)
 			end),
 			coordinate = cell.coordinate,
 			type = cell.type,

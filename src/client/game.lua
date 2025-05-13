@@ -200,6 +200,21 @@ end
 function handle_cells(world: World, update: WorldUpdate)
 	assert(update.type == "cells", "not a cell update")
 
+	-- remove cells that no longer exist
+	for old_encoded_coord, old_cell in world.cells do
+		if update.cells[old_encoded_coord] ~= nil then
+			continue
+		end
+		local instance = world.cell_instance_map[old_encoded_coord]
+		world.cell_instance_map[old_encoded_coord] = nil
+		world.instance_cell_map[instance] = nil
+		animate_cell_removal(instance)
+		Debris:AddItem(instance, 2)
+		world.cells[old_encoded_coord] = nil
+
+		hide_entities(world, old_cell)
+	end
+
 	for encoded_coord, cell in update.cells do
 		local old = world.cells[encoded_coord]
 		-- add new cells
@@ -219,28 +234,11 @@ function handle_cells(world: World, update: WorldUpdate)
 			world.instance_cell_map[new_instance] = encoded_coord
 		end
 
+		if old.visible_for_team and not cell.visible_for_team then
+			hide_entities(world, old)
+		end
+
 		world.cells[encoded_coord] = cell
-	end
-
-	-- remove cells that no longer exist
-	for old_encoded_coord, old_cell in world.cells do
-		if update.cells[old_encoded_coord] ~= nil then
-			continue
-		end
-		local instance = world.cell_instance_map[old_encoded_coord]
-		world.cell_instance_map[old_encoded_coord] = nil
-		world.instance_cell_map[instance] = nil
-		animate_cell_removal(instance)
-		Debris:AddItem(instance, 2)
-		world.cells[old_encoded_coord] = nil
-
-		for entity_id in old_cell.entities do
-			local entity = world.entities[entity_id]
-			if entity and not entity.always_visible then
-				local client_behavior = client_entity_mod.registry[entity.type]
-				client_behavior.on_hidden(entity, world)
-			end
-		end
 	end
 
 	for _, cell in world.cells do

@@ -26,6 +26,7 @@ local EntityInformation = require(ReplicatedStorage.Client.ui.game.entity_inform
 local Recipes = require(ReplicatedStorage.Client.ui.game.recipes).Recipes
 local ItemFilters = require(ReplicatedStorage.Client.ui.game.item_filters).ItemFilters
 local Credits = require(ReplicatedStorage.Client.ui.game.credits).Credits
+local Encyclopedia = require(ReplicatedStorage.Client.ui.game.encyclopedia).Encyclopedia
 
 local Corner = util_components.Corner
 
@@ -111,6 +112,7 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 
 	local settings_open, set_settings_open = React.useState(false)
 	local credits_open, set_credits_open = React.useState(false)
+	local encyclopedia_open, set_encyclopedia_open = React.useState(false)
 
 	local _, force_update = React.useReducer(function(x)
 		return x + 1
@@ -171,6 +173,8 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 			}),
 			SettingsMenu = if settings_open then React.createElement(SettingsMenu) else nil,
 			Credits = if credits_open then React.createElement(Credits) else nil,
+			Encyclopedia = if encyclopedia_open
+				then React.createElement(Encyclopedia) else nil
 		}),
 		TopCenter = React.createElement(TopCenter),
 		BottomCenter = React.createElement("Frame", {
@@ -320,6 +324,13 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 				Padding = UDim.new(0, 10),
 				SortOrder = Enum.SortOrder.LayoutOrder,
 				VerticalAlignment = Enum.VerticalAlignment.Bottom,
+			}),
+			Encyclopedia = React.createElement(MenuIcon, {
+				icon = "rbxassetid://6034509994",
+				label = "Encyclopedia",
+				on_click = function()
+					set_encyclopedia_open(not encyclopedia_open)
+				end,
 			}),
 			Players = React.createElement(MenuIcon, {
 				icon = "rbxassetid://6035053279",

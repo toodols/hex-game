@@ -5,21 +5,30 @@ local entity_mod = require(ServerScriptService.Server.entity)
 local server_types = require(ServerScriptService.Server.types)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
 
+local research_item = researches_mod.research_item
+
 type Entity = types.Entity
 type World = types.World
 type ActionState = server_types.ActionState
 type Heart = Entity & {
 	rad_clock: number,
 }
+
 entity_mod.registry.heart = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	init = function(self: Heart, world: World)
 		self.rad_clock = 0
 		self.researches = {
 			queue = {},
-			states = researches_mod.create_heart_researches(),
+			states = {
+				create_rad = research_item {
+					coord = { 0, 0, 0 },
+					id = "create_rad",
+				},
+			},
 		}
 	end,
+
 	tick = function(self: Heart, world: World, action_state: ActionState)
 		if self.status == "complete" then
 			assert(self.researches, "no researches")

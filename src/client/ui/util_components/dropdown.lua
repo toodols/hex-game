@@ -14,12 +14,14 @@ function Dropdown(props: {
 	on_change: (string) -> (),
 })
 	local open, set_open = React.useState(false)
+
 	return React.createElement("Frame", {
 		AnchorPoint = props.AnchorPoint,
 		BackgroundTransparency = 1,
 		Position = props.Position,
 		Size = props.Size or UDim2.new(0, 150, 0, 25),
 	}, {
+
 		Item = if #util.table_keys(props.options) > 1
 			then React.createElement("TextButton", {
 				BackgroundColor3 = Color3.fromRGB(30, 30, 30),
@@ -39,7 +41,9 @@ function Dropdown(props: {
 					Position = UDim2.new(1, 0, 0.5, 0),
 					Size = UDim2.new(0, 30, 0, 30),
 				}),
-
+				PaddingLeft = React.createElement("UIPadding", {
+					PaddingLeft = UDim.new(0, 5),
+				}),
 				UICorner = React.createElement(Corner),
 				UIStroke = React.createElement("UIStroke", {
 					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
@@ -66,6 +70,7 @@ function Dropdown(props: {
 					Size = UDim2.new(1, 0, 0, 0),
 				},
 				{
+
 					UIListLayout = React.createElement("UIListLayout", {
 						Padding = UDim.new(0, 2),
 						SortOrder = Enum.SortOrder.LayoutOrder,
@@ -82,12 +87,18 @@ function Dropdown(props: {
 						Size = UDim2.new(1, 0, 0, 25),
 						BackgroundTransparency = 1,
 						Text = "",
+						BackgroundColor3 = Color3.fromRGB(50, 50, 50),
+
 						[React.Event.MouseButton1Click] = function()
 							set_open(false)
 							if props.on_change then
 								props.on_change(k)
 							end
 						end,
+					}, {
+						PaddingLeft = React.createElement("UIPadding", {
+							PaddingLeft = UDim.new(0, 5),
+						}),
 					}, {
 						v,
 					})

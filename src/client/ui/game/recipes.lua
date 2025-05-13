@@ -87,7 +87,7 @@ function Recipes(props: { entity_id: EntityId, on_close: () -> () })
 			BorderColor3 = Color3.fromRGB(27, 42, 53),
 			LayoutOrder = 1,
 			Position = UDim2.new(-250, 250, 20, -20),
-			Size = UDim2.new(0, 200, 0, 0),
+			Size = UDim2.new(0, 250, 0, 0),
 		},
 		{
 			Header = React.createElement(

@@ -46,7 +46,8 @@ function compute_visibility(world: World)
 	-- loop through each entity and apply r=2
 	-- some other entities will have extra illuminations
 	for _, entity in world:active_entities() do
-		if entity.status ~= "complete" or entity.is_destroyed then
+		local server_behavior = server_entity_mod.registry[entity.type]
+		if entity.status ~= "complete" or server_behavior.incorporeal then
 			continue
 		end
 

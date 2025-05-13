@@ -775,7 +775,7 @@ function tests.deconstruct_interaction_gives_destroy_events()
 	)
 end
 
-function tests.phony_generates_bar_on_death()
+function tests.phony_generates_tek_on_death()
 	local world, teams = presets.blank_map()
 	world.global_configuration.decaying_enabled = false
 	local scout = entity_mod.new_entity({
