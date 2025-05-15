@@ -244,7 +244,7 @@ export type TeamData = {
 	-- whether the game should automatically put players on this team
 	is_player_team: boolean,
 	-- spectator teams cannot interact with the game
-	is_spectator_team: boolean?,
+	is_spectator_team: boolean,
 
 	server_data: {
 		-- creative mode (todo)

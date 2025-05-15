@@ -1,5 +1,7 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
+local DataStoreService = game:GetService "DataStoreService"
+
 local entity_mod = require(ReplicatedStorage.Shared.entity)
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
@@ -80,6 +82,57 @@ return function()
 			end)
 			assert(selection, "Did not find select_cells")
 			return coords_mod.from_set(selection.selected)
+		end,
+	}
+
+	extra_commands.save = {
+		description = "Saves the world in a key",
+		permissions = { "admin" },
+		overloads = {
+			{
+				returns = "nil",
+				args = {
+					{
+						name = "key",
+						type = "string",
+						description = "The key to save the world under.",
+					},
+				},
+			},
+		},
+		server_run = function(context)
+			local archive = require(ServerScriptService.Server.archive)
+			local base64 = require(ReplicatedStorage.Shared.base64)
+			local world = _G.world
+			local key = context.args[1]
+			local data = base64.encode(archive.serialize_world(world))
+			DataStoreService:GetDataStore("saves"):SetAsync(key, data)
+			return data
+		end,
+	}
+
+	extra_commands.load = {
+		description = "Loads the world from a key",
+		permissions = { "admin" },
+		overloads = {
+			{
+				returns = "nil",
+				args = {
+					{
+						name = "key",
+						type = "string",
+						description = "The key to load the world from.",
+					},
+				},
+			},
+		},
+		server_run = function(context)
+			local archive = require(ServerScriptService.Server.archive)
+			local base64 = require(ReplicatedStorage.Shared.base64)
+			local key = context.args[1]
+			local data = base64.decode(DataStoreService:GetDataStore("saves"):GetAsync(key))
+			local world = archive.deserialize_world(data)
+			return world
 		end,
 	}
 

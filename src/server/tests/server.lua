@@ -573,10 +573,12 @@ end
 function tests.archive_world()
 	-- todo
 	local world = presets.my_map()
-	local compressed = archive.compress_world(world)
-	local original = HttpService:JSONEncode(world)
-	local decompressed = archive.decompress_world(compressed)
-
+	local compressed = archive.serialize_world(world)
+	local as_json = HttpService:JSONEncode(world)
+	print("World saved as", #compressed, "bytes")
+	print(("Is %d%% of JSON size"):format(math.floor(#compressed / #as_json * 100)))
+	local decompressed = archive.deserialize_world(compressed)
+	print(decompressed)
 	cleanup(world)
 end
 

@@ -14,7 +14,7 @@ type EntityId = types.EntityId
 
 -- global id implies a local id but i haven't found a compelling use case for client-only entities because they need to be replicated to teams and coalitions
 function new_global_id()
-	return "(global)" .. HttpService:GenerateGUID()
+	return HttpService:GenerateGUID()
 end
 
 function catch(fn, plr, data)

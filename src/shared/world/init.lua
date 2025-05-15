@@ -53,6 +53,7 @@ function new_team(self: World, players: { Player }?, color: TeamColor?, name: st
 		color = color or { type = "color3", color = Color3.new() },
 		players = players or {},
 		is_player_team = true,
+		is_spectator_team = false,
 		server_data = {
 			creative = false,
 			visibility = "normal",
