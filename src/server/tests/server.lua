@@ -897,4 +897,19 @@ function tests.weird_presence_after_load()
 	cleanup(world)
 end
 
+function tests.heart_produces_rad()
+	local world, teams = presets.blank_map()
+	local heart = spawn_entity(world, "heart")
+	local stockpile = spawn_entity(world, "stockpile")
+	heart.researches.states.create_rad.status = "complete"
+	assert_eq(#stockpile.inventory.items, 0)
+	local result = action_phase_mod.run_action_phase(world)
+	assert(
+		util.table_any(stockpile.inventory.items, function(item)
+			return item == "rad"
+		end),
+		"Stockpile should have rad"
+	)
+end
+
 return tests

@@ -92,6 +92,14 @@ local PAGES = {
 			},
 		},
 	},
+	{
+		name = "Page 4",
+		items = {
+			{
+				type = "fountain",
+			},
+		},
+	},
 }
 
 local BuildingItem = React.forwardRef(function(

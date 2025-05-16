@@ -17,7 +17,6 @@ entity_mod.registry.taunt = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	on_completed = function(self: Entity, world: World) end,
 	influences = function(self: Entity, world: World)
-		print "influences for taunt"
 		local config = world.entity_configurations[self.type]
 		local neighbors = world_mod.into_cells(world, coords_mod.neighbors_leq(self.primary_coordinate, config.range))
 		for _, cell in neighbors do

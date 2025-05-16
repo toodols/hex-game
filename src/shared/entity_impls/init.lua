@@ -19,5 +19,6 @@ require(script.phony)
 require(script.suggestion)
 require(script.taunt)
 require(script.torch)
+require(script.fountain)
 
 return {}

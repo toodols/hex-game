@@ -28,34 +28,34 @@ entity_mod.registry.laboratory = entity_mod.with_defaults {
 	end,
 	init = function(self: Entity, world: World)
 		self.researches = {
-		queue = {},
-		states = {
-			-- turret = research_item {
-			-- 	coord = { -1, 0, 1 },
-			-- 	id = "turret",
-			-- },
-			proxy = research_item {
-				coord = { -1, 1, 0 },
-				id = "proxy",
+			queue = {},
+			states = {
+				-- turret = research_item {
+				-- 	coord = { -1, 0, 1 },
+				-- 	id = "turret",
+				-- },
+				proxy = research_item {
+					coord = { -1, 1, 0 },
+					id = "proxy",
+				},
+				fountain = research_item {
+					coord = { 1, 0, -1 },
+					id = "fountain",
+				},
+				heart = research_item {
+					coord = { 0, -1, 1 },
+					id = "heart",
+				},
+				vault = research_item {
+					coord = { 1, -1, 0 },
+					id = "vault",
+				},
+				taunt = research_item {
+					coord = { 0, 1, -1 },
+					id = "taunt",
+				},
 			},
-			-- extractor_boost = research_item {
-			-- 	coord = { 1, 0, -1 },
-			-- 	id = "extractor_boost",
-			-- },
-			heart = research_item {
-				coord = { 0, -1, 1 },
-				id = "heart",
-			},
-			vault = research_item {
-				coord = { 1, -1, 0 },
-				id = "vault",
-			},
-			taunt = research_item {
-				coord = { 0, 1, -1 },
-				id = "taunt",
-			},
-		},
-	}
+		}
 	end,
 }
 

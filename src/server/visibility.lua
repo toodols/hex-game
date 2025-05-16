@@ -72,7 +72,6 @@ function compute_visibility(world: World)
 			add_visibility(coord, entity.owner, "contact")
 		end
 
-		local server_behavior = server_entity_mod.registry[entity.type]
 		for _, neighbor_coord in server_behavior.illumination(entity, world) do
 			add_visibility(neighbor_coord, entity.owner, "illumination")
 		end
@@ -102,6 +101,10 @@ function entity_visibility(world: World, entity: Entity, team: TeamId): boolean
 	end
 
 	if entity.server_data.always_visible_for[team] then
+		return true
+	end
+
+	if world.teams[team].server_data.visibility == "perfect" then
 		return true
 	end
 

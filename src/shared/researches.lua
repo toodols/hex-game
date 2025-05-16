@@ -85,6 +85,19 @@ local researches = {
 		},
 		time = 2,
 	},
+	fountain = {
+		icon = {
+			type = "model",
+			model = "Entities/Fountain",
+		},
+		name = "Fountain",
+		description = "Allows construction of {entity.fountain}",
+		cost = {
+			bar = 2,
+			tek = 2,
+		},
+		time = 2,
+	},
 }
 
 --- Gets all researches on any of the cells for a team

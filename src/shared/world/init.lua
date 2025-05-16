@@ -222,7 +222,7 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 		color = Color3.fromRGB(255, 255, 255),
 	}, "Spectator").id
 	world.teams[world.spectator_team].is_spectator_team = true
-	world.teams[world.spectator_team].server_data.visibility = "fogless"
+	world.teams[world.spectator_team].server_data.visibility = "perfect"
 	world.teams[world.spectator_team].is_player_team = false
 	return world
 end

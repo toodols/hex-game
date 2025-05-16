@@ -16,23 +16,21 @@ entity_mod.registry.witness = entity_mod.with_defaults {
 	end,
 	on_completed = function(self: Entity, world: World) end,
 	on_event = function(self: Entity, world: World, event: EntityEvent, action_state: ActionState)
-		-- todo: fix
-		if event.event_type == "took_damage" then
-			return
-		end
-		local entity = world.entities[event.entity_id]
-		if entity.owner ~= self.owner then
-			return
-		end
-		assert(self.charges, "self.charges is nil")
-		self.charges += 1
-		if self.charges == 3 then
-			self.charges = 0
-			table.insert(world.action_queue, {
-				entity_id = self.id,
-				type = "exchange",
-				output_items = { "tek" },
-			})
+		if event.event_type == "took_damage" and event.damage and event.damage.from then
+			local from = world.entities[event.damage.from]
+			if from.owner ~= self.owner then
+				return
+			end
+			assert(self.charges, "self.charges is nil")
+			self.charges += 1
+			if self.charges == 3 then
+				self.charges = 0
+				table.insert(world.action_queue, {
+					entity_id = self.id,
+					type = "exchange",
+					output_items = { "tek" },
+				})
+			end
 		end
 	end,
 }

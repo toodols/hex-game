@@ -46,7 +46,7 @@ export type Recipe = {
 	input_items: { [Item]: number },
 	output_items: { Item },
 	time: number,
-	requires_research: { ResearchId }?,
+	required_research: { ResearchId }?,
 }
 
 export type ResearchId = string
