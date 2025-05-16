@@ -49,6 +49,7 @@ function init_ui(world: World, root_instance_: ScreenGui?)
 				render_stepped_connection:Disconnect()
 				ContextActionService:UnbindAction "select_cell"
 				root:unmount()
+				root_instance:Destroy()
 			end
 		end,
 	}

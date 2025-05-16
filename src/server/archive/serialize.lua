@@ -1,48 +1,43 @@
 local function write()
-	local format = {}
-	local buffer: { any } = {}
 	local record_size = {}
-
+	local text_buffer = {}
 	local writer = {}
+
 	function writer.begin_record_size()
-		table.insert(record_size, #buffer)
+		table.insert(record_size, #text_buffer)
 	end
 	function writer.end_record_size()
 		local slice = {}
-		local format_slice = {}
 		local start = table.remove(record_size)
-		for i = start, #buffer do
-			table.insert(format_slice, format[i])
-			table.insert(slice, buffer[i])
+		for i = start, #text_buffer do
+			table.insert(slice, text_buffer[i])
 		end
-		return #string.pack(table.concat(format_slice), table.unpack(slice))
+		return table.concat(slice):len()
 	end
-	function writer.write_f64(n: number)
-		table.insert(format, "d")
-		table.insert(buffer, n)
-	end
-	function writer.write_u8(n: number)
-		table.insert(format, "I1")
-		table.insert(buffer, n)
-	end
-	function writer.write_i8(n: number)
-		table.insert(format, "i1")
-		table.insert(buffer, n)
-	end
-	function writer.write_string(s: string)
-		table.insert(format, "s")
-		table.insert(buffer, s)
-	end
-	function writer.write_usize(n: number)
-		table.insert(format, "T")
-		table.insert(buffer, n)
-	end
-	function writer.write_i32(n: number)
-		table.insert(format, "i4")
-		table.insert(buffer, n)
+
+	local types = {
+		write_f64 = "d",
+		write_u8 = "I1",
+		write_u16 = "I2",
+		write_i8 = "i1",
+		write_string = "s2",
+		write_usize = "I4",
+		write_i32 = "i4",
+	}
+
+	for k, v in types do
+		writer[k] = function(data)
+			if data == nil or type(data) == "table" then
+				error "erm"
+			end
+			if v[1] == "s" and type(data) ~= "string" then
+				error(data .. " is not a string")
+			end
+			table.insert(text_buffer, string.pack(v, data))
+		end
 	end
 	function writer.to_string()
-		return string.pack(table.concat(format), table.unpack(buffer))
+		return table.concat(text_buffer)
 	end
 	return writer
 end
@@ -51,35 +46,21 @@ local function read(data)
 	local offset = 0
 
 	local reader = {}
-	function reader.read_f64()
-		local val, n = string.unpack("d", data, offset)
-		offset = n
-		return val
-	end
-	function reader.read_u8()
-		local val, n = string.unpack("I1", data, offset)
-		offset = n
-		return val
-	end
-	function reader.read_i8()
-		local val, n = string.unpack("i1", data, offset)
-		offset = n
-		return val
-	end
-	function reader.read_i32()
-		local val, n = string.unpack("i4", data, offset)
-		offset = n
-		return val
-	end
-	function reader.read_string()
-		local val, n = string.unpack("s", data, offset)
-		offset = n
-		return val
-	end
-	function reader.read_usize()
-		local val, n = string.unpack("T", data, offset)
-		offset = n
-		return val
+	local types = {
+		read_f64 = "d",
+		read_u8 = "I1",
+		read_i8 = "i1",
+		read_u16 = "I2",
+		read_i32 = "i4",
+		read_string = "s2",
+		read_usize = "T",
+	}
+	for k, v in types do
+		reader[k] = function()
+			local val, n = string.unpack(v, data, offset)
+			offset = n
+			return val
+		end
 	end
 	return reader
 end
@@ -91,7 +72,7 @@ export type Schema<T> = {
 	read: (reader: Reader) -> T,
 }
 
-local double = {
+local f64 = {
 	write = function(writer, data)
 		writer.write_f64(data)
 	end,
@@ -109,7 +90,7 @@ local str = {
 	end,
 }
 
-local integer = {
+local i32 = {
 	write = function(writer, data)
 		writer.write_i32(data)
 	end,
@@ -118,12 +99,23 @@ local integer = {
 	end,
 }
 
+local u8 = {
+	write = function(writer, data)
+		writer.write_u8(data)
+	end,
+	read = function(reader)
+		return reader.read_u8()
+	end,
+}
+
 local boolean = {
 	write = function(writer, data)
-		if data then
+		if data == true then
 			writer.write_u8(1)
-		else
+		elseif data == false then
 			writer.write_u8(0)
+		else
+			error "invalid boolean"
 		end
 	end,
 	read = function(reader)
@@ -138,13 +130,13 @@ local array = function<T>(schema: Schema<T>): Schema<{ T }>
 			for _ in data do
 				count += 1
 			end
-			writer.write_usize(count)
+			writer.write_u16(count)
 			for _, v in data do
 				schema.write(writer, v)
 			end
 		end,
 		read = function(reader)
-			local count = reader.read_usize()
+			local count = reader.read_u16()
 			local data = {}
 			for i = 1, count do
 				data[i] = schema.read(reader)
@@ -161,14 +153,14 @@ local map = function<K, V>(key_schema: Schema<K>, value_schema: Schema<V>): Sche
 			for _ in data do
 				count += 1
 			end
-			writer.write_usize(count)
+			writer.write_u16(count)
 			for k, v in data do
 				key_schema.write(writer, k)
 				value_schema.write(writer, v)
 			end
 		end,
 		read = function(reader)
-			local count = reader.read_usize()
+			local count = reader.read_u16()
 			local data = {}
 			for i = 1, count do
 				local k = key_schema.read(reader)
@@ -187,12 +179,33 @@ local option = function<T>(schema: Schema<T>): Schema<T?>
 				writer.write_u8(0)
 				return
 			end
+			-- microoptimization so option(boolean) uses 1 byte only
+			if schema == boolean then
+				if data == false then
+					writer.write_u8(1)
+				elseif data == true then
+					writer.write_u8(2)
+				else
+					error "erm"
+				end
+				return
+			end
 			writer.write_u8(1)
 			schema.write(writer, data)
 		end,
 		read = function(reader)
-			if reader.read_u8() == 0 then
+			local value = reader.read_u8()
+			if value == 0 then
 				return nil
+			end
+			if schema == boolean then
+				if value == 1 then
+					return false
+				elseif value == 2 then
+					return true
+				else
+					error "erm"
+				end
 			end
 			return schema.read(reader)
 		end,
@@ -240,13 +253,27 @@ local struct = function<T>(object: { [string]: Schema<any> | any }): Schema<T>
 	}
 end
 
+local function deep_clone(original)
+	local clone = table.clone(original)
+	for key, value in original do
+		if type(value) == "table" then
+			clone[key] = deep_clone(value)
+		end
+	end
+	return clone
+end
+
 local const = function<T>(value: T): Schema<T>
 	return {
 		write = function(writer, data)
 			-- do nothing
 		end,
 		read = function(reader)
-			return value
+			if type(value) == "table" then
+				return deep_clone(value)
+			else
+				return value
+			end
 		end,
 	}
 end
@@ -290,19 +317,38 @@ local collect_by_key = function(schema, key)
 			for _ in data do
 				count += 1
 			end
-			writer.write_usize(count)
+			writer.write_u16(count)
 			for _, entry in data do
 				schema.write(writer, entry)
 			end
 		end,
 		read = function(reader)
-			local count = reader.read_usize()
+			local count = reader.read_u16()
 			local data = {}
 			for i = 1, count do
 				local entry = schema.read(reader)
 				data[entry[key]] = entry
 			end
 			return data
+		end,
+	}
+end
+
+local tagged_union = function<T>(cases: { [string]: Schema<T> }, tag_key: string): Schema<T>
+	local cases_keys = {}
+	for k in cases do
+		table.insert(cases_keys, k)
+	end
+	local discriminant_schema = enum(cases_keys)
+	return {
+		write = function(writer, data)
+			local tag = data[tag_key]
+			discriminant_schema.write(writer, tag)
+			cases[tag].write(writer, data)
+		end,
+		read = function(reader)
+			local tag = discriminant_schema.read(reader)
+			return cases[tag].read(reader)
 		end,
 	}
 end
@@ -359,11 +405,11 @@ function test()
 	local person = struct {
 		type = const "person",
 		name = str,
-		age = integer,
+		age = i32,
 		alive = boolean,
 	}
 	local writer = write()
-	integer.write(writer, 30)
+	i32.write(writer, 30)
 	local sample = {
 		type = "person",
 		name = "John Doe",
@@ -374,7 +420,7 @@ function test()
 	dynamic_table.write(writer, sample)
 	local text = writer.to_string()
 	local reader = read(text)
-	assert(integer.read(reader) == 30, "number")
+	assert(i32.read(reader) == 30, "number")
 	local data = person.read(reader)
 	assert(data.type == "person", "type")
 	assert(data.name == "John Doe", "name")
@@ -390,11 +436,13 @@ end
 test()
 
 return {
-	double = double,
-	integer = integer,
-	string = str,
+	f64 = f64,
+	i32 = i32,
+	u8 = u8,
+	str = str,
 	array = array,
 	boolean = boolean,
+	dynamic = dynamic,
 	const = const,
 	tuple = tuple,
 	enum = enum,
@@ -406,4 +454,5 @@ return {
 	test = test,
 	debug_size = debug_size,
 	collect_by_key = collect_by_key,
+	tagged_union = tagged_union,
 }

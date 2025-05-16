@@ -9,6 +9,7 @@ local cells_mod = require(ReplicatedStorage.Shared.cells)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local client_entity_mod = require(script.Parent.entity)
 local visuals = require(script.Parent.visuals)
+local ui = require(ReplicatedStorage.Client.ui.game)
 
 local into_vec3 = coords.into_vec3
 local encode_coord = coords.encode_coord
@@ -26,29 +27,30 @@ type PartialWorld = types.PartialWorld
 type Item = types.Item
 type EntityEvent = types.EntityEvent
 
+function cell_color(world: World, cell: HexCell): Color3
+	if not cell.visible_for_team then
+		return Color3.fromRGB(70, 70, 70)
+	end
+	if cell.owner then
+		return (world.teams[cell.owner].color :: any).color
+	else
+		if cell.buildable_for_team then
+			return Color3.fromRGB(202, 202, 202)
+		else
+			return Color3.fromRGB(155, 155, 155)
+		end
+	end
+end
+
 --- Paints, with animation, a cell based on its owner and visibility
-function color_cell(world: World, cell: HexCell)
+function animate_color_cell(world: World, cell: HexCell)
 	local instance = world.cell_instance_map[coords.encode_coord(cell.coordinate)]
 	local function tween_color(color: Color3)
 		TweenService:Create(instance:FindFirstChild "Base", TweenInfo.new(), {
 			Color = color,
 		}):Play()
 	end
-	if not cell.visible_for_team then
-		tween_color(Color3.fromRGB(70, 70, 70))
-		return
-	end
-	-- tiles that are r=1 of a friendly tile and do not have an enemy presence
-	if cell.owner then
-		local color = (world.teams[cell.owner].color :: any).color
-		tween_color(color)
-	else
-		if cell.buildable_for_team then
-			tween_color(Color3.fromRGB(202, 202, 202))
-		else
-			tween_color(Color3.fromRGB(155, 155, 155))
-		end
-	end
+	tween_color(cell_color(world, cell))
 end
 
 --- Calls neighbor_changed on entities on all r=1 neighboring cells of the given coordinates <br>
@@ -85,7 +87,7 @@ function create_cell_instance(world: World, cell: HexCell): Model
 	instance:PivotTo(CFrame.new(into_vec3(cell.coordinate) * 4.542 / 2))
 	instance.Name = coords.encode_coord(cell.coordinate) -- for debugging
 	world.cell_instance_map[coords.encode_coord(cell.coordinate)] = instance
-	color_cell(world, cell)
+	instance:FindFirstChild("Base").Color = cell_color(world, cell)
 	world.instance_cell_map[instance] = coords.encode_coord(cell.coordinate)
 	return instance
 end
@@ -242,7 +244,7 @@ function handle_cells(world: World, update: WorldUpdate)
 	end
 
 	for _, cell in world.cells do
-		color_cell(world, cell)
+		animate_color_cell(world, cell)
 	end
 end
 
@@ -310,6 +312,13 @@ function handle_updates(world: World, updates: { WorldUpdate })
 			world.coalitions = update.coalitions
 		elseif update.type == "quest_update" then
 			world.quests[update.quest.id] = update.quest
+		elseif update.type == "world" then
+			-- "world" update is a special case cause this basically involves tearing down everything and rebuilding it
+			local data = update.world
+			world_mod.apply_world_data(world, data)
+			world.ui.destroy()
+			render_world(world)
+			world.ui = ui.init_ui(world)
 		end
 	end
 

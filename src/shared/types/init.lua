@@ -90,7 +90,7 @@ export type AnimationState = {
 }
 
 export type Entity = {
-	active: boolean?,
+	active: boolean,
 
 	type: string,
 	coordinates: { CubicCoordinate },
@@ -148,9 +148,9 @@ export type Entity = {
 	server_data: {
 		is_disguise_of: EntityId?,
 		-- whether this entity is always visible regardless of whether the cell it is on is visible
-		always_visible: boolean?,
+		always_visible: boolean,
 		-- whether this entity is always visible for a specific team
-		always_visible_for: { [TeamId]: boolean? },
+		always_visible_for: { [TeamId]: true },
 		-- timestamp of when it was first requested to be constructed
 		requested_at: number,
 
@@ -386,6 +386,9 @@ export type WorldUpdate =
 		type: "turn_timer",
 		turn_start_time: number,
 		turn_end_time: number,
+	} | {
+		type: "world",
+		world: PartialWorld,
 	}
 
 export type TurnSchedule = {
@@ -398,7 +401,7 @@ export type TurnSchedule = {
 	start_time: number,
 	start_time_sync: number,
 	turn_ran_signal: Signal<nil>,
-	wait_thread: thread,
+	wait_thread: thread?,
 }
 
 export type EntityConfiguration = {
@@ -455,7 +458,7 @@ export type EntityEvent = {
 } | {
 	event_type: "destroy",
 	entity_id: EntityId,
-	death_type: "deconstruct" | "killed" | "used" | "other",
+	death_type: "deconstruct" | "killed" | "used" | "decay" | "other",
 	damage_result: DamageResult?,
 	damage: Damage?,
 } | {
@@ -584,6 +587,7 @@ export type World = {
 
 	-- client only
 	animation_states: { [EntityId]: AnimationState }?,
+	ui: any,
 }
 
 export type PartialWorld = {
@@ -593,11 +597,7 @@ export type PartialWorld = {
 	turn: number,
 	highest_turn: number,
 	entities: { [EntityId]: Entity },
-	turn_schedule: {
-		start_time: number,
-		end_time: number,
-		running: boolean,
-	}?,
+	turn_schedule: TurnSchedule?,
 	current_skips: number,
 	needed_skips: number,
 	entity_configurations: { [string]: EntityConfiguration },

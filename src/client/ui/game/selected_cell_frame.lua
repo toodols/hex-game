@@ -108,7 +108,7 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 	React.useEffect(function()
 		if RunService:IsClient() then
 			ContextActionService:BindAction("build", function(action_name, input_state, input_object)
-				if input_state == Enum.UserInputState.Begin then
+				if input_state == Enum.UserInputState.Begin and #props_ref.current.selected_cells == 1 then
 					toggle_submenu { type = "build", cell = props_ref.current.selected_cells[1] }
 				end
 			end, false, Enum.KeyCode.B)

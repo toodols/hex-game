@@ -30,14 +30,8 @@ function tutorial_map()
 	world.entity_configurations.extractor.cycles_to_output = 1
 	world.global_configuration.decaying_enabled = false
 
-	world.turn_schedule = turn_scheduler.new_turn_schedule(function()
-		turn_scheduler.reset_turn_time(world, world.turn_schedule)
-		turn_scheduler.report_turn_time(world)
-	end, function()
-		world.skipped = {}
-		turn_scheduler.recalculate_skips(world)
-		action_phase_mod.run_action_phase(world)
-	end)
+	world.turn_schedule = turn_scheduler.new_turn_schedule(world)
+	turn_scheduler.reset_turn_time(world, world.turn_schedule)
 
 	local player_team = world_mod.new_team(
 		world,

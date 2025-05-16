@@ -107,7 +107,17 @@ return function()
 			local key = context.args[1]
 			local data = base64.encode(archive.serialize_world(world))
 			DataStoreService:GetDataStore("saves"):SetAsync(key, data)
-			return data
+			return data:len() .. " bytes"
+		end,
+	}
+
+	extra_commands.debug_world = {
+		description = "Prints the world",
+		permissions = { "admin" },
+		overloads = { { returns = "nil", args = {} } },
+		server_run = function(context)
+			local world = _G.world
+			print(world)
 		end,
 	}
 
@@ -129,10 +139,27 @@ return function()
 		server_run = function(context)
 			local archive = require(ServerScriptService.Server.archive)
 			local base64 = require(ReplicatedStorage.Shared.base64)
+			local updates_mod = require(ServerScriptService.Server.updates)
+			local computed_mod = require(ServerScriptService.Server.computed)
+			local visibility_mod = require(ServerScriptService.Server.visibility)
+			local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 			local key = context.args[1]
-			local data = base64.decode(DataStoreService:GetDataStore("saves"):GetAsync(key))
-			local world = archive.deserialize_world(data)
-			return world
+			local data = archive.deserialize_world(base64.decode(DataStoreService:GetDataStore("saves"):GetAsync(key)))
+			local world = _G.world
+			turn_scheduler.turn_schedule_kill(world.turn_schedule)
+			world_mod.apply_world_data(world, data)
+			turn_scheduler.hydrate(world, world.turn_schedule)
+			if world.turn_schedule.running then
+				turn_scheduler.turn_schedule_resume(world.turn_schedule)
+			end
+			turn_scheduler.recalculate_skips(world)
+			computed_mod.compute_influences(world)
+			computed_mod.compute_presence(world)
+			visibility_mod.compute_visibility(world)
+			world:add_update {
+				type = "world",
+			}
+			updates_mod.flush_updates(world)
 		end,
 	}
 

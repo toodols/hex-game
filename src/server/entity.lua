@@ -165,6 +165,9 @@ function new_entity(entity_: any, world: World): Entity
 	entity.server_data.always_visible_for = if entity.server_data.always_visible_for ~= nil
 		then entity.server_data.always_visible_for
 		else {}
+	entity.server_data.always_visible = if entity.server_data.always_visible ~= nil
+		then entity.server_data.always_visible
+		else false
 
 	-- todo: rotate the offsets by the rotation
 	for _, offset in shared_behavior.offsets do

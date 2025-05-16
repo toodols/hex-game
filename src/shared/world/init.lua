@@ -162,11 +162,7 @@ function world_active_entities(self: World): { [EntityId]: Entity }
 		if entity.is_destroyed then
 			return false
 		end
-		if entity.server_data then
-			return entity.active
-		else
-			return entity.active ~= false
-		end
+		return entity.active
 	end)
 	-- return (
 	-- 	setmetatable({}, {
@@ -231,9 +227,7 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 	return world
 end
 
--- hydrates a world from a serialized world
-function new_world_from_data(data: PartialWorld): World
-	local world = new_world_empty(data.entity_configurations, data.global_configuration)
+function apply_world_data(world: World, data: PartialWorld)
 	world.coalitions = data.coalitions
 	world.teams = data.teams
 	world.turn = data.turn
@@ -245,9 +239,13 @@ function new_world_from_data(data: PartialWorld): World
 	world.quests = data.quests
 	world.needed_skips = data.needed_skips
 	world.current_skips = data.current_skips
-	for cell_coords_encoded, cell in data.cells do
-		world.cells[cell_coords_encoded] = cell
-	end
+	world.cells = data.cells
+end
+
+-- creates a complete world from serialized world
+function new_world_from_data(data: PartialWorld): World
+	local world = new_world_empty(data.entity_configurations, data.global_configuration)
+	apply_world_data(world, data)
 	return world
 end
 
@@ -287,6 +285,7 @@ return {
 	new_world_from_extents = new_world_from_extents,
 	new_world_from_data = new_world_from_data,
 	new_world_empty = new_world_empty,
+	apply_world_data = apply_world_data,
 	line_of_sight = line_of_sight,
 	new_team = new_team,
 	purge_destroyed_entities = purge_destroyed_entities,

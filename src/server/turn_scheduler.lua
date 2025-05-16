@@ -20,15 +20,13 @@ end
 
 -- Resumes the turn schedule
 function turn_schedule_resume(schedule: TurnSchedule)
-	if schedule.running then
-		return
-	end
 	schedule.running = true
 	if schedule.now ~= nil then
 		local diff = os.clock() - schedule.now
 		schedule.start_time += diff
 		schedule.end_time += diff
 		schedule.start_time_sync += diff
+		schedule.now = nil
 	end
 	if schedule.wait_thread then
 		task.cancel(schedule.wait_thread)
@@ -118,18 +116,22 @@ function reset_turn_time(world: World, schedule: TurnSchedule)
 	schedule.end_time = os.clock() + wait_time
 end
 
-function new_turn_schedule(get_end_time: () -> number, run_turn: () -> ()): TurnSchedule
+function new_turn_schedule(world: World): TurnSchedule
 	local schedule = {
 		wait_thread = nil,
 		loop_thread = nil,
 		running = false,
 		start_time = 0,
 		end_time = 0,
-		get_end_time = get_end_time,
-		run_turn = run_turn,
-		turn_ran_signal = new_signal(),
 	} :: TurnSchedule
 
+	hydrate(world, schedule)
+
+	return schedule
+end
+
+function hydrate(world: World, schedule: TurnSchedule)
+	schedule.turn_ran_signal = new_signal()
 	schedule.loop_thread = coroutine.create(function()
 		while true do
 			while os.clock() < schedule.end_time or not schedule.running do
@@ -157,19 +159,20 @@ function new_turn_schedule(get_end_time: () -> number, run_turn: () -> ()): Turn
 			end)
 		end
 	end)
-
-	return schedule
-end
-
-function bootstrap(world: World)
-	world.turn_schedule = new_turn_schedule(function()
-		reset_turn_time(world, world.turn_schedule :: TurnSchedule)
+	schedule.get_end_time = function()
+		reset_turn_time(world, schedule :: TurnSchedule)
 		report_turn_time(world)
-	end, function()
+	end
+
+	schedule.run_turn = function()
 		world.skipped = {}
 		recalculate_skips(world)
 		action_phase_mod.run_action_phase(world)
-	end)
+	end
+end
+
+function bootstrap(world: World)
+	world.turn_schedule = new_turn_schedule(world)
 	reset_turn_time(world, world.turn_schedule :: TurnSchedule)
 	turn_schedule_resume(world.turn_schedule :: TurnSchedule)
 end
@@ -184,4 +187,5 @@ return {
 	turn_schedule_kill = turn_schedule_kill,
 	report_turn_time = report_turn_time,
 	bootstrap = bootstrap,
+	hydrate = hydrate,
 }

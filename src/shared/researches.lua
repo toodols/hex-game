@@ -129,6 +129,7 @@ function research_item(props): ResearchItem
 		description = preset.description or "",
 		time = preset.time or 0,
 		cost = preset.cost or {},
+		cost_is_paid = false,
 	} :: ResearchItem
 end
 

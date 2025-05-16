@@ -92,6 +92,11 @@ function get_updates_for_team(world: World, buffer: { WorldUpdate }, team_id: Te
 					return serialize_mod.serialize_cell_for_team(world, cell, team.id)
 				end),
 			}
+		elseif update.type == "world" then
+			return {
+				type = update.type,
+				world = serialize_mod.serialize_world_for_team(world, team.id),
+			}
 		else
 			return update
 		end
