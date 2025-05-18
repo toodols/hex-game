@@ -15,12 +15,15 @@ function get_allies(world: World, team: TeamId): { TeamId }
 end
 
 function is_allied(world: World, team1: TeamId, team2: TeamId): boolean
+	if team1 == team2 then
+		return true
+	end
 	for _, coalition in world.coalitions do
 		if table.find(coalition.teams, team1) and table.find(coalition.teams, team2) then
 			return true
 		end
 	end
-	return team1 == team2
+	return false
 end
 
 function team_of(world: World, player: Player): TeamData?

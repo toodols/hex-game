@@ -140,9 +140,10 @@ return function()
 			local archive = require(ServerScriptService.Server.archive)
 			local base64 = require(ReplicatedStorage.Shared.base64)
 			local updates_mod = require(ServerScriptService.Server.updates)
-			local computed_mod = require(ServerScriptService.Server.computed)
+			local influences_mod = require(ServerScriptService.Server.influences)
 			local visibility_mod = require(ServerScriptService.Server.visibility)
 			local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
+			local presence_mod = require(ServerScriptService.Server.presence)
 			local key = context.args[1]
 			local data = archive.deserialize_world(base64.decode(DataStoreService:GetDataStore("saves"):GetAsync(key)))
 			local world = _G.world
@@ -153,8 +154,8 @@ return function()
 				turn_scheduler.turn_schedule_resume(world.turn_schedule)
 			end
 			turn_scheduler.recalculate_skips(world)
-			computed_mod.compute_influences(world)
-			computed_mod.compute_presence(world)
+			influences_mod.compute_influences(world)
+			presence_mod.compute_presence(world)
 			visibility_mod.compute_visibility(world)
 			world:add_update {
 				type = "world",

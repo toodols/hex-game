@@ -163,6 +163,9 @@ function update_entity_client(world: World, old: Entity?, new: Entity)
 				instance.Parent = world.entity_instance_root
 			end
 			client_behavior.update(new, world, old)
+			if instance == nil then
+				warn("instance not found for entity " .. new.id .. " of type " .. new.type)
+			end
 			instance:PivotTo(
 				(cell_instance.Base.CFrame + Vector3.new(0, cell_instance.Base.Size.Y / 2, 0))
 					* CFrame.Angles(0, math.pi / 3 * new.rotation, 0)

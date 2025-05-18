@@ -70,4 +70,8 @@ entity_mod.registry.fountain = entity_mod.with_defaults {
 	model = asset_server.load "Entities/Fountain",
 }
 
+entity_mod.registry.terminal = entity_mod.with_defaults {
+	model = asset_server.load "Entities/Terminal",
+}
+
 return {}

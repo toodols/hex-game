@@ -13,13 +13,13 @@ local presets = require(ServerScriptService.Server.presets)
 local cleanup = require(ServerScriptService.Server.cleanup).cleanup
 local action_phase_mod = require(ServerScriptService.Server.action_phase)
 local damage_mod = require(ServerScriptService.Server.damage)
+local presence_mod = require(ServerScriptService.Server.presence)
 local effect_mod = require(ServerScriptService.Server.effect)
 local entity_mod = require(ServerScriptService.Server.entity)
 local router = require(ServerScriptService.Server.router)
 local visibility_mod = require(ServerScriptService.Server.visibility)
-local computed_mod = require(ServerScriptService.Server.computed)
+local influences_mod = require(ServerScriptService.Server.influences)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
-local base64 = require(ReplicatedStorage.Shared.base64)
 
 local assert_eq = util.assert_eq
 
@@ -342,7 +342,7 @@ function tests.stockpile_blueprint_builds()
 		primary_coordinate = { -1, 0, 1 },
 		owner = team1.id,
 	}, world)
-	stockpile.inventory.items = { "bar", "bar", "bar", "bar", "bar" }
+	stockpile.inventory.items = { "bar", "bar", "bar", "bar", "rad" }
 
 	action_phase_mod.run_action_phase(world)
 	assert_eq(extractor.status, "scaffold", "extractor blueprint did not become scaffold")
@@ -888,8 +888,8 @@ function tests.weird_presence_after_load()
 	turn_scheduler.turn_schedule_kill(world.turn_schedule)
 	world_mod.apply_world_data(world, data)
 	turn_scheduler.hydrate(world, world.turn_schedule)
-	computed_mod.compute_influences(world)
-	computed_mod.compute_presence(world)
+	influences_mod.compute_influences(world)
+	presence_mod.compute_presence(world)
 	visibility_mod.compute_visibility(world)
 	assert(next((world:get_cell { 0, 0, 0 }).server_data.presence) == nil, "There should be no presence on center tile")
 

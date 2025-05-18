@@ -4,11 +4,11 @@ local types = require(ReplicatedStorage.Shared.types)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local questing = require(ServerScriptService.Server.questing)
 local updates_mod = require(ServerScriptService.Server.updates)
-local computed_mod = require(ServerScriptService.Server.computed)
 local visibility_mod = require(ServerScriptService.Server.visibility)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 local util = require(ReplicatedStorage.Shared.util)
 local coords = require(ReplicatedStorage.Shared.coords)
+local presence_mod = require(ServerScriptService.Server.presence)
 
 type World = types.World
 type Quest = types.Quest
@@ -148,7 +148,7 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 
 				(world:get_cell { 1, -2, 1 } :: any).type = "rad_deposit"
 				visibility_mod.compute_visibility(world)
-				computed_mod.compute_presence(world)
+				presence_mod.compute_presence(world)
 
 				world:add_update {
 					type = "cells",

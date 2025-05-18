@@ -236,7 +236,7 @@ function handle_cells(world: World, update: WorldUpdate)
 			world.instance_cell_map[new_instance] = encoded_coord
 		end
 
-		if old.visible_for_team and not cell.visible_for_team then
+		if old and old.visible_for_team and not cell.visible_for_team then
 			hide_entities(world, old)
 		end
 

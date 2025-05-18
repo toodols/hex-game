@@ -5,7 +5,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 
 local server_types = require(ServerScriptService.Server.types)
-local cell_visibility = require(ServerScriptService.Server.visibility).cell_visibility
+local presence_mod = require(ServerScriptService.Server.presence)
 local entity_mod = require(ServerScriptService.Server.entity)
 local server_entity_mod = require(ServerScriptService.Server.entity)
 
@@ -13,6 +13,7 @@ type World = types.World
 type Interaction = types.Interaction
 type PlayerInfo = server_types.PlayerInfo
 type EntityId = types.EntityId
+
 function construct_interaction(world: World, entry: Interaction, player_info: PlayerInfo): { [EntityId]: boolean }
 	assert(entry.type == "construct", "Expected entry to be a construct interaction")
 	-- the cell exists
@@ -21,18 +22,8 @@ function construct_interaction(world: World, entry: Interaction, player_info: Pl
 		return {}
 	end
 
-	-- and does not have the presence of an enemy
-	local has_enemy_presence = false
-	if cell.owner ~= player_info.team then
-		for team_id, presence in cell.server_data.presence do
-			if team_id ~= player_info.team and presence then
-				has_enemy_presence = true
-				break
-			end
-		end
-		if has_enemy_presence then
-			return {}
-		end
+	if not presence_mod.team_may_naively_place_blueprint(world, player_info.team, entry.coordinate) then
+		return {}
 	end
 
 	-- and is not blocked
@@ -50,11 +41,6 @@ function construct_interaction(world: World, entry: Interaction, player_info: Pl
 			end
 		)
 	then
-		return {}
-	end
-
-	-- and is visible to the player team
-	if not cell_visibility(cell.server_data.visibility[player_info.team]) then
 		return {}
 	end
 

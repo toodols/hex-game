@@ -98,6 +98,9 @@ local PAGES = {
 			{
 				type = "fountain",
 			},
+			{
+				type = "terminal",
+			},
 		},
 	},
 }

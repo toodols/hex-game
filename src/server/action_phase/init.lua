@@ -4,11 +4,14 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local world_mod = require(ReplicatedStorage.Shared.world)
+local team_mod = require(ReplicatedStorage.Shared.team)
+local coords = require(ReplicatedStorage.Shared.coords)
 
+local presence_mod = require(ServerScriptService.Server.presence)
 local server_types = require(ServerScriptService.Server.types)
 local server_entity_mod = require(ServerScriptService.Server.entity)
 local updates_mod = require(ServerScriptService.Server.updates)
-local computed_mod = require(ServerScriptService.Server.computed)
+local influences_mod = require(ServerScriptService.Server.influences)
 local questing = require(ServerScriptService.Server.questing)
 local effect_mod = require(ServerScriptService.Server.effect)
 local visibility_mod = require(ServerScriptService.Server.visibility)
@@ -76,25 +79,21 @@ end
 
 function remove_occluded_blueprints(world: World)
 	-- remove blueprints that are too close to enemies
+	-- presence is not allowed here cause we only want to remove
+	-- blueprints that has a presence the team can observe
 	for _, entity in world:active_entities() do
-		if entity.status == "blueprint" then
-			local cell = world:get_cell(entity.primary_coordinate)
-			if
-				util.table_any(util.table_keys(cell.server_data.presence), function(team)
-					if team ~= entity.owner then
-						return true
-					end
-					return false
-				end)
-			then
-				world:add_update {
-					type = "entity_event",
-					event_type = "destroy",
-					entity_id = entity.id,
-					death_type = "other",
-				}
-				entity_mod.remove_entity(world, entity)
-			end
+		if
+			entity.status == "blueprint"
+			and not presence_mod.team_may_naively_place_blueprint(world, entity.owner, entity.primary_coordinate)
+		then
+			-- then destroy the blueprint
+			world:add_update {
+				type = "entity_event",
+				event_type = "destroy",
+				entity_id = entity.id,
+				death_type = "other",
+			}
+			entity_mod.remove_entity(world, entity)
 		end
 	end
 end
@@ -190,8 +189,8 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	portals_tick(world)
 
 	local first_changes = visibility_mod.compute_visibility(world)
-	computed_mod.compute_influences(world)
-	computed_mod.compute_presence(world)
+	influences_mod.compute_influences(world)
+	presence_mod.compute_presence(world)
 	entities_tick(world, action_state)
 	status_effects_tick(world, action_state)
 
@@ -240,11 +239,10 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	create_systems(world, action_state)
 	do_entity_decay(world, action_state)
 
-	computed_mod.compute_influences(world) --recompute influences if entities DIE
-	computed_mod.compute_presence(world)
-	remove_occluded_blueprints(world)
-
+	influences_mod.compute_influences(world) --recompute influences if entities DIE
+	presence_mod.compute_presence(world)
 	visibility_mod.compute_visibility(world)
+	remove_occluded_blueprints(world)
 
 	-- add entity update for all cells that are now visible to a team
 	-- only do this for changed_to_true that was set this turn that are still visible

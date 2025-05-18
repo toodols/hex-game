@@ -38,6 +38,7 @@ local AttackButton = action_buttons.AttackButton
 local OpenRecipeButton = action_buttons.OpenRecipeButton
 local ToggleEnableButton = action_buttons.ToggleEnableButton
 local ActivateButton = action_buttons.ActivateButton
+local StoreEntityButton = action_buttons.StoreEntityButton
 
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
@@ -551,11 +552,13 @@ function EntityInformation(props: {
 						ToggleEnableButton = if entity.active ~= false
 								and entity.owner == player_team.id
 								and shared_behavior.can_disable
+								and entity.status == "complete"
 							then React.createElement(ToggleEnableButton, {
 								entity_id = entity.id,
 								LayoutOrder = 2,
 							})
 							else nil,
+
 						OpenRecipeButton = if entity.active ~= false
 								and entity.owner == player_team.id
 								and (entity.type == "factory")
@@ -563,6 +566,16 @@ function EntityInformation(props: {
 							then React.createElement(OpenRecipeButton, {
 								entity_id = entity.id,
 								LayoutOrder = 5,
+							})
+							else nil,
+
+						StoreEntityButton = if entity.active ~= false
+								and entity.owner == player_team.id
+								and (entity.type == "terminal")
+								and entity.status == "complete"
+							then React.createElement(StoreEntityButton, {
+								entity_id = entity.id,
+								LayoutOrder = 6,
 							})
 							else nil,
 					}),

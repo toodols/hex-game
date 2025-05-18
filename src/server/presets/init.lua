@@ -4,7 +4,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local coords = require(ReplicatedStorage.Shared.coords)
 
 local entity_mod = require(script.Parent.entity)
-local computed_mod = require(script.Parent.computed)
+local presence_mod = require(script.Parent.presence)
 local updates_mod = require(script.Parent.updates)
 local turn_scheduler = require(script.Parent.turn_scheduler)
 local visibility_mod = require(script.Parent.visibility)
@@ -164,7 +164,7 @@ function prepare_preset(fn: (...any) -> World): (...any) -> (World, { [string]: 
 		local result = { fn(...) }
 		local world = result[1]
 		updates_mod.flush_updates(world)
-		computed_mod.compute_presence(world)
+		presence_mod.compute_presence(world)
 		visibility_mod.compute_visibility(world)
 		systems.compute_systems(world)
 		return unpack(result)

@@ -221,6 +221,7 @@ local entity: Schema<Entity> = struct {
 	researches = option(researches),
 	queued_decisions = array(queued_decision),
 	server_data = struct {
+		requested_at = f64,
 		is_disguise_of = option(entity_id),
 		always_visible = boolean,
 		always_visible_for = map(team_id, const(true)),

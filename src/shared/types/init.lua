@@ -101,7 +101,7 @@ export type Entity = {
 	health: number,
 	max_health: number,
 	inventory: Inventory?,
-
+	incorporeal: true?,
 	effects: { Effect },
 
 	-- factory only
@@ -142,6 +142,7 @@ export type Entity = {
 
 	owner: TeamId,
 	queued_decisions: { Decision },
+
 
 	-- for clients: .always_visible or .always_visible_for[team_id]
 	always_visible: boolean?,
