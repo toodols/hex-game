@@ -137,9 +137,9 @@ function handle_ability_actions(world: World, action_state: ActionState)
 			return (value.type == "ability")
 		end)
 	do
-		if ability.ability_type == "scout_attack" or ability.ability_type == "turret_attack" then
+		if ability.ability_type == "attack" then
 			scout_attack(world, action_state, ability)
-		elseif ability.ability_type == "solution_activate" then
+		elseif ability.ability_type == "activate" then
 			local entity = world.entities[ability.entity_id]
 			server_entity_mod.registry[entity.type].abilities[ability.ability_type](entity, world)
 			local event = {

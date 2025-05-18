@@ -53,7 +53,7 @@ entity_mod.registry.suggestion = entity_mod.with_defaults {
 	decayable = false,
 	incorporeal = true,
 	init = function(self: Entity, world: World)
-		effect_mod.add_exclusive_effect(self, {
+		effect_mod.add_exclusive_effect(world, self, {
 			type = "hidden",
 		})
 	end,

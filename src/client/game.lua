@@ -281,7 +281,6 @@ function sort_updates(updates: { WorldUpdate })
 			cells = 1,
 			entity_update = 3,
 			exchange = 4,
-			scout_attack = 4,
 			entity_event = 4,
 		}
 		return (order[a.type] or 5) < (order[b.type] or 5)
@@ -354,7 +353,7 @@ function handle_updates(world: World, updates: { WorldUpdate })
 				warn("entity not found", update.entity_id, "when handling ability", update.ability_type)
 				return
 			end
-			if update.ability_type == "scout_attack" or update.ability_type == "turret_attack" then
+			if update.ability_type == "attack" then
 				visuals.scout_attack_effect(entity_instance, cell_instance)
 			end
 		end

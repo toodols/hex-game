@@ -17,7 +17,7 @@ function serialize_entity_for_team(world: World, entity: Entity, team: TeamId): 
 		for k, v in to_copy do
 			if k == "server_data" then
 			elseif k == "queued_decisions" then
-				if team_mod.is_allied(world, entity.owner, team) then
+				if team_mod.is_allied(world, entity.owner, team) or team_data.server_data.visibility == "perfect" then
 					copy[k] = v
 				else
 					copy[k] = {}

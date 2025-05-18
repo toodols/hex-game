@@ -163,6 +163,48 @@ return function()
 		end,
 	}
 
+	extra_commands.set_team = {
+		description = "Sets the team of players",
+		permissions = { "admin" },
+		overloads = {
+			{
+				returns = "nil",
+				args = {
+					{
+						name = "Players",
+						type = "players",
+						description = "The player to set the team for.",
+					},
+					{
+						name = "team",
+						type = "team",
+						description = "The new team.",
+					},
+				},
+			},
+		},
+		server_run = function(context)
+			local updates_mod = require(ServerScriptService.Server.updates)
+			local targets: { number } = util.table_map(context.args[1], function(player)
+				return player.UserId
+			end)
+			local new_team = _G.world.teams[context.args[2]]
+			-- remove all players' userids from world.teams
+			for _, team in _G.world.teams do
+				team.players = util.table_filter(team.players, function(user_id)
+					return not table.find(targets, user_id)
+				end)
+			end
+			for _, user_id in targets do
+				table.insert(new_team.players, user_id)
+			end
+			_G.world:add_update {
+				type = "world",
+			}
+			updates_mod.flush_updates(_G.world)
+		end,
+	}
+
 	extra_commands.cell_type = {
 		description = "Sets the type of a cell.",
 		permissions = { "admin" },

@@ -41,10 +41,12 @@ function get_one_effect(entity: Entity, effect_type: string): Effect?
 	return get_effects(entity, effect_type)[1]
 end
 
-function add_exclusive_effect(entity: Entity, effect: Effect): Effect
+function add_exclusive_effect(world: World, entity: Entity, effect: Effect): Effect
+	local effect_behavior = registry[effect.type]
 	local old_effect = get_one_effect(entity, effect.type)
 	if old_effect == nil then
 		table.insert(entity.effects, effect)
+		effect_behavior.init(world, entity, effect)
 		return effect
 	else
 		if effect.duration then
@@ -56,8 +58,10 @@ function add_exclusive_effect(entity: Entity, effect: Effect): Effect
 	end
 end
 
-function add_effect(entity: Entity, effect: Effect): Effect
+function add_effect(world: World, entity: Entity, effect: Effect): Effect
+	local effect_behavior = registry[effect.type]
 	table.insert(entity.effects, effect)
+	effect_behavior.init(world, entity, effect)
 	return effect
 end
 
@@ -71,22 +75,10 @@ function purge_destroyed_effects(entity: Entity)
 	entity.effects = new_effects
 end
 
-function tick_effects(world: World, action_state: ActionState, entity: Entity)
-	for _, effect in entity.effects do
-		local behavior = registry[effect.type]
-		if behavior then
-			if behavior.tick then
-				behavior.tick(world, action_state, entity, effect)
-			end
-		end
-		if effect.duration ~= nil then
-			effect.duration -= 1
-			if effect.duration <= 0 then
-				effect.is_destroyed = true
-			end
-		end
-	end
-	purge_destroyed_effects(entity)
+function destroy_effect(world: World, entity: Entity, effect: Effect)
+	local effect_behavior = registry[effect.type]
+	effect_behavior.remove(world, entity, effect)
+	effect.is_destroyed = true
 end
 
 return {
@@ -95,7 +87,7 @@ return {
 	add_exclusive_effect = add_exclusive_effect,
 	add_effect = add_effect,
 	purge_destroyed_effects = purge_destroyed_effects,
-	tick_effects = tick_effects,
+	destroy_effect = destroy_effect,
 	registry = registry,
 	with_defaults = with_defaults,
 }

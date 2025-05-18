@@ -4,8 +4,8 @@ local entity_mod = require(ReplicatedStorage.Shared.entity)
 entity_mod.registry.turret = entity_mod.with_defaults {
 	type = "turret",
 	name = "Dagger",
-	description = "Attacks for {entity.turret.abilities.turret_attack.damage.amount} damage to enemies in a {entity.turret.abilities.turret_attack.range} tile radius. "
-		.. "Costs {entity.turret.abilities.turret_attack.cost} to shoot. On kill, gain +1 max hp.",
+	description = "Attacks for {entity.turret.abilities.attack.damage.amount} damage to enemies in a {entity.turret.abilities.attack.range} tile radius. "
+		.. "Costs {entity.turret.abilities.attack.cost} to shoot. On kill, gain +1 max hp.",
 	max_health = 4,
 	build_time = 2,
 	cost = {
@@ -16,7 +16,7 @@ entity_mod.registry.turret = entity_mod.with_defaults {
 	required_research = {},
 	layer = entity_mod.LAYER.building,
 	abilities = {
-		turret_attack = {
+		attack = {
 			range = 3,
 			damage = {
 				type = "flat",

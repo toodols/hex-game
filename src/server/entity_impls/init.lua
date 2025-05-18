@@ -19,4 +19,7 @@ require(script.torch)
 require(script.scout)
 require(script.turret)
 require(script.fountain)
+require(script.impression)
+require(script.terminal)
+
 return {}

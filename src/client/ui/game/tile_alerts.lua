@@ -19,6 +19,7 @@ local INDICATORS = {
 	disabled = { icon = "http://www.roblox.com/asset/?id=6031084743", color = Color3.new(0.666667, 0.627451, 0.172549) },
 	disguise = { icon = "http://www.roblox.com/asset/?id=6034467796", color = Color3.fromRGB(113, 172, 196) },
 	activate = { icon = "http://www.roblox.com/asset/?id=6026663705", color = Color3.new(0.898039, 0.823529, 0) },
+	infected = { icon = "http://www.roblox.com/asset/?id=6034684949", color = Color3.fromRGB(173, 105, 16) },
 }
 
 function IconAndNumber(props: {
@@ -134,7 +135,7 @@ function TileAlerts()
 							is_deconstructing = true
 							indicators.deconstruction = (indicators.deconstruction or 0) + 1
 						elseif decision.type == "ability" then
-							if decision.ability_type == "solution_activate" then
+							if decision.ability_type == "activate" then
 								indicators.activate = (indicators.activate or 0) + 1
 							end
 						end
@@ -155,6 +156,13 @@ function TileAlerts()
 					end
 					if entity.disguise then
 						indicators.disguise = (indicators.disguise or 0) + 1
+					end
+					if
+						util.table_any(entity.effects, function(effect)
+							return effect.type == "infected"
+						end)
+					then
+						indicators.infected = 1
 					end
 				end
 				if next(indicators) then

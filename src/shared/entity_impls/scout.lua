@@ -4,7 +4,7 @@ local entity_mod = require(ReplicatedStorage.Shared.entity)
 entity_mod.registry.scout = entity_mod.with_defaults {
 	type = "scout",
 	name = "Sentry",
-	description = "Illuminates r=3 tiles. For {entity.scout.abilities.scout_attack.cost}, does {entity.scout.abilities.scout_attack.damage.amount} damage.",
+	description = "Illuminates r=3 tiles. For {entity.scout.abilities.attack.cost}, does {entity.scout.abilities.attack.damage.amount} damage.",
 	max_health = 3,
 	build_time = 2,
 	cost = {
@@ -12,7 +12,7 @@ entity_mod.registry.scout = entity_mod.with_defaults {
 		rad = 1,
 	},
 	abilities = {
-		scout_attack = {
+		attack = {
 			range = 3,
 			damage = {
 				type = "flat",

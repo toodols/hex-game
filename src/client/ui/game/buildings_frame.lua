@@ -102,6 +102,7 @@ local PAGES = {
 	},
 }
 
+local HEIGHT = 220
 local BuildingItem = React.forwardRef(function(
 	props: {
 		do_animation: boolean,
@@ -126,13 +127,13 @@ local BuildingItem = React.forwardRef(function(
 	return React.createElement("Frame", {
 		BackgroundTransparency = 1,
 		ref = ref,
-		Size = UDim2.new(0, 160, 0, if props.do_animation then 0 else 200),
+		Size = UDim2.new(0, 160, 0, if props.do_animation then 0 else HEIGHT),
 	}, {
 		TextButton = React.createElement(
 			"TextButton",
 			themes.theme_solid {
 				Position = if props.do_animation then UDim2.new(0, 0, 0, -30) else UDim2.new(0, 0, 0, 0),
-				Size = UDim2.new(1, 0, 0, 200),
+				Size = UDim2.new(1, 0, 0, HEIGHT),
 				Text = "",
 				TextSize = 14,
 				ref = button_ref,
@@ -149,7 +150,7 @@ local BuildingItem = React.forwardRef(function(
 					props.mouse_enter()
 					if props.do_animation then
 						TweenService:Create(button_ref.current, TweenInfo.new(0.3), {
-							Position = UDim2.new(0, 0, 0, -200),
+							Position = UDim2.new(0, 0, 0, -HEIGHT),
 							BackgroundColor3 = Color3.fromRGB(30, 30, 30),
 						}):Play()
 					end
@@ -218,7 +219,7 @@ local BuildingItem = React.forwardRef(function(
 						},
 						{
 							SizeConstraint = React.createElement("UISizeConstraint", {
-								MaxSize = Vector2.new(math.huge, 60),
+								MaxSize = Vector2.new(math.huge, 80),
 							}),
 						}
 					),
@@ -325,7 +326,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 		props_ref.current = props
 	end
 	React.useEffect(function()
-		ref.current.Position = UDim2.new(0.5, 0, 1, 200)
+		ref.current.Position = UDim2.new(0.5, 0, 1, HEIGHT)
 		TweenService:Create(ref.current, TweenInfo.new(0.3), {
 			Position = UDim2.new(0.5, 0, 1, 0),
 		}):Play()
@@ -351,7 +352,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(27, 42, 53),
 		LayoutOrder = 2,
-		Position = UDim2.new(0.5, 0, 1, 200),
+		Position = UDim2.new(0.5, 0, 1, HEIGHT),
 		Size = UDim2.new(0, 1000, 0.8, 0),
 		ref = ref,
 	}, {
@@ -523,7 +524,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 					"Frame",
 					{
 						BackgroundTransparency = 1,
-						Size = UDim2.new(1, 0, 0, 200),
+						Size = UDim2.new(1, 0, 0, HEIGHT),
 					},
 					{
 						HorizontalLayout = React.createElement("UIListLayout", {
@@ -546,11 +547,11 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 								for i, v in inst do
 									if col == i then
 										TweenService:Create(v, TweenInfo.new(0.1), {
-											Size = UDim2.new(0, 160 + 20 * 5, 0, 200),
+											Size = UDim2.new(0, 160 + 20 * 5, 0, HEIGHT),
 										}):Play()
 									else
 										TweenService:Create(v, TweenInfo.new(0.1), {
-											Size = UDim2.new(0, 160 - 20, 0, 200),
+											Size = UDim2.new(0, 160 - 20, 0, HEIGHT),
 										}):Play()
 									end
 								end
@@ -560,7 +561,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 									cur = nil
 									for i, v in inst do
 										TweenService:Create(v, TweenInfo.new(0.1), {
-											Size = UDim2.new(0, 160, 0, 200),
+											Size = UDim2.new(0, 160, 0, HEIGHT),
 										}):Play()
 									end
 								end

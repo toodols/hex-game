@@ -15,7 +15,7 @@ local indicator_template = asset_server.load "Effects/AttackArrow"
 local function update_model(self: Entity, world: World)
 	local instance = world.entity_instance_map[self.id]
 	local attack = util.table_find_pred(self.queued_decisions, function(v)
-		return v.type == "ability" and v.ability_type == "turret_attack"
+		return v.type == "ability" and v.ability_type == "attack"
 	end)
 
 	local indicator = instance:FindFirstChild "AttackArrow"

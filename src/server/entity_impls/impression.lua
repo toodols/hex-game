@@ -4,8 +4,8 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local coords = require(ReplicatedStorage.Shared.coords)
+local team_mod = require(ReplicatedStorage.Shared.team)
 
-local updates_mod = require(ServerScriptService.Server.updates)
 local effect_mod = require(ServerScriptService.Server.effect)
 local entity_mod = require(ServerScriptService.Server.entity)
 
@@ -13,38 +13,25 @@ type Entity = types.Entity
 type World = types.World
 type EntityEvent = types.EntityEvent
 
-entity_mod.registry.solution = entity_mod.with_defaults {
-	init = function(self: Entity, world: World)
-		self.decayable = false
-	end,
+entity_mod.registry.impression = entity_mod.with_defaults {
+	decayable = false,
+	init = function(self: Entity, world: World) end,
 	abilities = {
 		activate = function(self: Entity, world: World)
-			local config = world.entity_configurations[self.type]
 			for _, cell in
-				util.table_filter_map(coords.neighbors_many_leq(self.coordinates, 1), function(coord)
+				util.table_filter_map(coords.neighbors_leq(self.primary_coordinate, 1), function(coord)
 					return world:get_cell(coord)
 				end)
 			do
 				for entity_id in cell.entities do
 					local affected_entity = world.entities[entity_id]
-
-					-- it would be nice to use damage_mod for this but it doesn't support healing damage
-					-- and this ignores layers
-					affected_entity.health = math.max(
-						affected_entity.max_health,
-						affected_entity.health + config.abilities.activate.heal_amount
-					)
-
-					effect_mod.add_effect(world, affected_entity, {
-						type = "shield",
-						health = config.abilities.activate.shield_health,
-						duration = config.abilities.activate.shield_duration,
+					if team_mod.is_allied(world, self.owner, affected_entity.owner) then
+						continue
+					end
+					effect_mod.add_exclusive_effect(world, affected_entity, {
+						type = "infected",
+						duration = 1,
 					})
-
-					world:add_update {
-						type = "entity_update",
-						entity = affected_entity,
-					}
 				end
 			end
 		end,

@@ -24,7 +24,7 @@ function ability_interaction(world: World, entry: Interaction, player_info: Play
 	if not ability then
 		return {}
 	end
-	if entry.ability_type == "scout_attack" or entry.ability_type == "turret_attack" then
+	if entry.ability_type == "attack" then
 		local cell = world:get_cell(entry.coordinate)
 		if not cell then
 			return {}
@@ -41,7 +41,7 @@ function ability_interaction(world: World, entry: Interaction, player_info: Play
 				continue
 			end
 		end
-	elseif entry.ability_type == "solution_activate" then
+	elseif entry.ability_type == "activate" then
 		--ok
 	end
 	util.table_extract(entity.queued_decisions, function(decision)

@@ -20,5 +20,6 @@ require(script.suggestion)
 require(script.taunt)
 require(script.torch)
 require(script.fountain)
+require(script.terminal)
 
 return {}

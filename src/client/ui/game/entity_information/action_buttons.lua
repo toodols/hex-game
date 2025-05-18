@@ -31,12 +31,9 @@ function AttackButton(props: { entity_id: EntityId, LayoutOrder: number? })
 	local shared_behavior = shared_entity_mod.registry[entity.type]
 	local player_team = team_mod.team_of(world, Players.LocalPlayer)
 
-	local ability_name = if entity.type == "scout"
-		then "scout_attack"
-		else if entity.type == "turret" then "turret_attack" else error "unreachable"
-
+	local ability_type = "attack"
 	local is_attacking = util.table_any(entity.queued_decisions, function(v)
-		return v.type == "ability" and v.ability_type == ability_name
+		return v.type == "ability" and v.ability_type == ability_type
 	end)
 
 	return React.createElement(SquareActionButton, {
@@ -51,12 +48,12 @@ function AttackButton(props: { entity_id: EntityId, LayoutOrder: number? })
 						type = "cancel_decision",
 						decision_type = "ability",
 						entity_id = entity.id,
-						ability_type = ability_name,
+						ability_type = ability_type,
 					},
 				}
 				return
 			end
-			local ability = shared_behavior.abilities[ability_name]
+			local ability = shared_behavior.abilities[ability_type]
 
 			local candidates: { [EncodedCoordinate]: true } = {}
 			for _, coord in
@@ -99,7 +96,7 @@ function AttackButton(props: { entity_id: EntityId, LayoutOrder: number? })
 					client_interaction_remote:FireServer {
 						{
 							type = "ability",
-							ability_type = ability_name,
+							ability_type = ability_type,
 							entity_id = entity.id,
 							coordinate = coord,
 						},
@@ -228,13 +225,15 @@ function RotateButton(props: { entity_id: EntityId, LayoutOrder: number? })
 	})
 end
 
--- UseButton: Activates the "solution" entity's ability.
-function UseButton(props: { entity_id: EntityId, LayoutOrder: number? })
+-- ActivateButton: Activates the "solution" entity's ability.
+function ActivateButton(props: { entity_id: EntityId, LayoutOrder: number? })
 	local entity = hooks.use_synced_entity(props.entity_id)
 
+	local ability_type = "activate"
 	local is_using = util.table_any(entity.queued_decisions, function(v)
-		return v.type == "ability" and v.ability_type == "solution_activate"
+		return v.type == "ability" and v.ability_type == ability_type
 	end)
+
 	return React.createElement(SquareActionButton, {
 		Image = "http://www.roblox.com/asset/?id=6026663699",
 		LayoutOrder = props.LayoutOrder,
@@ -247,7 +246,7 @@ function UseButton(props: { entity_id: EntityId, LayoutOrder: number? })
 						type = "cancel_decision",
 						entity_id = entity.id,
 						decision_type = "ability",
-						ability_type = "solution_activate",
+						ability_type = ability_type,
 					},
 				}
 				return
@@ -255,7 +254,7 @@ function UseButton(props: { entity_id: EntityId, LayoutOrder: number? })
 				client_interaction_remote:FireServer {
 					{
 						type = "ability",
-						ability_type = "solution_activate",
+						ability_type = ability_type,
 						entity_id = entity.id,
 					},
 				}
@@ -318,7 +317,7 @@ return {
 	FilterButton = FilterButton,
 	RotateButton = RotateButton,
 	DeconstructButton = DeconstructButton,
-	UseButton = UseButton,
+	ActivateButton = ActivateButton,
 	ToggleEnableButton = ToggleEnableButton,
 	OpenRecipeButton = OpenRecipeButton,
 }

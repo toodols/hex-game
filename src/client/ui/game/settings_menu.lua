@@ -138,26 +138,17 @@ function SettingsMenu()
 					Padding = UDim.new(0, 4),
 					SortOrder = Enum.SortOrder.LayoutOrder,
 				}),
-				Debug = React.createElement(
-					"TextButton",
-					themes.theme_button {
-						Size = UDim2.new(1, 0, 0, 40),
-						Text = "Debug",
-						LayoutOrder = 1,
-						[React.Event.MouseButton1Click] = function()
-							print(world)
-						end,
-					},
-					{
-						Corner = React.createElement(Corner),
-					}
-				),
 				Header = React.createElement(
 					"TextLabel",
 					themes.theme_title {
 						Size = UDim2.new(0, 0, 0, 40),
 						Text = "Keybinds",
 						LayoutOrder = 2,
+					},
+					{
+						LeftPad = React.createElement("UIPadding", {
+							PaddingLeft = UDim.new(0, 10),
+						}),
 					}
 				),
 				Construct = React.createElement(Rebindable, {

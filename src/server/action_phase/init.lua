@@ -25,6 +25,7 @@ type ActionState = server_types.ActionState
 type EntityAction = types.EntityAction
 type TeamId = types.TeamId
 type SystemExtended = server_types.SystemExtended
+type Effect = types.Effect
 
 function portals_tick(world: World)
 	for _, cell in world.cells do
@@ -99,11 +100,35 @@ function remove_occluded_blueprints(world: World)
 end
 
 function status_effects_tick(world: World, action_state: ActionState)
+	local entity_and_effects: { [EntityId]: { Effect } } = {}
+
+	-- clone table so only effects that existed at the start of the tick are ticked
 	for entity_id, entity in world:active_entities() do
 		if next(entity.effects) == nil then
 			continue
 		end
-		effect_mod.tick_effects(world, action_state, entity)
+		entity_and_effects[entity_id] = table.clone(entity.effects)
+	end
+
+	for entity_id, effects in entity_and_effects do
+		local entity = world.entities[entity_id]
+		for _, effect in effects do
+			local behavior = effect_mod.registry[effect.type]
+			if behavior then
+				if behavior.tick then
+					behavior.tick(world, action_state, entity, effect)
+				end
+			end
+			if effect.duration ~= nil then
+				effect.duration -= 1
+				if effect.duration <= 0 then
+					behavior.remove(world, entity, effect)
+					effect.is_destroyed = true
+				end
+			end
+		end
+
+		effect_mod.purge_destroyed_effects(entity)
 		world:add_update {
 			type = "entity_update",
 			entity = entity,
@@ -199,7 +224,7 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 			end
 		end
 		if on_vit then
-			effect_mod.add_exclusive_effect(entity, {
+			effect_mod.add_exclusive_effect(world, entity, {
 				type = "regeneration",
 				duration = 2,
 			})

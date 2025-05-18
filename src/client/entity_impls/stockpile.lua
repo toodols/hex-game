@@ -7,6 +7,8 @@ local items_mod = require(ReplicatedStorage.Shared.items)
 type Entity = types.Entity
 type World = types.World
 
+
+
 function update_model(self: Entity, world: World)
 	if self.status == "complete" then
 		assert(self.inventory, "inventory nil")

@@ -11,7 +11,7 @@ entity_mod.registry.impression = entity_mod.with_defaults {
 		pow = 2,
 	},
 	abilities = {
-		impression_use = {},
+		activate = {},
 	},
 	layer = entity_mod.LAYER.building,
 }

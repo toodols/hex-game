@@ -37,7 +37,7 @@ local FilterButton = action_buttons.FilterButton
 local AttackButton = action_buttons.AttackButton
 local OpenRecipeButton = action_buttons.OpenRecipeButton
 local ToggleEnableButton = action_buttons.ToggleEnableButton
-local UseButton = action_buttons.UseButton
+local ActivateButton = action_buttons.ActivateButton
 
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
@@ -539,10 +539,10 @@ function EntityInformation(props: {
 							})
 							else nil,
 
-						UseButton = if entity.active ~= false
+						ActivateButton = if entity.active ~= false
 								and entity.owner == player_team.id
-								and (entity.type == "solution")
-							then React.createElement(UseButton, {
+								and (entity.type == "solution" or entity.type == "impression")
+							then React.createElement(ActivateButton, {
 								entity_id = entity.id,
 								LayoutOrder = 4,
 							})

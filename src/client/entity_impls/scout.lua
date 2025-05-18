@@ -14,7 +14,7 @@ local model = asset_server.load "Entities/Scout"
 local function update_model(self: Entity, world: World)
 	local instance = world.entity_instance_map[self.id]
 	local attack = util.table_find_pred(self.queued_decisions, function(v)
-		return v.type == "ability" and v.ability_type == "scout_attack"
+		return v.type == "ability" and v.ability_type == "attack"
 	end)
 
 	local indicator: PVInstance? = instance:FindFirstChild "AttackArrow"

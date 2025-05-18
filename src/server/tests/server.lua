@@ -197,7 +197,7 @@ function tests.damage_shielded_scout_with_magic()
 	local world = presets.blank_map()
 
 	local scout = spawn_entity(world, "scout")
-	local shield_effect = effect_mod.add_effect(scout, { type = "shield", health = 3 })
+	local shield_effect = effect_mod.add_effect(world, scout, { type = "shield", health = 3 })
 	damage_mod.damage_entity_destroying(world, scout, { amount = 1 })
 	assert_eq(scout.health, scout.max_health, "scout should not have been damaged")
 	assert_eq(shield_effect.health, 2, "shield should have 2 health")
@@ -207,8 +207,8 @@ function tests.damage_shielded_scout_with_magic()
 
 	-- Reset scout hp to test with multiple shields
 	scout.health = scout.max_health
-	local shield_1 = effect_mod.add_effect(scout, { type = "shield", health = 3 })
-	local shield_2 = effect_mod.add_effect(scout, { type = "shield", health = 3 })
+	local shield_1 = effect_mod.add_effect(world, scout, { type = "shield", health = 3 })
+	local shield_2 = effect_mod.add_effect(world, scout, { type = "shield", health = 3 })
 	damage_mod.damage_entity_destroying(world, scout, { amount = 5 })
 
 	assert(shield_1.is_destroyed, "shield 1 should have been destroyed")
@@ -493,7 +493,7 @@ function tests.scout_attack_each_other()
 
 	table.insert(scout.queued_decisions, {
 		type = "ability",
-		ability_type = "scout_attack",
+		ability_type = "attack",
 		coordinate = { 1, -1, 0 },
 	})
 
@@ -501,7 +501,7 @@ function tests.scout_attack_each_other()
 
 	assert_eq(
 		scout2.health,
-		scout2.max_health - world.entity_configurations.scout.abilities.scout_attack.damage.amount,
+		scout2.max_health - world.entity_configurations.scout.abilities.attack.damage.amount,
 		"Scout 2 should have been damaged"
 	)
 
@@ -511,12 +511,12 @@ function tests.scout_attack_each_other()
 	for i = 1, 3 do
 		table.insert(scout.queued_decisions, {
 			type = "ability",
-			ability_type = "scout_attack",
+			ability_type = "attack",
 			coordinate = { 1, -1, 0 },
 		})
 		table.insert(scout2.queued_decisions, {
 			type = "ability",
-			ability_type = "scout_attack",
+			ability_type = "attack",
 			coordinate = { -1, 1, 0 },
 		})
 		action_phase_mod.run_action_phase(world)
@@ -592,7 +592,7 @@ function tests.correct_scout_updates()
 	local scout = spawn_entity(world, "scout")
 	table.insert(scout.queued_decisions, {
 		type = "ability",
-		ability_type = "scout_attack",
+		ability_type = "attack",
 		coordinate = { 1, -1, 0 },
 	})
 
@@ -748,7 +748,7 @@ function tests.taunt_chain_reaction()
 
 	table.insert(scout.queued_decisions, {
 		type = "ability",
-		ability_type = "scout_attack",
+		ability_type = "attack",
 		coordinate = { 0, 0, 0 },
 	})
 
@@ -827,7 +827,7 @@ function tests.phony_generates_tek_on_death()
 
 	table.insert(scout.queued_decisions, {
 		type = "ability",
-		ability_type = "scout_attack",
+		ability_type = "attack",
 		coordinate = phony.primary_coordinate,
 	})
 
@@ -910,6 +910,50 @@ function tests.heart_produces_rad()
 		end),
 		"Stockpile should have rad"
 	)
+end
+
+function tests.infected_effect()
+	local world, teams = presets.blank_map()
+	world.global_configuration.decaying_enabled = false
+
+	local scout0 = entity_mod.new_entity({
+		type = "scout",
+		primary_coordinate = { 0, 0, 0 },
+	}, world)
+
+	local scout1 = entity_mod.new_entity({
+		type = "scout",
+		primary_coordinate = { 1, 0, -1 },
+	}, world)
+
+	local scout2 = entity_mod.new_entity({
+		type = "scout",
+		primary_coordinate = { 2, 0, -2 },
+	}, world)
+
+	local scout3 = entity_mod.new_entity({
+		type = "scout",
+		primary_coordinate = { 3, 0, -3 },
+	}, world)
+
+	effect_mod.add_effect(world, scout0, { type = "infected", duration = 1 })
+	assert_eq(scout0.health, 2)
+	assert_eq(scout1.health, 3)
+
+	action_phase_mod.run_action_phase(world)
+	assert_eq(scout1.health, 2)
+	assert_eq(scout2.health, 3)
+
+	action_phase_mod.run_action_phase(world)
+	assert_eq(scout2.health, 2)
+	assert_eq(scout3.health, 3)
+
+	action_phase_mod.run_action_phase(world)
+	assert_eq(scout0.health, 2)
+	assert_eq(scout1.health, 2)
+	assert_eq(scout2.health, 2)
+	assert_eq(scout3.health, 2)
+	cleanup(world)
 end
 
 return tests

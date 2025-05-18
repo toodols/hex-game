@@ -3,7 +3,6 @@
 - [ ] Display scores in player list
 - [ ] Add an end screen when only one team is left, then send players to lobby
 - [ ] Items in inventories with incompatible filters should be moved to different inventories
-- [ ] Remove `turret`. It's too generic.
 - [ ] `witness` should indicate its charges
 - [ ] Add `mace`, an artillery-type building
 	- [ ] Warning indicator entity 
@@ -21,11 +20,10 @@
 
 - [ ] `host` A building that can control time
 - [ ] `empath` An offensive building that copies status effects of buildings it kills
-- [ ] `pocket` A building that can allow buildings to "fast travel"
+- [ ] Unlock system that unlocks new buildings with each win
 
 # Ongoing
-- [ ] Make `impression` functional
-	- [x] Add `infected` status effect
+- [ ] `terminal` A building that can allow buildings to "fast travel"
 - [ ] Entities get respective buffs while on a resource tile
 	- [x] Vit: Passive Healing
 - [ ] Add settings menu 
@@ -34,6 +32,8 @@
 - [ ] Add keybinds for ui
 
 # Complete
+- [x] Make `impression` functional
+	- [x] Add `infected` status effect
 - [x] `torch` a building that can illuminate areas
 - [x] Make `suggestion` functional
 - [x] `scout` should physically turn to face its target when attacking
