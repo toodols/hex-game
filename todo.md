@@ -1,12 +1,10 @@
 # Todo
-
 - [ ] Display scores in player list
 - [ ] Add an end screen when only one team is left, then send players to lobby
 - [ ] Items in inventories with incompatible filters should be moved to different inventories
 - [ ] `witness` should indicate its charges
-- [ ] Add `mace`, an artillery-type building
+- [ ] Add `flail`, an artillery-type building
 	- [ ] Warning indicator entity 
-	- [ ] Mace occupies 3 tiles?
 - [ ] Add `exclusion`, creates a fog that blocks visibility or building for enemy
 - [ ] `vault` has passive that blocks lethal damage by consuming items in its inventory
 - [ ] Systems should be visible to the client and should show total items
@@ -21,9 +19,11 @@
 - [ ] `host` A building that can control time
 - [ ] `empath` An offensive building that copies status effects of buildings it kills
 - [ ] Unlock system that unlocks new buildings with each win
+- [ ] Change entity_update to use entity_id when adding to queue, then fill with entity at serialization step
 
 # Ongoing
 - [ ] `terminal` A building that can allow buildings to "fast travel"
+	- New entity status `reservation`
 - [ ] Entities get respective buffs while on a resource tile
 	- [x] Vit: Passive Healing
 - [ ] Add settings menu 

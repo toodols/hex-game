@@ -48,16 +48,37 @@ entity_mod.registry.fountain = entity_mod.with_defaults {
 		for _, neighbor_cell in world_mod.into_cells(world, coords.neighbors_leq(self.primary_coordinate, 2)) do
 			for entity_id in neighbor_cell.entities do
 				local entity = world.entities[entity_id]
-				if entity.inventory ~= nil and entity.owner == self.owner then
-					if items_mod.item_match_filter(item_ty, entity.inventory.filter) then
-						for i = #entity.inventory.items + 1, entity.inventory.capacity do
-							table.insert(entity.inventory.items, item_ty)
-						end
-						world:add_update {
-							type = "entity_update",
-							entity = entity,
-						}
+				if entity.owner ~= self.owner then
+					continue
+				end
+				-- if entity.type == "blueprint" and entity.cost[item_ty] ~= nil and entity.cost[item_ty] > 0 then
+				-- 	local diff = entity.cost[item_ty] - entity.cost_fulfilled[item_ty]
+				-- 	entity.cost_fulfilled[item_ty] += diff
+				-- 	local consumed = {}
+				-- 	for i = 1, diff do
+				-- 		table.insert(consumed, item_ty)
+				-- 	end
+				-- 	local consumed_event = {
+				-- 		type = "entity_event",
+				-- 		event_type = "consumed_items",
+				-- 		entity_id = entity.id,
+				-- 		items = consumed,
+				-- 	}
+				-- 	table.insert(world.action_queue, consumed_event)
+				-- 	world:add_update(consumed_event)
+				-- 	world:add_update {
+				-- 		type = "entity_update",
+				-- 		entity = entity,
+				-- 	}
+				-- end
+				if entity.inventory ~= nil and items_mod.item_can_deposit(item_ty, entity.inventory) then
+					for i = #entity.inventory.items + 1, entity.inventory.capacity do
+						table.insert(entity.inventory.items, item_ty)
 					end
+					world:add_update {
+						type = "entity_update",
+						entity = entity,
+					}
 				end
 			end
 		end

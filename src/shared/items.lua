@@ -40,14 +40,28 @@ function item_match_filter(item: Item, filter: Filter): boolean
 	end
 end
 
+function item_can_deposit(item: Item, inventory: Inventory): boolean
+	if not item_match_filter(item, inventory.filter) then
+		return false
+	end
+	if inventory.homogeneous then
+		if #inventory.items == 0 then
+			return true
+		else
+			return inventory.items[1] == item
+		end
+	else
+		return true
+	end
+end
+
 -- Puts as many `mut items` as possible into `mut inventory`
 -- Returns true if any items were extracted
 function inventory_deposit(inventory: Inventory, items: { Item }): boolean
+	if #items == 0 then
+		return false
+	end
 	if inventory.homogeneous then
-		if #items == 0 then
-			return false
-		end
-
 		local item_type
 		if #inventory.items == 0 then
 			item_type = util.table_find_pred(items, function(item)
@@ -126,6 +140,7 @@ return {
 	consume_items = consume_items,
 	into_counted_items = into_counted_items,
 	item_match_filter = item_match_filter,
+	item_can_deposit = item_can_deposit,
 	inventory_deposit = inventory_deposit,
 	inventory_sum = inventory_sum,
 	accumulator_satisfies_target = accumulator_satisfies_target,

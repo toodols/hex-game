@@ -51,17 +51,22 @@ local presets = require(ServerScriptService.Server.presets)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 local updates_mod = require(ServerScriptService.Server.updates)
 local server_util = require(ServerScriptService.Server.util)
-local pow = require(ServerScriptService.Server.pow)
-local pow_ext = ServerScriptService.Server.pow_ext
 
-pow.init {
-	permissions = {
-		owner = {
-			["195294332"] = 5,
+if ServerScriptService.Server:FindFirstChild "pow" then
+	local pow = require(ServerScriptService.Server.pow :: any)
+
+	pow.init {
+		permissions = {
+			owner = {
+				["195294332"] = 5,
+			},
 		},
-	},
-	extras = pow_ext,
-}
+		extras_shared = { ServerScriptService.Server.pow_extras.extras_shared },
+		extras_server = { ServerScriptService.Server.pow_extras.extras_server },
+	}
+else
+	warn "Did not find pow. Cannot initialize."
+end
 
 if RunService:IsStudio() then
 	tests.run_tests()

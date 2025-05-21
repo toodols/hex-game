@@ -18,6 +18,7 @@ function update_model(self: Entity, world: World)
 			local size_scale = math.pow(#self.inventory.items, 1 / 3)
 			crystal.Size = base_size * size_scale
 			crystal.Color = items_mod.item_colors[self.inventory.items[1]]
+			crystal.Transparency = 0
 		else
 			crystal.Transparency = 1
 		end
