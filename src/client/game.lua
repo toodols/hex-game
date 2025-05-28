@@ -158,10 +158,17 @@ function step_animations(world: World)
 		local behavior = client_entity_mod.registry[entity.type]
 		if behavior.animate then
 			if not world.animation_states[entity_id] then
-				world.animation_states[entity_id] = { type = "idle", step = 0 }
+				world.animation_states[entity_id] = { type = "idle", start = os.clock(), step = 0, period = nil }
 			end
-			world.animation_states[entity_id].step += 1
-			behavior.animate(entity, world, world.animation_states[entity_id])
+			local animation_state = world.animation_states[entity_id]
+			animation_state.step = os.clock() - animation_state.start
+
+			if animation_state.period ~= nil then
+				while animation_state.step > animation_state.period do
+					animation_state.step = animation_state.step - animation_state.period
+				end
+			end
+			behavior.animate(entity, world, animation_state)
 		end
 	end
 end

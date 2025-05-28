@@ -50,7 +50,7 @@ function with_defaults(t: any)
 			local instance = world.entity_instance_map[self.id]
 			if instance then
 				for _, v in instance:GetDescendants() do
-					if v:IsA "BasePart" then
+					if v:IsA "BasePart" and v.Name:find "^Hidden" == nil then
 						v.Transparency = ENTITY_TRANSPARENCY[self.status]
 					end
 				end
@@ -106,6 +106,17 @@ function with_defaults(t: any)
 	}
 end
 
+function recolor(world: World, entity: Entity, instance: Instance)
+	local team_color = world.teams[entity.owner].color
+	for _, part in instance:GetDescendants() do
+		if part:IsA "BasePart" and part.Name == "Color" then
+			local color: Color3 = team_color.color
+			local h, s, v = color:ToHSV()
+			local less_saturated = Color3.fromHSV(h, s * 0.7, v)
+			part.Color = less_saturated
+		end
+	end
+end
 function create_model_from_entity(world: World, entity: Entity): Model
 	local client_behavior = registry[entity.type]
 	local instance
@@ -124,11 +135,13 @@ function create_model_from_entity(world: World, entity: Entity): Model
 			instance.Transparency = ENTITY_TRANSPARENCY[entity.status]
 		end
 		for _, v in instance:GetDescendants() do
-			if v:IsA "BasePart" then
+			if v:IsA "BasePart" and v.Name:find "^Hidden" == nil then
 				v.Transparency = ENTITY_TRANSPARENCY[entity.status]
 			end
 		end
 	end
+
+	recolor(world, entity, instance)
 
 	return instance
 end
@@ -162,6 +175,8 @@ function update_entity_client(world: World, old: Entity?, new: Entity)
 				client_behavior.init(new, world)
 				instance.Parent = world.entity_instance_root
 			end
+			recolor(world, new, instance)
+
 			client_behavior.update(new, world, old)
 			if instance == nil then
 				warn("instance not found for entity " .. new.id .. " of type " .. new.type)

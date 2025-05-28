@@ -5,5 +5,7 @@ require(script.vault)
 require(script.misc)
 require(script.turret)
 require(script.torch)
-
+require(script.fountain)
+require(script.phony)
+require(script.obelisk)
 return {}

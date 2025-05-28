@@ -27,10 +27,10 @@ entity_mod.registry.fountain = entity_mod.with_defaults {
 			type = "entity_event",
 			event_type = "destroy",
 			entity_id = self.id,
-			death_type = "other",
+			death_type = "used",
 		}
 		world:add_update(event)
-		self.server_data.will_die = { death_type = "other" }
+		self.server_data.will_die = { death_type = "used" }
 		local deposit_ty = cell.type
 		local item_ty
 		if deposit_ty == "bar_deposit" then

@@ -213,7 +213,7 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 	-- certain units can be captured by building a vertex on top of it
 	world.neutral_team = new_team(world, {}, {
 		type = "color3",
-		color = Color3.fromRGB(150, 150, 150),
+		color = Color3.fromRGB(80, 80, 80),
 	}, "Neutral").id
 	world.teams[world.neutral_team].is_player_team = false
 	-- spectator team

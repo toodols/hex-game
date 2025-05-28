@@ -7,8 +7,6 @@ local items_mod = require(ReplicatedStorage.Shared.items)
 type Entity = types.Entity
 type World = types.World
 
-
-
 function update_model(self: Entity, world: World)
 	if self.status == "complete" then
 		assert(self.inventory, "inventory nil")
@@ -55,7 +53,7 @@ entity_mod.registry.stockpile = entity_mod.with_defaults {
 		local instance_root = world.entity_instance_map[self.id]
 		assert(instance_root, `instance_root of {self.id} is nil`)
 
-		local t = (animation_state.step / 100) % (math.pi * 2)
+		local t = 0.5 * animation_state.step % (math.pi * 2)
 		for i = 1, self.inventory.capacity do
 			local t_i = ((i - 1) / self.inventory.capacity) * math.pi * 2 + t
 			local instance = instance_root:FindFirstChild(tostring(i)) :: Part

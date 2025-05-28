@@ -10,16 +10,8 @@ entity_mod.registry.infinite_source = entity_mod.with_defaults {
 	model = asset_server.load "Entities/InfiniteSource",
 }
 
-entity_mod.registry.phony = entity_mod.with_defaults {
-	model = asset_server.load "Entities/Phony",
-}
-
 entity_mod.registry.laboratory = entity_mod.with_defaults {
 	model = asset_server.load "Entities/Laboratory",
-}
-
-entity_mod.registry.obelisk = entity_mod.with_defaults {
-	model = asset_server.load "Entities/Obelisk",
 }
 
 entity_mod.registry.witness = entity_mod.with_defaults {
@@ -64,10 +56,6 @@ entity_mod.registry.factory = entity_mod.with_defaults {
 
 entity_mod.registry.extractor = entity_mod.with_defaults {
 	model = asset_server.load "Entities/Extractor",
-}
-
-entity_mod.registry.fountain = entity_mod.with_defaults {
-	model = asset_server.load "Entities/Fountain",
 }
 
 entity_mod.registry.terminal = entity_mod.with_defaults {

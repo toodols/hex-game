@@ -29,6 +29,7 @@ local collect_by_key = serializing.collect_by_key
 local const = serializing.const
 local tagged_union = serializing.tagged_union
 local f64 = serializing.f64
+local i32_infinite = serializing.i32_infinite
 
 local entity_types = enum(util.table_keys(server_entity_mod.registry))
 
@@ -149,6 +150,9 @@ local researches = struct {
 				"researching",
 				"complete",
 			},
+			precondition = const(function()
+				warn "todo"
+			end),
 		},
 		"id"
 	),
@@ -175,7 +179,7 @@ local queued_decision = tagged_union({
 	rotate_entity = struct {
 		type = const "rotate_entity",
 		entity_id = entity_id,
-		rotation = i32,
+		rotation = u8,
 	},
 }, "type")
 
@@ -198,8 +202,9 @@ local entity: Schema<Entity> = struct {
 	coordinates = array(coord),
 	id = entity_id,
 	rotation = option(u8),
-	health = i32,
-	max_health = i32,
+	health = i32_infinite,
+	max_health = i32_infinite,
+	head_rotation = option(u8), -- torch
 	inventory = option(inventory),
 	effects = array(effect),
 	current_recipe = option(str),

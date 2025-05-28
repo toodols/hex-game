@@ -84,9 +84,14 @@ export type Effect = { is_destroyed: boolean?, duration: number? } & ({
 	type: "infected_immune",
 })
 
-export type AnimationState = {
+export type AnimationState = ({
 	type: "idle",
+} | {
+	type: "use",
+}) & {
+	start: number,
 	step: number,
+	period: number?,
 }
 
 export type Entity = {
@@ -142,7 +147,6 @@ export type Entity = {
 
 	owner: TeamId,
 	queued_decisions: { Decision },
-
 
 	-- for clients: .always_visible or .always_visible_for[team_id]
 	always_visible: boolean?,

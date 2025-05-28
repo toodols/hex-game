@@ -442,6 +442,8 @@ function EntityInformation(props: {
 							end,
 						})
 						else nil,
+					
+					-- Store
 
 					Range = if entity.type == "laboratory"
 						then React.createElement(HighlightOnHover, {

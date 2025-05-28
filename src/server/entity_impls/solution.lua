@@ -30,7 +30,7 @@ entity_mod.registry.solution = entity_mod.with_defaults {
 
 					-- it would be nice to use damage_mod for this but it doesn't support healing damage
 					-- and this ignores layers
-					affected_entity.health = math.max(
+					affected_entity.health = math.min(
 						affected_entity.max_health,
 						affected_entity.health + config.abilities.activate.heal_amount
 					)

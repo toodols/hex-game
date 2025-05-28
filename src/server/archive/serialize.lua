@@ -228,6 +228,24 @@ local enum = function<T>(values: { T }): Schema<T>
 	}
 end
 
+-- i32 with a special case for math.huge
+local i32_infinite = {
+	write = function(writer, data)
+		if data == math.huge then
+			writer.write_i32(0x7fffffff)
+			return
+		end
+		writer.write_i32(data)
+	end,
+	read = function(reader)
+		local value = reader.read_i32()
+		if value == 0x7fffffff then
+			return math.huge
+		end
+		return value
+	end,
+}
+
 local struct = function<T>(object: { [string]: Schema<any> | any }): Schema<T>
 	local keys = {}
 	for k in object do
@@ -438,6 +456,7 @@ test()
 return {
 	f64 = f64,
 	i32 = i32,
+	i32_infinite = i32_infinite,
 	u8 = u8,
 	str = str,
 	array = array,
