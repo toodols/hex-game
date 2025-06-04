@@ -101,7 +101,7 @@ function handle_try_promote_actions(world: World, action_state: ActionState)
 				if util.deep_equal(entity.cost, entity.cost_fulfilled) then
 					entity.status = "scaffold"
 					if system.heart == "anima" then
-						if entity.max_health > 1 then
+						if entity.max_health > 0 then
 							entity.max_health -= 1
 							entity.health = entity.max_health
 						end
@@ -130,6 +130,8 @@ function handle_try_promote_actions(world: World, action_state: ActionState)
 							warn "This scaffold has no corresponding vertex"
 						end
 					end
+
+					break
 				end
 			end
 		elseif action.type == "try_promote_scaffold" and entity.build_time > 0 then

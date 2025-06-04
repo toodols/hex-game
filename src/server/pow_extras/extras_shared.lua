@@ -127,7 +127,7 @@ return function(extras)
 			if context.args[1] then
 				coords = world_mod.coords_filter(_G.world, context.args[1])
 			else
-				coords = context.process:run_command("selected").ok
+				coords = context.runtime.run_commands_string(context.process, "selected").ok
 			end
 			local entities_map = {}
 			for _, coord in coords do

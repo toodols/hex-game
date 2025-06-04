@@ -103,12 +103,12 @@ local PAGES = {
 			},
 			{
 				type = "heart",
-			}
+			},
 		},
 	},
 }
 
-local HEIGHT = 220
+local HEIGHT = 250
 local BuildingItem = React.forwardRef(function(
 	props: {
 		do_animation: boolean,
@@ -220,12 +220,12 @@ local BuildingItem = React.forwardRef(function(
 							Size = UDim2.new(1, 0, 0, 0),
 							Text = formatting.format_text(world, entity_config.description),
 							TextWrapped = true,
-							TextSize = 13,
+							TextSize = 12,
 							TextTruncate = Enum.TextTruncate.AtEnd,
 						},
 						{
 							SizeConstraint = React.createElement("UISizeConstraint", {
-								MaxSize = Vector2.new(math.huge, 80),
+								MaxSize = Vector2.new(math.huge, 100),
 							}),
 						}
 					),

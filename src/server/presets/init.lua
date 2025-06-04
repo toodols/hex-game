@@ -77,7 +77,7 @@ function my_map(): World
 	shuffled_cells = util.table_shuffle(shuffled_cells)
 
 	local cell_count = #shuffled_cells
-	local bar_deposit_quota = math.ceil(cell_count * 0.04 / 2)
+	local bar_deposit_quota = math.ceil(cell_count * 0.045 / 2)
 	local vit_deposit_quota = math.ceil(cell_count * 0.015 / 2)
 	local rad_deposit_quota = math.ceil(cell_count * 0.015 / 2)
 	local tar_deposit_quota = math.ceil(cell_count * 0.015 / 2)

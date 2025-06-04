@@ -10,7 +10,7 @@ entity_mod.registry.turret = entity_mod.with_defaults {
 	build_time = 2,
 	cost = {
 		bar = 3,
-		rad = 1,
+		rad = 2,
 		pow = 1,
 	},
 	required_research = {},

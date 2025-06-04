@@ -4,9 +4,7 @@ local entity_mod = require(ReplicatedStorage.Shared.entity)
 entity_mod.registry.anima = entity_mod.with_defaults {
 	type = "anima",
 	name = "Anima",
-	description = [[This building may not be deconstructed.
-
-In systems exclusively supported by {entity.anima}:
+	description = [[In systems exclusively supported by {entity.anima}:
 - {entity.extractor} produces items every turn.
 - Newly built buildings have 1 less max hp.]],
 	max_health = 3,
