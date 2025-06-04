@@ -9,8 +9,7 @@ entity_mod.registry.extractor = entity_mod.with_defaults {
 	build_time = 1,
 	cycles_to_output = 2,
 	cost = {
-		bar = 2,
-		rad = 1,
+		bar = 4,
 	},
 	can_disable = true,
 	layer = entity_mod.LAYER.building,

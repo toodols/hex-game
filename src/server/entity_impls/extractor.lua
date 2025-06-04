@@ -29,7 +29,7 @@ entity_mod.registry.extractor = entity_mod.with_defaults {
 				self.should_output = ((self.should_output :: any) + 1)
 					% (if is_boosted then 1 else config.cycles_to_output)
 			end
-			if self.should_output == 0 then
+			if is_boosted or self.should_output == 0 then
 				local items
 				if cell.type == "bar_deposit" then
 					items = { "bar" }

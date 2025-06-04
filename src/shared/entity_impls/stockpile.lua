@@ -9,7 +9,8 @@ entity_mod.registry.stockpile = entity_mod.with_defaults {
 	build_time = 0,
 	inventory_capacity = 5,
 	cost = {
-		bar = 4,
+		rad = 1,
+		bar = 2,
 	},
 	layer = entity_mod.LAYER.building,
 }
