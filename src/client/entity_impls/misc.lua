@@ -62,4 +62,8 @@ entity_mod.registry.terminal = entity_mod.with_defaults {
 	model = asset_server.load "Entities/Terminal",
 }
 
+entity_mod.registry.anima = entity_mod.with_defaults {
+	model = asset_server.load "Entities/Anima",
+}
+
 return {}

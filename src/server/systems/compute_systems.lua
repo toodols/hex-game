@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local coords = require(ReplicatedStorage.Shared.coords)
+local get_heart = require(script.Parent.get_heart).get_heart
 
 type World = types.World
 type CubicCoordinate = types.CubicCoordinate
@@ -47,6 +48,7 @@ function compute_systems(world: World): { System }
 				if ent and not system_visited[encoded_coord] and not visited[encoded_coord] then
 					if ent.owner == initial_entity.owner then
 						table.insert(systems[#systems], coord)
+
 						local portals = {}
 						if cell.type == "portal" and cell.portal.open then
 							portals = cell.portal.group
@@ -60,6 +62,7 @@ function compute_systems(world: World): { System }
 								visitable_stack_map[encoded_neighbor_coord] = true
 							end
 						end
+
 						for _, neighbor in coords.neighbors_eq(coord, 1) do
 							local encoded_neighbor_coord = coords.encode_coord(neighbor)
 							if not visitable_stack_map[encoded_neighbor_coord] then
@@ -100,14 +103,27 @@ function compute_systems(world: World): { System }
 			entities[entity_id] = true
 		end
 
-		table.insert(result, { entities = entities, cells = cells })
+		table.insert(result, {
+			entities = entities,
+			cells = cells,
+			overflow_items = {},
+			power = 0,
+			team = world.entities[next(entities) :: EntityId].owner,
+		})
 	end
 
 	for entity_id, entity in world:active_entities() do
 		if not entities_set[entity_id] then
 			-- cells is empty because individual entities do not have a vertex and cells only count vertex
-			table.insert(result, { entities = { [entity_id] = true }, cells = {} })
+			table.insert(
+				result,
+				{ entities = { [entity_id] = true }, cells = {}, overflow_items = {}, power = 0, team = entity.owner }
+			)
 		end
+	end
+
+	for _, system in result do
+		system.heart = get_heart(world, system)
 	end
 
 	return result

@@ -100,6 +100,13 @@ function handle_try_promote_actions(world: World, action_state: ActionState)
 				-- if entity.cost_fulfilled deep_equal entity.cost then entity can promote to
 				if util.deep_equal(entity.cost, entity.cost_fulfilled) then
 					entity.status = "scaffold"
+					if system.heart == "anima" then
+						if entity.max_health > 1 then
+							entity.max_health -= 1
+							entity.health = entity.max_health
+						end
+					end
+
 					world:add_update {
 						type = "entity_update",
 						entity = entity,

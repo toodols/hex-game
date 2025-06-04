@@ -4,7 +4,6 @@ local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
 local server_util = require(ServerScriptService.Server.util)
 local util = require(ReplicatedStorage.Shared.util)
-local updates_mod = require(ServerScriptService.Server.updates)
 local entity_mod = require(ServerScriptService.Server.entity)
 
 type World = types.World
@@ -28,14 +27,6 @@ function do_entity_decay(world: World, action_state: ActionState)
 
 	-- remove connected entities from decay
 	for _, system in action_state.systems do
-		local has_heart = false
-		for entity_id in system.entities do
-			local entity = world.entities[entity_id]
-			if entity.type == "heart" or entity.type == "infinite_source" then
-				has_heart = true
-			end
-		end
-
 		for neighbor in
 			server_util.get_neighbors_set(
 				world,
@@ -55,7 +46,7 @@ function do_entity_decay(world: World, action_state: ActionState)
 		end
 
 		for entity_id in system.entities do
-			if has_heart then
+			if system.heart ~= nil then
 				decayable_entities[entity_id] = false
 			end
 		end

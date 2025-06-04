@@ -522,6 +522,10 @@ export type EntityAction =
 export type System = {
 	entities: { [EntityId]: boolean },
 	cells: { [EncodedCoordinate]: boolean },
+	overflow_items: { Item },
+	power: number,
+	heart: string?,
+	team: TeamId,
 }
 
 export type World = {

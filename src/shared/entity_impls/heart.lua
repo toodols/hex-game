@@ -3,7 +3,7 @@ local entity_mod = require(ReplicatedStorage.Shared.entity)
 
 entity_mod.registry.heart = entity_mod.with_defaults {
 	type = "heart",
-	name = "Monarch",
+	name = "Soma",
 	description = "Outputs bar per turn. Buildings not connected to a {entity.heart} will decay in 3 turns.",
 	max_health = 7,
 	build_time = 2,

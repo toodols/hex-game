@@ -3,11 +3,12 @@ local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local util = require(ReplicatedStorage.Shared.util)
+local hooks = require(ReplicatedStorage.Client.ui.hooks)
 
-type Entity = types.Entity
+type EntityId = types.EntityId
 
-function Hitpoints(props: { entity: Entity })
-	local entity = props.entity
+function Hitpoints(props: { entity_id: EntityId })
+	local entity = hooks.use_synced_entity(props.entity_id)
 	local total_health = shared_entity_mod.get_effective_health(entity)
 	local shield_health = total_health - entity.health
 
@@ -38,26 +39,32 @@ function Hitpoints(props: { entity: Entity })
 				PaddingTop = UDim.new(0, 8),
 			}),
 		},
-		if entity.max_health > 20
-			then React.createElement("TextLabel", {
-				BackgroundTransparency = 1,
-				BorderSizePixel = 0,
-				TextColor3 = Color3.fromRGB(255, 255, 255),
-				Size = UDim2.new(0, 100, 0, 100),
-				TextSize = 12,
-				TextXAlignment = Enum.TextXAlignment.Right,
-				Text = if entity.max_health ~= math.huge
-					then `{entity.health} / {entity.max_health}` .. if shield_health > 0
-						then ` +{shield_health}`
-						else ""
-					else "--",
-			})
-			elseif total_health == 0 then React.createElement("Frame", {
-				BorderSizePixel = 1,
-				BorderColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundColor3 = Color3.new(0, 0, 0),
-				Size = UDim2.new(0, 100, 0, 100),
-			})
+		if entity.max_health > 20 or entity.status == "blueprint"
+			-- freak bug that occurs if I don't have { } around these special hitpoint renders
+			-- jsdotlua/react-lua #42 ??
+			then {
+				React.createElement("TextLabel", {
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					TextColor3 = Color3.fromRGB(255, 255, 255),
+					Size = UDim2.new(0, 100, 0, 100),
+					TextSize = 12,
+					TextXAlignment = Enum.TextXAlignment.Right,
+					Text = if entity.max_health ~= math.huge and entity.status ~= "blueprint"
+						then `{entity.health} / {entity.max_health} {if shield_health > 0
+							then ` +{shield_health}`
+							else ""}`
+						else "--",
+				}),
+			}
+			elseif total_health == 0 then {
+				React.createElement("Frame", {
+					BorderSizePixel = 1,
+					BorderColor3 = Color3.fromRGB(255, 255, 255),
+					BackgroundColor3 = Color3.new(0, 0, 0),
+					Size = UDim2.new(0, 100, 0, 100),
+				}),
+			}
 			else util.table_map((util.range(math.max(entity.max_health, shield_health))), function(i)
 				local color
 				if i <= shield_health then

@@ -239,7 +239,7 @@ function EntityInformation(props: {
 				}),
 
 				Hitpoints = React.createElement(Hitpoints, {
-					entity = entity,
+					entity_id = entity.id,
 				}),
 
 				SizeConstraint = React.createElement("UISizeConstraint", {

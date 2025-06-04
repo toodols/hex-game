@@ -20,16 +20,9 @@ export type DamageResult = {
 	effective: number,
 }
 export type ActionState = {
-	systems: { SystemExtended },
-	system_by_entity_id: { [EntityId]: SystemExtended },
-	system_by_cell: { [EncodedCoordinate]: SystemExtended },
-}
-
-export type SystemExtended = System & {
-	overflow_items: { Item },
-	power: number,
-	has_heart: boolean,
-	team: TeamId,
+	systems: { System },
+	system_by_entity_id: { [EntityId]: System },
+	system_by_cell: { [EncodedCoordinate]: System },
 }
 
 export type PlayerInfo = {

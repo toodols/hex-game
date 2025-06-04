@@ -23,7 +23,8 @@ entity_mod.registry.extractor = entity_mod.with_defaults {
 		if self.status == "complete" and self.enabled and self.owner ~= world.neutral_team then
 			local cell = world:get_cell(self.primary_coordinate)
 
-			local is_boosted = false
+			local system = action_state.system_by_entity_id[self.id]
+			local is_boosted = system.heart == "anima"
 			local function ok()
 				self.should_output = ((self.should_output :: any) + 1)
 					% (if is_boosted then 1 else config.cycles_to_output)

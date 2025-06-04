@@ -79,7 +79,7 @@ local PAGES = {
 				type = "proxy",
 			},
 			{
-				type = "heart",
+				type = "anima",
 			},
 			{
 				type = "taunt",
@@ -101,6 +101,9 @@ local PAGES = {
 			{
 				type = "terminal",
 			},
+			{
+				type = "heart",
+			}
 		},
 	},
 }

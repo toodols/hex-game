@@ -27,7 +27,7 @@ type EntityId = types.EntityId
 type ActionState = server_types.ActionState
 type EntityAction = types.EntityAction
 type TeamId = types.TeamId
-type SystemExtended = server_types.SystemExtended
+type System = types.System
 type Effect = types.Effect
 
 function portals_tick(world: World)
@@ -188,9 +188,11 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	delete_deconstructed_entities(world, world.action_queue)
 	portals_tick(world)
 
-	local first_changes = visibility_mod.compute_visibility(world)
+	visibility_mod.compute_visibility(world)
 	influences_mod.compute_influences(world)
 	presence_mod.compute_presence(world)
+	create_systems(world, action_state)
+
 	entities_tick(world, action_state)
 	status_effects_tick(world, action_state)
 
@@ -205,7 +207,6 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 		end
 	end
 
-	create_systems(world, action_state)
 	local dropped = process_queue(world, action_state)
 
 	for _, entity in world:active_entities() do

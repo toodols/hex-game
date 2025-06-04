@@ -21,5 +21,6 @@ require(script.taunt)
 require(script.torch)
 require(script.fountain)
 require(script.terminal)
+require(script.anima)
 
 return {}

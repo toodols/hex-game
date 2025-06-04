@@ -54,6 +54,16 @@ return function(extras)
 		end,
 	}
 
+	commands.debug_world = {
+		description = "Prints the world",
+		permissions = { "admin" },
+		overloads = { { returns = "nil", args = {} } },
+		run = function(context)
+			local world = _G.world
+			print(world)
+		end,
+	}
+
 	commands.cell_type = {
 		description = "Sets the type of a cell.",
 		permissions = { "admin" },

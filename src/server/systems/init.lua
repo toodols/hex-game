@@ -6,9 +6,10 @@ local server_types = require(ServerScriptService.Server.types)
 local items_mod = require(ReplicatedStorage.Shared.items)
 local updates_mod = require(ServerScriptService.Server.updates)
 local compute_systems = require(script.compute_systems).compute_systems
+local get_heart = require(script.get_heart).get_heart
 
 type World = types.World
-type SystemExtended = server_types.SystemExtended
+type System = types.System
 type ActionState = server_types.ActionState
 type Item = types.Item
 type Entity = types.Entity
@@ -18,7 +19,7 @@ type Inventory = types.Inventory
 function system_consume_item_type(
 	world: World,
 	action_state: ActionState,
-	system: SystemExtended,
+	system: System,
 	request_item: Item,
 	amount: number
 )
@@ -72,7 +73,7 @@ end
 function system_has_items(
 	world: World,
 	action_state: ActionState,
-	system: SystemExtended,
+	system: System,
 	request_items: { [Item]: number? }
 ): boolean
 	local infinite_source = util.table_any(util.table_keys(system.entities), function(entity_id)
@@ -112,7 +113,7 @@ function system_has_items(
 end
 
 -- add items to inventories in the system, then add overflow to overflow_items
-function system_add_items(world: World, action_state: ActionState, system: SystemExtended, items: { Item })
+function system_add_items(world: World, action_state: ActionState, system: System, items: { Item })
 	local open_inventory_entities: { Entity & { inventory: Inventory } } = util.table_filter_map(
 		util.table_keys(system.entities),
 		function(entity_id)
@@ -148,4 +149,5 @@ return {
 	system_has_items = system_has_items,
 	system_add_items = system_add_items,
 	compute_systems = compute_systems,
+	get_heart = get_heart,
 }

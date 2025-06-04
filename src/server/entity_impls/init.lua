@@ -21,5 +21,6 @@ require(script.turret)
 require(script.fountain)
 require(script.impression)
 require(script.terminal)
+require(script.anima)
 
 return {}

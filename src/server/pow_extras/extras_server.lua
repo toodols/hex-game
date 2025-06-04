@@ -183,15 +183,7 @@ return function(extras)
 		end,
 	}
 
-	commands.debug_world = {
-		description = "Prints the world",
-		permissions = { "admin" },
-		overloads = { { returns = "nil", args = {} } },
-		server_run = function(context)
-			local world = _G.world
-			print(world)
-		end,
-	}
+
 
 	commands.spawn_entity = {
 		description = "spawn_entity",

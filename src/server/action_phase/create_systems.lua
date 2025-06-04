@@ -6,21 +6,12 @@ local systems_mod = require(ServerScriptService.Server.systems)
 
 type World = types.World
 type ActionState = server_types.ActionState
-type System = server_types.SystemExtended
 
 function create_systems(world: World, action_state: ActionState)
 	local systems = {}
 	local system_by_entity_id = {}
 	local system_by_cell = {}
-	for _, system_data in systems_mod.compute_systems(world) do
-		local system = {
-			entities = system_data.entities,
-			cells = system_data.cells,
-			overflow_items = {},
-			power = 0,
-			team = world.entities[next(system_data.entities) :: any].owner,
-		} :: System
-
+	for _, system in systems_mod.compute_systems(world) do
 		for entity_id in system.entities do
 			system_by_entity_id[entity_id] = system
 		end
