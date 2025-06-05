@@ -4,8 +4,6 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local world_mod = require(ReplicatedStorage.Shared.world)
-local team_mod = require(ReplicatedStorage.Shared.team)
-local coords = require(ReplicatedStorage.Shared.coords)
 
 local presence_mod = require(ServerScriptService.Server.presence)
 local server_types = require(ServerScriptService.Server.types)
@@ -16,6 +14,7 @@ local questing = require(ServerScriptService.Server.questing)
 local effect_mod = require(ServerScriptService.Server.effect)
 local visibility_mod = require(ServerScriptService.Server.visibility)
 local entity_mod = require(ServerScriptService.Server.entity)
+local conclusion = require(ServerScriptService.Server.conclusion)
 
 local do_entity_decay = require(script.entity_decay).do_entity_decay
 local new_action_state = require(script.new_action_state).new_action_state
@@ -239,6 +238,8 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 
 	create_systems(world, action_state)
 	do_entity_decay(world, action_state)
+
+	conclusion.handle_conclusion(world)
 
 	influences_mod.compute_influences(world) --recompute influences if entities DIE
 	presence_mod.compute_presence(world)

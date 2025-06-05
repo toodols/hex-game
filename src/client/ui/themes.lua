@@ -16,10 +16,12 @@ function theme_title(props)
 	props.TextColor3 = props.TextColor3 or Color3.fromRGB(255, 255, 255)
 	props.FontFace = Font.fromName("Oswald", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 	props.TextSize = props.TextSize or 18
-	props.TextXAlignment = Enum.TextXAlignment.Left
-	props.AutomaticSize = Enum.AutomaticSize.X
-	props.BackgroundTransparency = 1
-	props.RichText = true
+	props.TextXAlignment = props.TextXAlignment or Enum.TextXAlignment.Left
+	props.AutomaticSize = props.AutomaticSize or Enum.AutomaticSize.X
+	props.BackgroundTransparency = props.BackgroundTransparency or 1
+	if props.RichText == nil then
+		props.RichText = true
+	end
 	return props
 end
 
@@ -34,7 +36,9 @@ function theme_description(props)
 	props.TextWrapped = props.TextWrapped or true
 	props.AutomaticSize = props.AutomaticSize or Enum.AutomaticSize.X
 	props.TextXAlignment = props.TextXAlignment or Enum.TextXAlignment.Left
-	props.RichText = props.RichText or true
+	if props.RichText == nil then
+		props.RichText = true
+	end
 	return props
 end
 
@@ -44,8 +48,10 @@ function theme_label(props)
 	props.FontFace = props.FontFace
 		or Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 	props.AutomaticSize = props.AutomaticSize or Enum.AutomaticSize.X
-	props.RichText = props.RichText or true
 	props.TextColor3 = props.TextColor3 or Color3.fromRGB(255, 255, 255)
+	if props.RichText == nil then
+		props.RichText = true
+	end
 	return props
 end
 

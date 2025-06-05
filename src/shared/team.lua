@@ -27,6 +27,9 @@ function is_allied(world: World, team1: TeamId, team2: TeamId): boolean
 end
 
 function team_of(world: World, player: Player): TeamData?
+	if player == nil then
+		return nil
+	end
 	for _, team in world.teams do
 		if table.find(team.players, player.UserId) then
 			return team

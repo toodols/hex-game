@@ -59,6 +59,11 @@ function new_team(self: World, players: { Player }?, color: TeamColor?, name: st
 			visibility = "normal",
 		},
 	})
+	table.insert(self.coalitions, {
+		name = "Solo Coalition",
+		id = #self.coalitions + 1,
+		teams = { #self.teams },
+	})
 	return self.teams[#self.teams]
 end
 

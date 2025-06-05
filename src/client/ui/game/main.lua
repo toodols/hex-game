@@ -15,18 +15,19 @@ local themes = require(ReplicatedStorage.Client.ui.themes)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 
-local TileAlerts = require(ReplicatedStorage.Client.ui.game.tile_alerts).TileAlerts
-local Research = require(ReplicatedStorage.Client.ui.game.research).Research
-local PlayerList = require(ReplicatedStorage.Client.ui.game.player_list).PlayerList
-local SettingsMenu = require(ReplicatedStorage.Client.ui.game.settings_menu).SettingsMenu
-local TopCenter = require(ReplicatedStorage.Client.ui.game.top_center).TopCenter
-local BuildingsFrame = require(ReplicatedStorage.Client.ui.game.buildings_frame).BuildingsFrame
-local SelectedCellFrame = require(ReplicatedStorage.Client.ui.game.selected_cell_frame).SelectedCellFrame
-local EntityInformation = require(ReplicatedStorage.Client.ui.game.entity_information).EntityInformation
-local Recipes = require(ReplicatedStorage.Client.ui.game.recipes).Recipes
-local ItemFilters = require(ReplicatedStorage.Client.ui.game.item_filters).ItemFilters
-local Credits = require(ReplicatedStorage.Client.ui.game.credits).Credits
-local Encyclopedia = require(ReplicatedStorage.Client.ui.game.encyclopedia).Encyclopedia
+local TileAlerts = require(script.Parent.tile_alerts).TileAlerts
+local Research = require(script.Parent.research).Research
+local PlayerList = require(script.Parent.player_list).PlayerList
+local SettingsMenu = require(script.Parent.settings_menu).SettingsMenu
+local BuildingsFrame = require(script.Parent.buildings_frame).BuildingsFrame
+local SelectedCellFrame = require(script.Parent.selected_cell_frame).SelectedCellFrame
+local EntityInformation = require(script.Parent.entity_information).EntityInformation
+local Recipes = require(script.Parent.recipes).Recipes
+local ItemFilters = require(script.Parent.item_filters).ItemFilters
+local Credits = require(script.Parent.credits).Credits
+local Encyclopedia = require(script.Parent.encyclopedia).Encyclopedia
+local TopCenter = require(script.Parent.top_center).TopCenter
+local Conclusion = require(script.Parent.conclusion).Conclusion
 
 local Corner = util_components.Corner
 
@@ -173,8 +174,8 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 			}),
 			SettingsMenu = if settings_open then React.createElement(SettingsMenu) else nil,
 			Credits = if credits_open then React.createElement(Credits) else nil,
-			Encyclopedia = if encyclopedia_open
-				then React.createElement(Encyclopedia) else nil
+			Encyclopedia = if encyclopedia_open then React.createElement(Encyclopedia) else nil,
+			Conclusion = React.createElement(Conclusion),
 		}),
 		TopCenter = React.createElement(TopCenter),
 		BottomCenter = React.createElement("Frame", {

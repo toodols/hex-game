@@ -397,6 +397,9 @@ export type WorldUpdate =
 	} | {
 		type: "systems",
 		systems: { System },
+	} | {
+		type: "conclusion",
+		conclusion: Conclusion,
 	}
 
 export type TurnSchedule = {
@@ -531,6 +534,10 @@ export type System = {
 	team: TeamId,
 }
 
+export type Conclusion = {
+	winning_coalition: CoalitionId,
+}
+
 export type World = {
 	-- instances are always nil on the server, while always a table on the client
 	entity_instance_map: InstanceMap<EntityId>,
@@ -567,6 +574,8 @@ export type World = {
 	spectator_team: TeamId,
 
 	systems: { System },
+
+	conclusion: Conclusion?,
 
 	-- player teams can grant or revoke visibility to spectators
 	-- use userid so visibility is preserved even after the spectator leaves
