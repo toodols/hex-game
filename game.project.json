@@ -18,7 +18,10 @@
 			"Server": {
 				"$path": "src/server",
 				"pow": {
-					"$path": "../pow/package.project.json"
+					"$path": "pow/package.project.json"
+				},
+				"openskill": {
+					"$path": "openskill/src"
 				}
 			},
 			"server_init": {

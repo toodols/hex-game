@@ -17,7 +17,7 @@ return function(extras)
 	local commands = extras.commands
 	commands.resume_timer = {
 		description = "Resumes the timer.",
-		permissions = { "admin" },
+		permissions = { "gamemaster" },
 		overloads = {
 			{ returns = "nil", args = {} },
 		},
@@ -31,7 +31,7 @@ return function(extras)
 
 	commands.skip_timer = {
 		description = "Skips the timer.",
-		permissions = { "admin" },
+		permissions = { "gamemaster" },
 		overloads = {
 			{ returns = "nil", args = {} },
 		},
@@ -43,7 +43,7 @@ return function(extras)
 
 	commands.pause_timer = {
 		description = "Pauses the timer.",
-		permissions = { "admin" },
+		permissions = { "gamemaster" },
 		overloads = {
 			{ returns = "nil", args = {} },
 		},
@@ -56,7 +56,7 @@ return function(extras)
 
 	commands.set_game_speed = {
 		description = "Sets the game speed.",
-		permissions = { "admin" },
+		permissions = { "gamemaster" },
 		overloads = {
 			{
 				returns = "nil",
@@ -84,7 +84,7 @@ return function(extras)
 	}
 	commands.set_team = {
 		description = "Sets the team of players",
-		permissions = { "admin" },
+		permissions = { "gamemaster" },
 		overloads = {
 			{
 				returns = "nil",
@@ -125,7 +125,7 @@ return function(extras)
 
 	commands.load = {
 		description = "Loads the world from a key",
-		permissions = { "admin" },
+		permissions = { "gamemaster" },
 		overloads = {
 			{
 				returns = "nil",
@@ -161,7 +161,7 @@ return function(extras)
 
 	commands.save = {
 		description = "Saves the world in a key",
-		permissions = { "admin" },
+		permissions = { "gamemaster" },
 		overloads = {
 			{
 				returns = "nil",
@@ -183,11 +183,9 @@ return function(extras)
 		end,
 	}
 
-
-
 	commands.spawn_entity = {
 		description = "spawn_entity",
-		permissions = { "admin" },
+		permissions = { "gamemaster" },
 		overloads = {
 			{
 				returns = "nil",
@@ -243,7 +241,7 @@ return function(extras)
 
 	commands.set_visibility = {
 		description = "Sets the visibility of a team.",
-		permissions = { "admin" },
+		permissions = { "gamemaster" },
 		overloads = {
 			{
 				returns = "nil",
@@ -267,6 +265,52 @@ return function(extras)
 			local visibility = context.args[2]
 			local team = world.teams[team_id]
 			team.server_data.visibility = visibility
+		end,
+	}
+
+	commands.cell_type = {
+		description = "Sets the type of a cell.",
+		permissions = { "gamemaster" },
+		overloads = {
+			{
+				returns = "nil",
+				args = {
+					{
+						name = "type",
+						type = "cell_type",
+						description = "The new type.",
+					},
+				},
+			},
+			{
+				returns = "nil",
+				args = {
+
+					{
+						name = "type",
+						type = "cell_type",
+						description = "The new type.",
+					},
+					{
+						name = "cell",
+						type = "coords",
+						description = "The cell to set the type for.",
+					},
+				},
+			},
+		},
+		server_run = function(context)
+			local world = _G.world
+			local type = context.args[1]
+			local coords = context.args[3] or context.runtime.run_commands_string(context.process, "selected").ok
+
+			for _, coord in coords do
+				local cell = world:get_cell(coord)
+				if cell == nil then
+					continue
+				end
+				cell.type = type
+			end
 		end,
 	}
 end

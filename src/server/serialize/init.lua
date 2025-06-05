@@ -104,6 +104,9 @@ function serialize_cell_for_team(world: World, cell: HexCell, team: TeamId): Hex
 end
 
 function serialize_system_for_team(world: World, system: System, team: TeamId): System?
+	if team_mod.is_allied(world, system.team, team) then
+		return system
+	end
 	return nil
 end
 
@@ -149,6 +152,7 @@ return {
 	serialize_world_for_team = serialize_world_for_team,
 	serialize_cell_for_team = serialize_cell_for_team,
 	serialize_entity_for_team = serialize_entity_for_team,
+	serialize_system_for_team = serialize_system_for_team,
 	buildable_for_team = buildable_for_team,
 	serialize_team = serialize_team,
 }

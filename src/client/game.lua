@@ -318,6 +318,8 @@ function handle_updates(world: World, updates: { WorldUpdate })
 			world.coalitions = update.coalitions
 		elseif update.type == "quest_update" then
 			world.quests[update.quest.id] = update.quest
+		elseif update.type == "systems" then
+			world.systems = update.systems
 		elseif update.type == "world" then
 			-- "world" update is a special case cause this basically involves tearing down everything and rebuilding it
 			local data = update.world

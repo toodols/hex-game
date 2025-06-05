@@ -97,6 +97,13 @@ function get_updates_for_team(world: World, buffer: { WorldUpdate }, team_id: Te
 				type = update.type,
 				world = serialize_mod.serialize_world_for_team(world, team.id),
 			}
+		elseif update.type == "systems" then
+			return {
+				type = update.type,
+				systems = util.table_filter_map(update.systems, function(system)
+					return serialize_mod.serialize_system_for_team(world, system, team.id)
+				end),
+			}
 		else
 			return update
 		end

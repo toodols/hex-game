@@ -20,7 +20,6 @@ local function update_model(self: Entity, world: World)
 	local indicator: PVInstance? = instance:FindFirstChild "AttackArrow"
 	if attack then
 		if indicator then
-			-- todo: make it animate?
 			(indicator :: any):PivotTo(
 				CFrame.lookAt(
 					instance:GetPivot().Position,

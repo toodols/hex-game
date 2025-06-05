@@ -13,10 +13,14 @@ type World = types.World
 return function(extras)
 	local commands = extras.commands
 	local extra_types = extras.types
+	local permission_types = extras.permission_types
+	permission_types.admin = { "gamemaster" }
+	permission_types.normal = { "automation" }
+	permission_types.gamemaster = {}
 
 	commands.coord = {
 		description = "Constructs a coordinate from x, y.",
-		permissions = {},
+		permissions = { "automation" },
 		overloads = {
 			{
 				returns = "coord",
@@ -43,7 +47,7 @@ return function(extras)
 
 	commands.selected = {
 		description = "Gets coords of selected",
-		permissions = {},
+		permissions = { "automation" },
 		overloads = { { returns = "coords", args = {} } },
 		client_run = function(context)
 			local selection = util.table_find_pred(_G.world.ui.selection_mode_stack, function(selection_mode)
@@ -54,65 +58,28 @@ return function(extras)
 		end,
 	}
 
-	commands.debug_world = {
+	commands.debug_world_client = {
 		description = "Prints the world",
-		permissions = { "admin" },
+		permissions = { "automation" },
 		overloads = { { returns = "nil", args = {} } },
-		run = function(context)
+		client_run = function(context)
 			local world = _G.world
 			print(world)
 		end,
 	}
 
-	commands.cell_type = {
-		description = "Sets the type of a cell.",
-		permissions = { "admin" },
-		overloads = {
-			{
-				returns = "nil",
-				args = {
-					{
-						name = "type",
-						type = "cell_type",
-						description = "The new type.",
-					},
-				},
-			},
-			{
-				returns = "nil",
-				args = {
-
-					{
-						name = "type",
-						type = "cell_type",
-						description = "The new type.",
-					},
-					{
-						name = "cell",
-						type = "coords",
-						description = "The cell to set the type for.",
-					},
-				},
-			},
-		},
-		server_run = function(context)
-			local world = _G.world
-			local type = context.args[1]
-			local coords = context.args[3] or context.runtime.run_commands_string(context.process, "selected").ok
-
-			for _, coord in coords do
-				local cell = world:get_cell(coord)
-				if cell == nil then
-					continue
-				end
-				cell.type = type
-			end
+	commands.systems = {
+		description = "Returns the systems visible to the client.",
+		permissions = { "automation" },
+		overloads = { { returns = "any", args = {} } },
+		client_run = function(context)
+			return _G.world.systems
 		end,
 	}
 
 	commands.selected_entities = {
 		description = "Gets the selected entities visible to the client.",
-		permissions = { "moderator" },
+		permissions = { "automation" },
 		overloads = {
 			{ returns = "entities", args = {} },
 			{
@@ -133,17 +100,19 @@ return function(extras)
 			for _, coord in coords do
 				local cell = _G.world:get_cell(coord)
 				for entity_id in cell.entities do
-					entities_map[_G.world.entities[entity_id]] = true
+					entities_map[entity_id] = true
 				end
 			end
 
-			return util.table_keys(entities_map)
+			return util.table_map(entities_map, function(_, entity_id)
+				return _G.world.entities[entity_id]
+			end)
 		end,
 	}
 
 	commands.set_selected = {
 		description = "Sets the selected cells.",
-		permissions = {},
+		permissions = { "automation" },
 		overloads = {
 			{
 				returns = "nil",

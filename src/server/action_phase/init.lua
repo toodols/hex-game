@@ -273,6 +273,11 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 		cells = world.cells,
 	}
 
+	world:add_update {
+		type = "systems",
+		systems = world.systems,
+	}
+
 	world.turn += 1
 	world:add_update {
 		type = "turn",

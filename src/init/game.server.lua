@@ -36,7 +36,6 @@ clone_assets({
 	Items = true,
 }, server_assets, destination)
 
--- Load entities and effects into their registries
 require(ReplicatedStorage.Shared.effect_impls)
 require(ReplicatedStorage.Shared.entity_impls)
 require(ServerScriptService.Server.effect_impls)

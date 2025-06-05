@@ -1,7 +1,10 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ServerScriptService = game:GetService "ServerScriptService"
 local util = require(ReplicatedStorage.Shared.util)
 local formatting = require(ReplicatedStorage.Shared.formatting)
 local coords = require(ReplicatedStorage.Shared.coords)
+local OpenSkill = require(ServerScriptService.Server.openskill)
+
 local assert_eq = util.assert_eq
 
 local tests = {}
@@ -52,6 +55,29 @@ function tests.sector()
 			{ -1, 0, 1 },
 		}
 	)
+end
+
+function tests.openskill()
+	local alice = OpenSkill.Rating()
+	local bob = OpenSkill.Rating()
+	local charlie = OpenSkill.Rating()
+
+	-- charlie always loses
+	for i = 1, 10 do
+		OpenSkill.Rate { { alice }, { bob, charlie } }
+		OpenSkill.Rate { { alice, bob }, { charlie } }
+		OpenSkill.Rate { { bob }, { alice } }
+		OpenSkill.Rate { { bob }, { alice, charlie } }
+		OpenSkill.Rate { { alice }, { bob, charlie } }
+	end
+
+	local alice_ordinal = OpenSkill.Ordinal(alice)
+	local bob_ordinal = OpenSkill.Ordinal(bob)
+	local charlie_ordinal = OpenSkill.Ordinal(charlie)
+
+	assert(bob_ordinal > alice_ordinal, "bob should be better than alice")
+	assert(alice_ordinal > charlie_ordinal, "alice should be better than charlie")
+	assert(bob_ordinal > charlie_ordinal, "bob should be better than charlie")
 end
 
 return tests

@@ -394,6 +394,9 @@ export type WorldUpdate =
 	} | {
 		type: "world",
 		world: PartialWorld,
+	} | {
+		type: "systems",
+		systems: { System },
 	}
 
 export type TurnSchedule = {
