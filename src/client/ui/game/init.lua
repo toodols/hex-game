@@ -12,6 +12,19 @@ local Main = require(script.main).Main
 
 type World = types.World
 
+function bind_sprint()
+	ContextActionService:BindAction("sprint", function(action_name, input_state, input_object)
+		if input_state == Enum.UserInputState.Begin then
+			Players.LocalPlayer.Character.Humanoid.WalkSpeed = 32
+		elseif input_state == Enum.UserInputState.End then
+			Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+		end
+	end, false, Enum.KeyCode.LeftShift)
+end
+function unbind_sprint()
+	ContextActionService:UnbindAction "sprint"
+end
+
 function init_ui(world: World, root_instance_: ScreenGui?)
 	local root_instance = root_instance_
 	if root_instance == nil then
@@ -36,6 +49,7 @@ function init_ui(world: World, root_instance_: ScreenGui?)
 	if RunService:IsClient() then
 		render_stepped_connection = selection_manager_mod.render_stepped(world, selection_manager, update)
 		selection_manager_mod.bind_select_cell(world, selection_manager, update)
+		bind_sprint()
 	end
 
 	update()
@@ -48,6 +62,7 @@ function init_ui(world: World, root_instance_: ScreenGui?)
 			if RunService:IsClient() then
 				render_stepped_connection:Disconnect()
 				ContextActionService:UnbindAction "select_cell"
+				unbind_sprint()
 				root:unmount()
 				root_instance:Destroy()
 			end
