@@ -3,7 +3,7 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local coords = require(ReplicatedStorage.Shared.coords)
-local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
+local turn_scheduler_init = require(ServerScriptService.Server.turn_scheduler_init)
 local entity_mod = require(ServerScriptService.Server.entity)
 
 type World = types.World
@@ -79,7 +79,7 @@ function map_with_infinite_source()
 		owner = team1.id,
 	}, world)
 
-	turn_scheduler.bootstrap(world)
+	turn_scheduler_init.bootstrap(world)
 	return world
 end
 
@@ -128,7 +128,7 @@ function stress_test(): World
 		end
 	end
 
-	turn_scheduler.bootstrap(world)
+	turn_scheduler_init.bootstrap(world)
 	return world
 end
 

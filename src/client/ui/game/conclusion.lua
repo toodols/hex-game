@@ -31,8 +31,6 @@ function Conclusion()
 		return
 	end
 
-	print(conclusion)
-
 	local player_team = team_mod.team_of(world, Players.LocalPlayer)
 
 	local player_team_id = player_team.id

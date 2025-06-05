@@ -1,5 +1,7 @@
+local ServerScriptService = game:GetService "ServerScriptService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
+local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 
 type World = types.World
 type CoalitionId = types.CoalitionId
@@ -43,6 +45,11 @@ end
 function handle_conclusion(world: World)
 	local is_concluded, winning_coalition = check_conclusion(world)
 	if is_concluded then
+		if world.turn_schedule ~= nil then
+			turn_scheduler.turn_schedule_stop(world.turn_schedule)
+			turn_scheduler.report_turn_time(world)
+		end
+
 		world.conclusion = {
 			winning_coalition = winning_coalition,
 		}

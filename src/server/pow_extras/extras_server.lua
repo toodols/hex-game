@@ -9,6 +9,7 @@ local updates_mod = require(ServerScriptService.Server.updates)
 local influences_mod = require(ServerScriptService.Server.influences)
 local visibility_mod = require(ServerScriptService.Server.visibility)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
+local turn_scheduler_init = require(ServerScriptService.Server.turn_scheduler_init)
 local presence_mod = require(ServerScriptService.Server.presence)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local server_entity_mod = require(ServerScriptService.Server.entity)
@@ -125,7 +126,7 @@ return function(extras)
 
 	commands.load = {
 		description = "Loads the world from a key",
-		permissions = { "gamemaster" },
+		permissions = { "admin" },
 		overloads = {
 			{
 				returns = "nil",
@@ -144,7 +145,7 @@ return function(extras)
 			local world = _G.world
 			turn_scheduler.turn_schedule_kill(world.turn_schedule)
 			world_mod.apply_world_data(world, data)
-			turn_scheduler.hydrate(world, world.turn_schedule)
+			turn_scheduler_init.hydrate(world, world.turn_schedule)
 			if world.turn_schedule.running then
 				turn_scheduler.turn_schedule_resume(world.turn_schedule)
 			end
@@ -161,7 +162,7 @@ return function(extras)
 
 	commands.save = {
 		description = "Saves the world in a key",
-		permissions = { "gamemaster" },
+		permissions = { "admin" },
 		overloads = {
 			{
 				returns = "nil",

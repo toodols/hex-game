@@ -1,17 +1,16 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local world_mod = require(ReplicatedStorage.Shared.world)
 local types = require(ReplicatedStorage.Shared.types)
-local coords = require(ReplicatedStorage.Shared.coords)
 
 local entity_mod = require(script.Parent.entity)
 local presence_mod = require(script.Parent.presence)
 local updates_mod = require(script.Parent.updates)
-local turn_scheduler = require(script.Parent.turn_scheduler)
 local visibility_mod = require(script.Parent.visibility)
 local systems = require(script.Parent.systems)
 local tutorial_map = require(script.tutorial).tutorial_map
 local testing_maps = require(script.testing)
 local util = require(ReplicatedStorage.Shared.util)
+local turn_scheduler_init = require(script.Parent.turn_scheduler_init)
 
 type World = types.World
 type TeamData = types.TeamData
@@ -29,7 +28,7 @@ function my_map(): World
 	local team1 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "Red")
 	local team2 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "Blue")
 
-	turn_scheduler.bootstrap(world)
+	turn_scheduler_init.bootstrap(world)
 
 	local stockpile = entity_mod.new_entity({
 		type = "stockpile",
