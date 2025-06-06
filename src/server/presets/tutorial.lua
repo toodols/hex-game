@@ -4,7 +4,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local entity_mod = require(ServerScriptService.Server.entity)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
-local action_phase_mod = require(ServerScriptService.Server.action_phase)
+local turn_scheduler_init = require(ServerScriptService.Server.turn_scheduler_init)
 
 type World = types.World
 local quests = require(ServerScriptService.Server.quests)
@@ -30,7 +30,7 @@ function tutorial_map()
 	world.entity_configurations.extractor.cycles_to_output = 1
 	world.global_configuration.decaying_enabled = false
 
-	world.turn_schedule = turn_scheduler.new_turn_schedule(world)
+	world.turn_schedule = turn_scheduler_init.new_turn_schedule(world)
 	turn_scheduler.reset_turn_time(world, world.turn_schedule)
 
 	local player_team = world_mod.new_team(

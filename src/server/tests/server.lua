@@ -957,4 +957,10 @@ function tests.infected_effect()
 	cleanup(world)
 end
 
+function tests.tutorial_works()
+	local tutorial_map = presets.tutorial_map()
+
+	cleanup(tutorial_map)
+end
+
 return tests

@@ -355,6 +355,7 @@ local rating: Schema<Rating> = struct {
 
 local player_data: Schema<PlayerData> = struct {
 	rating = rating,
+	rating_ordinal = f64,
 	unlockables_owned = map(unlockable, const(true)),
 	first_joined = f64,
 	total_playtime = f64,

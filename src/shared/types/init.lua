@@ -251,6 +251,7 @@ export type Unlockable = "tba"
 -- PlayerData is an outdated service so no name conflicts here
 export type PlayerData = {
 	rating: Rating,
+	rating_ordinal: number,
 	unlockables_owned: { [Unlockable]: true },
 	first_joined: number,
 	total_playtime: number,
@@ -265,6 +266,7 @@ export type TeamData = {
 	name: string,
 	color: TeamColor,
 	players: { PlayerId },
+	historical_players: { PlayerId },
 	leader: PlayerId?,
 	-- whether the game should automatically put players on this team
 	is_player_team: boolean,
@@ -378,51 +380,69 @@ export type Icon = {
 -- A message from Server to Client about the state of the game
 export type WorldUpdate =
 	-- handles add, update, and destruction
-	{ type: "ability", ability_type: string, entity_id: EntityId, coordinate: CubicCoordinate } | { type: "cells", cells: { [EncodedCoordinate]: HexCell }, target: TeamTarget } | {
+	{ type: "ability", ability_type: string, entity_id: EntityId, coordinate: CubicCoordinate }
+	| { type: "cells", cells: { [EncodedCoordinate]: HexCell }, target: TeamTarget }
+	| {
 		type: "cell_update",
 		coord: CubicCoordinate,
 		target: TeamTarget,
-	} | { type: "entity_created", entity_id: EntityId, target: TeamTarget } | { type: "entity_update", entity: Entity, target: TeamTarget } | (EntityEvent & { type: "entity_event", target: TeamTarget }) | {
+	}
+	| { type: "entity_created", entity_id: EntityId, target: TeamTarget }
+	| { type: "entity_update", entity: Entity, target: TeamTarget }
+	| (EntityEvent & { type: "entity_event", target: TeamTarget })
+	| {
 		type: "exchange",
 		input_items: { [Item]: number }?,
 		input_power: number?,
 		output_items: { Item }?,
 		output_power: number?,
-	} | {
+	}
+	| {
 		type: "quest_update",
 		quest: Quest,
-	} | {
+	}
+	| {
 		type: "teams",
 		teams: { [TeamId]: TeamData },
 		coalitions: { [CoalitionId]: CoalitionData },
-	} | {
+	}
+	| {
 		type: "turn",
 		turn: number,
 		highest_turn: number,
-	} | {
+	}
+	| {
 		type: "turn_completed",
-	} | {
+	}
+	| {
 		type: "turn_skipped",
-	} | {
+	}
+	| {
 		type: "turn_skips",
 		current_skips: number,
 		needed_skips: number,
-	} | {
+	}
+	| {
 		type: "turn_timer",
 		turn_start_time: number,
 		turn_end_time: number,
-	} | {
+	}
+	| {
 		type: "world",
 		world: PartialWorld,
-	} | {
+	}
+	| {
 		type: "systems",
 		systems: { System },
-	} | {
+	}
+	| {
 		type: "conclusion",
 		conclusion: Conclusion,
-	} | {
+	}
+	| {
 		type: "player_data",
-		player_data: { [PlayerId]: PlayerData },
+		-- PlayerId as a string
+		player_data: { [string]: PlayerData },
 	}
 
 export type TurnSchedule = {
@@ -588,7 +608,7 @@ export type World = {
 	-- get_team_coalition: (self: World, team: TeamId) -> CoalitionData,
 
 	player_data: {
-		[PlayerId]: PlayerData,
+		[string]: PlayerData,
 	},
 
 	-- server only

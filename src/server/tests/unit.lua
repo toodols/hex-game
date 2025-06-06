@@ -78,6 +78,13 @@ function tests.openskill()
 	assert(bob_ordinal > alice_ordinal, "bob should be better than alice")
 	assert(alice_ordinal > charlie_ordinal, "alice should be better than charlie")
 	assert(bob_ordinal > charlie_ordinal, "bob should be better than charlie")
+
+	OpenSkill.Rate({ { alice }, { bob } }, { rank = { 0, 0 } })
+
+	local alice_new_ordinal = OpenSkill.Ordinal(alice)
+	local bob_new_ordinal = OpenSkill.Ordinal(bob)
+	assert(alice_new_ordinal > alice_ordinal, "alice's ordinal should go up")
+	assert(bob_new_ordinal < bob_ordinal, "bob's ordinal should go down")
 end
 
 return tests

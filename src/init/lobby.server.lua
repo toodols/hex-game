@@ -12,7 +12,7 @@ local placeids = require(ReplicatedStorage.Shared.placeids).placeids
 
 type Room = types.Room
 
-local START_TIME = if RunService:IsStudio() then 5 else 20
+local START_TIME = if RunService:IsStudio() then 5 else 10
 local REQUIRES_FILLED_TEAMS = if RunService:IsStudio() then true else true
 
 local rooms_remote = Instance.new "RemoteEvent"

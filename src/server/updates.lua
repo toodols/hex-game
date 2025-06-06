@@ -137,7 +137,7 @@ function get_updates(
 				return {
 					type = update.type,
 					player_data = {
-						[serialize_for.player] = update.player_data[serialize_for.player],
+						[serialize_for.player] = update.player_data[tostring(serialize_for.player)],
 					},
 				}
 			else

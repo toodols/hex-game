@@ -45,6 +45,16 @@ return function(extras)
 		end,
 	}
 
+	commands.player_data = {
+		description = "Returns the executor's player data",
+		permissions = { "automation" },
+		overloads = { { returns = "any", args = {} } },
+		client_run = function(context)
+			local player = context.executor
+			return _G.world.player_data[tostring(player.UserId)] or {}
+		end,
+	}
+
 	commands.selected = {
 		description = "Gets coords of selected",
 		permissions = { "automation" },

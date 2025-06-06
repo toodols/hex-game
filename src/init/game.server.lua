@@ -138,7 +138,12 @@ function start_game(teleport_data: { room: types.Room }?)
 			if not team then
 				team = main_world.teams[main_world.spectator_team]
 			end
+			if table.find(team.players, plr.UserId) then
+				warn("player", plr.Name, "is already in team", team.name)
+				return
+			end
 			table.insert(team.players, plr.UserId)
+			table.insert(team.historical_players, plr.UserId)
 		else
 			local team_with_least_players = nil
 			for _, team in main_world.teams do
@@ -151,12 +156,13 @@ function start_game(teleport_data: { room: types.Room }?)
 			end
 			assert(team_with_least_players, "no teams found")
 			table.insert(team_with_least_players.players, plr.UserId)
+			table.insert(team_with_least_players.historical_players, plr.UserId)
 		end
 		task.defer(function()
-			main_world.player_data[plr.UserId] = datastore_mod.get_player_data(plr.UserId)
+			main_world.player_data[tostring(plr.UserId)] = datastore_mod.get_player_data(plr.UserId)
 			main_world:add_update {
 				type = "player_data",
-				player_data = main_world.player_data
+				player_data = main_world.player_data,
 			}
 			updates_mod.flush_updates(main_world)
 		end)

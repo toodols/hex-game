@@ -27,11 +27,14 @@ function run_tests()
 			end
 		end
 	end
+
+	_G.is_testing = true
 	run_tests_recursive {
 		server = server_tests,
 		client = client_tests,
 		unit = unit_tests,
 	}
+	_G.is_testing = nil
 
 	if successes == total then
 		print(`{successes} / {total} tests passed. Completed in {math.floor((os.clock() - tests_t0) * 1000)}ms`)

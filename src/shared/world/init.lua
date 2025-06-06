@@ -51,7 +51,8 @@ function new_team(self: World, players: { Player }?, color: TeamColor?, name: st
 		id = #self.teams + 1,
 		name = name or "Unnamed Team",
 		color = color or { type = "color3", color = Color3.new() },
-		players = players or {},
+		players = if players then table.clone(players) else {},
+		historical_players = if players then table.clone(players) else {},
 		is_player_team = true,
 		is_spectator_team = false,
 		server_data = {

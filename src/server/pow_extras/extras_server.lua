@@ -124,6 +124,29 @@ return function(extras)
 		end,
 	}
 
+	commands.test_webhook = {
+		description = "Tests the discord webhook",
+		permissions = { "admin" },
+		overloads = {
+			{
+				returns = "nil",
+				args = {},
+			},
+		},
+		server_run = function(context)
+			local HttpService = game:GetService "HttpService"
+			local match_result_webhook = HttpService:GetSecret "MATCH_RESULT_WEBHOOK_URL"
+			match_result_webhook = match_result_webhook:AddPrefix "https://discord.com/api/webhooks/"
+
+			HttpService:PostAsync(
+				match_result_webhook,
+				HttpService:JSONEncode {
+					content = "test webhook from pow",
+				}
+			)
+		end,
+	}
+
 	commands.load = {
 		description = "Loads the world from a key",
 		permissions = { "admin" },

@@ -12,8 +12,10 @@ local player_data_store = DataStoreService:GetDataStore "player_data"
 local game_saves_store = DataStoreService:GetDataStore "game_saves"
 
 function default_player_data(): PlayerData
+	local default_rating = openskill.Rating()
 	return {
-		rating = openskill.Rating(),
+		rating = default_rating,
+		rating_ordinal = openskill.Ordinal(default_rating),
 		unlockables_owned = {},
 		first_joined = os.time(),
 		total_playtime = 0,
@@ -22,6 +24,10 @@ function default_player_data(): PlayerData
 		losses = 0,
 		aborted = 0,
 	}
+end
+
+function set_player_data(player_id: PlayerId, data: PlayerData)
+	player_data_store:SetAsync(player_id, data)
 end
 
 function get_player_data(player_id: PlayerId): PlayerData
@@ -40,6 +46,7 @@ end
 function update_rating(player_id: PlayerId, new_rating: Rating)
 	update_player_data(player_id, function(data)
 		data.rating = new_rating
+		data.rating_ordinal = openskill.Ordinal(new_rating)
 		return data
 	end)
 end
@@ -53,6 +60,7 @@ end
 
 return {
 	get_player_data = get_player_data,
+	set_player_data = set_player_data,
 	update_player_data = update_player_data,
 	update_rating = update_rating,
 	increment_games_played = increment_games_played,
