@@ -73,7 +73,7 @@ function disguise_ability(world: World, action_state: ActionState, ability: Enti
 			status = "complete",
 		},
 		function(target_entity)
-			return visibility_mod.entity_visibility(world, target_entity, entity.owner)
+			return visibility_mod.entity_visibility(world, { team = entity.owner }, target_entity)
 				and #target_entity.coordinates == 1
 		end
 	)

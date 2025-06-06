@@ -1,6 +1,7 @@
 {
 	"files.exclude": {
 		"**/Packages": true,
+		"pow": true,
 	},
 	"luau-lsp.sourcemap.rojoProjectFile": "game.project.json",
 	"stylua.targetReleaseVersion": "latest"

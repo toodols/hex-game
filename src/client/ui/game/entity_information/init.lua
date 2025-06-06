@@ -5,11 +5,9 @@ local TweenService = game:GetService "TweenService"
 local types = require(ReplicatedStorage.Shared.types)
 local React = require(ReplicatedStorage.Packages.react)
 local util = require(ReplicatedStorage.Shared.util)
-local world_mod = require(ReplicatedStorage.Shared.world)
 local formatting = require(ReplicatedStorage.Shared.formatting)
 local items_mod = require(ReplicatedStorage.Shared.items)
 local team_mod = require(ReplicatedStorage.Shared.team)
-local coords = require(ReplicatedStorage.Shared.coords)
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
@@ -39,8 +37,6 @@ local OpenRecipeButton = action_buttons.OpenRecipeButton
 local ToggleEnableButton = action_buttons.ToggleEnableButton
 local ActivateButton = action_buttons.ActivateButton
 local StoreEntityButton = action_buttons.StoreEntityButton
-
-local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
 type EntityId = types.EntityId
 type WorldUpdate = types.WorldUpdate

@@ -240,6 +240,26 @@ export type CoalitionData = {
 }
 
 export type PlayerId = number
+
+export type Rating = {
+	mu: number,
+	sigma: number,
+}
+
+export type Unlockable = "tba"
+
+-- PlayerData is an outdated service so no name conflicts here
+export type PlayerData = {
+	rating: Rating,
+	unlockables_owned: { [Unlockable]: true },
+	first_joined: number,
+	total_playtime: number,
+	games_played: number,
+	wins: number,
+	losses: number,
+	aborted: number,
+}
+
 export type TeamData = {
 	id: TeamId,
 	name: string,
@@ -360,7 +380,7 @@ export type WorldUpdate =
 	-- handles add, update, and destruction
 	{ type: "ability", ability_type: string, entity_id: EntityId, coordinate: CubicCoordinate } | { type: "cells", cells: { [EncodedCoordinate]: HexCell }, target: TeamTarget } | {
 		type: "cell_update",
-		cell: HexCell,
+		coord: CubicCoordinate,
 		target: TeamTarget,
 	} | { type: "entity_created", entity_id: EntityId, target: TeamTarget } | { type: "entity_update", entity: Entity, target: TeamTarget } | (EntityEvent & { type: "entity_event", target: TeamTarget }) | {
 		type: "exchange",
@@ -400,6 +420,9 @@ export type WorldUpdate =
 	} | {
 		type: "conclusion",
 		conclusion: Conclusion,
+	} | {
+		type: "player_data",
+		player_data: { [PlayerId]: PlayerData },
 	}
 
 export type TurnSchedule = {
@@ -564,6 +587,10 @@ export type World = {
 
 	-- get_team_coalition: (self: World, team: TeamId) -> CoalitionData,
 
+	player_data: {
+		[PlayerId]: PlayerData,
+	},
+
 	-- server only
 	action_queue: { EntityAction },
 
@@ -627,6 +654,7 @@ export type PartialWorld = {
 	spectator_team: TeamId,
 	quests: { [string]: Quest },
 	systems: { System },
+	conclusion: Conclusion?,
 }
 
 -- Questing types

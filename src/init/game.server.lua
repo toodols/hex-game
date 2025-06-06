@@ -11,6 +11,7 @@ local clone_assets = require(ReplicatedStorage.Shared.asset_server).clone
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local team_mod = require(ReplicatedStorage.Shared.team)
+local datastore_mod = require(ServerScriptService.Server.datastore)
 
 type TeamData = types.TeamData
 type Interaction = types.Interaction
@@ -52,7 +53,7 @@ local updates_mod = require(ServerScriptService.Server.updates)
 local server_util = require(ServerScriptService.Server.util)
 
 if ServerScriptService.Server:FindFirstChild "pow" then
-	local pow = require(ServerScriptService.Server.pow :: any)
+	local pow = require(ServerScriptService.Server.pow)
 
 	pow.init {
 		permissions = {
@@ -78,7 +79,7 @@ remotes_mod.get_world_data_remote.OnServerInvoke = function(player)
 		task.wait()
 	end
 	local player_team = team_mod.team_of(main_world, player)
-	local serialized = serialize_mod.serialize_world_for_team(main_world, player_team.id)
+	local serialized = serialize_mod.serialize_world(main_world, {}, { team = player_team.id, player = player.UserId })
 	return serialized
 end :: any
 
@@ -151,6 +152,14 @@ function start_game(teleport_data: { room: types.Room }?)
 			assert(team_with_least_players, "no teams found")
 			table.insert(team_with_least_players.players, plr.UserId)
 		end
+		task.defer(function()
+			main_world.player_data[plr.UserId] = datastore_mod.get_player_data(plr.UserId)
+			main_world:add_update {
+				type = "player_data",
+				player_data = main_world.player_data
+			}
+			updates_mod.flush_updates(main_world)
+		end)
 		local team = team_mod.team_of(main_world, plr)
 		plr.Team = team_instances[team.id]
 	end

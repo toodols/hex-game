@@ -15,6 +15,9 @@ type Entity = types.Entity
 type HexCell = types.HexCell
 type Inventory = types.Inventory
 type Schema<T> = serializing.Schema<T>
+type Unlockable = types.Unlockable
+type PlayerData = types.PlayerData
+type Rating = types.Rating
 
 local enum = serializing.enum
 local struct = serializing.struct
@@ -343,6 +346,24 @@ local turn_schedule = {
 	end,
 }
 
+local unlockable: Unlockable = enum {}
+
+local rating: Schema<Rating> = struct {
+	mu = f64,
+	sigma = f64,
+}
+
+local player_data: Schema<PlayerData> = struct {
+	rating = rating,
+	unlockables_owned = map(unlockable, const(true)),
+	first_joined = f64,
+	total_playtime = f64,
+	games_played = i32,
+	wins = i32,
+	losses = i32,
+	aborted = i32,
+}
+
 local world_schema = struct {
 	version = const(1),
 	entities = collect_by_key(entity, "id"),
@@ -366,6 +387,7 @@ local world_schema = struct {
 	skipped = const {},
 	turn_schedule = option(turn_schedule),
 	quests = collect_by_key(quest, "id"),
+	player_data = map(player_id, player_data),
 }
 
 function serialize_world(world: World): string

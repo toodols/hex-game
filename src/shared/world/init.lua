@@ -206,6 +206,7 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 		global_configuration = global_config or {
 			decaying_enabled = true,
 		},
+		player_data = {},
 		quests = {},
 		systems = {},
 		active_entities = world_active_entities,
@@ -235,6 +236,7 @@ end
 function apply_world_data(world: World, data: PartialWorld)
 	world.coalitions = data.coalitions
 	world.teams = data.teams
+	world.conclusion = data.conclusion
 	world.turn = data.turn
 	world.turn_schedule = data.turn_schedule
 	world.highest_turn = data.highest_turn

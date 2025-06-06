@@ -322,6 +322,8 @@ function handle_updates(world: World, updates: { WorldUpdate })
 			world.systems = update.systems
 		elseif update.type == "conclusion" then
 			world.conclusion = update.conclusion
+		elseif update.type == "player_data" then
+			world.player_data = update.player_data
 		elseif update.type == "world" then
 			-- "world" update is a special case cause this basically involves tearing down everything and rebuilding it
 			local data = update.world

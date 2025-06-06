@@ -1,8 +1,10 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
+
 type World = types.World
 type TeamId = types.TeamId
 type TeamData = types.TeamData
+type PlayerId = types.PlayerId
 
 function get_allies(world: World, team: TeamId): { TeamId }
 	for _, coalition in world.coalitions do
@@ -38,8 +40,21 @@ function team_of(world: World, player: Player): TeamData?
 	return nil
 end
 
+function team_of_id(world: World, player_id: PlayerId): TeamData?
+	if player_id == nil then
+		return nil
+	end
+	for _, team in world.teams do
+		if table.find(team.players, player_id) then
+			return team
+		end
+	end
+	return nil
+end
+
 return {
 	get_allies = get_allies,
 	is_allied = is_allied,
 	team_of = team_of,
+	team_of_id = team_of_id,
 }

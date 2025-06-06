@@ -12,6 +12,9 @@ type ResearchId = types.ResearchId
 type EncodedCoordinate = types.EncodedCoordinate
 type Damage = types.Damage
 type System = types.System
+type PlayerId = types.PlayerId
+type HexCell = types.HexCell
+type Quest = types.Quest
 
 export type DamageResult = {
 	-- whether to propagate damage to the next layer(s)
@@ -28,6 +31,32 @@ export type ActionState = {
 export type PlayerInfo = {
 	team: TeamId,
 	player: Player?,
+}
+
+export type SerializeFor = {
+	team: TeamId,
+	player: PlayerId,
+} | {
+	team: TeamId,
+	player: nil,
+} | {
+	team: nil,
+	player: nil,
+}
+
+export type Personalized = {
+	cells: { [EncodedCoordinate]: HexCell }?,
+	systems: { System }?,
+	entities: { [EntityId]: Entity }?,
+	quests: { [string]: Quest }?,
+}
+
+-- this is a cache for personalized data
+-- TODO: use this cache
+export type SerializationContext = {
+	[TeamId]: {
+		[PlayerId]: Personalized,
+	},
 }
 
 return {}

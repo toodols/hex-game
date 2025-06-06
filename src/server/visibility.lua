@@ -95,21 +95,25 @@ function cell_visibility(visibility: CellTeamVisibility?)
 	return visibility and (visibility.contact or visibility.fogless or visibility.portal or visibility.illumination)
 end
 
-function entity_visibility(world: World, entity: Entity, team: TeamId): boolean
+function entity_visibility(world: World, serialize_for: { team: TeamId? }, entity: Entity): boolean
 	if entity.server_data.always_visible then
 		return true
 	end
 
-	if entity.server_data.always_visible_for[team] then
+	if serialize_for.team == nil then
 		return true
 	end
 
-	if world.teams[team].server_data.visibility == "perfect" then
+	if entity.server_data.always_visible_for[serialize_for.team] then
+		return true
+	end
+
+	if world.teams[serialize_for.team].server_data.visibility == "perfect" then
 		return true
 	end
 
 	-- this entity is visible if it is owned by this coalition
-	if team_mod.is_allied(world, entity.owner, team) then
+	if team_mod.is_allied(world, entity.owner, serialize_for.team) then
 		return true
 	end
 
@@ -119,7 +123,7 @@ function entity_visibility(world: World, entity: Entity, team: TeamId): boolean
 
 	if entity.server_data.is_disguise_of ~= nil then
 		local cell = world:get_cell(entity.primary_coordinate)
-		if cell and cell_visibility(cell.server_data.visibility[team]) then
+		if cell and cell_visibility(cell.server_data.visibility[serialize_for.team]) then
 			return true
 		end
 		return false
@@ -127,7 +131,7 @@ function entity_visibility(world: World, entity: Entity, team: TeamId): boolean
 
 	local cell = world:get_cell(entity.primary_coordinate)
 	if
-		cell_visibility(cell.server_data.visibility[team])
+		cell_visibility(cell.server_data.visibility[serialize_for.team])
 		and entity.status ~= "blueprint"
 		and entity.active
 		and entity.disguise == nil
