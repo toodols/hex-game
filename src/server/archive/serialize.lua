@@ -220,6 +220,9 @@ local enum = function<T>(values: { T }): Schema<T>
 
 	return {
 		write = function(writer, data)
+			if value_to_index[data] == nil then
+				error("Invalid enum value: " .. tostring(data))
+			end
 			writer.write_u8(value_to_index[data])
 		end,
 		read = function(reader)

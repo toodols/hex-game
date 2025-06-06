@@ -34,6 +34,9 @@ local tagged_union = serializing.tagged_union
 local f64 = serializing.f64
 local i32_infinite = serializing.i32_infinite
 
+if #util.table_keys(server_entity_mod.registry) == 0 then
+	error "No entities registered in server entity registry. Likely before it has loaded."
+end
 local entity_types = enum(util.table_keys(server_entity_mod.registry))
 
 local entity_statuses = enum {
@@ -308,6 +311,7 @@ local team_color = tagged_union({
 local team_data = struct {
 	id = team_id,
 	name = str,
+	historical_players = array(player_id),
 	players = array(player_id),
 	is_player_team = boolean,
 	is_spectator_team = boolean,

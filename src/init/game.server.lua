@@ -11,7 +11,6 @@ local clone_assets = require(ReplicatedStorage.Shared.asset_server).clone
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local team_mod = require(ReplicatedStorage.Shared.team)
-local datastore_mod = require(ServerScriptService.Server.datastore)
 
 type TeamData = types.TeamData
 type Interaction = types.Interaction
@@ -51,6 +50,7 @@ local presets = require(ServerScriptService.Server.presets)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 local updates_mod = require(ServerScriptService.Server.updates)
 local server_util = require(ServerScriptService.Server.util)
+local datastore_mod = require(ServerScriptService.Server.datastore)
 
 if ServerScriptService.Server:FindFirstChild "pow" then
 	local pow = require(ServerScriptService.Server.pow)

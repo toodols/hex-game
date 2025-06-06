@@ -1,10 +1,7 @@
 local ServerScriptService = game:GetService "ServerScriptService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local DataStoreService = game:GetService "DataStoreService"
 
 local util = require(ReplicatedStorage.Shared.util)
-local archive = require(ServerScriptService.Server.archive)
-local base64 = require(ReplicatedStorage.Shared.base64)
 local updates_mod = require(ServerScriptService.Server.updates)
 local influences_mod = require(ServerScriptService.Server.influences)
 local visibility_mod = require(ServerScriptService.Server.visibility)
@@ -13,6 +10,7 @@ local turn_scheduler_init = require(ServerScriptService.Server.turn_scheduler_in
 local presence_mod = require(ServerScriptService.Server.presence)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local server_entity_mod = require(ServerScriptService.Server.entity)
+local datastore_mod = require(ServerScriptService.Server.datastore)
 
 return function(extras)
 	local commands = extras.commands
@@ -147,7 +145,7 @@ return function(extras)
 		end,
 	}
 
-	commands.load = {
+	commands.load_game = {
 		description = "Loads the world from a key",
 		permissions = { "admin" },
 		overloads = {
@@ -164,7 +162,7 @@ return function(extras)
 		},
 		server_run = function(context)
 			local key = context.args[1]
-			local data = archive.deserialize_world(base64.decode(DataStoreService:GetDataStore("saves"):GetAsync(key)))
+			local data = datastore_mod.load_world(key)
 			local world = _G.world
 			turn_scheduler.turn_schedule_kill(world.turn_schedule)
 			world_mod.apply_world_data(world, data)
@@ -183,7 +181,7 @@ return function(extras)
 		end,
 	}
 
-	commands.save = {
+	commands.save_game = {
 		description = "Saves the world in a key",
 		permissions = { "admin" },
 		overloads = {
@@ -201,9 +199,8 @@ return function(extras)
 		server_run = function(context)
 			local world = _G.world
 			local key = context.args[1]
-			local data = base64.encode(archive.serialize_world(world))
-			DataStoreService:GetDataStore("saves"):SetAsync(key, data)
-			return data:len() .. " bytes"
+
+			return datastore_mod.save_world(world, key)
 		end,
 	}
 
