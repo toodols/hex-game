@@ -1,6 +1,5 @@
 # Todo
 - [ ] Display scores in player list
-- [ ] Add an end screen when only one team is left, then send players to lobby
 - [ ] Items in inventories with incompatible filters should be moved to different inventories
 - [ ] `witness` should indicate its charges
 - [ ] Add `flail`, an artillery-type building
@@ -44,3 +43,5 @@
 	- [x] Range should be extendable by proxy
 - [x] Building cards in expanded view should expand horizontally when hovered
 - [x] Improve map generation to be less random or add handmade maps
+- [x] Add an end screen when only one team is left
+	- [x] then send players to lobby

@@ -370,7 +370,6 @@ local player_data: Schema<PlayerData> = struct {
 }
 
 local world_schema = struct {
-	version = const(1),
 	entities = collect_by_key(entity, "id"),
 	cells = map(encoded_coord, cell),
 	teams = collect_by_key(team_data, "id"),
@@ -395,16 +394,27 @@ local world_schema = struct {
 	player_data = map(player_id, player_data),
 }
 
+local timestamped_world = {
+	write = function(writer, world)
+		writer.write_i64(DateTime.now().UnixTimestampMillis)
+		world_schema.write(writer, world)
+	end,
+
+	read = function(reader)
+		return reader.read_f64(), world_schema.read(reader)
+	end,
+}
+
 function serialize_world(world: World): string
 	local writer = serializing.write()
-	world_schema.write(writer, world)
+	timestamped_world.write(writer, world)
 
 	return writer.to_string()
 end
 
 function deserialize_world(data: string): World
 	local reader = serializing.read(data)
-	local world = world_schema.read(reader)
+	local time, world = timestamped_world.read(reader)
 	return world
 end
 

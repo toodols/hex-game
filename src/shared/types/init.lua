@@ -579,6 +579,7 @@ export type System = {
 
 export type Conclusion = {
 	winning_coalition: CoalitionId,
+	world_archive: string?,
 }
 
 export type World = {

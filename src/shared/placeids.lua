@@ -4,6 +4,4 @@ local placeids = {
 	["game"] = "96418171483264",
 	["lobby"] = "18215168959",
 }
-return {
-	placeids = placeids,
-}
+return placeids

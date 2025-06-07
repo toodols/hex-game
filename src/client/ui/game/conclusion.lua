@@ -8,6 +8,8 @@ local ui_components = require(ReplicatedStorage.Client.ui.util_components)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local team_mod = require(ReplicatedStorage.Shared.team)
 
+local teleport_remote = ReplicatedStorage:FindFirstChild "TeleportRemote" :: RemoteEvent
+
 local Corner = ui_components.Corner
 
 type Conclusion = types.Conclusion
@@ -65,16 +67,76 @@ function Conclusion()
 		},
 		{
 			Corner = React.createElement(Corner),
-			VerticalLayout = React.createElement("UIListLayout", {
-				SortOrder = Enum.SortOrder.LayoutOrder,
+			Top = React.createElement("Frame", themes.theme_container {}, {
+				VerticalLayout = React.createElement("UIListLayout", {
+					SortOrder = Enum.SortOrder.LayoutOrder,
+					HorizontalAlignment = Enum.HorizontalAlignment.Center,
+				}),
+				Title = React.createElement(
+					"TextLabel",
+					themes.theme_title {
+						LayoutOrder = 1,
+						Size = UDim2.new(1, 0, 0, 50),
+						Text = "GAME ENDED: " .. status,
+						TextSize = 40,
+						TextXAlignment = Enum.TextXAlignment.Center,
+					}
+				),
+				Label = React.createElement(
+					"TextLabel",
+					themes.theme_label {
+						LayoutOrder = 2,
+						Text = "Archive data:",
+						TextSize = 20,
+						TextXAlignment = Enum.TextXAlignment.Center,
+						Size = UDim2.new(1, 0, 0, 30),
+					}
+				),
+				WorldArchive = React.createElement(
+					"ScrollingFrame",
+					themes.theme_solid {
+						Size = UDim2.new(1, -20, 0, 100),
+						AutomaticCanvasSize = Enum.AutomaticSize.Y,
+						LayoutOrder = 3,
+					},
+					{
+						TextBox = React.createElement("TextBox", {
+							ClipsDescendants = true,
+							BackgroundTransparency = 1,
+							Text = conclusion.world_archive,
+							TextColor3 = Color3.fromRGB(255, 255, 255),
+							TextYAlignment = Enum.TextYAlignment.Top,
+							TextSize = 10,
+							TextWrapped = true,
+							ClearTextOnFocus = false,
+							Size = UDim2.new(1, 0, 0, 5000),
+						}),
+					}
+				),
 			}),
-			Title = React.createElement(
-				"TextLabel",
-				themes.theme_title {
-					Size = UDim2.new(1, 0, 0, 50),
-					Text = "GAME ENDED: " .. status,
-					TextSize = 40,
-					TextXAlignment = Enum.TextXAlignment.Center,
+			Bottom = React.createElement(
+				"Frame",
+				themes.theme_container {
+					Position = UDim2.new(0, 0, 1, 0),
+					Size = UDim2.new(1, 0, 0, 0),
+					AnchorPoint = Vector2.new(0, 1),
+				},
+				{
+
+					LobbyButton = React.createElement(
+						"TextButton",
+						themes.theme_button {
+							LayoutOrder = 2,
+							Text = "Return to Lobby",
+							TextSize = 20,
+							Size = UDim2.new(0, 200, 0, 40),
+							AnchorPoint = Vector2.new(0.5, 1),
+							Position = UDim2.new(0.5, 0, 1, -10),
+							[React.Event.Activated] = function()
+								teleport_remote:FireServer "lobby"
+							end,
+						}
+					),
 				}
 			),
 		}

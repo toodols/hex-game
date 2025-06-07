@@ -8,7 +8,7 @@ local RunService = game:GetService "RunService"
 
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
-local placeids = require(ReplicatedStorage.Shared.placeids).placeids
+local placeids = require(ReplicatedStorage.Shared.placeids)
 
 type Room = types.Room
 

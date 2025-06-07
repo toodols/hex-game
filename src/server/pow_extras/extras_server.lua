@@ -260,6 +260,41 @@ return function(extras)
 		end,
 	}
 
+	commands.kill_selected = {
+		description = "Kills all selected entities.",
+		permissions = { "gamemaster" },
+		overloads = {
+			{
+				returns = "nil",
+				args = {},
+			},
+		},
+		server_run = function(context)
+			local world = _G.world
+			local coords = context.runtime.run_commands_string(context.process, "selected").ok
+
+			for _, coord in coords do
+				local cell = world:get_cell(coord)
+				if cell == nil then
+					continue
+				end
+				for entity_id in cell.entities do
+					local entity = world.entities[entity_id]
+					if entity then
+						world:add_update {
+							type = "entity_event",
+							event_type = "destroy",
+							entity_id = entity.id,
+							death_type = "other",
+						}
+						server_entity_mod.remove_entity(world, entity)
+						updates_mod.flush_updates(world)
+					end
+				end
+			end
+		end,
+	}
+
 	commands.set_visibility = {
 		description = "Sets the visibility of a team.",
 		permissions = { "gamemaster" },

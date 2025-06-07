@@ -16,8 +16,13 @@ local client_interaction_remote = Instance.new "RemoteEvent"
 client_interaction_remote.Parent = ReplicatedStorage
 client_interaction_remote.Name = "ClientInteractionRemote"
 
+local teleport_remote = Instance.new "RemoteEvent"
+teleport_remote.Parent = ReplicatedStorage
+teleport_remote.Name = "TeleportRemote"
+
 return {
 	world_updates_remote = world_updates_remote,
 	get_world_data_remote = get_world_data_remote,
 	client_interaction_remote = client_interaction_remote,
+	teleport_remote = teleport_remote,
 }

@@ -51,6 +51,7 @@ local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 local updates_mod = require(ServerScriptService.Server.updates)
 local server_util = require(ServerScriptService.Server.util)
 local datastore_mod = require(ServerScriptService.Server.datastore)
+require(ServerScriptService.Server.teleport)
 
 if ServerScriptService.Server:FindFirstChild "pow" then
 	local pow = require(ServerScriptService.Server.pow)

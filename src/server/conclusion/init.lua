@@ -9,6 +9,8 @@ local types = require(ReplicatedStorage.Shared.types)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 local util = require(ReplicatedStorage.Shared.util)
 local datastore_mod = require(ServerScriptService.Server.datastore)
+local base64 = require(ReplicatedStorage.Shared.base64)
+local archive = require(ServerScriptService.Server.archive)
 
 local match_result_webhook = HttpService:GetSecret "MATCH_RESULT_WEBHOOK_URL"
 match_result_webhook = match_result_webhook:AddPrefix "https://discord.com/api/webhooks/"
@@ -105,8 +107,11 @@ function handle_conclusion(world: World)
 			turn_scheduler.report_turn_time(world)
 		end
 
+		local data = base64.encode(archive.serialize_world(world))
+
 		world.conclusion = {
 			winning_coalition = winning_coalition,
+			world_archive = data,
 		}
 
 		local old_player_ratings = {}
