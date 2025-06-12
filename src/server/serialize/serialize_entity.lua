@@ -4,6 +4,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local visibility = require(ServerScriptService.Server.visibility)
 local team_mod = require(ReplicatedStorage.Shared.team)
 local server_types = require(ServerScriptService.Server.types)
+local get_cache = require(script.Parent.get_cache).get_cache
 
 type World = types.World
 type Entity = types.Entity
@@ -12,7 +13,7 @@ type TeamId = types.TeamId
 type SerializeFor = server_types.SerializeFor
 type SerializationContext = server_types.SerializationContext
 
-function serialize_entity_for_team(
+function serialize_entity(
 	world: World,
 	se_ctx: SerializationContext,
 	serialize_for: SerializeFor,
@@ -20,6 +21,12 @@ function serialize_entity_for_team(
 ): Entity?
 	if serialize_for.team == nil then
 		return entity
+	end
+
+	local value
+	local team_cache = get_cache(se_ctx, { team = serialize_for.team })
+	if team_cache.entities[entity.id] ~= nil then
+		return team_cache.entities[entity.id]
 	end
 	if visibility.entity_visibility(world, serialize_for, entity) then
 		local team_data = world.teams[serialize_for.team]
@@ -50,11 +57,12 @@ function serialize_entity_for_team(
 		if entity.server_data.always_visible or entity.server_data.always_visible_for[serialize_for.team] then
 			copy.always_visible = true
 		end
-		return copy :: Entity
+		value = copy :: Entity
+		team_cache.entities[entity.id] = value
 	end
-	return nil
+	return value
 end
 
 return {
-	serialize_entity_for_team = serialize_entity_for_team,
+	serialize_entity = serialize_entity,
 }

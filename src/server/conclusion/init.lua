@@ -91,14 +91,6 @@ function update_ratings(world: World, winning_coalition: CoalitionId?)
 	}
 end
 
-function round(num: number): string
-	if num >= 0 then
-		return string.format("%.2f", num)
-	else
-		return string.format("%.2f", -num)
-	end
-end
-
 function handle_conclusion(world: World)
 	local is_concluded, winning_coalition = check_conclusion(world)
 	if is_concluded then
@@ -114,49 +106,51 @@ function handle_conclusion(world: World)
 			world_archive = data,
 		}
 
-		local old_player_ratings = {}
-		for player_id, player_data in world.player_data do
-			old_player_ratings[player_id] = player_data.rating_ordinal
-		end
+		if world.global_configuration.rated then
+			local old_player_ratings = {}
+			for player_id, player_data in world.player_data do
+				old_player_ratings[player_id] = player_data.rating_ordinal
+			end
 
-		update_ratings(world, winning_coalition)
+			update_ratings(world, winning_coalition)
 
-		local is_draw = winning_coalition == nil
-		local winning_teams = if winning_coalition ~= nil then world.coalitions[winning_coalition].teams else nil
+			local is_draw = winning_coalition == nil
+			local winning_teams = if winning_coalition ~= nil then world.coalitions[winning_coalition].teams else nil
 
-		if not RunService:IsStudio() and match_result_webhook ~= nil then
-			local content = ""
-			content ..= table.concat(
-				util.table_filter_map(world.teams, function(team)
-					if not team.is_player_team then
-						return nil
-					end
-					local did_win = table.find(winning_teams, team.id) ~= nil
-					return `# {team.name} ({if is_draw then "DRAW" elseif did_win then "WIN" else "LOSE"})\n`
-						.. table.concat(
-							util.table_map(team.historical_players, function(player_id: PlayerId)
-								local player_data = world.player_data[tostring(player_id)]
-								local player = Players:GetPlayerByUserId(player_id)
-								local player_name = if player
-									then player.Name
-									else Players:GetNameFromUserIdAsync(player_id)
+			if not RunService:IsStudio() and match_result_webhook ~= nil then
+				local content = ""
+				content ..= table.concat(
+					util.table_filter_map(world.teams, function(team)
+						if not team.is_player_team then
+							return nil
+						end
+						local did_win = table.find(winning_teams, team.id) ~= nil
+						return `# {team.name} ({if is_draw then "DRAW" elseif did_win then "WIN" else "LOSE"})\n`
+							.. table.concat(
+								util.table_map(team.historical_players, function(player_id: PlayerId)
+									local player_data = world.player_data[tostring(player_id)]
+									local player = Players:GetPlayerByUserId(player_id)
+									local player_name = if player
+										then player.Name
+										else Players:GetNameFromUserIdAsync(player_id)
 
-								return ` - {player_name} ({round(old_player_ratings[tostring(player_id)])} -> {round(
-									player_data.rating_ordinal
-								)})`
-							end),
-							"\n"
-						)
-				end),
-				"\n"
-			)
+									return ` - {player_name} ({util.round2(old_player_ratings[tostring(player_id)])} -> {util.round2(
+										player_data.rating_ordinal
+									)})`
+								end),
+								"\n"
+							)
+					end),
+					"\n"
+				)
 
-			HttpService:PostAsync(
-				match_result_webhook,
-				HttpService:JSONEncode {
-					content = content,
-				}
-			)
+				HttpService:PostAsync(
+					match_result_webhook,
+					HttpService:JSONEncode {
+						content = content,
+					}
+				)
+			end
 		end
 
 		world:add_update {

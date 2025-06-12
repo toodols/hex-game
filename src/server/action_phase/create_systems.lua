@@ -23,7 +23,6 @@ function create_systems(world: World, action_state: ActionState)
 		end
 		table.insert(systems, system)
 	end
-	world.systems = systems
 	action_state.systems = systems
 	action_state.system_by_entity_id = system_by_entity_id
 	action_state.system_by_cell = system_by_cell

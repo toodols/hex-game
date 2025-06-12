@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
+local server_types = require(ServerScriptService.Server.types)
 local team_mod = require(ReplicatedStorage.Shared.team)
 local coords = require(ReplicatedStorage.Shared.coords)
 local effect_mod = require(script.Parent.effect)
@@ -13,6 +14,7 @@ type World = types.World
 type CellTeamVisibility = types.CellTeamVisibility
 type CubicCoordinate = types.CubicCoordinate
 type EncodedCoordinate = types.EncodedCoordinate
+type SerializeFor = server_types.SerializeFor
 
 -- Computes cell visibility for each team
 -- This also sets changed_to_true field of visibility
@@ -95,7 +97,7 @@ function cell_visibility(visibility: CellTeamVisibility?)
 	return visibility and (visibility.contact or visibility.fogless or visibility.portal or visibility.illumination)
 end
 
-function entity_visibility(world: World, serialize_for: { team: TeamId? }, entity: Entity): boolean
+function entity_visibility(world: World, serialize_for: SerializeFor, entity: Entity): boolean
 	if entity.server_data.always_visible then
 		return true
 	end

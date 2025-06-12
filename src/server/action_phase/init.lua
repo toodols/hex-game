@@ -15,6 +15,7 @@ local effect_mod = require(ServerScriptService.Server.effect)
 local visibility_mod = require(ServerScriptService.Server.visibility)
 local entity_mod = require(ServerScriptService.Server.entity)
 local conclusion = require(ServerScriptService.Server.conclusion)
+local systems_mod = require(ServerScriptService.Server.systems)
 
 local do_entity_decay = require(script.entity_decay).do_entity_decay
 local new_action_state = require(script.new_action_state).new_action_state
@@ -187,6 +188,7 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	delete_deconstructed_entities(world, world.action_queue)
 	portals_tick(world)
 
+	systems_mod.compute_systems(world, action_state)
 	visibility_mod.compute_visibility(world)
 	influences_mod.compute_influences(world)
 	presence_mod.compute_presence(world)
@@ -241,6 +243,7 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 
 	conclusion.handle_conclusion(world)
 
+	systems_mod.compute_systems(world, action_state)
 	influences_mod.compute_influences(world) --recompute influences if entities DIE
 	presence_mod.compute_presence(world)
 	visibility_mod.compute_visibility(world)

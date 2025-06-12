@@ -507,6 +507,7 @@ export type EntityConfiguration = {
 
 export type GlobalConfiguration = {
 	decaying_enabled: boolean,
+	rated: boolean,
 }
 
 export type EntityEvent = {

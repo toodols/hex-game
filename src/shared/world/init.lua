@@ -206,6 +206,7 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 		entity_configurations = entity_config or shared_entity_mod.create_configuration(),
 		global_configuration = global_config or {
 			decaying_enabled = true,
+			rated = true,
 		},
 		player_data = {},
 		quests = {},

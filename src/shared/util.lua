@@ -261,6 +261,14 @@ function font(text: string, props: { color: Color3? }): string
 	return `<font{if props.color then ` color="#{props.color:ToHex()}"` else ""}>{text}</font>`
 end
 
+function round2(num: number): string
+	if num >= 0 then
+		return string.format("%.2f", num)
+	else
+		return string.format("%.2f", -num)
+	end
+end
+
 return {
 	table_from_entries = table_from_entries,
 	table_filter = table_filter,
@@ -287,4 +295,5 @@ return {
 	range = range,
 	assert_eq = assert_eq,
 	font = font,
+	round2 = round2,
 }

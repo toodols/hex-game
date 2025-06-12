@@ -4,7 +4,6 @@ local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
 local items_mod = require(ReplicatedStorage.Shared.items)
-local updates_mod = require(ServerScriptService.Server.updates)
 local compute_systems = require(script.compute_systems).compute_systems
 local get_heart = require(script.get_heart).get_heart
 
@@ -14,6 +13,7 @@ type ActionState = server_types.ActionState
 type Item = types.Item
 type Entity = types.Entity
 type Inventory = types.Inventory
+type EntityId = types.EntityId
 
 -- consume items from inventories, prioritizing overflow_items
 function system_consume_item_type(
@@ -144,10 +144,20 @@ function system_add_items(world: World, action_state: ActionState, system: Syste
 	end
 end
 
+function get_system_for_entity(world: World, entity: EntityId): System?
+	for _, system in world.systems do
+		if system.entities[entity] then
+			return system
+		end
+	end
+	return nil
+end
+
 return {
 	system_consume_item_type = system_consume_item_type,
 	system_has_items = system_has_items,
 	system_add_items = system_add_items,
 	compute_systems = compute_systems,
 	get_heart = get_heart,
+	get_system_for_entity = get_system_for_entity,
 }

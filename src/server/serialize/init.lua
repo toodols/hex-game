@@ -8,7 +8,8 @@ local server_types = require(script.Parent.types)
 local visibility_mod = require(script.Parent.visibility)
 local questing = require(script.Parent.questing)
 local compute_systems = require(script.Parent.systems.compute_systems).compute_systems
-local serialize_entity = require(script.serialize_entity).serialize_entity_for_team
+local serialize_entity = require(script.serialize_entity).serialize_entity
+local get_cache = require(script.get_cache).get_cache
 
 type Entity = types.Entity
 type World = types.World
@@ -23,23 +24,6 @@ type Quest = types.Quest
 
 type SerializeFor = server_types.SerializeFor
 type SerializationContext = server_types.SerializationContext
-type Personalized = server_types.Personalized
-
-local nil_key = "nil"
-
--- if team is nil assume they have perfect visibility
---
-function get_personalized(context: SerializationContext, serialize_for: SerializeFor): Personalized
-	local team = serialize_for.team or nil_key
-	local player = serialize_for.player or nil_key
-	if context[team] == nil then
-		context[team] = {}
-	end
-	if context[team][player] == nil then
-		context[team][player] = {}
-	end
-	return context[team][player]
-end
 
 -- se_ctx is not used but included for consistency
 function buildable_for_team(
@@ -159,7 +143,12 @@ function serialize_system(
 end
 
 function serialize_world(world: World, se_ctx: SerializationContext, serialize_for: SerializeFor): PartialWorld
-	world.systems = compute_systems(world)
+	local global_cache = get_cache(se_ctx, {})
+	if global_cache.systems == nil then
+		compute_systems(world)
+		global_cache.systems = world.systems
+	end
+
 	local entities: { [EntityId]: Entity } = {}
 	for entity_id, entity in world.entities do
 		local serialized = serialize_entity(world, se_ctx, serialize_for, entity)
@@ -168,20 +157,37 @@ function serialize_world(world: World, se_ctx: SerializationContext, serialize_f
 		end
 	end
 
-	local partial_world: PartialWorld = {
-		cells = util.table_map(world.cells, function(cell, coord)
-			return serialize_cell(world, se_ctx, serialize_for, coord)
-		end),
-		coalitions = world.coalitions,
-		teams = util.table_map(world.teams, function(other_team)
-			return serialize_team(world, other_team)
-		end),
-		quests = util.table_map(world.quests, function(quest)
-			return questing.quest_serialize(quest, world)
-		end),
-		systems = util.table_filter_map(world.systems, function(system)
+	local cache = get_cache(se_ctx, { team = serialize_for.team })
+	if cache.systems == nil then
+		cache.systems = util.table_filter_map(world.systems, function(system)
 			return serialize_system(world, se_ctx, serialize_for, system)
-		end),
+		end)
+	end
+
+	if cache.quests == nil then
+		cache.quests = util.table_filter_map(world.quests, function(quest)
+			return questing.quest_serialize(quest, world)
+		end)
+	end
+
+	if cache.teams == nil then
+		cache.teams = util.table_map(world.teams, function(other_team)
+			return serialize_team(world, other_team)
+		end)
+	end
+
+	if cache.cells == nil then
+		cache.cells = util.table_map(world.cells, function(cell, coord)
+			return serialize_cell(world, se_ctx, serialize_for, coord)
+		end)
+	end
+
+	local partial_world: PartialWorld = {
+		cells = cache.cells,
+		coalitions = world.coalitions,
+		teams = cache.teams,
+		quests = cache.quests,
+		systems = cache.systems,
 		turn = world.turn,
 		current_skips = world.current_skips,
 		needed_skips = world.needed_skips,

@@ -44,7 +44,7 @@ export type SerializeFor = {
 	player: nil,
 }
 
-export type Personalized = {
+export type SerializingCache = {
 	cells: { [EncodedCoordinate]: HexCell }?,
 	systems: { System }?,
 	entities: { [EntityId]: Entity }?,
@@ -55,7 +55,7 @@ export type Personalized = {
 -- TODO: use this cache
 export type SerializationContext = {
 	[TeamId]: {
-		[PlayerId]: Personalized,
+		[PlayerId]: SerializingCache,
 	},
 }
 

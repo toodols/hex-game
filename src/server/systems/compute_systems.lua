@@ -125,7 +125,7 @@ function compute_systems(world: World): { System }
 	for _, system in result do
 		system.heart = get_heart(world, system)
 	end
-
+	world.systems = result
 	return result
 end
 

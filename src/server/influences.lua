@@ -9,6 +9,7 @@ local world_mod = require(ReplicatedStorage.Shared.world)
 
 type World = types.World
 
+-- must have systems computed first
 function compute_influences(world: World)
 	for _, cell in world.cells do
 		cell.influences = {}

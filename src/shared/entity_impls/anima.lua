@@ -6,7 +6,8 @@ entity_mod.registry.anima = entity_mod.with_defaults {
 	name = "Anima",
 	description = [[In systems exclusively supported by {entity.anima}:
 - {entity.extractor} produces items every turn.
-- Newly built buildings have 1 less max hp.]],
+- Newly built buildings have 1 less max hp.
+- {entity.laboratory} is disabled.]],
 	max_health = 3,
 	build_time = 2,
 	cost = {
