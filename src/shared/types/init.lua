@@ -467,6 +467,7 @@ export type EntityConfiguration = {
 	type: string,
 	init: ((self: Entity, world: World) -> ())?,
 	name: string,
+	short_description: string,
 	description: string,
 	max_health: number,
 	buildable: boolean,
