@@ -36,7 +36,7 @@ function construct_interaction(world: World, entry: Interaction, player_info: Pl
 
 	if player_info.player then
 		local player_data = world.player_data[tostring(player_info.player.UserId)]
-		if unlockable_mod.player_has_unlockable(player_data, entity_config.required_unlockable) == false then
+		if not unlockable_mod.player_has_unlockable(player_data, entity_config.required_unlockable) then
 			return {}
 		end
 	end

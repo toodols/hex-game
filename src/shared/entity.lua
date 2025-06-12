@@ -48,7 +48,7 @@ function with_defaults(t: PartialEntityConfiguration): EntityConfiguration
 	t.buildable = if t.buildable ~= nil then t.buildable else true
 	t.name = t.name or t.type
 	t.description = t.description or "No description for " .. t.type
-	t.description = t.short_description or t.description
+	t.short_description = t.short_description or t.description
 	t.max_health = t.max_health or 0
 	t.can_disable = t.can_disable or false
 	t.offsets = t.offsets or {}
