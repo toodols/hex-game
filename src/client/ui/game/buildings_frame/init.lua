@@ -11,7 +11,7 @@ local themes = require(ReplicatedStorage.Client.ui.themes)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local BuildingItem = require(script.building_item).BuildingItem
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
-local unlockable = require(ReplicatedStorage.Shared.unlockable)
+local unlockable_mod = require(ReplicatedStorage.Shared.unlockable)
 
 local Corner = util_components.Corner
 
@@ -144,7 +144,7 @@ local BuildingPage = function(
 				cell = props.cell,
 				researches = props.researches,
 				height = HEIGHT,
-				locked = not unlockable.player_has_unlockable(
+				locked = not unlockable_mod.player_has_unlockable(
 					player_data,
 					world.entity_configurations[item.type].required_unlockable
 				),
@@ -395,7 +395,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 							researches = researches,
 							cell = props.cell,
 							height = HEIGHT,
-							locked = not unlockable.player_has_unlockable(
+							locked = not unlockable_mod.player_has_unlockable(
 								player_data,
 								world.entity_configurations[item.type].required_unlockable
 							),

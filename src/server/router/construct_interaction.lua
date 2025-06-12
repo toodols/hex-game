@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
+local unlockable_mod = require(ReplicatedStorage.Shared.unlockable)
 
 local server_types = require(ServerScriptService.Server.types)
 local presence_mod = require(ServerScriptService.Server.presence)
@@ -16,6 +17,13 @@ type EntityId = types.EntityId
 
 function construct_interaction(world: World, entry: Interaction, player_info: PlayerInfo): { [EntityId]: boolean }
 	assert(entry.type == "construct", "Expected entry to be a construct interaction")
+
+	local entity_config = world.entity_configurations[entry.entity_type]
+	if entity_config == nil then
+		warn("Entity configuration not found for entity type: ", entry.entity_type)
+		return {}
+	end
+
 	-- the cell exists
 	local cell = world:get_cell(entry.coordinate)
 	if not cell then
@@ -26,6 +34,13 @@ function construct_interaction(world: World, entry: Interaction, player_info: Pl
 		return {}
 	end
 
+	if player_info.player then
+		local player_data = world.player_data[tostring(player_info.player.UserId)]
+		if unlockable_mod.player_has_unlockable(player_data, entity_config.required_unlockable) == false then
+			return {}
+		end
+	end
+
 	-- and is not blocked
 	if
 		util.table_any(
@@ -34,8 +49,7 @@ function construct_interaction(world: World, entry: Interaction, player_info: Pl
 			end),
 			function(entity)
 				if entity.owner == player_info.team then
-					return world.entity_configurations[entity.type].layer
-						== world.entity_configurations[entry.entity_type].layer
+					return world.entity_configurations[entity.type].layer == entity_config.layer
 				end
 				return nil
 			end
@@ -53,7 +67,6 @@ function construct_interaction(world: World, entry: Interaction, player_info: Pl
 	end
 
 	-- and can be built by the player
-	local entity_config = world.entity_configurations[entry.entity_type]
 	if not entity_config.buildable then
 		return {}
 	end
