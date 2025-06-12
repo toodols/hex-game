@@ -6,6 +6,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local coords_mod = require(ReplicatedStorage.Shared.coords)
 local cells_mod = require(ReplicatedStorage.Shared.cells)
 local world_mod = require(ReplicatedStorage.Shared.world)
+local unlockables = require(ReplicatedStorage.Shared.unlockable)
 
 type TeamData = types.TeamData
 type World = types.World
@@ -315,5 +316,9 @@ return function(extras)
 				return { err = "cannot coerce " .. typeof(value) .. " to entity_id" }
 			end
 		end,
+	}
+
+	extra_types.unlockable = {
+		autocomplete_simple = unlockables.get_unlockables(),
 	}
 end

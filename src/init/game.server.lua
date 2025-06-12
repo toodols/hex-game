@@ -188,7 +188,8 @@ function start_game(teleport_data: { room: types.Room }?)
 			util.table_remove_needle(team.players, plr.UserId)
 		end
 		util.table_remove_needle(main_world.skipped, plr.UserId)
-
+		local player_data = main_world.player_data[tostring(plr.UserId)]
+		datastore_mod.set_player_data(plr.UserId, player_data)
 		turn_scheduler.recalculate_skips(main_world)
 		republish_teams(main_world)
 		updates_mod.flush_updates(main_world)

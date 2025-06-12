@@ -340,6 +340,36 @@ function StoreEntityButton(props: { entity_id: EntityId, LayoutOrder: number? })
 	})
 end
 
+function DeployEntityButton(props: { entity_id: EntityId, LayoutOrder: number? })
+	local context = React.useContext(MainContext)
+	local world = context.world
+	local entity = hooks.use_synced_entity(props.entity_id)
+	local selection_mode_stack: { SelectionMode } = context.selection_mode_stack
+	local stored_entity = entity.stored_entity
+	return React.createElement(SquareActionButton, {
+		Image = "http://www.roblox.com/asset/?id=6023426930",
+		LayoutOrder = props.LayoutOrder,
+		color = Color3.fromRGB(119, 14, 151),
+		ImageColor3 = Color3.fromRGB(200, 200, 200),
+		on_click = function()
+			local candidates = coords_mod.neighbors_eq(entity.primary_coordinate, 1)
+			table.insert(selection_mode_stack, {
+				type = "select_some_cell",
+				candidates = candidates,
+				on_selected = function(coord)
+					client_interaction_remote:FireServer {
+						{
+							type = "deploy_entity",
+							entity_id = stored_entity,
+							coord = coord,
+						},
+					}
+				end,
+			})
+		end,
+	})
+end
+
 return {
 	AttackButton = AttackButton,
 	DisguiseButton = DisguiseButton,

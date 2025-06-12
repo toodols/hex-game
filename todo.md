@@ -19,6 +19,7 @@
 - [ ] `empath` An offensive building that copies status effects of buildings it kills
 - [ ] Unlock system that unlocks new buildings with each win
 - [ ] Change entity_update to use entity_id when adding to queue, then fill with entity at serialization step
+- [ ] Validate phony on the server
 
 # Ongoing
 - [ ] `terminal` A building that can allow buildings to "fast travel"

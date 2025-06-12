@@ -15,6 +15,9 @@ entity_mod.registry.vault = entity_mod.with_defaults {
 	required_research = {
 		"vault",
 	},
+	required_unlockable = {
+		"vault",
+	},
 	layer = entity_mod.LAYER.building,
 }
 

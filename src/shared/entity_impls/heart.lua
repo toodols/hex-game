@@ -12,9 +12,9 @@ entity_mod.registry.heart = entity_mod.with_defaults {
 		"heart",
 	},
 	cost = {
-		bar = 10,
-		rad = 5,
-		vit = 3,
+		bar = 3,
+		rad = 2,
+		vit = 2,
 	},
 	layer = entity_mod.LAYER.building,
 }

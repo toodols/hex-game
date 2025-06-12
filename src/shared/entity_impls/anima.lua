@@ -13,6 +13,9 @@ entity_mod.registry.anima = entity_mod.with_defaults {
 		bar = 3,
 		vit = 2,
 	},
+	required_unlockable = {
+		"anima",
+	},
 	layer = entity_mod.LAYER.building,
 }
 

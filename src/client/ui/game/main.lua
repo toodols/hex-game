@@ -155,7 +155,6 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 		},
 	}, {
 		TileAlerts = React.createElement(TileAlerts),
-
 		Research = submenu.type == "research" and React.createElement(Research, {
 			entity_id = submenu.entity_id,
 			on_close = function()

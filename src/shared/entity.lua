@@ -21,7 +21,25 @@ local LAYER = {
 
 local registry: { [string]: EntityConfiguration } = {}
 
-function with_defaults(t: any): EntityConfiguration
+-- for typechecking
+type PartialEntityConfiguration = {
+	type: string,
+	init: ((self: Entity) -> ())?,
+	build_time: number?,
+	buildable: boolean?,
+	name: string?,
+	description: string?,
+	max_health: number?,
+	can_disable: boolean?,
+	offsets: { CubicCoordinate }?,
+	layer: number?,
+	cost: { [Item]: number }?,
+	required_research: { ResearchId }?,
+	recipes: { Recipe }?,
+	required_unlockable: { string }?,
+}
+
+function with_defaults(t: PartialEntityConfiguration): EntityConfiguration
 	t.type = t.type or error "no type"
 	t.init = t.init or function() end
 	t.build_time = t.build_time or 0
@@ -34,9 +52,10 @@ function with_defaults(t: any): EntityConfiguration
 	t.offsets = t.offsets or {}
 	t.layer = t.layer or LAYER.building
 	t.cost = t.cost or {}
-	t.required_research = t.required_research
+	t.required_research = t.required_research or {}
 	t.recipes = t.recipes
-	return t
+	t.required_unlockable = t.required_unlockable or {}
+	return t :: any
 end
 
 function get_effective_health(entity: Entity): number

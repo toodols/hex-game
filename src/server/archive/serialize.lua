@@ -23,6 +23,7 @@ local function write()
 		write_string = "s2",
 		write_usize = "I4",
 		write_i32 = "i4",
+		write_i64 = "i8",
 	}
 
 	for k, v in types do
@@ -52,6 +53,7 @@ local function read(data)
 		read_i8 = "i1",
 		read_u16 = "I2",
 		read_i32 = "i4",
+		write_i64 = "i8",
 		read_string = "s2",
 		read_usize = "T",
 	}

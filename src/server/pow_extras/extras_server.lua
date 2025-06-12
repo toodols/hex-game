@@ -260,6 +260,80 @@ return function(extras)
 		end,
 	}
 
+	commands.add_unlockable = {
+		description = "Adds an unlockable for a player",
+		permissions = { "admin" },
+		overloads = {
+			{
+				returns = "nil",
+				args = {
+					{
+						name = "players",
+						type = "players",
+						description = "The players to add the unlockable for.",
+					},
+					{
+						name = "unlockable",
+						type = "unlockable",
+						description = "The unlockable to add.",
+					},
+				},
+			},
+		},
+		server_run = function(context)
+			local players = context.args[1]
+			local unlockable = context.args[2]
+
+			for _, player in players do
+				local user_id = player.UserId
+				local player_data = _G.world.player_data[tostring(user_id)]
+				player_data.unlockables_owned[unlockable] = true
+
+				_G.world:add_update {
+					type = "player_data",
+					player_data = _G.world.player_data,
+				}
+			end
+		end,
+	}
+
+	commands.remove_unlockable = {
+		description = "Removes an unlockable for a player",
+		permissions = { "admin" },
+		overloads = {
+			{
+				returns = "nil",
+				args = {
+					{
+						name = "players",
+						type = "players",
+						description = "The players to add the unlockable for.",
+					},
+					{
+						name = "unlockable",
+						type = "unlockable",
+						description = "The unlockable to add.",
+					},
+				},
+			},
+		},
+		server_run = function(context)
+			local players = context.args[1]
+			local unlockable = context.args[2]
+
+			for _, player in players do
+				local user_id = player.UserId
+				local player_data = _G.world.player_data[tostring(user_id)]
+				player_data.unlockables_owned[unlockable] = nil
+
+				_G.world:add_update {
+					type = "player_data",
+					player_data = _G.world.player_data,
+				}
+			end
+		end,
+	}
+
 	commands.kill_selected = {
 		description = "Kills all selected entities.",
 		permissions = { "gamemaster" },
