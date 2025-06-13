@@ -134,10 +134,14 @@ function get_updates(
 				}
 			end
 			if serialize_for.player then
+				local player_data = world.player_data[tostring(serialize_for.player)]
+				if player_data == nil then
+					return nil
+				end
 				return {
 					type = update.type,
 					player_data = {
-						[serialize_for.player] = update.player_data[tostring(serialize_for.player)],
+						[tostring(serialize_for.player)] = player_data,
 					},
 				}
 			else

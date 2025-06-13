@@ -262,6 +262,7 @@ export type KeybindId =
 	| "deconstruct"
 	| "previous_entity"
 	| "next_entity"
+
 export type PlayerSettings = {
 	keybinds: { [KeybindId]: number },
 }
@@ -322,7 +323,7 @@ export type Decision = {
 	rotation: number,
 } | {
 	type: "update_settings",
-	setting: PlayerSettings,
+	settings: PlayerSettings,
 }
 
 export type Interaction = Decision | {

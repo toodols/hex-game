@@ -125,8 +125,8 @@ function TileAlerts()
 				local indicators = {}
 				for entity_id in cell.entities do
 					local entity = world.entities[entity_id]
-					if not entity then
-						warn("no entity for", entity_id, "at", cell.coordinate)
+					if entity == nil then
+						warn("tile alerts has no entity for", entity_id, "at", coords.display_coord(cell.coordinate))
 						continue
 					end
 					local is_deconstructing = false

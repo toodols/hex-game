@@ -19,7 +19,6 @@ entity_mod.registry.laboratory = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	tick = function(self: Entity, world: World, action_state: ActionState) end,
 	influences = function(self: Entity, world: World)
-		print(world.systems)
 		local system = systems_mod.get_system_for_entity(world, self.id)
 		if system == nil then
 			error "No system found"

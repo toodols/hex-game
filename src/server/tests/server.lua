@@ -8,7 +8,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local coords = require(ReplicatedStorage.Shared.coords)
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 
-local archive = require(ServerScriptService.Server.archive)
+local structures = require(ServerScriptService.Server.structures)
 local presets = require(ServerScriptService.Server.presets)
 local cleanup = require(ServerScriptService.Server.cleanup).cleanup
 local action_phase_mod = require(ServerScriptService.Server.action_phase)
@@ -577,11 +577,11 @@ end
 function tests.archive_world()
 	-- todo
 	local world = presets.my_map()
-	local compressed = archive.serialize_world(world)
+	local compressed = structures.serialize_world(world)
 	local as_json = HttpService:JSONEncode(world)
 	print("World saved as", #compressed, "bytes")
 	print(("Is %d%% of JSON size"):format(math.floor(#compressed / #as_json * 100)))
-	local decompressed = archive.deserialize_world(compressed)
+	local decompressed = structures.deserialize_world(compressed)
 	print(decompressed)
 	cleanup(world)
 end
@@ -884,8 +884,8 @@ end
 
 function tests.weird_presence_after_load()
 	local world, teams = presets.my_map()
-	local bin = archive.serialize_world(world)
-	local data = archive.deserialize_world(bin)
+	local bin = structures.serialize_world(world)
+	local data = structures.deserialize_world(bin)
 	turn_scheduler.turn_schedule_kill(world.turn_schedule)
 	world_mod.apply_world_data(world, data)
 	turn_scheduler_init.hydrate(world, world.turn_schedule)

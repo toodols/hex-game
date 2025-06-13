@@ -163,7 +163,9 @@ function start_game(teleport_data: { room: types.Room }?)
 			main_world.player_data[tostring(plr.UserId)] = datastore_mod.get_player_data(plr.UserId)
 			main_world:add_update {
 				type = "player_data",
-				player_data = main_world.player_data,
+				player_data = {
+					[tostring(plr.UserId)] = main_world.player_data[tostring(plr.UserId)],
+				},
 			}
 			updates_mod.flush_updates(main_world)
 		end)

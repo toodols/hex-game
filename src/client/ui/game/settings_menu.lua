@@ -1,22 +1,48 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local UserInputService = game:GetService "UserInputService"
 
+local types = require(ReplicatedStorage.Shared.types)
 local React = require(ReplicatedStorage.Packages.react)
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local Corner = require(ReplicatedStorage.Client.ui.util_components).Corner
-local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
+local contexts = require(ReplicatedStorage.Client.ui.context)
+local MainContext = contexts.MainContext
+local SettingsContext = contexts.SettingsContext
+
+local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
+
+type KeybindId = types.KeybindId
+type PlayerSettings = types.PlayerSettings
 
 function Rebindable(props: {
-	id: string,
+	id: KeybindId,
 	label: string?,
 	LayoutOrder: number?,
 	default: Enum.KeyCode?,
 })
-	local context = React.useContext(MainContext)
+	local player_settings: PlayerSettings = React.useContext(SettingsContext)
+	local value = if player_settings.keybinds[props.id] ~= nil
+		then (Enum.KeyCode :: any):FromValue(player_settings.keybinds[props.id])
+		else nil
+
 	local input_ref = React.useRef(nil)
 	local connection_ref = React.useRef(nil)
-	local key, set_key = React.useState(props.default or Enum.KeyCode.Unknown)
+	local key, set_key_ = React.useState(value or props.default or Enum.KeyCode.Unknown)
 	local button_ref = React.useRef(nil)
+
+	local set_key = function(new_key)
+		if new_key == Enum.KeyCode.Unknown then
+			player_settings.keybinds[props.id] = nil
+		else
+			player_settings.keybinds[props.id] = new_key.Value
+		end
+		client_interaction_remote:FireServer { {
+			type = "update_settings",
+			settings = player_settings,
+		} }
+		set_key_(new_key)
+	end
+
 	return React.createElement("Frame", {
 		LayoutOrder = props.LayoutOrder,
 		BackgroundTransparency = 0.7,

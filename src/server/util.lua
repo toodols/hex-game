@@ -18,9 +18,11 @@ function new_global_id()
 end
 
 function catch(fn, plr, data)
-	local success, err = pcall(fn)
+	local success, err = xpcall(fn, function(err_)
+		return tostring(err_) .. "\n" .. debug.traceback()
+	end)
+	print(err)
 	if not success then
-		print "failure"
 		warn(
 			("Data %s from %s produced an error %s. This incident will be reported"):format(
 				HttpService:JSONEncode(data),

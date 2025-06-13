@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local RunService = game:GetService "RunService"
 local ContextActionService = game:GetService "ContextActionService"
 local TweenService = game:GetService "TweenService"
+local Players = game:GetService "Players"
 
 local React = require(ReplicatedStorage.Packages.react)
 
@@ -13,7 +14,9 @@ local ui_types = require(ReplicatedStorage.Client.ui.types)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
-local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
+local context = require(ReplicatedStorage.Client.ui.context)
+local MainContext = context.MainContext
+local SettingsContext = context.SettingsContext
 
 local TileAlerts = require(script.Parent.tile_alerts).TileAlerts
 local Research = require(script.Parent.research).Research
@@ -30,6 +33,8 @@ local TopCenter = require(script.Parent.top_center).TopCenter
 local Conclusion = require(script.Parent.conclusion).Conclusion
 
 local Corner = util_components.Corner
+
+local local_player = Players.LocalPlayer
 
 type World = types.World
 type SelectionMode = ui_types.SelectionMode
@@ -144,217 +149,237 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 		end
 	end, {})
 
-	return React.createElement(MainContext.Provider, {
-		value = {
-			world = props.world,
-			selection_mode_stack = props.selection_mode_stack,
-			quest_effects = quest_effects,
-			force_update = force_update,
-			submenu = submenu,
-			set_submenu = set_submenu,
+	React.useEffect(function()
+		local cleanup = props.world.world_update_signal.listen(function(updates)
+			for _, update in updates do
+				if update.type == "player_data" then
+					force_update(nil)
+				end
+			end
+		end)
+		return cleanup
+	end, {})
+
+	return React.createElement(
+		MainContext.Provider,
+		{
+			value = {
+				world = props.world,
+				selection_mode_stack = props.selection_mode_stack,
+				quest_effects = quest_effects,
+				force_update = force_update,
+				submenu = submenu,
+				set_submenu = set_submenu,
+			},
 		},
-	}, {
-		TileAlerts = React.createElement(TileAlerts),
-		Research = submenu.type == "research" and React.createElement(Research, {
-			entity_id = submenu.entity_id,
-			on_close = function()
-				set_submenu {}
-			end,
-		}),
+		React.createElement(SettingsContext.Provider, {
+			value = if local_player then props.world.player_data[tostring(local_player.UserId)].settings else nil,
+		}, {
+			TileAlerts = React.createElement(TileAlerts),
+			Research = submenu.type == "research" and React.createElement(Research, {
+				entity_id = submenu.entity_id,
+				on_close = function()
+					set_submenu {}
+				end,
+			}),
 
-		Center = React.createElement("Frame", {
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			BackgroundTransparency = 1,
-			Position = UDim2.new(0.5, 0, 0.5, 0),
-			Size = UDim2.new(1, 0, 1, 0),
-		}, {
-			PlayerList = React.createElement(PlayerList, {
-				visible = players_visible,
+			Center = React.createElement("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundTransparency = 1,
+				Position = UDim2.new(0.5, 0, 0.5, 0),
+				Size = UDim2.new(1, 0, 1, 0),
+			}, {
+				PlayerList = React.createElement(PlayerList, {
+					visible = players_visible,
+				}),
+				SettingsMenu = if settings_open then React.createElement(SettingsMenu) else nil,
+				Credits = if credits_open then React.createElement(Credits) else nil,
+				Encyclopedia = if encyclopedia_open then React.createElement(Encyclopedia) else nil,
+				Conclusion = React.createElement(Conclusion),
 			}),
-			SettingsMenu = if settings_open then React.createElement(SettingsMenu) else nil,
-			Credits = if credits_open then React.createElement(Credits) else nil,
-			Encyclopedia = if encyclopedia_open then React.createElement(Encyclopedia) else nil,
-			Conclusion = React.createElement(Conclusion),
-		}),
-		TopCenter = React.createElement(TopCenter),
-		BottomCenter = React.createElement("Frame", {
-			AnchorPoint = Vector2.new(0.5, 1),
-			BackgroundTransparency = 1,
-			Position = UDim2.new(0.5, 0, 1, -20),
-			Size = UDim2.new(1, 0, 1, 0),
-			Active = false,
-			ZIndex = 2,
-		}, {
-			BuildingsFrame = submenu.type == "build" and React.createElement(BuildingsFrame, {
-				cell = submenu.cell,
+			TopCenter = React.createElement(TopCenter),
+			BottomCenter = React.createElement("Frame", {
+				AnchorPoint = Vector2.new(0.5, 1),
+				BackgroundTransparency = 1,
+				Position = UDim2.new(0.5, 0, 1, -20),
+				Size = UDim2.new(1, 0, 1, 0),
+				Active = false,
+				ZIndex = 2,
+			}, {
+				BuildingsFrame = submenu.type == "build" and React.createElement(BuildingsFrame, {
+					cell = submenu.cell,
+				}),
 			}),
-		}),
-		BottomLeft = React.createElement("Frame", {
-			AnchorPoint = Vector2.new(0, 1),
-			BackgroundTransparency = 1,
-			Position = UDim2.new(0, 20, 1, -20),
-		}, {
-			HorizontalLayout = React.createElement("UIListLayout", {
-				FillDirection = Enum.FillDirection.Horizontal,
-				Padding = UDim.new(0, 10),
-				SortOrder = Enum.SortOrder.LayoutOrder,
-				VerticalAlignment = Enum.VerticalAlignment.Bottom,
-			}),
-		}, {
-			CancelButton = React.createElement(
-				"TextButton",
-				themes.theme_button {
-					Visible = selection_mode.type == "select_some_cell",
-					Text = "Cancel",
-					Size = UDim2.new(0, 100, 0, 30),
-					BackgroundColor3 = Color3.fromRGB(13, 13, 13),
-					BackgroundTransparency = 0.2,
-					[React.Event.MouseButton1Click] = function()
-						props.selection_mode_stack[#props.selection_mode_stack] = nil
-						force_update()
-					end,
-				},
-				{
-					Corner = React.createElement(Corner),
-				}
-			),
-			SelectedCellFrame = if selection_mode.type == "select_cells"
-				then React.createElement(SelectedCellFrame, {
-					selected_cells = util.table_map(util.table_keys(selection_mode.selected), function(encoded_coord)
-						return coords.decode_coord(encoded_coord)
-					end),
-				})
-				else nil,
-			OneEntityFrame = if selection_mode.type == "show_one_entity"
-				then React.createElement("Frame", {
-					AnchorPoint = Vector2.new(0, 1),
-					BackgroundTransparency = 1,
-					Position = UDim2.new(-250, 250, 20, -20),
-					Size = UDim2.new(0, 250, 0, 300),
-				}, {
+			BottomLeft = React.createElement("Frame", {
+				AnchorPoint = Vector2.new(0, 1),
+				BackgroundTransparency = 1,
+				Position = UDim2.new(0, 20, 1, -20),
+			}, {
+				HorizontalLayout = React.createElement("UIListLayout", {
+					FillDirection = Enum.FillDirection.Horizontal,
+					Padding = UDim.new(0, 10),
+					SortOrder = Enum.SortOrder.LayoutOrder,
+					VerticalAlignment = Enum.VerticalAlignment.Bottom,
+				}),
+			}, {
+				CancelButton = React.createElement(
+					"TextButton",
+					themes.theme_button {
+						Visible = selection_mode.type == "select_some_cell",
+						Text = "Cancel",
+						Size = UDim2.new(0, 100, 0, 30),
+						BackgroundColor3 = Color3.fromRGB(13, 13, 13),
+						BackgroundTransparency = 0.2,
+						[React.Event.MouseButton1Click] = function()
+							props.selection_mode_stack[#props.selection_mode_stack] = nil
+							force_update()
+						end,
+					},
+					{
+						Corner = React.createElement(Corner),
+					}
+				),
+				SelectedCellFrame = if selection_mode.type == "select_cells"
+					then React.createElement(SelectedCellFrame, {
+						selected_cells = util.table_map(
+							util.table_keys(selection_mode.selected),
+							function(encoded_coord)
+								return coords.decode_coord(encoded_coord)
+							end
+						),
+					})
+					else nil,
+				OneEntityFrame = if selection_mode.type == "show_one_entity"
+					then React.createElement("Frame", {
+						AnchorPoint = Vector2.new(0, 1),
+						BackgroundTransparency = 1,
+						Position = UDim2.new(-250, 250, 20, -20),
+						Size = UDim2.new(0, 250, 0, 300),
+					}, {
 
-					VerticalLayout = React.createElement("UIListLayout", {
-						HorizontalAlignment = Enum.HorizontalAlignment.Center,
-						SortOrder = Enum.SortOrder.LayoutOrder,
-						VerticalAlignment = Enum.VerticalAlignment.Bottom,
-					}),
-					Corner = React.createElement(Corner),
-					Header = React.createElement(
-						"Frame",
-						themes.theme_solid {
-							LayoutOrder = 1,
-							Size = UDim2.new(1, 0, 0, 40),
-						},
-						{
-							Corner = React.createElement(Corner),
-							BackButton = React.createElement(
-								"TextButton",
-								themes.theme_button {
-									Text = "Back",
-									Size = UDim2.new(1, 0, 1, 0),
-									[React.Event.MouseButton1Click] = function()
-										props.selection_mode_stack[#props.selection_mode_stack] = nil
-										force_update()
+						VerticalLayout = React.createElement("UIListLayout", {
+							HorizontalAlignment = Enum.HorizontalAlignment.Center,
+							SortOrder = Enum.SortOrder.LayoutOrder,
+							VerticalAlignment = Enum.VerticalAlignment.Bottom,
+						}),
+						Corner = React.createElement(Corner),
+						Header = React.createElement(
+							"Frame",
+							themes.theme_solid {
+								LayoutOrder = 1,
+								Size = UDim2.new(1, 0, 0, 40),
+							},
+							{
+								Corner = React.createElement(Corner),
+								BackButton = React.createElement(
+									"TextButton",
+									themes.theme_button {
+										Text = "Back",
+										Size = UDim2.new(1, 0, 1, 0),
+										[React.Event.MouseButton1Click] = function()
+											props.selection_mode_stack[#props.selection_mode_stack] = nil
+											force_update()
+										end,
+									}
+								),
+							}
+						),
+						Content = React.createElement(
+							"Frame",
+							themes.theme_background {
+								AnchorPoint = Vector2.new(0.5, 0.5),
+								AutomaticSize = Enum.AutomaticSize.Y,
+								LayoutOrder = 2,
+								Position = UDim2.new(0.5, 0, 0.5, 0),
+								Size = UDim2.new(1, 0, 0, 0),
+							},
+							{
+								VerticalLayout = React.createElement("UIListLayout", {
+									Padding = UDim.new(0, 4),
+									SortOrder = Enum.SortOrder.LayoutOrder,
+								}),
+								Padding = React.createElement("UIPadding", {
+									PaddingBottom = UDim.new(0, 4),
+									PaddingLeft = UDim.new(0, 4),
+									PaddingRight = UDim.new(0, 4),
+									PaddingTop = UDim.new(0, 4),
+								}),
+							},
+							{
+								Info = React.createElement(EntityInformation, {
+									entity_id = selection_mode.entity_id,
+									compressed = false,
+									on_compress = function() end,
+									on_select = function() end,
+									toggle_submenu = function(menu)
+										set_submenu(function(current)
+											return if util.deep_equal(current, menu) then {} else menu
+										end)
 									end,
-								}
-							),
-						}
-					),
-					Content = React.createElement(
-						"Frame",
-						themes.theme_background {
-							AnchorPoint = Vector2.new(0.5, 0.5),
-							AutomaticSize = Enum.AutomaticSize.Y,
-							LayoutOrder = 2,
-							Position = UDim2.new(0.5, 0, 0.5, 0),
-							Size = UDim2.new(1, 0, 0, 0),
-						},
-						{
-							VerticalLayout = React.createElement("UIListLayout", {
-								Padding = UDim.new(0, 4),
-								SortOrder = Enum.SortOrder.LayoutOrder,
-							}),
-							Padding = React.createElement("UIPadding", {
-								PaddingBottom = UDim.new(0, 4),
-								PaddingLeft = UDim.new(0, 4),
-								PaddingRight = UDim.new(0, 4),
-								PaddingTop = UDim.new(0, 4),
-							}),
-						},
-						{
-							Info = React.createElement(EntityInformation, {
-								entity_id = selection_mode.entity_id,
-								compressed = false,
-								on_compress = function() end,
-								on_select = function() end,
-								toggle_submenu = function(menu)
-									set_submenu(function(current)
-										return if util.deep_equal(current, menu) then {} else menu
-									end)
-								end,
-							}),
-						}
-					),
-				})
-				else nil,
-			Recipes = if submenu.type == "recipes"
-				then React.createElement(Recipes, {
-					entity_id = submenu.entity_id,
-					on_close = function()
-						set_submenu {}
-					end,
-				})
-				else nil,
-			ItemFilters = if submenu.type == "item_filters"
-				then React.createElement(ItemFilters, {
-					entity_id = submenu.entity_id,
-				})
-				else nil,
-		}),
-	}, {
-		BottomRight = React.createElement("Frame", {
-			AnchorPoint = Vector2.new(1, 1),
-			BackgroundTransparency = 1,
-			Position = UDim2.new(1, -20, 1, -20),
+								}),
+							}
+						),
+					})
+					else nil,
+				Recipes = if submenu.type == "recipes"
+					then React.createElement(Recipes, {
+						entity_id = submenu.entity_id,
+						on_close = function()
+							set_submenu {}
+						end,
+					})
+					else nil,
+				ItemFilters = if submenu.type == "item_filters"
+					then React.createElement(ItemFilters, {
+						entity_id = submenu.entity_id,
+					})
+					else nil,
+			}),
 		}, {
+			BottomRight = React.createElement("Frame", {
+				AnchorPoint = Vector2.new(1, 1),
+				BackgroundTransparency = 1,
+				Position = UDim2.new(1, -20, 1, -20),
+			}, {
 
-			VerticalLyaout = React.createElement("UIListLayout", {
-				FillDirection = Enum.FillDirection.Vertical,
-				HorizontalAlignment = Enum.HorizontalAlignment.Right,
-				Padding = UDim.new(0, 10),
-				SortOrder = Enum.SortOrder.LayoutOrder,
-				VerticalAlignment = Enum.VerticalAlignment.Bottom,
+				VerticalLyaout = React.createElement("UIListLayout", {
+					FillDirection = Enum.FillDirection.Vertical,
+					HorizontalAlignment = Enum.HorizontalAlignment.Right,
+					Padding = UDim.new(0, 10),
+					SortOrder = Enum.SortOrder.LayoutOrder,
+					VerticalAlignment = Enum.VerticalAlignment.Bottom,
+				}),
+				Encyclopedia = React.createElement(MenuIcon, {
+					icon = "rbxassetid://6034509994",
+					label = "Encyclopedia",
+					on_click = function()
+						set_encyclopedia_open(not encyclopedia_open)
+					end,
+				}),
+				Players = React.createElement(MenuIcon, {
+					icon = "rbxassetid://6035053279",
+					label = "Players",
+					on_click = function()
+						set_players_visible(not players_visible)
+					end,
+				}),
+				Settings = React.createElement(MenuIcon, {
+					label = "Settings",
+					icon = "rbxassetid://6031280882",
+					on_click = function()
+						set_settings_open(not settings_open)
+					end,
+				}),
+				Credits = React.createElement(MenuIcon, {
+					label = "<3",
+					icon = "rbxassetid://6023426974",
+					on_click = function()
+						set_credits_open(not credits_open)
+					end,
+				}),
 			}),
-			Encyclopedia = React.createElement(MenuIcon, {
-				icon = "rbxassetid://6034509994",
-				label = "Encyclopedia",
-				on_click = function()
-					set_encyclopedia_open(not encyclopedia_open)
-				end,
-			}),
-			Players = React.createElement(MenuIcon, {
-				icon = "rbxassetid://6035053279",
-				label = "Players",
-				on_click = function()
-					set_players_visible(not players_visible)
-				end,
-			}),
-			Settings = React.createElement(MenuIcon, {
-				label = "Settings",
-				icon = "rbxassetid://6031280882",
-				on_click = function()
-					set_settings_open(not settings_open)
-				end,
-			}),
-			Credits = React.createElement(MenuIcon, {
-				label = "<3",
-				icon = "rbxassetid://6023426974",
-				on_click = function()
-					set_credits_open(not credits_open)
-				end,
-			}),
-		}),
-	})
+		})
+	)
 end
 
 return {

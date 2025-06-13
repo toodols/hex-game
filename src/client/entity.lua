@@ -108,6 +108,7 @@ end
 
 function recolor(world: World, entity: Entity, instance: Instance)
 	local team_color = world.teams[entity.owner].color
+
 	for _, part in instance:GetDescendants() do
 		if part:IsA "BasePart" and part.Name == "Color" then
 			local color: Color3 = team_color.color
@@ -141,7 +142,11 @@ function create_model_from_entity(world: World, entity: Entity): Model
 		end
 	end
 
-	recolor(world, entity, instance)
+	if instance ~= nil then
+		recolor(world, entity, instance)
+	else
+		warn("No instance created for entity " .. entity.id .. " of type " .. entity.type)
+	end
 
 	return instance
 end

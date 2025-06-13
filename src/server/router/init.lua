@@ -4,6 +4,7 @@ local util = require(ReplicatedStorage.Shared.util)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local items_mod = require(ReplicatedStorage.Shared.items)
 local team_mod = require(ReplicatedStorage.Shared.team)
+local result = require(ReplicatedStorage.Shared.result)
 
 local questing = require(script.Parent.questing)
 local turn_scheduler = require(script.Parent.turn_scheduler)
@@ -11,6 +12,7 @@ local server_entity_mod = require(script.Parent.entity)
 local updates_mod = require(script.Parent.updates)
 local server_types = require(script.Parent.types)
 local entity_mod = require(script.Parent.entity)
+local structures = require(script.Parent.structures)
 
 local ability_interaction = require(script.ability_interaction).ability_interaction
 local construct_interaction = require(script.construct_interaction).construct_interaction
@@ -257,6 +259,21 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 			questing.quest_update(tutorial, world)
 		end
 		return {}
+	elseif entry.type == "update_settings" then
+		if player_info.player == nil then
+			error "no player"
+		end
+		local player_data = world.player_data[tostring(player_info.player.UserId)]
+		local res = structures.player_settings.validate(entry.settings)
+		local player_settings = result.unwrap(res)
+		player_data.settings = player_settings
+		world:add_update {
+			type = "player_data",
+			player_data = {
+				[tostring(player_info.player.UserId)] = player_data,
+			},
+		}
+		return {}
 	else
 		error("unknown interaction type: " .. entry.type)
 	end
@@ -280,6 +297,9 @@ function on_client_interaction(
 
 	local dirty_entities = {}
 
+	if #data == 0 and next(data) ~= nil then
+		error "Expected data to be an array"
+	end
 	for _, entry in data do
 		local dirty = handle_interaction(world, entry, player_info)
 		for entity_id in dirty do

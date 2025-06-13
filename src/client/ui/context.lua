@@ -10,6 +10,7 @@ type CubicCoordinate = types.CubicCoordinate
 type SelectionMode = ui_types.SelectionMode
 type QuestEffect = types.QuestEffect
 type Submenu = ui_types.Submenu
+type PlayerSettings = types.PlayerSettings
 
 export type MainContext = {
 	world: World,
@@ -21,6 +22,9 @@ export type MainContext = {
 
 local MainContext: React.ReactContext<MainContext> = React.createContext(nil)
 
+local SettingsContext: React.ReactContext<PlayerSettings> = React.createContext(nil)
+
 return {
 	MainContext = MainContext,
+	SettingsContext = SettingsContext,
 }

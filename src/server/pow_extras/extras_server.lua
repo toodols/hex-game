@@ -291,7 +291,7 @@ return function(extras)
 
 				_G.world:add_update {
 					type = "player_data",
-					player_data = _G.world.player_data,
+					player_data = { [tostring(user_id)] = player_data },
 				}
 			end
 		end,
@@ -328,7 +328,9 @@ return function(extras)
 
 				_G.world:add_update {
 					type = "player_data",
-					player_data = _G.world.player_data,
+					player_data = {
+						[tostring(user_id)] = player_data,
+					},
 				}
 			end
 		end,

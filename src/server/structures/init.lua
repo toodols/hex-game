@@ -9,30 +9,35 @@ local util = require(ReplicatedStorage.Shared.util)
 local serializing = require(script.serialize)
 local coords_mod = require(ReplicatedStorage.Shared.coords)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
+local unlockable_mod = require(ReplicatedStorage.Shared.unlockable)
+local combinators = require(script.combinators)
 
 type World = types.World
 type Entity = types.Entity
 type HexCell = types.HexCell
 type Inventory = types.Inventory
-type Schema<T> = serializing.Schema<T>
+type Schema<T> = combinators.Schema<T>
 type Unlockable = types.Unlockable
 type PlayerData = types.PlayerData
 type Rating = types.Rating
+type PlayerSettings = types.PlayerSettings
 
-local enum = serializing.enum
-local struct = serializing.struct
-local option = serializing.option
-local array = serializing.array
-local map = serializing.map
-local i32 = serializing.i32
-local u8 = serializing.u8
-local str = serializing.str
-local boolean = serializing.boolean
-local collect_by_key = serializing.collect_by_key
-local const = serializing.const
-local tagged_union = serializing.tagged_union
-local f64 = serializing.f64
-local i32_infinite = serializing.i32_infinite
+local enum = combinators.enum
+local struct = combinators.struct
+local option = combinators.option
+local array = combinators.array
+local map = combinators.map
+local i32 = combinators.i32
+local u8 = combinators.u8
+local str = combinators.str
+local boolean = combinators.boolean
+local collect_by_key = combinators.collect_by_key
+local const = combinators.const
+local tagged_union = combinators.tagged_union
+local f64 = combinators.f64
+local i32_infinite = combinators.i32_infinite
+local keycode = combinators.keycode
+local u16 = combinators.u16
 
 if #util.table_keys(server_entity_mod.registry) == 0 then
 	error "No entities registered in server entity registry. Likely before it has loaded."
@@ -328,6 +333,8 @@ local team_data = struct {
 
 local global_configuration = struct {
 	decaying_enabled = boolean,
+	rated = boolean,
+	conclusion_enabled = boolean,
 }
 
 local quest = {}
@@ -350,11 +357,26 @@ local turn_schedule = {
 	end,
 }
 
-local unlockable: Unlockable = enum {}
+local unlockable: Unlockable = enum(unlockable_mod.get_unlockables())
 
 local rating: Schema<Rating> = struct {
 	mu = f64,
 	sigma = f64,
+}
+
+local keybind_id = enum {
+	"construct",
+	"skip",
+	"primary_ability",
+	"research",
+	"show_player_list",
+	"deconstruct",
+	"previous_entity",
+	"next_entity",
+}
+
+local player_settings: Schema<PlayerSettings> = struct {
+	keybinds = map(keybind_id, u16),
 }
 
 local player_data: Schema<PlayerData> = struct {
@@ -367,6 +389,7 @@ local player_data: Schema<PlayerData> = struct {
 	wins = i32,
 	losses = i32,
 	aborted = i32,
+	settings = player_settings,
 }
 
 local world_schema = struct {
@@ -419,6 +442,7 @@ function deserialize_world(data: string): World
 end
 
 return {
+	player_settings = player_settings,
 	serialize_world = serialize_world,
 	deserialize_world = deserialize_world,
 }
