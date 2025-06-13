@@ -253,6 +253,19 @@ export type Rating = {
 
 export type Unlockable = string
 
+export type KeybindId =
+	"construct"
+	| "skip"
+	| "primary_ability"
+	| "research"
+	| "show_player_list"
+	| "deconstruct"
+	| "previous_entity"
+	| "next_entity"
+export type PlayerSettings = {
+	keybinds: { [KeybindId]: number },
+}
+
 -- PlayerData is an outdated service so no name conflicts here
 export type PlayerData = {
 	rating: Rating,
@@ -264,6 +277,7 @@ export type PlayerData = {
 	wins: number,
 	losses: number,
 	aborted: number,
+	settings: PlayerSettings,
 }
 
 export type TeamData = {
@@ -306,6 +320,9 @@ export type Decision = {
 	type: "rotate_entity",
 	entity_id: EntityId,
 	rotation: number,
+} | {
+	type: "update_settings",
+	setting: PlayerSettings,
 }
 
 export type Interaction = Decision | {
@@ -508,6 +525,8 @@ export type EntityConfiguration = {
 export type GlobalConfiguration = {
 	decaying_enabled: boolean,
 	rated: boolean,
+	-- whether the game will end when one team is left
+	conclusion_enabled: boolean,
 }
 
 export type EntityEvent = {

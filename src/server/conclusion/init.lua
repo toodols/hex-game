@@ -26,6 +26,9 @@ function check_conclusion(world: World): (boolean, CoalitionId?)
 	if _G.is_testing then
 		return false, nil
 	end
+	if not world.global_configuration.conclusion_enabled then
+		return false, nil
+	end
 	local team_status = {}
 	for team_id, team in world.teams do
 		if team.is_player_team then

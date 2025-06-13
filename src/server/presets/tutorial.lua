@@ -29,6 +29,7 @@ function tutorial_map()
 	world.entity_configurations.extractor.power_input = 0
 	world.entity_configurations.extractor.cycles_to_output = 1
 	world.global_configuration.decaying_enabled = false
+	world.global_configuration.conclusion_enabled = false
 
 	world.turn_schedule = turn_scheduler_init.new_turn_schedule(world)
 	turn_scheduler.reset_turn_time(world, world.turn_schedule)
