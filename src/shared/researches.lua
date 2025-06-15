@@ -130,9 +130,6 @@ end
 function research_item(props): ResearchItem
 	local preset = researches[props.id] or {}
 	return {
-		precondition = props.precondition or function()
-			return true
-		end,
 		coord = props.coord,
 		status = props.status or "incomplete",
 		icon = preset.icon,
@@ -143,11 +140,32 @@ function research_item(props): ResearchItem
 		time = preset.time or 0,
 		cost = preset.cost or {},
 		cost_is_paid = false,
+		conflicts = preset.conflicts or {},
+		dependencies = preset.dependencies or {},
 	} :: ResearchItem
+end
+
+function research_is_available(research: ResearchItem, research_state: ResearchState)
+	if research.conflicts then
+		for research_id in research.conflicts do
+			if research_state.states[research_id].status ~= "incomplete" then
+				return false
+			end
+		end
+	end
+	if research.dependencies then
+		for research_id in research.dependencies do
+			if research_state.states[research_id].status ~= "complete" then
+				return false
+			end
+		end
+	end
+	return true
 end
 
 return {
 	get_cells_researches = get_cells_researches,
 	research_item = research_item,
+	research_is_available = research_is_available,
 	researches = researches,
 }

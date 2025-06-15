@@ -18,7 +18,20 @@ function player_has_unlockable(player_data: PlayerData, requirement: { Unlockabl
 	return true
 end
 
+-- defines available unlockables based on dependents
+local unlockables: { [Unlockable]: { weight: number, dependencies: { Unlockable } } } = {
+	anima = {
+		weight = 1,
+		dependencies = {},
+	},
+	vault = {
+		weight = 1,
+		dependencies = {},
+	},
+}
+
 local computed_unlockables = nil
+--- gets all unlockables that are used, including unobtainable ones
 function get_unlockables(): { Unlockable }
 	if computed_unlockables == nil then
 		computed_unlockables = {}
@@ -36,4 +49,5 @@ end
 return {
 	player_has_unlockable = player_has_unlockable,
 	get_unlockables = get_unlockables,
+	unlockables = unlockables,
 }

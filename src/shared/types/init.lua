@@ -62,14 +62,14 @@ export type ResearchItem = {
 	icon: Icon,
 	coord: CubicCoordinate,
 	status: "incomplete" | "researching" | "complete",
-
-	precondition: (world: World, entity: Entity) -> boolean,
+	conflicts: { ResearchId },
+	dependencies: { ResearchId },
 }
 
 export type ResearchState = {
 	queue: { ResearchId },
 	states: {
-		[string]: ResearchItem,
+		[ResearchId]: ResearchItem,
 	},
 }
 
