@@ -3,6 +3,7 @@ local cells = require(ReplicatedStorage.Shared.cells)
 local researches_mod = require(script.Parent.researches)
 local items_mod = require(script.Parent.items)
 local types = require(script.Parent.types)
+local util = require(script.Parent.util)
 
 function resolve_path(namespaces: any, path: string)
 	local parts = path:split "."
@@ -15,6 +16,10 @@ function resolve_path(namespaces: any, path: string)
 	end
 	return start
 end
+
+local formatted_items = util.table_map(items_mod.item_names, function(name, item)
+	return util.font(name, { color = items_mod.item_colors[item] })
+end)
 
 function format_text_raw(text: string, namespaces: { [string]: any }, depth: number?)
 	if depth and depth > 5 then
@@ -49,7 +54,7 @@ function format_text_raw(text: string, namespaces: { [string]: any }, depth: num
 			else
 				local format_cost = ""
 				for item, amount in start do
-					format_cost ..= amount .. " " .. item .. "  "
+					format_cost ..= amount .. " " .. formatted_items[item] .. "  "
 				end
 				return format_cost
 			end
@@ -62,7 +67,7 @@ end
 function format_text(world: types.World, text: string, ns: { [string]: any }?, depth: number?)
 	local namespaces = {
 		research = researches_mod.researches,
-		item = items_mod.item_names,
+		item = formatted_items,
 		cell = cells.cell_models,
 		entity = world.entity_configurations,
 		quest = world.quests,

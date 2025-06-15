@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
 local formatting = require(ReplicatedStorage.Shared.formatting)
+local researches_mod = require(ReplicatedStorage.Shared.researches)
 
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
@@ -12,9 +13,12 @@ local TextActionButton = require(ReplicatedStorage.Client.ui.game.action_button)
 local Corner = util_components.Corner
 
 type ResearchItem = types.ResearchItem
+type ResearchState = types.ResearchState
 
-function Aside(props: { state: ResearchItem, on_add: () -> (), on_remove: () -> () })
+function Aside(props: { item: ResearchItem, state: ResearchState, on_add: () -> (), on_remove: () -> () })
 	local world = React.useContext(MainContext).world
+	local is_available = researches_mod.research_is_available(props.item, props.state)
+
 	return React.createElement(
 		"Frame",
 		themes.theme_solid {
@@ -57,7 +61,7 @@ function Aside(props: { state: ResearchItem, on_add: () -> (), on_remove: () -> 
 					Title = React.createElement(
 						"TextLabel",
 						themes.theme_title {
-							Text = props.state.name,
+							Text = props.item.name,
 							TextXAlignment = Enum.TextXAlignment.Center,
 							Size = UDim2.new(1, 0, 0, 30),
 							LayoutOrder = 1,
@@ -66,26 +70,39 @@ function Aside(props: { state: ResearchItem, on_add: () -> (), on_remove: () -> 
 					Description = React.createElement(
 						"TextLabel",
 						themes.theme_description {
-							Text = formatting.format_text(world, props.state.description),
+							Text = formatting.format_text(world, props.item.description),
 							Size = UDim2.new(1, 0, 0, 40),
 							LayoutOrder = 2,
 						}
 					),
 				},
-				if props.state.status ~= "complete"
+				if not is_available
+					then {
+						UnavailableLabel = React.createElement(
+							"TextLabel",
+							themes.theme_description {
+								Text = "Unavailable",
+								TextColor3 = Color3.fromRGB(150, 50, 50),
+								Size = UDim2.new(1, 0, 0, 40),
+								LayoutOrder = 4,
+							}
+						),
+					}
+					else nil,
+				if props.item.status ~= "complete"
 					then {
 						Items = React.createElement(Items, {
-							items = props.state.cost,
+							items = props.item.cost,
 							LayoutOrder = 3,
 						}),
 					}
 					else {},
-				if props.state.status == "complete" or props.state.status == "researching"
+				if props.item.status == "complete" or props.item.status == "researching"
 					then {
 						CompletedLabel = React.createElement(
 							"TextLabel",
 							themes.theme_description {
-								Text = if props.state.status == "complete" then "Complete" else "Researching",
+								Text = if props.item.status == "complete" then "Complete" else "Researching",
 								Size = UDim2.new(1, 0, 0, 40),
 								LayoutOrder = 4,
 							}
@@ -94,7 +111,7 @@ function Aside(props: { state: ResearchItem, on_add: () -> (), on_remove: () -> 
 					else {}
 			),
 		},
-		if props.state.status == "incomplete"
+		if props.item.status == "incomplete" and is_available
 			then {
 				AddButton = React.createElement(TextActionButton, {
 					Size = UDim2.new(1, 0, 0, 20),

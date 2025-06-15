@@ -124,7 +124,8 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 
 		local research_item = entity.researches.states[entry.research_id]
 		if
-			research_item.status ~= "incomplete" and researches.research_is_available(research_item, entity.researches)
+			research_item.status ~= "incomplete"
+			or not researches.research_is_available(research_item, entity.researches)
 		then
 			return {}
 		end

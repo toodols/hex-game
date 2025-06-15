@@ -6,6 +6,7 @@ local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local coords = require(ReplicatedStorage.Shared.coords)
+local researches_mod = require(ReplicatedStorage.Shared.researches)
 
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
@@ -26,17 +27,20 @@ type World = types.World
 type EntityId = types.EntityId
 type Icon = types.Icon
 type TeamData = types.TeamData
+type ResearchState = types.ResearchState
 
 local TRANSFORM_SIZE = 5000
-function Node(props: { state: ResearchItem, on_click: () -> () })
-	local icon = props.state.icon
+function Node(props: { item: ResearchItem, state: ResearchState, on_click: () -> () })
+	local icon = props.item.icon
 	local scale = 80
 	local ratio = scale / 52 / TRANSFORM_SIZE
 	-- local offset = { 1531 * ratio, 1598 * ratio }
 	local offset = { 1531 * ratio, 1598 * ratio }
-	local vec3 = coords.into_vec3(props.state.coord)
+	local vec3 = coords.into_vec3(props.item.coord)
 	local x = vec3.X
 	local y = vec3.Z
+
+	local image_ref = React.useRef(nil :: any)
 
 	return React.createElement("Frame", {
 		BackgroundTransparency = 1,
@@ -55,11 +59,12 @@ function Node(props: { state: ResearchItem, on_click: () -> () })
 			Rotation = 90,
 			ImageTransparency = 0.5,
 			ScaleType = Enum.ScaleType.Fit,
-			ImageColor3 = if props.state.status == "complete"
-				then Color3.fromRGB(0, 255, 0)
-				else if props.state.status == "researching"
-					then Color3.fromRGB(255, 254, 196)
-					else Color3.fromRGB(255, 255, 255),
+			ref = image_ref,
+			ImageColor3 = if not researches_mod.research_is_available(props.item, props.state)
+				then Color3.fromRGB(80, 80, 80)
+				elseif props.item.status == "complete" then Color3.fromRGB(0, 255, 0)
+				elseif props.item.status == "researching" then Color3.fromRGB(255, 254, 196)
+				else Color3.fromRGB(255, 255, 255),
 			Image = "http://www.roblox.com/asset/?id=245630713",
 			ZIndex = 1,
 		}),
@@ -67,8 +72,14 @@ function Node(props: { state: ResearchItem, on_click: () -> () })
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.new(0.5, 0, 0.5, 0),
 			Size = UDim2.new(0.9, 0, 0.9, 0),
-			BackgroundTransparency = 0.9,
+			BackgroundTransparency = 1,
 			Text = "",
+			[React.Event.MouseEnter] = function()
+				image_ref.current.ImageTransparency = 0
+			end,
+			[React.Event.MouseLeave] = function()
+				image_ref.current.ImageTransparency = 0.5
+			end,
 			[React.Event.MouseButton1Click] = function()
 				props.on_click()
 			end,
@@ -220,7 +231,8 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 			end),
 			util.table_map(entity.researches.states, function(v, k)
 				return React.createElement(Node, {
-					state = v,
+					item = v,
+					state = entity.researches,
 					on_click = function()
 						set_selected_node(k)
 					end,
@@ -228,7 +240,8 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 			end)
 		),
 		Aside = selected_node and React.createElement(Aside, {
-			state = entity.researches.states[selected_node],
+			item = entity.researches.states[selected_node],
+			state = entity.researches,
 			on_close = function()
 				set_selected_node(nil)
 			end,

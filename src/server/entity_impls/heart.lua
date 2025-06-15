@@ -11,13 +11,13 @@ type Entity = types.Entity
 type World = types.World
 type ActionState = server_types.ActionState
 type Heart = Entity & {
-	rad_clock: number,
+	bonus_clock: number,
 }
 
 entity_mod.registry.heart = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	init = function(self: Heart, world: World)
-		self.rad_clock = 0
+		self.bonus_clock = 0
 		self.researches = {
 			queue = {},
 			states = {
@@ -41,9 +41,18 @@ entity_mod.registry.heart = entity_mod.with_defaults {
 		if self.status == "complete" then
 			assert(self.researches, "no researches")
 			local output_items = { "bar" }
-			if self.researches.states.create_rad.status == "complete" and self.rad_clock % 2 == 0 then
-				self.rad_clock = (self.rad_clock + 1) % 2
-				table.insert(output_items, "rad")
+			local bonus_item
+			if self.researches.states.create_rad.status == "complete" then
+				bonus_item = "rad"
+			elseif self.researches.states.create_bar.status == "complete" then
+				bonus_item = "bar"
+			elseif self.researches.states.create_tek.status == "complete" then
+				bonus_item = "tek"
+			end
+
+			if bonus_item ~= nil and self.bonus_clock % 2 == 0 then
+				self.bonus_clock = (self.bonus_clock + 1) % 2
+				table.insert(output_items, bonus_item)
 			end
 			table.insert(world.action_queue, {
 				entity_id = self.id,

@@ -178,14 +178,14 @@ end
 
 function research_is_available(research: ResearchItem, research_state: ResearchState)
 	if research.conflicts then
-		for research_id in research.conflicts do
+		for _, research_id in research.conflicts do
 			if research_state.states[research_id].status ~= "incomplete" then
 				return false
 			end
 		end
 	end
 	if research.dependencies then
-		for research_id in research.dependencies do
+		for _, research_id in research.dependencies do
 			if research_state.states[research_id].status ~= "complete" then
 				return false
 			end
