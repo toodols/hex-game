@@ -15,7 +15,7 @@ entity_mod.registry.factory = entity_mod.with_defaults {
 	end,
 	tick = function(self: Entity, world: World, action_state: ActionState)
 		local config = world.entity_configurations[self.type]
-		if self.status == "complete" and self.enabled and self.owner ~= world.neutral_team then
+		if self.status == "complete" and self.enabled and self.owner ~= world.capturable_team then
 			local recipe = config.recipes[self.current_recipe]
 			if recipe then
 				table.insert(world.action_queue, {

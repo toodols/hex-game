@@ -50,8 +50,8 @@ function get_updates(
 		return {}
 	end
 	if serialize_for.team ~= nil and team == nil then
-		print(world.teams, serialize_for.team)
-		error "wtf"
+		warn(world.teams, serialize_for.team)
+		error "^ wtf"
 	end
 	local mapped = filter_duplicate_entity_updates(util.table_filter_map(buffer, function(update: WorldUpdate)
 		local target = (update :: any).target or "everyone"

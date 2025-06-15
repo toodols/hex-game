@@ -183,6 +183,10 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 			table.insert(world.action_queue, action)
 		end
 	end
+	table.sort(world.action_queue, function(a, b)
+		if a.requested_at then
+		end
+	end)
 
 	queue_entity_decisions(world, world.action_queue)
 	delete_deconstructed_entities(world, world.action_queue)
@@ -200,7 +204,7 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	queue_blueprints_and_scaffolds(world, world.action_queue)
 
 	for _, entity in world:active_entities() do
-		if entity.status == "complete" and entity.owner ~= world.neutral_team and entity.researches ~= nil then
+		if entity.status == "complete" and entity.owner ~= world.capturable_team and entity.researches ~= nil then
 			table.insert(world.action_queue, {
 				type = "advance_research",
 				entity_id = entity.id,

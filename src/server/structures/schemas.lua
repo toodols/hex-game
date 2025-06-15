@@ -15,7 +15,9 @@ export type ValidatingSchema<T> = {
 	validate: (data: T) -> Result<T>,
 }
 
-export type Schema<T> = SerializingSchema<T> & ValidatingSchema<T>
+export type Schema<T> = SerializingSchema<T> & ValidatingSchema<T> & {
+	label: string?,
+}
 
 local f64: Schema<number> = {
 	write = function(writer, data)

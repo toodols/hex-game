@@ -3,9 +3,8 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local server_types = require(ServerScriptService.Server.types)
-local world_mod = require(ReplicatedStorage.Shared.world)
-local coords = require(ReplicatedStorage.Shared.coords)
-local team_mod = require(ReplicatedStorage.Shared.team)
+local coords_mod = require(ReplicatedStorage.Shared.coords)
+local ability_mod = require(ReplicatedStorage.Shared.ability)
 
 type World = types.World
 type Interaction = types.Interaction
@@ -25,21 +24,10 @@ function ability_interaction(world: World, entry: Interaction, player_info: Play
 		return {}
 	end
 	if entry.ability_type == "attack" then
-		local cell = world:get_cell(entry.coordinate)
-		if not cell then
+		local candidates = ability_mod.entity_attack_candidates(world, entity, ability.range, player_info.team)
+
+		if candidates[coords_mod.encode_coord(entry.coordinate)] == nil then
 			return {}
-		end
-		local in_range = coords.coords_dist(entity.primary_coordinate, entry.coordinate) <= ability.range
-			and world_mod.line_of_sight(world, entity.primary_coordinate, entry.coordinate, player_info.team)
-		if not in_range then
-			return {}
-		end
-		-- prevent cells with influence from taunt from being targeted
-		for influence in cell.influences do
-			local taunt = world.entities[influence]
-			if taunt.type == "taunt" and not team_mod.is_allied(world, taunt.owner, player_info.team) then
-				continue
-			end
 		end
 	elseif entry.ability_type == "activate" then
 		--ok

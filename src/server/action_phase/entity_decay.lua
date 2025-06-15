@@ -18,7 +18,8 @@ function do_entity_decay(world: World, action_state: ActionState)
 		if
 			world.global_configuration.decaying_enabled
 			and entity.status ~= "blueprint"
-			and entity.owner ~= world.neutral_team
+			and entity.owner ~= world.capturable_team
+			-- and entity.owner ~= world.neutral_team
 			and entity.decayable
 		then
 			decayable_entities[entity.id] = true
@@ -77,7 +78,7 @@ function do_entity_decay(world: World, action_state: ActionState)
 					}
 					entity_mod.remove_entity(world, entity)
 				else
-					entity.owner = world.neutral_team
+					entity.owner = world.capturable_team
 					entity.decay = 0
 					entity.is_decaying = false
 				end

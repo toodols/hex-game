@@ -290,7 +290,7 @@ function tests.decaying()
 		action_phase_mod.run_action_phase(world)
 	end
 
-	assert(scout.owner == world.neutral_team, "scout should be neutral team after decaying")
+	assert(scout.owner == world.capturable_team, "scout should be neutral team after decaying")
 
 	cleanup(world)
 end
@@ -305,7 +305,7 @@ function tests.capture_extractor()
 	local extractor = entity_mod.new_entity({
 		type = "extractor",
 		primary_coordinate = { 0, 0, 0 },
-		owner = world.neutral_team,
+		owner = world.capturable_team,
 	}, world)
 
 	local infinite_source = entity_mod.new_entity({

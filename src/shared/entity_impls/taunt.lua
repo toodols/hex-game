@@ -4,7 +4,12 @@ local entity_mod = require(ReplicatedStorage.Shared.entity)
 entity_mod.registry.taunt = entity_mod.with_defaults {
 	type = "taunt",
 	name = "Taunt",
-	description = "While visible, neighboring cells in a range of {entity.taunt.range} may not be targeted. On death, deal 2 damage in a range of 1",
+	description = [[Enemy buildings in a range of {entity.taunt.range} who can see this building:
+	- Must target {entity.taunt} if possible
+On death:
+- Building that killed this gains immunity to taunt
+
+]],
 	max_health = 4,
 	build_time = 2,
 	cost = {

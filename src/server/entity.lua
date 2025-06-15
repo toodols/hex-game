@@ -183,7 +183,7 @@ function new_entity(entity_: any, world: World): Entity
 	if entity.status == "complete" then
 		server_behavior.on_completed(entity, world)
 	end
-	if server_behavior.autogenerates_vertex and entity.owner ~= world.neutral_team then
+	if server_behavior.autogenerates_vertex and entity.owner ~= world.capturable_team then
 		autogenerate_vertex(world, entity)
 	end
 

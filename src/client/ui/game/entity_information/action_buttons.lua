@@ -8,6 +8,7 @@ local team_mod = require(ReplicatedStorage.Shared.team)
 local util = require(ReplicatedStorage.Shared.util)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local coords_mod = require(ReplicatedStorage.Shared.coords)
+local ability_mod = require(ReplicatedStorage.Shared.ability)
 
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local ui_types = require(ReplicatedStorage.Client.ui.types)
@@ -55,39 +56,7 @@ function AttackButton(props: { entity_id: EntityId, LayoutOrder: number? })
 			end
 			local ability = shared_behavior.abilities[ability_type]
 
-			local candidates: { [EncodedCoordinate]: true } = {}
-			for _, coord in
-				world_mod.coords_filter(world, coords_mod.neighbors_leq(entity.primary_coordinate, ability.range))
-			do
-				if not world_mod.line_of_sight(world, entity.primary_coordinate, coord, player_team.id) then
-					continue
-				end
-
-				candidates[coords_mod.encode_coord(coord)] = true
-			end
-
-			local taunts_on_cell: { [EntityId]: Entity } = util.table_filter_map(
-				(world:get_cell(entity.primary_coordinate) :: HexCell).influences,
-				function(_, taunt_id)
-					local taunt = world.entities[taunt_id]
-					if
-						taunt.type == "taunt"
-						and candidates[coords_mod.encode_coord(taunt.primary_coordinate)]
-						and not team_mod.is_allied(world, taunt.owner, player_team.id)
-						and taunt.owner ~= world.neutral_team
-					then
-						return taunt
-					end
-					return nil
-				end
-			)
-
-			if next(taunts_on_cell) ~= nil then
-				candidates = {}
-				for _, taunt in taunts_on_cell do
-					candidates[coords_mod.encode_coord(taunt.primary_coordinate)] = true
-				end
-			end
+			local candidates = ability_mod.entity_attack_candidates(world, entity, ability.range, player_team.id)
 
 			table.insert(selection_mode_stack, {
 				type = "select_some_cell",

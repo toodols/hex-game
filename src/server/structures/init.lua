@@ -10,34 +10,34 @@ local serializing = require(script.serialize)
 local coords_mod = require(ReplicatedStorage.Shared.coords)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
 local unlockable_mod = require(ReplicatedStorage.Shared.unlockable)
-local combinators = require(script.combinators)
+local schemas = require(script.schemas)
 
 type World = types.World
 type Entity = types.Entity
 type HexCell = types.HexCell
 type Inventory = types.Inventory
-type Schema<T> = combinators.Schema<T>
+type Schema<T> = schemas.Schema<T>
 type Unlockable = types.Unlockable
 type PlayerData = types.PlayerData
 type Rating = types.Rating
 type PlayerSettings = types.PlayerSettings
 
-local enum = combinators.enum
-local struct = combinators.struct
-local option = combinators.option
-local array = combinators.array
-local map = combinators.map
-local i32 = combinators.i32
-local u8 = combinators.u8
-local str = combinators.str
-local boolean = combinators.boolean
-local collect_by_key = combinators.collect_by_key
-local const = combinators.const
-local tagged_union = combinators.tagged_union
-local f64 = combinators.f64
-local i32_infinite = combinators.i32_infinite
-local keycode = combinators.keycode
-local u16 = combinators.u16
+local enum = schemas.enum
+local struct = schemas.struct
+local option = schemas.option
+local array = schemas.array
+local map = schemas.map
+local i32 = schemas.i32
+local u8 = schemas.u8
+local str = schemas.str
+local boolean = schemas.boolean
+local collect_by_key = schemas.collect_by_key
+local const = schemas.const
+local tagged_union = schemas.tagged_union
+local f64 = schemas.f64
+local i32_infinite = schemas.i32_infinite
+local keycode = schemas.keycode
+local u16 = schemas.u16
 
 if #util.table_keys(server_entity_mod.registry) == 0 then
 	error "No entities registered in server entity registry. Likely before it has loaded."

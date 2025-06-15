@@ -21,7 +21,6 @@ function catch(fn, plr, data)
 	local success, err = xpcall(fn, function(err_)
 		return tostring(err_) .. "\n" .. debug.traceback()
 	end)
-	print(err)
 	if not success then
 		warn(
 			("Data %s from %s produced an error %s. This incident will be reported"):format(

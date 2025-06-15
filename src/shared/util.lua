@@ -265,7 +265,7 @@ function round2(num: number): string
 	if num >= 0 then
 		return string.format("%.2f", num)
 	else
-		return string.format("%.2f", -num)
+		return string.format("-%.2f", -num)
 	end
 end
 

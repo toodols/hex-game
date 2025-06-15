@@ -203,6 +203,7 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 		needed_skips = 0,
 		neutral_team = nil :: any,
 		spectator_team = nil :: any,
+		capturable_team = nil :: any,
 		entity_configurations = entity_config or shared_entity_mod.create_configuration(),
 		global_configuration = global_config or {
 			decaying_enabled = true,
@@ -216,6 +217,7 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 		query_entity = world_query_entity,
 		add_update = world_add_update,
 		get_cell = world_get_cell,
+		debug_updates_log = {},
 	}
 	-- neutral team
 	-- does not impose presence on its neighbors
@@ -225,6 +227,12 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 		color = Color3.fromRGB(80, 80, 80),
 	}, "Neutral").id
 	world.teams[world.neutral_team].is_player_team = false
+	world.capturable_team = new_team(world, {}, {
+		type = "color3",
+		color = Color3.fromRGB(80, 80, 80),
+	}, "Capturable").id
+	world.teams[world.capturable_team].is_player_team = false
+
 	-- spectator team
 	world.spectator_team = new_team(world, {}, {
 		type = "color3",
@@ -241,6 +249,7 @@ function apply_world_data(world: World, data: PartialWorld)
 	world.teams = data.teams
 	world.conclusion = data.conclusion
 	world.turn = data.turn
+	world.global_configuration = data.global_configuration
 	world.turn_schedule = data.turn_schedule
 	world.highest_turn = data.highest_turn
 	world.entities = data.entities

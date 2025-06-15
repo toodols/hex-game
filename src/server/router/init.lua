@@ -300,7 +300,10 @@ function on_client_interaction(
 	if #data == 0 and next(data) ~= nil then
 		error "Expected data to be an array"
 	end
+	local t = os.clock()
 	for _, entry in data do
+		t += 0.001
+		entry.requested_at = t
 		local dirty = handle_interaction(world, entry, player_info)
 		for entity_id in dirty do
 			dirty_entities[entity_id] = true

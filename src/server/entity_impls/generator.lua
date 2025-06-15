@@ -15,7 +15,7 @@ entity_mod.registry.generator = entity_mod.with_defaults {
 	on_completed = function(self: Entity, world: World) end,
 	tick = function(self: Entity, world: World, action_state: ActionState)
 		local config = world.entity_configurations[self.type]
-		if self.status == "complete" and self.owner ~= world.neutral_team then
+		if self.status == "complete" and self.owner ~= world.capturable_team then
 			table.insert(world.action_queue, {
 				entity_id = self.id,
 				type = "exchange",

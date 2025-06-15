@@ -168,47 +168,47 @@ function update_entity_client(world: World, old: Entity?, new: Entity)
 	if not client_behavior then
 		error("Unknown entity type: " .. new.type)
 	end
-	if new.is_destroyed then
-	else
-		if old then
-			local instance = world.entity_instance_map[new.id]
-			local cell_instance = world.cell_instance_map[coords.encode_coord(new.primary_coordinate)]
-			-- type changed. destroy old one and swap in with new
-			if old.type ~= new.type then
-				instance:Destroy()
-				instance = create_model_from_entity(world, new)
-				client_behavior.init(new, world)
-				instance.Parent = world.entity_instance_root
-			end
-			recolor(world, new, instance)
-
-			client_behavior.update(new, world, old)
-			if instance == nil then
-				warn("instance not found for entity " .. new.id .. " of type " .. new.type)
-			end
-			instance:PivotTo(
-				(cell_instance.Base.CFrame + Vector3.new(0, cell_instance.Base.Size.Y / 2, 0))
-					* CFrame.Angles(0, math.pi / 3 * new.rotation, 0)
-			)
-			if old.status ~= new.status and not new.is_destroyed and instance then
-				registry[old.type].status_changed(new, world, old)
-			end
-		else
-			local instance: Model
-			if client_behavior.model then
-				instance = create_model_from_entity(world, new)
-			end
-			for _, coord in new.coordinates do
-				local cell = world:get_cell(coord)
-				if cell.entities[new.id] == nil then
-					cell.entities[new.id] = true
-				end
-			end
+	-- if new.is_destroyed then
+	-- 	return
+	-- end
+	if old then
+		local instance = world.entity_instance_map[new.id]
+		local cell_instance = world.cell_instance_map[coords.encode_coord(new.primary_coordinate)]
+		-- type changed. destroy old one and swap in with new
+		if old.type ~= new.type then
+			instance:Destroy()
+			instance = create_model_from_entity(world, new)
 			client_behavior.init(new, world)
+			instance.Parent = world.entity_instance_root
+		end
+		recolor(world, new, instance)
 
-			if instance then
-				instance.Parent = world.entity_instance_root
+		client_behavior.update(new, world, old)
+		if instance == nil then
+			warn("instance not found for entity " .. new.id .. " of type " .. new.type)
+		end
+		instance:PivotTo(
+			(cell_instance.Base.CFrame + Vector3.new(0, cell_instance.Base.Size.Y / 2, 0))
+				* CFrame.Angles(0, math.pi / 3 * new.rotation, 0)
+		)
+		if old.status ~= new.status and not new.is_destroyed and instance then
+			registry[old.type].status_changed(new, world, old)
+		end
+	else
+		local instance: Model
+		if client_behavior.model then
+			instance = create_model_from_entity(world, new)
+		end
+		for _, coord in new.coordinates do
+			local cell = world:get_cell(coord)
+			if cell.entities[new.id] == nil then
+				cell.entities[new.id] = true
 			end
+		end
+		client_behavior.init(new, world)
+
+		if instance then
+			instance.Parent = world.entity_instance_root
 		end
 	end
 end

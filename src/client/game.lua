@@ -301,6 +301,7 @@ function handle_updates(world: World, updates: { WorldUpdate })
 	local updated_entities = {}
 
 	for _, update in updates do
+		table.insert(world.debug_updates_log, update)
 		if update.type == "turn_timer" then
 			world.turn_schedule = update.schedule
 		elseif update.type == "turn" then

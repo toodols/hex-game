@@ -646,8 +646,11 @@ export type World = {
 	coalitions: { CoalitionData },
 	teams: { TeamData },
 
+	-- for objects that don't have a team
 	neutral_team: TeamId,
 	spectator_team: TeamId,
+	-- for objects that don't have a team, and can be captured
+	capturable_team: TeamId,
 
 	systems: { System },
 
@@ -685,6 +688,7 @@ export type World = {
 	-- client only
 	animation_states: { [EntityId]: AnimationState }?,
 	ui: any,
+	debug_updates_log: { WorldUpdate },
 }
 
 export type PartialWorld = {

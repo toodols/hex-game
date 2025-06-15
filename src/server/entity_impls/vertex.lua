@@ -18,15 +18,15 @@ entity_mod.registry.vertex = entity_mod.with_defaults {
 	on_completed = function(self: Entity, world: World)
 		-- Capturing mechanics: if this entity is not neutral, and is built on a cell that has neutral entities,
 		-- neutral entities are captured, neutral vertex are destroyed
-		if self.owner == world.neutral_team then
+		if self.owner == world.capturable_team then
 			return
 		end
 		local cell = world:get_cell(self.primary_coordinate)
 		for entity_id in cell.entities do
 			local entity = world.entities[entity_id]
-			if entity.owner == world.neutral_team then
+			if entity.owner == world.capturable_team then
 				if entity.type == "vertex" then
-					error "there should not be a neutral vertex"
+					error "there should not be a capturable vertex"
 				end
 				entity.owner = self.owner
 				world:add_update { type = "entity_update", entity = entity }
