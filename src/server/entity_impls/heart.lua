@@ -22,8 +22,16 @@ entity_mod.registry.heart = entity_mod.with_defaults {
 			queue = {},
 			states = {
 				create_rad = research_item {
-					coord = { 0, 0, 0 },
+					coord = { 1, 0, -1 },
 					id = "create_rad",
+				},
+				create_bar = research_item {
+					coord = { 0, -1, 1 },
+					id = "create_bar",
+				},
+				create_tek = research_item {
+					coord = { -1, 1, 0 },
+					id = "create_tek",
 				},
 			},
 		}

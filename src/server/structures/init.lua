@@ -161,9 +161,6 @@ local researches = struct {
 				"researching",
 				"complete",
 			},
-			precondition = const(function()
-				warn "todo"
-			end),
 		},
 		"id"
 	),

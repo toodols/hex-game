@@ -78,13 +78,44 @@ local researches = {
 			type = "model",
 			model = "Items/Rad",
 		},
-		name = "Inspiration",
+		name = "Mania",
 		description = "{entity.heart} begins producing 1 {item.rad} every 2 turns.",
-		cost = {
-			bar = 5,
+		conflicts = {
+			"create_tek",
+			"create_bar",
 		},
-		time = 2,
+		cost = {},
+		time = 5,
 	},
+	create_tek = {
+		icon = {
+			type = "model",
+			model = "Items/Tek",
+		},
+		name = "Idealism",
+		description = "{entity.heart} begins producing 1 {item.tek} every 2 turns.",
+		conflicts = {
+			"create_rad",
+			"create_bar",
+		},
+		cost = {},
+		time = 7,
+	},
+	create_bar = {
+		icon = {
+			type = "model",
+			model = "Items/Bar",
+		},
+		conflicts = {
+			"create_rad",
+			"create_tek",
+		},
+		name = "Avarice",
+		description = "{entity.heart} begins producing 1 {item.bar} every 2 turns.",
+		cost = {},
+		time = 3,
+	},
+
 	fountain = {
 		icon = {
 			type = "model",

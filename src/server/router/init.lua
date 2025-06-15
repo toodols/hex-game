@@ -5,6 +5,7 @@ local world_mod = require(ReplicatedStorage.Shared.world)
 local items_mod = require(ReplicatedStorage.Shared.items)
 local team_mod = require(ReplicatedStorage.Shared.team)
 local result = require(ReplicatedStorage.Shared.result)
+local researches = require(ReplicatedStorage.Shared.researches)
 
 local questing = require(script.Parent.questing)
 local turn_scheduler = require(script.Parent.turn_scheduler)
@@ -122,7 +123,9 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 		end
 
 		local research_item = entity.researches.states[entry.research_id]
-		if research_item.status ~= "incomplete" or not research_item.precondition(world, entity) then
+		if
+			research_item.status ~= "incomplete" and researches.research_is_available(research_item, entity.researches)
+		then
 			return {}
 		end
 
