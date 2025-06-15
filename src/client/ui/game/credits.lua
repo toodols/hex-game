@@ -28,10 +28,14 @@ function Credits()
 			FontFace = Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
 			Size = UDim2.new(1, 0, 1, 0),
 			Text = table.concat({
+				"My beloved modeler",
 				"♥♥♥ Leo",
+				"My beloved playtesters",
+				"♥ no1",
 				"♥ Blue",
 				"♥ Bacon",
 				"♥ Roid",
+				"♥ quin",
 			}, "\n"),
 		}, {
 			SidePad = React.createElement("UIPadding", {

@@ -8,7 +8,7 @@ entity_mod.registry.scout = entity_mod.with_defaults {
 	max_health = 3,
 	build_time = 2,
 	cost = {
-		bar = 3,
+		bar = 2,
 		rad = 2,
 	},
 	abilities = {

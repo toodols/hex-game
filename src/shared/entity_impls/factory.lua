@@ -8,7 +8,8 @@ entity_mod.registry.factory = entity_mod.with_defaults {
 	max_health = 3,
 	build_time = 1,
 	cost = {
-		bar = 4,
+		rad = 2,
+		bar = 2,
 	},
 	can_disable = true,
 	recipes = {

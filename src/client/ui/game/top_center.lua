@@ -26,6 +26,7 @@ function TopCenter()
 	local do_animation = React.useRef(false)
 	local skip_btn_ref = React.useRef(nil)
 	local did_skip = React.useRef(false)
+	local old_skips = React.useRef(world.current_skips)
 	React.useEffect(function()
 		local cleanup = world.world_update_signal.listen(function(updates)
 			for _, update in updates do
@@ -43,6 +44,12 @@ function TopCenter()
 					end
 					if update.type == "turn_skipped" then
 						did_skip.current = true
+					end
+					if old_skips.current ~= world.current_skips then
+						old_skips.current = world.current_skips
+						if world.current_skips > 0 then
+							did_skip.current = true
+						end
 					end
 					do_update = true
 				end
@@ -82,7 +89,7 @@ function TopCenter()
 	end, {})
 
 	React.useEffect(function()
-		if did_skip.current or world.current_skips ~= 0 then
+		if did_skip.current then
 			did_skip.current = false
 			local tween = TweenService:Create(skip_btn_ref.current.Stroke, TweenInfo.new(0.3), {
 				Transparency = 0.4,

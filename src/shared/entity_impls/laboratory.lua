@@ -9,8 +9,8 @@ entity_mod.registry.laboratory = entity_mod.with_defaults {
 	max_health = 3,
 	build_time = 1,
 	cost = {
-		bar = 2,
-		rad = 2,
+		bar = 1,
+		rad = 3,
 	},
 	abilities = {},
 	layer = entity_mod.LAYER.building,

@@ -160,6 +160,9 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 		return cleanup
 	end, {})
 
+	local player_data = if local_player then props.world.player_data[tostring(local_player.UserId)] else nil
+	local player_settings = if player_data then player_data.settings else nil
+
 	return React.createElement(
 		MainContext.Provider,
 		{
@@ -173,7 +176,7 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 			},
 		},
 		React.createElement(SettingsContext.Provider, {
-			value = if local_player then props.world.player_data[tostring(local_player.UserId)].settings else nil,
+			value = player_settings,
 		}, {
 			TileAlerts = React.createElement(TileAlerts),
 			Research = submenu.type == "research" and React.createElement(Research, {
