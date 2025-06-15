@@ -14,6 +14,11 @@ entity_mod.registry.turret = entity_mod.with_defaults {
 			and event.damage
 			and event.damage.from == self.id
 		then
+			local victim = world.entities[event.entity_id]
+			-- don't count vertex cause they're too easy to kill
+			if victim.type == "vertex" then
+				return
+			end
 			self.max_health += 1
 		end
 	end,
