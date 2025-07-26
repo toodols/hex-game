@@ -20,7 +20,8 @@ function ability_interaction(world: World, entry: Interaction, player_info: Play
 	end
 	local entity_config = world.entity_configurations[entity.type]
 	local ability = entity_config.abilities[entry.ability_type]
-	if not ability then
+	if ability == nil then
+		-- not a valid ability of this entity
 		return {}
 	end
 	if entry.ability_type == "attack" then

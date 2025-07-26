@@ -239,6 +239,7 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	for _, entity in world:active_entities() do
 		if entity.server_data.will_die then
 			entity_mod.remove_entity(world, entity)
+			entity.server_data.will_die = nil
 		end
 	end
 
@@ -252,6 +253,7 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	presence_mod.compute_presence(world)
 	visibility_mod.compute_visibility(world)
 	remove_occluded_blueprints(world)
+	world_mod.destroy_orphan_entities(world)
 
 	-- add entity update for all cells that are now visible to a team
 	-- only do this for changed_to_true that was set this turn that are still visible

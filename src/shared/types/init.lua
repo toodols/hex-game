@@ -115,8 +115,11 @@ export type Entity = {
 	-- proxy only
 	disguise: EntityId?,
 
+	-- grave only
+	revives_into: EntityId?,
+
 	-- Whether this building's primary abilities are enabled
-	enabled: boolean?,
+	enabled: boolean,
 
 	-- for heart and extractor
 	should_output: number?,
@@ -124,9 +127,9 @@ export type Entity = {
 	deposit: CellType?,
 
 	-- entities enter decay when there is no longer a heart
-	decay: number?,
-	is_decaying: boolean?,
-	decayable: boolean?,
+	decay: number,
+	is_decaying: boolean,
+	decayable: boolean,
 
 	-- laboratory only
 	researches: ResearchState?,
@@ -154,9 +157,10 @@ export type Entity = {
 	-- for clients: .always_visible or .always_visible_for[team_id]
 	always_visible: boolean?,
 	server_data: {
-		reservation_for: EntityId?,
+		subject_type: ("reservation" | "disguise" | "revived")?,
 
-		is_disguise_of: EntityId?,
+		-- if subject_of is destroyed, this entity is also destroyed
+		subject_of: EntityId?,
 		-- whether this entity is always visible regardless of whether the cell it is on is visible
 		always_visible: boolean,
 		-- whether this entity is always visible for a specific team
@@ -164,7 +168,7 @@ export type Entity = {
 		-- timestamp of when it was first requested to be constructed
 		requested_at: number,
 
-		will_die: { death_type: string },
+		will_die: { death_type: string }?,
 	},
 }
 
@@ -366,7 +370,9 @@ export type Interaction = Decision | {
 }
 
 export type Damage = {
+	-- the entity from which this damage originated
 	from: EntityId?,
+
 	damage_type: ("physical" | "healing")?,
 	amount: number,
 	-- Whether this damage ignores shields
@@ -513,6 +519,7 @@ export type EntityConfiguration = {
 	output_power: number?,
 
 	range: number?,
+	can_revive: boolean,
 
 	-- list of offsets in addition to entity.primary_coordinate
 	offsets: { CubicCoordinate },

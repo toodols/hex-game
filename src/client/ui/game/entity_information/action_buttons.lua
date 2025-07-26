@@ -3,10 +3,8 @@ local Players = game:GetService "Players"
 
 local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
-local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local team_mod = require(ReplicatedStorage.Shared.team)
 local util = require(ReplicatedStorage.Shared.util)
-local world_mod = require(ReplicatedStorage.Shared.world)
 local coords_mod = require(ReplicatedStorage.Shared.coords)
 local ability_mod = require(ReplicatedStorage.Shared.ability)
 
@@ -29,7 +27,7 @@ function AttackButton(props: { entity_id: EntityId, LayoutOrder: number? })
 	local world: World = context.world
 	local selection_mode_stack: { SelectionMode } = context.selection_mode_stack
 	local entity = hooks.use_synced_entity(props.entity_id)
-	local shared_behavior = shared_entity_mod.registry[entity.type]
+	local shared_behavior = world.entity_configurations[entity.type]
 	local player_team = team_mod.team_of(world, Players.LocalPlayer)
 
 	local ability_type = "attack"
@@ -110,10 +108,10 @@ function DeconstructButton(props: { entity_id: EntityId, LayoutOrder: number? })
 end
 
 function DisguiseButton(props: { entity_id: EntityId, LayoutOrder: number? })
-	local entity = hooks.use_synced_entity(props.entity_id)
-	local shared_behavior = shared_entity_mod.registry[entity.type]
 	local context = React.useContext(MainContext)
 	local world: World = context.world
+	local entity = hooks.use_synced_entity(props.entity_id)
+	local shared_behavior = world.entity_configurations[entity.type]
 	local selection_mode_stack: { SelectionMode } = context.selection_mode_stack
 	local is_disguising = util.table_any(entity.queued_decisions, function(v)
 		return v.type == "ability" and v.ability_type == "disguise"

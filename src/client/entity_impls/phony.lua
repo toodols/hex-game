@@ -24,6 +24,9 @@ entity_mod.registry.phony = entity_mod.with_defaults {
 		end
 	end,
 	animate = function(self: Entity, world: World, animation_state: AnimationState)
+		if self.status ~= "complete" then
+			return
+		end
 		local instance = world.entity_instance_map[self.id]
 		assert(instance, "instance not found for entity " .. self.id .. " of type " .. self.type)
 		local spin = instance:FindFirstChild "Spin"

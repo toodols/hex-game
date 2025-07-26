@@ -12,7 +12,6 @@ type ActionState = server_types.ActionState
 
 entity_mod.registry.generator = entity_mod.with_defaults {
 	autogenerates_vertex = true,
-	on_completed = function(self: Entity, world: World) end,
 	tick = function(self: Entity, world: World, action_state: ActionState)
 		local config = world.entity_configurations[self.type]
 		if self.status == "complete" and self.owner ~= world.capturable_team then

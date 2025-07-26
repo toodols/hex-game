@@ -4,7 +4,6 @@ local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local is_allied = require(ReplicatedStorage.Shared.team).is_allied
 
 local server_types = require(script.Parent.types)
-local updates_mod = require(script.Parent.updates)
 local effect_mod = require(script.Parent.effect)
 local entity_mod = require(script.Parent.entity)
 

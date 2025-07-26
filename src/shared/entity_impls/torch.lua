@@ -10,6 +10,7 @@ entity_mod.registry.torch = entity_mod.with_defaults {
 		bar = 3,
 		rad = 3,
 	},
+	can_revive = true,
 	layer = entity_mod.LAYER.building,
 }
 

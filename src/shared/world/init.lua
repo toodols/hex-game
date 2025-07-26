@@ -79,7 +79,7 @@ function purge_destroyed_entities(world: World)
 			world.entities[entity.id] = nil
 			local instance = world.entity_instance_map[entity.id]
 			if instance then
-				world.instance_entity_map[instance] = nil
+				warn(`Instance for entity {entity.id} ({entity.type}) still exists`)
 			end
 			world.entity_instance_map[entity.id] = nil
 		end
@@ -163,13 +163,18 @@ end
 -- 	return nil
 -- end
 
+function is_active_entity(entity: Entity?): boolean
+	if entity == nil then
+		return false
+	end
+	if entity.is_destroyed then
+		return false
+	end
+	return entity.active
+end
+
 function world_active_entities(self: World): { [EntityId]: Entity }
-	return util.table_filter(self.entities, function(entity)
-		if entity.is_destroyed then
-			return false
-		end
-		return entity.active
-	end)
+	return util.table_filter(self.entities, is_active_entity)
 	-- return (
 	-- 	setmetatable({}, {
 	-- 		__iter = function()
@@ -281,6 +286,24 @@ function empty_cell(coord: CubicCoordinate): HexCell
 	}
 end
 
+-- sort of like a garbage collector that removes entities that no longer have a link
+function destroy_orphan_entities(world: World)
+	for _, entity in world.entities do
+		if entity.active then
+			continue
+		end
+		-- problem??
+		-- if C is a subject of B, and B is a subject of A, destroying A will only destroy B.
+		-- however this:
+		-- 1. is unlikely to occur in practice
+		-- 2. not destroying will not cause behavior changes
+		-- 3. this is called at the end of every turn so multiple turns will eventually destroy all orphans
+		if entity.server_data.subject_of and not is_active_entity(world.entities[entity.server_data.subject_of]) then
+			entity.is_destroyed = true
+		end
+	end
+end
+
 -- Creates a headless world from extents.
 function new_world_from_extents(extents: Extents): World
 	local world = new_world_empty()
@@ -308,4 +331,5 @@ return {
 	line_of_sight = line_of_sight,
 	new_team = new_team,
 	purge_destroyed_entities = purge_destroyed_entities,
+	destroy_orphan_entities = destroy_orphan_entities,
 }

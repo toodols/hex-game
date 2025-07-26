@@ -22,5 +22,6 @@ require(script.torch)
 require(script.fountain)
 require(script.terminal)
 require(script.anima)
+require(script.necromancer)
 
 return {}

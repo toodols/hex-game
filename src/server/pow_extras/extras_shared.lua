@@ -11,7 +11,7 @@ local unlockable_mod = require(ReplicatedStorage.Shared.unlockable)
 type TeamData = types.TeamData
 type World = types.World
 
-return function(extras)
+return function(extras, modules)
 	local commands = extras.commands
 	local extra_types = extras.types
 	local permission_types = extras.permission_types
@@ -168,18 +168,13 @@ return function(extras)
 			local suggestions = {}
 			for id, team in world.teams do
 				local id_str = tostring(id)
-				if id_str:sub(1, #text:lower()) ~= text:lower() then
-					continue
-				end
 				table.insert(suggestions, {
 					replace_at = replace_at,
 					text = id_str,
 					display_text = id_str .. " (" .. team.name .. ")",
-					match_start = 1,
-					match_end = #text,
 				})
 			end
-			return suggestions
+			return modules.util.search(suggestions, text)
 		end,
 	}
 

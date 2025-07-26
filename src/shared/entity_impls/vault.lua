@@ -18,6 +18,7 @@ entity_mod.registry.vault = entity_mod.with_defaults {
 	required_unlockable = {
 		"vault",
 	},
+	can_revive = true,
 	layer = entity_mod.LAYER.building,
 }
 

@@ -10,6 +10,7 @@ entity_mod.registry.anima = entity_mod.with_defaults {
 - {entity.laboratory} is disabled.]],
 	max_health = 3,
 	build_time = 2,
+	can_revive = true,
 	cost = {
 		bar = 3,
 		vit = 2,

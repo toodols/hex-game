@@ -4,13 +4,10 @@ local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
 
 local util = require(ReplicatedStorage.Shared.util)
-local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 
 local systems_mod = require(ServerScriptService.Server.systems)
 local damage_mod = require(ServerScriptService.Server.damage)
-local updates_mod = require(ServerScriptService.Server.updates)
 local server_entity_mod = require(ServerScriptService.Server.entity)
-local server_util = require(ServerScriptService.Server.util)
 local visibility_mod = require(ServerScriptService.Server.visibility)
 
 type World = types.World
@@ -47,7 +44,7 @@ function scout_attack(world: World, action_state: ActionState, ability: EntityAc
 	assert(cell, "cell not found")
 
 	world:add_update(ability)
-	local damage = table.clone(shared_entity_mod.registry[entity.type].abilities[ability.ability_type].damage)
+	local damage = table.clone(world.entity_configurations[entity.type].abilities[ability.ability_type].damage)
 	damage.from = ability.entity_id
 
 	damage_mod.delayed_destruction(world, damage_mod.damage_cells(world, { cell.coordinate }, damage), damage)
@@ -89,13 +86,13 @@ function disguise_ability(world: World, action_state: ActionState, ability: Enti
 
 	-- treat entity disguising as itself as resetting disguise
 	if top == entity then
-		if entity.disguise then
-			world.entities[entity.disguise].is_destroyed = true
-			world:add_update {
-				type = "entity_update",
-				entity = world.entities[entity.disguise],
-			}
-		end
+		-- if entity.disguise then
+		-- 	world.entities[entity.disguise].is_destroyed = true
+		-- 	world:add_update {
+		-- 		type = "entity_update",
+		-- 		entity = world.entities[entity.disguise],
+		-- 	}
+		-- end
 		entity.disguise = nil
 		world:add_update {
 			type = "disguise",
@@ -109,15 +106,12 @@ function disguise_ability(world: World, action_state: ActionState, ability: Enti
 		top = world.entities[top.disguise]
 	end
 
-	local copied = util.deep_copy(top)
-	copied.disguise = nil
+	local copied = server_entity_mod.clone_entity(top)
+	copied.server_data.subject_type = "disguise"
+	copied.server_data.subject_of = entity.id
 	copied.active = false
-	copied.id = server_util.new_global_id()
-	copied.primary_coordinate = entity.primary_coordinate
-	copied.coordinates = entity.coordinates
-	copied.owner = entity.owner
+	copied.disguise = nil
 	copied.is_destroyed = false
-	copied.server_data.is_disguise_of = entity.id
 	world.entities[copied.id] = copied
 	entity.disguise = copied.id
 	world:add_update {

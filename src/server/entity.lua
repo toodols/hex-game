@@ -67,7 +67,7 @@ function entity_can_deconstruct(entity: Entity, world: World)
 	if
 		entity.type == "vertex"
 		and not util.table_any(cell.entities, function(_, entity_id)
-			return shared_entity_mod.registry[world.entities[entity_id].type].layer > shared_entity_mod.LAYER.vertex
+			return world.entity_configurations[world.entities[entity_id].type].layer > shared_entity_mod.LAYER.vertex
 		end)
 	then
 		return false
@@ -111,7 +111,7 @@ function new_entity(entity_: any, world: World): Entity
 		error "argument 2 not provided"
 	end
 	local server_behavior = registry[entity.type]
-	local shared_behavior = shared_entity_mod.registry[entity.type]
+	local config = world.entity_configurations[entity.type]
 	local cell
 	if entity.primary_coordinate then
 		cell = world:get_cell(entity.primary_coordinate)
@@ -124,8 +124,8 @@ function new_entity(entity_: any, world: World): Entity
 	if server_behavior == nil then
 		error("No server behavior for " .. entity.type)
 	end
-	if shared_behavior == nil then
-		error("No shared behavior for " .. entity.type)
+	if config == nil then
+		error("No config for " .. entity.type)
 	end
 
 	-- quickly catch when i use TeamData for owner instead of TeamId
@@ -133,20 +133,21 @@ function new_entity(entity_: any, world: World): Entity
 
 	local defaults = {
 		active = true,
-		build_time = shared_behavior.build_time,
+		build_time = config.build_time,
 		incorporeal = server_behavior.incorporeal,
 		coordinates = { entity.primary_coordinate },
-		cost = shared_behavior.cost,
+		cost = config.cost,
 		cost_fulfilled = {},
 		decay = 0,
+		is_decaying = false,
+		is_destroyed = false,
 		decayable = server_behavior.decayable,
 		effects = {},
 		enabled = true,
-		health = shared_behavior.max_health,
+		health = config.max_health,
 		id = server_util.new_global_id() --[[ .. entity.type ]],
-		is_destroyed = false,
-		max_health = shared_behavior.max_health,
-		name = shared_behavior.name,
+		max_health = config.max_health,
+		name = config.name,
 		owner = world.neutral_team,
 		queued_decisions = {},
 		server_data = {},
@@ -170,7 +171,7 @@ function new_entity(entity_: any, world: World): Entity
 		else false
 
 	-- todo: rotate the offsets by the rotation
-	for _, offset in shared_behavior.offsets do
+	for _, offset in config.offsets do
 		table.insert(entity.coordinates, coords.coords_add(entity.primary_coordinate, offset))
 	end
 
@@ -195,13 +196,32 @@ function new_entity(entity_: any, world: World): Entity
 	return entity
 end
 
+function activate_entity(world: World, entity: Entity)
+	entity.active = true
+	local server_behavior = registry[entity.type]
+	server_behavior.init(entity, world)
+
+	for _, coord in entity.coordinates do
+		local cell = world:get_cell(coord)
+		if cell then
+			cell.entities[entity.id] = true
+		else
+			warn("No cell at " .. coords.encode_coord(coord))
+		end
+	end
+
+	world:add_update { type = "entity_update", entity = entity }
+end
+
 --- Marks an entity as destroyed, removing it from the cells it occupies
 --- Does not remove it from world.entities
 function remove_entity(world: World, entity: Entity)
-	local cell = world:get_cell(entity.primary_coordinate)
-	assert(cell, "cell not found")
-	for _, coord in entity.coordinates do
-		cell.entities[entity.id] = nil
+	if entity.active then
+		local cell = world:get_cell(entity.primary_coordinate)
+		assert(cell, "cell not found")
+		for _, coord in entity.coordinates do
+			cell.entities[entity.id] = nil
+		end
 	end
 	entity.is_destroyed = true
 	world:add_update { type = "entity_update", entity = entity }
@@ -215,10 +235,10 @@ function move_entity(world: World, entity: Entity, new_coordinate: CubicCoordina
 		cell.entities[entity.id] = nil
 	end
 
-	local shared_entity_behavior = shared_entity_mod.registry[entity.type]
+	local config = world.entity_configurations[entity.type]
 	entity.primary_coordinate = new_coordinate
 
-	for _, coord in shared_entity_behavior.offsets do
+	for _, coord in config.offsets do
 		table.insert(entity.coordinates, coords.coords_add(new_coordinate, coord))
 	end
 
@@ -229,9 +249,26 @@ function move_entity(world: World, entity: Entity, new_coordinate: CubicCoordina
 	end
 end
 
+--- unsets all values that indicate this entity is dead (health, is_destroyed, will_die)
+function revive_entity(entity: Entity)
+	entity.health = entity.max_health
+	entity.is_destroyed = false
+	entity.server_data.will_die = nil
+	return entity
+end
+
+function clone_entity(entity: Entity)
+	local copied = util.deep_copy(entity)
+	copied.id = server_util.new_global_id()
+	return copied
+end
+
 return {
+	revive_entity = revive_entity,
+	activate_entity = activate_entity,
+	clone_entity = clone_entity,
 	remove_entity = remove_entity,
-	autogenerates_vertex = autogenerate_vertex,
+	autogenerate_vertex = autogenerate_vertex,
 	new_entity = new_entity,
 	with_defaults = with_defaults,
 	entity_can_deconstruct = entity_can_deconstruct,

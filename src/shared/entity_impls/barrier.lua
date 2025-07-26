@@ -6,6 +6,7 @@ entity_mod.registry.barrier = entity_mod.with_defaults {
 	name = "Barrier",
 	description = "Obstacle that prevents building",
 	max_health = 5,
+	buildable = false,
 	layer = entity_mod.LAYER.building,
 }
 

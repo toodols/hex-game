@@ -11,6 +11,7 @@ entity_mod.registry.heart = entity_mod.with_defaults {
 	required_research = {
 		"heart",
 	},
+	can_revive = true,
 	cost = {
 		bar = 3,
 		rad = 2,

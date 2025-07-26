@@ -8,5 +8,6 @@ require(script.torch)
 require(script.fountain)
 require(script.phony)
 require(script.obelisk)
+require(script.necromancer)
 
 return {}

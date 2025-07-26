@@ -48,8 +48,8 @@ function serialize_entity(
 				copy[k] = v
 			end
 		end
-		if entity.server_data.is_disguise_of then
-			local host = world.entities[entity.server_data.is_disguise_of]
+		if entity.server_data.subject_of ~= nil and entity.server_data.subject_type == "disguise" then
+			local host = world.entities[entity.server_data.subject_of]
 			if not team_mod.is_allied(world, host.owner, serialize_for.team) then
 				copy.active = true
 			end

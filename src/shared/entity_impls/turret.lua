@@ -15,6 +15,7 @@ entity_mod.registry.turret = entity_mod.with_defaults {
 	},
 	required_research = {},
 	layer = entity_mod.LAYER.building,
+	can_revive = true,
 	abilities = {
 		attack = {
 			range = 3,

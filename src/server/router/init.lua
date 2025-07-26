@@ -346,6 +346,8 @@ function on_client_interaction(
 		questing.quest_update(quest, world)
 	end
 
+	world_mod.destroy_orphan_entities(world)
+
 	local updates = updates_mod.flush_updates(world)
 
 	world_mod.purge_destroyed_entities(world)

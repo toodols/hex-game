@@ -10,6 +10,7 @@ entity_mod.registry.terminal = entity_mod.with_defaults {
 	cost = {
 		bar = 4,
 	},
+	can_revive = true,
 	layer = entity_mod.LAYER.building,
 }
 

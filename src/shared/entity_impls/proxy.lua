@@ -16,6 +16,7 @@ entity_mod.registry.proxy = entity_mod.with_defaults {
 		bar = 2,
 		vit = 1,
 	},
+	can_revive = true,
 	layer = entity_mod.LAYER.building,
 }
 

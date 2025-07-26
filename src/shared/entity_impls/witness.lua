@@ -13,6 +13,7 @@ entity_mod.registry.witness = entity_mod.with_defaults {
 		bar = 3,
 		vit = 1,
 	},
+	can_revive = true,
 	layer = entity_mod.LAYER.building,
 }
 

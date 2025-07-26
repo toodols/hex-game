@@ -13,8 +13,8 @@ local registry: { [string]: ClientEntityBehavior } = {}
 type ClientEntityBehavior = {
 	-- self is possibly nil so ui can create a model from entity type alone
 	-- i don't like this behavior and i think a fake entity should be created instead
-	model: Instance | (self: Entity?, world: World) -> Instance,
-
+	model: Instance?,
+	create_model: (self: Entity?, world: World) -> Instance,
 	-- this happens before the model is parented to workspace
 	init: (self: Entity, world: World) -> (),
 
@@ -43,6 +43,7 @@ local ENTITY_TRANSPARENCY = {
 function with_defaults(t: any)
 	return {
 		model = t.model,
+		create_model = t.create_model,
 		init = t.init or function() end,
 		neighbor_changed = t.neighbor_changed or function() end,
 
@@ -59,13 +60,14 @@ function with_defaults(t: any)
 		on_destroy = t.on_destroy or function(self: Entity, world: World, event: EntityEvent)
 			assert(event.event_type == "destroy", "Not death event")
 			local instance: Instance = world.entity_instance_map[self.id]
-			if not instance then
+			if instance == nil then
 				warn("Can't do death for" .. self.id .. " (" .. self.type .. ") because instance not found ")
 				return
 			end
+			world.entity_instance_map[self.id] = nil
+			world.instance_entity_map[instance] = nil
+
 			if event.death_type == "killed" then
-				world.entity_instance_map[self.id] = nil
-				world.instance_entity_map[instance] = nil
 				for _, part in instance:GetDescendants() do
 					if not part:IsA "BasePart" then
 						continue
@@ -107,6 +109,10 @@ function with_defaults(t: any)
 end
 
 function recolor(world: World, entity: Entity, instance: Instance)
+	if instance == nil then
+		warn("No instance to recolor for entity " .. entity.id .. " of type " .. entity.type)
+		return
+	end
 	local team_color = world.teams[entity.owner].color
 
 	for _, part in instance:GetDescendants() do
@@ -121,15 +127,21 @@ end
 function create_model_from_entity(world: World, entity: Entity): Model
 	local client_behavior = registry[entity.type]
 	local instance
-	if type(client_behavior.model) == "function" then
-		instance = client_behavior.model(entity, world)
-	else
+	if entity.type == "grave" then
+		print "ITS A GRAVE"
+	end
+	if client_behavior.create_model ~= nil then
+		instance = client_behavior.create_model(entity, world)
+		world.entity_instance_map[entity.id] = instance
+		world.instance_entity_map[instance] = entity.id
+	elseif client_behavior.model ~= nil then
 		instance = client_behavior.model:Clone()
 		local cell_instance = world.cell_instance_map[coords.encode_coord(entity.primary_coordinate)]
 		instance:PivotTo(
 			(cell_instance.Base.CFrame + Vector3.new(0, cell_instance.Base.Size.Y / 2, 0))
 				* CFrame.Angles(0, math.pi / 3 * entity.rotation, 0)
 		)
+
 		world.entity_instance_map[entity.id] = instance
 		world.instance_entity_map[instance] = entity.id
 		if instance:IsA "BasePart" then
@@ -140,6 +152,10 @@ function create_model_from_entity(world: World, entity: Entity): Model
 				v.Transparency = ENTITY_TRANSPARENCY[entity.status]
 			end
 		end
+	else
+		print(
+			"Client entity behavior must either have .model or .create_model defined for entity type: " .. entity.type
+		)
 	end
 
 	if instance ~= nil then
@@ -156,10 +172,14 @@ function create_model_from_type(world: World, entity_type: string): Model
 	if not client_behavior then
 		error("Unknown entity type: " .. entity_type)
 	end
-	if type(client_behavior.model) == "function" then
-		return client_behavior.model(nil, world)
-	else
+	if client_behavior.create_model ~= nil then
+		return client_behavior.create_model(nil, world)
+	elseif client_behavior.model ~= nil then
 		return client_behavior.model:Clone()
+	else
+		error(
+			"Client entity behavior must either have .model or .create_model defined for entity type: " .. entity_type
+		)
 	end
 end
 
@@ -181,24 +201,21 @@ function update_entity_client(world: World, old: Entity?, new: Entity)
 			client_behavior.init(new, world)
 			instance.Parent = world.entity_instance_root
 		end
-		recolor(world, new, instance)
-
 		client_behavior.update(new, world, old)
-		if instance == nil then
-			warn("instance not found for entity " .. new.id .. " of type " .. new.type)
+
+		if instance ~= nil then
+			recolor(world, new, instance)
+			instance:PivotTo(
+				(cell_instance.Base.CFrame + Vector3.new(0, cell_instance.Base.Size.Y / 2, 0))
+					* CFrame.Angles(0, math.pi / 3 * new.rotation, 0)
+			)
 		end
-		instance:PivotTo(
-			(cell_instance.Base.CFrame + Vector3.new(0, cell_instance.Base.Size.Y / 2, 0))
-				* CFrame.Angles(0, math.pi / 3 * new.rotation, 0)
-		)
-		if old.status ~= new.status and not new.is_destroyed and instance then
+
+		if old.status ~= new.status and not new.is_destroyed then
 			registry[old.type].status_changed(new, world, old)
 		end
 	else
-		local instance: Model
-		if client_behavior.model then
-			instance = create_model_from_entity(world, new)
-		end
+		local instance: Model = create_model_from_entity(world, new)
 		for _, coord in new.coordinates do
 			local cell = world:get_cell(coord)
 			if cell.entities[new.id] == nil then

@@ -20,6 +20,7 @@ On death:
 	required_research = {
 		"taunt",
 	},
+	can_revive = true,
 	layer = entity_mod.LAYER.building,
 }
 

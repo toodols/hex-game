@@ -84,6 +84,7 @@ function serialize_cell(
 		for entity_id in cell.entities do
 			local entity = world.entities[entity_id]
 			if serialize_for.team == nil or visibility_mod.entity_visibility(world, serialize_for, entity) then
+				-- organically add a disguised entity to a serialized cell
 				if entity.disguise then
 					if
 						serialize_for.team == nil

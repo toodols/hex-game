@@ -11,7 +11,7 @@ type World = types.World
 type HexCell = types.HexCell
 type Entity = types.Entity
 
-function update_vertex_artifacts(self: Entity, world: World)
+function update_walls(self: Entity, world: World)
 	local instance = world.entity_instance_map[self.id]
 	util.set_transparency(instance:FindFirstChild "MeshPart", entity_mod.ENTITY_TRANSPARENCY[self.status])
 
@@ -36,13 +36,13 @@ entity_mod.registry.obelisk = entity_mod.with_defaults {
 	model = model,
 	update = function(self: Entity, world: World, old: Entity) end,
 	status_changed = function(self, world)
-		update_vertex_artifacts(self, world)
+		update_walls(self, world)
 	end,
 	neighbor_changed = function(self: Entity, world: World)
-		update_vertex_artifacts(self, world)
+		update_walls(self, world)
 	end,
 	init = function(self: Entity, world: World)
-		update_vertex_artifacts(self, world)
+		update_walls(self, world)
 	end,
 }
 

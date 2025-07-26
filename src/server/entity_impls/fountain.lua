@@ -19,10 +19,8 @@ entity_mod.registry.fountain = entity_mod.with_defaults {
 	built_on = { "bar_deposit", "vit_deposit", "rad_deposit", "tar_deposit" },
 	init = function(self: Entity, world: World) end,
 	on_completed = function(self: Entity, world: World)
-		if self.status ~= "complete" then
-			return
-		end
 		local cell = world:get_cell(self.primary_coordinate)
+		self.health = 0
 		local event = {
 			type = "entity_event",
 			event_type = "destroy",

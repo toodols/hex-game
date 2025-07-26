@@ -38,6 +38,7 @@ type PartialEntityConfiguration = {
 	required_research: { ResearchId }?,
 	recipes: { Recipe }?,
 	required_unlockable: { string }?,
+	can_revive: boolean?,
 }
 
 function with_defaults(t: PartialEntityConfiguration): EntityConfiguration
@@ -57,6 +58,7 @@ function with_defaults(t: PartialEntityConfiguration): EntityConfiguration
 	t.required_research = t.required_research or {}
 	t.recipes = t.recipes
 	t.required_unlockable = t.required_unlockable or {}
+	t.can_revive = t.can_revive or false
 	return t :: any
 end
 

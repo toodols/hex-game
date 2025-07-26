@@ -17,6 +17,7 @@ entity_mod.registry.solution = entity_mod.with_defaults {
 			heal_amount = 2,
 		},
 	},
+	can_revive = true,
 	layer = entity_mod.LAYER.building,
 }
 

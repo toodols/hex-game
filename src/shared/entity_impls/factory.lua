@@ -11,6 +11,7 @@ entity_mod.registry.factory = entity_mod.with_defaults {
 		rad = 2,
 		bar = 2,
 	},
+	can_revive = true,
 	can_disable = true,
 	recipes = {
 		vit_to_tek = {

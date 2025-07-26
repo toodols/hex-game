@@ -8,7 +8,6 @@ local util = require(ReplicatedStorage.Shared.util)
 local formatting = require(ReplicatedStorage.Shared.formatting)
 local items_mod = require(ReplicatedStorage.Shared.items)
 local team_mod = require(ReplicatedStorage.Shared.team)
-local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local ui_types = require(ReplicatedStorage.Client.ui.types)
@@ -48,7 +47,8 @@ type SelectionMode = ui_types.SelectionMode
 type HexCell = types.HexCell
 
 function OutputClock(props: { entity: Entity, LayoutOrder: number? })
-	local shared_behavior = shared_entity_mod.registry[props.entity.type]
+	local world: World = React.useContext(MainContext).world
+	local shared_behavior = world.entity_configurations[props.entity.type]
 	local cycles_to_output = shared_behavior.cycles_to_output
 	local should_output = props.entity.should_output
 
@@ -438,7 +438,7 @@ function EntityInformation(props: {
 							end,
 						})
 						else nil,
-					
+
 					-- Store
 
 					Range = if entity.type == "laboratory"
