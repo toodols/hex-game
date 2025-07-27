@@ -9,5 +9,6 @@ require(script.fountain)
 require(script.phony)
 require(script.obelisk)
 require(script.necromancer)
+require(script.deposit)
 
 return {}

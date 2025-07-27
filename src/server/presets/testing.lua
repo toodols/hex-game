@@ -5,6 +5,7 @@ local world_mod = require(ReplicatedStorage.Shared.world)
 local coords = require(ReplicatedStorage.Shared.coords)
 local turn_scheduler_init = require(ServerScriptService.Server.turn_scheduler_init)
 local entity_mod = require(ServerScriptService.Server.entity)
+local set_deposit_type = require(ServerScriptService.Server.deposit).set_deposit_type
 
 type World = types.World
 
@@ -113,7 +114,7 @@ function stress_test(): World
 	for encoded_coord, cell in world.cells do
 		local x, y, z = unpack(cell.coordinate)
 		if (x + y) % 2 == 0 then
-			cell.type = "bar_deposit"
+			set_deposit_type(world, cell.coordinate, "bar_deposit")
 			entity_mod.new_entity({
 				type = "extractor",
 				primary_coordinate = cell.coordinate,

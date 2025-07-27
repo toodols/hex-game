@@ -6,6 +6,9 @@ local util = require(ReplicatedStorage.Shared.util)
 type Inventory = types.Inventory
 type Item = types.Item
 type Filter = types.Filter
+type World = types.World
+type HexCell = types.HexCell
+type DepositType = types.DepositType
 
 function count_items(tab: { Item }, needle: Item): number
 	local count = 0

@@ -23,5 +23,6 @@ require(script.impression)
 require(script.terminal)
 require(script.anima)
 require(script.necromancer)
+require(script.deposit)
 
 return {}

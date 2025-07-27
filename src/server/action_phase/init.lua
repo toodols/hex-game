@@ -4,6 +4,8 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local world_mod = require(ReplicatedStorage.Shared.world)
+local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
+local get_deposit_type = require(ReplicatedStorage.Shared.deposit).get_deposit_type
 
 local presence_mod = require(ServerScriptService.Server.presence)
 local server_types = require(ServerScriptService.Server.types)
@@ -215,16 +217,20 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	local dropped = process_queue(world, action_state)
 
 	for _, entity in world:active_entities() do
-		if entity.type == "vertex" or entity.type == "extractor" then
+		if
+			entity.type == "vertex"
+			or entity.type == "extractor"
+			or world.entity_configurations[entity.type].layer < shared_entity_mod.LAYER.building
+		then
 			continue
 		end
 		local on_vit = false
 		local on_rad = false
 		for _, coord in entity.coordinates do
-			local cell = world:get_cell(coord)
-			if cell.type == "vit_deposit" then
+			local deposit_type = get_deposit_type(world, coord)
+			if deposit_type == "vit_deposit" then
 				on_vit = true
-			elseif cell.type == "rad_deposit" then
+			elseif deposit_type == "rad_deposit" then
 				on_rad = true
 			end
 		end

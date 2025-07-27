@@ -26,7 +26,8 @@ export type ServerEntityBehavior = {
 
 	abilities: { [string]: (self: Entity, world: World) -> () },
 	built_on: { CellType },
-	incorporeal: boolean?,
+	incorporeal: boolean,
+	always_visible: boolean,
 
 	illumination: (self: Entity, world: World) -> { CubicCoordinate },
 	influences: ((self: Entity, world: World) -> ())?,
@@ -47,9 +48,11 @@ local noop = function() end
 function with_defaults(behavior: any): ServerEntityBehavior
 	behavior.init = behavior.init or noop
 	behavior.tick = behavior.tick or noop
+	behavior.always_visible = behavior.always_visible or false
 	if behavior.decayable == nil then
 		behavior.decayable = true
 	end
+	behavior.incorporeal = behavior.incorporeal or false
 	behavior.on_completed = behavior.on_completed or noop
 	behavior.built_on = behavior.built_on or {}
 	-- behavior.influences = behavior.influences
@@ -134,7 +137,6 @@ function new_entity(entity_: any, world: World): Entity
 	local defaults = {
 		active = true,
 		build_time = config.build_time,
-		incorporeal = server_behavior.incorporeal,
 		coordinates = { entity.primary_coordinate },
 		cost = config.cost,
 		cost_fulfilled = {},
@@ -168,7 +170,11 @@ function new_entity(entity_: any, world: World): Entity
 		else {}
 	entity.server_data.always_visible = if entity.server_data.always_visible ~= nil
 		then entity.server_data.always_visible
-		else false
+		else server_behavior.always_visible
+
+	entity.server_data.incorporeal = if entity.server_data.incorporeal ~= nil
+		then entity.server_data.incorporeal
+		else server_behavior.incorporeal
 
 	-- todo: rotate the offsets by the rotation
 	for _, offset in config.offsets do

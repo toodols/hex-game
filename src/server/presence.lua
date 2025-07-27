@@ -12,7 +12,7 @@ type TeamId = types.TeamId
 type CubicCoordinate = types.CubicCoordinate
 
 function presence_size(world: World, entity: Entity): number
-	if entity.incorporeal then
+	if entity.server_data.incorporeal then
 		return -1
 	end
 
@@ -74,8 +74,6 @@ function team_may_naively_place_blueprint(world: World, team: TeamId, coord: Cub
 	if not can_see_enemy_presence then
 		return true
 	end
-
-
 
 	return false
 end

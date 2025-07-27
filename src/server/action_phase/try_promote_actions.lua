@@ -44,17 +44,19 @@ function handle_try_promote_actions(world: World, action_state: ActionState)
 				end
 			end
 
-			-- promote this blueprint if it is on a portal connected to a system
 			local cell = world:get_cell(entity.primary_coordinate)
-			if cell.type == "portal" and cell.portal.open then
-				for _, coord in cell.portal.group do
-					local system = action_state.system_by_cell[coords.encode_coord(coord)]
-					if system ~= nil then
-						table.insert(valid_systems, system)
-					end
-				end
-			end
-			if not valid_systems then
+
+			-- promote this blueprint if it is on a portal connected to a system
+			-- if cell.type == "portal" and cell.portal.open then
+			-- 	for _, coord in cell.portal.group do
+			-- 		local system = action_state.system_by_cell[coords.encode_coord(coord)]
+			-- 		if system ~= nil then
+			-- 			table.insert(valid_systems, system)
+			-- 		end
+			-- 	end
+			-- end
+
+			if #valid_systems == 0 then
 				continue
 			end
 			for _, system in valid_systems do

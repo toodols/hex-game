@@ -99,7 +99,7 @@ function start_game(teleport_data: { room: types.Room }?)
 	-- or { map = "my_map", players = { ["-1"] = { team = 4 }, ["-2"] = { team = 3 } } }
 	local players_config = room and room.players
 	print("Starting game with teleport data", game.HttpService:JSONEncode(teleport_data))
-	-- main_world = presets.tutorial_map()
+	-- main_world = tests.server.weird_presence_after_load()
 	main_world = presets[if room then room.map else "my_map"]()
 	-- main_world = tests.server.phony_generates_tek_on_death()
 

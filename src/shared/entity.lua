@@ -13,10 +13,11 @@ type EntityConfiguration = types.EntityConfiguration
 
 -- a higher layer indicates that damage will be passed to it first before the others
 local LAYER = {
-	vertex = 0,
-	modifier = 1,
-	building = 2,
-	-- shield = 3,
+	deposit = 0,
+	vertex = 1,
+	modifier = 2,
+	building = 3,
+	-- shield = 4,
 }
 
 local registry: { [string]: EntityConfiguration } = {}

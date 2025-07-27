@@ -20,6 +20,7 @@ local visibility_mod = require(ServerScriptService.Server.visibility)
 local influences_mod = require(ServerScriptService.Server.influences)
 local turn_scheduler_init = require(ServerScriptService.Server.turn_scheduler_init)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
+local set_deposit_type = require(ServerScriptService.Server.deposit).set_deposit_type
 
 local assert_eq = util.assert_eq
 
@@ -29,7 +30,7 @@ type HexCell = types.HexCell
 type TeamData = types.TeamData
 
 -- spawns an entity at the first empty cell
-function spawn_entity(world: World, entity_ty: string, cell_ty: string?)
+function spawn_entity(world: World, entity_ty: string, deposit_ty: string?)
 	local team = (util.table_find_pred(world.teams, function(candidate)
 		return candidate.is_player_team
 	end) :: TeamData).id
@@ -53,8 +54,8 @@ function spawn_entity(world: World, entity_ty: string, cell_ty: string?)
 		primary_coordinate = cell.coordinate,
 	}, world)
 
-	if cell_ty then
-		cell.type = cell_ty
+	if deposit_ty then
+		set_deposit_type(world, cell.coordinate, deposit_ty)
 	end
 
 	return entity
@@ -269,7 +270,7 @@ function tests.chatgpt_didnt_grift_me() -- (it did)
 	for _, cell in world.cells do
 		local coord = cell.coordinate
 		if not world_mod.line_of_sight(world, { 1, 0, -1 }, coord, team1.id) then
-			cell.type = "rad_deposit"
+			set_deposit_type(world, coord, "rad_deposit")
 		end
 	end
 
@@ -892,6 +893,7 @@ function tests.weird_presence_after_load()
 	influences_mod.compute_influences(world)
 	presence_mod.compute_presence(world)
 	visibility_mod.compute_visibility(world)
+
 	assert(next((world:get_cell { 0, 0, 0 }).server_data.presence) == nil, "There should be no presence on center tile")
 
 	action_phase_mod.run_action_phase(world)
@@ -1012,6 +1014,18 @@ function tests.tutorial_works()
 	local tutorial_map = presets.tutorial_map()
 
 	cleanup(tutorial_map)
+end
+
+function tests.deposit_is_incorporeal()
+	local world = presets.my_map()
+	local deposit = world:query_entity({ type = "deposit", coordinate = { 0, 0, 0 } })[1]
+	assert(deposit.server_data.incorporeal, "Deposit should be incorporeal")
+	action_phase_mod.run_action_phase(world)
+	print(world:get_cell { 0, 0, 0 })
+	assert(
+		world:get_cell({ 0, 0, 0 }).server_data.presence[world.neutral_team] == nil,
+		"Deposit should not create a presence"
+	)
 end
 
 return tests

@@ -4,6 +4,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local asset_server = require(ReplicatedStorage.Shared.asset_server)
 local items_mod = require(ReplicatedStorage.Shared.items)
 local RunService = game:GetService "RunService"
+local get_deposit_type = require(ReplicatedStorage.Shared.deposit).get_deposit_type
 
 type Entity = types.Entity
 type World = types.World
@@ -12,15 +13,15 @@ type EntityEvent = types.EntityEvent
 entity_mod.registry.fountain = entity_mod.with_defaults {
 	model = asset_server.load "Entities/Fountain",
 	update = function(self: Entity, world: World)
-		local cell = world:get_cell(self.primary_coordinate)
+		local deposit_type = get_deposit_type(world, world:get_cell(self.primary_coordinate) :: types.HexCell)
 		local item_type
-		if cell.type == "bar_deposit" then
+		if deposit_type == "bar_deposit" then
 			item_type = "bar"
-		elseif cell.type == "vit_deposit" then
+		elseif deposit_type == "vit_deposit" then
 			item_type = "vit"
-		elseif cell.type == "rad_deposit" then
+		elseif deposit_type == "rad_deposit" then
 			item_type = "rad"
-		elseif cell.type == "tar_deposit" then
+		elseif deposit_type == "tar_deposit" then
 			item_type = "tar"
 		end
 		if item_type then

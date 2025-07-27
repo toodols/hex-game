@@ -11,6 +11,7 @@ local tutorial_map = require(script.tutorial).tutorial_map
 local testing_maps = require(script.testing)
 local util = require(ReplicatedStorage.Shared.util)
 local turn_scheduler_init = require(script.Parent.turn_scheduler_init)
+local set_deposit_type = require(script.Parent.deposit).set_deposit_type
 
 type World = types.World
 type TeamData = types.TeamData
@@ -64,7 +65,6 @@ function my_map(): World
 		owner = team2.id,
 	}, world)
 
-	-- world:get_cell({ 1 - magic, magic - 1, 0 }).type = "bar_deposit"
 	stockpile2.inventory.items = { "bar", "bar", "rad", "bar", "rad" }
 
 	local shuffled_cells = {}
@@ -90,30 +90,30 @@ function my_map(): World
 
 	for i = 1, bar_deposit_quota do
 		local cell = shuffled_cells[idx]
-		cell.type = "bar_deposit"
+		set_deposit_type(world, cell.coordinate, "bar_deposit")
 		local opp = world:get_cell(inverse(cell.coordinate))
-		opp.type = "bar_deposit"
+		set_deposit_type(world, opp.coordinate, "bar_deposit")
 		idx += 1
 	end
 	for i = 1, vit_deposit_quota do
 		local cell = shuffled_cells[idx]
-		cell.type = "vit_deposit"
+		set_deposit_type(world, cell.coordinate, "vit_deposit")
 		local opp = world:get_cell(inverse(cell.coordinate))
-		opp.type = "vit_deposit"
+		set_deposit_type(world, opp.coordinate, "vit_deposit")
 		idx += 1
 	end
 	for i = 1, rad_deposit_quota do
 		local cell = shuffled_cells[idx]
-		cell.type = "rad_deposit"
+		set_deposit_type(world, cell.coordinate, "rad_deposit")
 		local opp = world:get_cell(inverse(cell.coordinate))
-		opp.type = "rad_deposit"
+		set_deposit_type(world, opp.coordinate, "rad_deposit")
 		idx += 1
 	end
 	for i = 1, tar_deposit_quota do
 		local cell = shuffled_cells[idx]
-		cell.type = "tar_deposit"
+		set_deposit_type(world, cell.coordinate, "tar_deposit")
 		local opp = world:get_cell(inverse(cell.coordinate))
-		opp.type = "tar_deposit"
+		set_deposit_type(world, opp.coordinate, "tar_deposit")
 		idx += 1
 	end
 	for i = 1, barrier_quota do
@@ -143,7 +143,7 @@ function my_map(): World
 	end
 
 	local origin = world:get_cell { 0, 0, 0 }
-	origin.type = "bar_deposit"
+	set_deposit_type(world, origin.coordinate, "bar_deposit")
 
 	return world, {
 		team1 = team1,

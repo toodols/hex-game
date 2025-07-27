@@ -202,7 +202,17 @@ local effect = tagged_union({
 	infected_immune = struct {
 		type = const "infected_immune",
 	},
+	regeneration = struct {
+		type = const "regeneration",
+	},
 }, "type")
+
+local deposit_type = enum {
+	"bar_deposit",
+	"tar_deposit",
+	"rad_deposit",
+	"vit_deposit",
+}
 
 local entity: Schema<Entity> = struct {
 	active = boolean,
@@ -217,6 +227,7 @@ local entity: Schema<Entity> = struct {
 	effects = array(effect),
 	current_recipe = option(str),
 	disguise = option(entity_id),
+	deposit_type = option(deposit_type),
 	enabled = boolean,
 	should_output = option(u8),
 	status = entity_statuses,
@@ -239,16 +250,13 @@ local entity: Schema<Entity> = struct {
 		subject_of = option(entity_id),
 		always_visible = boolean,
 		always_visible_for = map(team_id, const(true)),
+		incorporeal = boolean,
 	},
 }
 
 local cell_types = enum {
 	"basic",
 	"portal",
-	"bar_deposit",
-	"tar_deposit",
-	"rad_deposit",
-	"vit_deposit",
 }
 
 local cell: Schema<HexCell> = struct {

@@ -106,7 +106,6 @@ export type Entity = {
 	health: number,
 	max_health: number,
 	inventory: Inventory?,
-	incorporeal: true?,
 	effects: { Effect },
 
 	-- factory only
@@ -118,13 +117,16 @@ export type Entity = {
 	-- grave only
 	revives_into: EntityId?,
 
+	-- deposit only
+	deposit_type: DepositType?,
+
 	-- Whether this building's primary abilities are enabled
 	enabled: boolean,
 
 	-- for heart and extractor
 	should_output: number?,
 	--- extractor only
-	deposit: CellType?,
+	deposit: DepositType?,
 
 	-- entities enter decay when there is no longer a heart
 	decay: number,
@@ -169,6 +171,7 @@ export type Entity = {
 		requested_at: number,
 
 		will_die: { death_type: string }?,
+		incorporeal: boolean,
 	},
 }
 
@@ -180,7 +183,7 @@ export type Extents = { ExtentsDim }
 
 export type InstanceMap<T> = { [T]: PVInstance }
 
-export type CellType = "basic" | "bar_deposit" | "tar_deposit" | "vit_deposit" | "rad_deposit" | "portal"
+export type DepositType = "bar_deposit" | "tar_deposit" | "vit_deposit" | "rad_deposit" | "portal"
 
 type Portal = {
 	group: { CubicCoordinate },
@@ -204,6 +207,7 @@ export type CellTeamVisibility = {
 	changed_to_true: boolean?,
 }
 
+export type CellType = "basic"
 export type HexCell = {
 	type: CellType,
 	entities: { [EntityId]: boolean },
@@ -504,7 +508,6 @@ export type EntityConfiguration = {
 		},
 	},
 	can_disable: boolean,
-	incorporeal: true?,
 
 	required_research: { ResearchId },
 	required_unlockable: { Unlockable },

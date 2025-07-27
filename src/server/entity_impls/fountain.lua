@@ -7,6 +7,8 @@ local updates_mod = require(ServerScriptService.Server.updates)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local items_mod = require(ReplicatedStorage.Shared.items)
 local coords = require(ReplicatedStorage.Shared.coords)
+local get_deposit_type = require(ReplicatedStorage.Shared.deposit).get_deposit_type
+local set_deposit_type = require(ServerScriptService.Server.deposit).set_deposit_type
 
 type ActionState = server_types.ActionState
 type Entity = types.Entity
@@ -16,7 +18,6 @@ type HexCell = types.HexCell
 
 entity_mod.registry.fountain = entity_mod.with_defaults {
 	autogenerates_vertex = true,
-	built_on = { "bar_deposit", "vit_deposit", "rad_deposit", "tar_deposit" },
 	init = function(self: Entity, world: World) end,
 	on_completed = function(self: Entity, world: World)
 		local cell = world:get_cell(self.primary_coordinate)
@@ -29,7 +30,7 @@ entity_mod.registry.fountain = entity_mod.with_defaults {
 		}
 		world:add_update(event)
 		self.server_data.will_die = { death_type = "used" }
-		local deposit_ty = cell.type
+		local deposit_ty = get_deposit_type(world, self.primary_coordinate)
 		local item_ty
 		if deposit_ty == "bar_deposit" then
 			item_ty = "bar"
@@ -41,7 +42,7 @@ entity_mod.registry.fountain = entity_mod.with_defaults {
 			item_ty = "tar"
 		end
 
-		cell.type = "basic"
+		set_deposit_type(world, self.primary_coordinate, nil)
 
 		for _, neighbor_cell in world_mod.into_cells(world, coords.neighbors_leq(self.primary_coordinate, 2)) do
 			for entity_id in neighbor_cell.entities do
