@@ -40,12 +40,17 @@ type PartialEntityConfiguration = {
 	recipes: { Recipe }?,
 	required_unlockable: { string }?,
 	can_revive: boolean?,
+	internal: boolean?,
+	construction_condition: {}?,
+	entity_group: { [string]: true }?,
 }
 
 function with_defaults(t: PartialEntityConfiguration): EntityConfiguration
 	t.type = t.type or error "no type"
 	t.init = t.init or function() end
+	t.internal = t.internal or false
 	t.build_time = t.build_time or 0
+	t.construction_condition = t.construction_condition or {}
 	-- this entity may be built by the player?
 	t.buildable = if t.buildable ~= nil then t.buildable else true
 	t.name = t.name or t.type
@@ -60,6 +65,7 @@ function with_defaults(t: PartialEntityConfiguration): EntityConfiguration
 	t.recipes = t.recipes
 	t.required_unlockable = t.required_unlockable or {}
 	t.can_revive = t.can_revive or false
+	t.entity_group = t.entity_group or {}
 	return t :: any
 end
 

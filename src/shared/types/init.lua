@@ -512,6 +512,9 @@ export type EntityConfiguration = {
 	required_research: { ResearchId },
 	required_unlockable: { Unlockable },
 
+	-- when true, this entity does not show up directly on selected cells
+	internal: boolean,
+
 	-- extractor only
 	cycles_to_output: number?,
 
@@ -531,6 +534,14 @@ export type EntityConfiguration = {
 
 	-- factory only
 	recipes: { Recipe }?,
+	construction_condition: ConstructionCondition,
+	entity_group: { [string]: true },
+}
+
+export type ConstructionCondition = {
+	nearby: { string }?,
+	not_nearby: { string }?,
+	built_on: { string }?,
 }
 
 export type GlobalConfiguration = {

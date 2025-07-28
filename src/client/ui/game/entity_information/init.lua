@@ -281,7 +281,7 @@ function EntityInformation(props: {
 							AutomaticSize = Enum.AutomaticSize.Y,
 							LayoutOrder = 2,
 							Size = UDim2.new(1, 0, 0, 20),
-							Text = formatting.format_text(world, shared_behavior.short_description),
+							Text = formatting.format_text(world, shared_behavior.description),
 						}
 					),
 					StatusLabel = if entity.status ~= "complete"

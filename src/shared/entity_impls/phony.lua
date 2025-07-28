@@ -5,6 +5,7 @@ entity_mod.registry.phony = entity_mod.with_defaults {
 	type = "phony",
 	name = "Phony",
 	description = "Can disguise as a different building in a range of {entity.phony.abilities.disguise.range}. On death, generate 1 {item.tek}",
+	short_description = "Can disguise as a different building",
 	max_health = 1,
 	build_time = 1,
 	cost = {
@@ -16,9 +17,9 @@ entity_mod.registry.phony = entity_mod.with_defaults {
 			range = 4,
 		},
 	},
-	-- required_research = {
-	-- 	"phony",
-	-- },
+	construction_condition = {
+		nearby = { "scout" },
+	},
 	layer = entity_mod.LAYER.building,
 }
 

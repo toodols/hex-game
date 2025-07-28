@@ -3,6 +3,9 @@
 		"**/Packages": true,
 		"pow": true,
 	},
+	"files.associations": {
+    	"*.lua": "luau"
+  	},
 	"luau-lsp.sourcemap.rojoProjectFile": "game.project.json",
 	"stylua.targetReleaseVersion": "latest"
 }

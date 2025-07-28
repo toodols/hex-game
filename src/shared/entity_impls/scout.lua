@@ -5,8 +5,12 @@ entity_mod.registry.scout = entity_mod.with_defaults {
 	type = "scout",
 	name = "Sentry",
 	description = "Illuminates r=3 tiles. For {entity.scout.abilities.attack.cost}, does {entity.scout.abilities.attack.damage.amount} damage.",
+	short_description = "Early warning and defense",
 	max_health = 3,
 	build_time = 2,
+	entity_group = {
+		["@weapon"] = true,
+	},
 	cost = {
 		bar = 2,
 		rad = 2,
@@ -24,6 +28,10 @@ entity_mod.registry.scout = entity_mod.with_defaults {
 				bar = 1,
 			},
 		},
+	},
+	construction_condition = {
+		nearby = { "extractor" },
+		not_nearby = { "scout" },
 	},
 	can_revive = true,
 	layer = entity_mod.LAYER.building,

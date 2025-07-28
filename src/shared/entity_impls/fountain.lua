@@ -5,6 +5,7 @@ entity_mod.registry.fountain = entity_mod.with_defaults {
 	type = "fountain",
 	name = "Fountain",
 	description = "On complete, fill every owned inventory in r={entity.fountain.range} with the item corresponding to this tile, then set this tile's type to basic.",
+	short_description = "Produces a large amount of items when inventory is nearby",
 	max_health = 3,
 	build_time = 3,
 	cost = {
@@ -12,7 +13,7 @@ entity_mod.registry.fountain = entity_mod.with_defaults {
 		tar = 3,
 	},
 	range = 2,
-	required_research = { "fountain" },
+	construction_condition = { built_on = { "deposit" }, nearby = { "extractor" } },
 	abilities = {},
 	layer = entity_mod.LAYER.building,
 }

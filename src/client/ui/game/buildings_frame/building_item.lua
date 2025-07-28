@@ -1,18 +1,20 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local TweenService = game:GetService "TweenService"
+local Players = game:GetService "Players"
 
 local React = require(ReplicatedStorage.Packages.react)
 
+local util = require(ReplicatedStorage.Shared.util)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local client_entity_mod = require(ReplicatedStorage.Client.entity)
 local themes = require(ReplicatedStorage.Client.ui.themes)
 
 local types = require(ReplicatedStorage.Shared.types)
-local util = require(ReplicatedStorage.Shared.util)
-local researches_mod = require(ReplicatedStorage.Shared.researches)
 local formatting = require(ReplicatedStorage.Shared.formatting)
+local team_mod = require(ReplicatedStorage.Shared.team)
 local Items = require(ReplicatedStorage.Client.ui.game.items).Items
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
+local validate_condition = require(ReplicatedStorage.Shared.construction_condition).validate_condition
 
 local Corner = util_components.Corner
 local Separator = util_components.Separator
@@ -38,14 +40,19 @@ local BuildingItem = React.forwardRef(function(
 )
 	local height = props.height
 	local world: World = React.useContext(MainContext).world
+	local player_team = team_mod.team_of(world, Players.LocalPlayer)
 	local entity_config = world.entity_configurations[props.type]
 	local item_ref = React.useRef(nil :: any)
 	local viewport_ref = React.useRef(nil :: any)
+
 	React.useEffect(function()
 		local model = client_entity_mod.create_model_from_type(world, props.type)
 		model.Parent = viewport_ref.current
 		model:PivotTo(CFrame.new(0, -2, -4))
 	end, { props.type })
+
+	local can_build, construction_condition_status =
+		validate_condition(world, props.cell, player_team.id, entity_config.construction_condition)
 
 	return React.createElement("Frame", {
 		BackgroundTransparency = 1,
@@ -174,6 +181,9 @@ local BuildingItem = React.forwardRef(function(
 								Size = UDim2.new(1, 0, 0, 25),
 								Text = entity_config.name,
 								TextSize = 18,
+								TextColor3 = if can_build
+									then Color3.fromRGB(255, 255, 255)
+									else Color3.fromRGB(90, 90, 90),
 								TextXAlignment = Enum.TextXAlignment.Left,
 							}
 						),
@@ -199,33 +209,138 @@ local BuildingItem = React.forwardRef(function(
 								}),
 							}
 						),
-						RequiredResearch = if #entity_config.required_research > 0
-							then React.createElement(
-								"TextLabel",
-								themes.theme_description {
-									BackgroundTransparency = 1,
-									LayoutOrder = 4,
-									AutomaticSize = Enum.AutomaticSize.Y,
-									Size = UDim2.new(1, 0, 0, 0),
-									Text = "Requires Research: " .. table.concat(
-										util.table_map(entity_config.required_research, function(research_id)
-											local research = researches_mod.researches[research_id]
-											if props.researches[research_id] then
-												return `<font color="rgb(50, 155, 50)">{research.name}</font>`
-											else
-												return `<font color="rgb(155, 50, 50)">{research.name}</font>`
-											end
-										end),
-										", "
-									),
-									TextSize = 13,
-								}
-							)
-							else nil,
 						Items = React.createElement(Items, {
 							items = entity_config.cost,
 							LayoutOrder = 5,
 						}),
+						-- CanBuild = React.createElement(
+						-- 	"TextLabel",
+						-- 	themes.theme_description {
+						-- 		LayoutOrder = 6,
+						-- 		TextSize = 14,
+						-- 		Size = UDim2.new(1, 0, 0, 25),
+						-- 		Text = "Conditions",
+						-- 		TextColor3 = if can_build
+						-- 			then Color3.fromRGB(123, 165, 123)
+						-- 			else Color3.fromRGB(138, 90, 90),
+						-- 	}
+						-- ),
+						MustBeBuiltOn = if construction_condition_status.built_on
+							then React.createElement(
+								"TextLabel",
+								themes.theme_description {
+									TextSize = 12,
+									AutomaticSize = Enum.AutomaticSize.Y,
+									LayoutOrder = 7,
+									Size = UDim2.new(1, 0, 0, 0),
+									Text = formatting.format_text(
+										world,
+										`Built On: {table.concat(
+											util.table_map(construction_condition_status.built_on, function(status)
+												local text
+												if status.entity_type:sub(1, 1) == "@" then
+													text = status.entity_type
+												else
+													text = "{entity." .. status.entity_type .. "}"
+												end
+												return util.font(text, {
+													color = if status.ok
+														then Color3.fromRGB(123, 165, 123)
+														else Color3.fromRGB(138, 90, 90),
+												})
+											end),
+											" / "
+										)}`
+									),
+								}
+							)
+							else nil,
+						MustBeNearby = if construction_condition_status.nearby
+							then React.createElement(
+								"TextLabel",
+								themes.theme_description {
+									LayoutOrder = 8,
+									Size = UDim2.new(1, 0, 0, 0),
+									TextSize = 12,
+									AutomaticSize = Enum.AutomaticSize.Y,
+
+									Text = formatting.format_text(
+										world,
+										`Nearby: {table.concat(
+											util.table_map(construction_condition_status.nearby, function(status)
+												local text
+												if status.entity_type:sub(1, 1) == "@" then
+													text = status.entity_type
+												else
+													text = "{entity." .. status.entity_type .. "}"
+												end
+												return util.font(text, {
+													color = if status.ok
+														then Color3.fromRGB(123, 165, 123)
+														else Color3.fromRGB(138, 90, 90),
+												})
+											end),
+											" / "
+										)}`
+									),
+								}
+							)
+							else nil,
+						MustNotBeNearby = if construction_condition_status.not_nearby
+							then React.createElement(
+								"TextLabel",
+								themes.theme_description {
+									LayoutOrder = 9,
+									Size = UDim2.new(1, 0, 0, 0),
+									TextSize = 12,
+									AutomaticSize = Enum.AutomaticSize.Y,
+									Text = formatting.format_text(
+										world,
+										`Not Nearby: {table.concat(
+											util.table_map(construction_condition_status.not_nearby, function(status)
+												local text
+												if status.entity_type:sub(1, 1) == "@" then
+													text = status.entity_type
+												else
+													text = "{entity." .. status.entity_type .. "}"
+												end
+												return util.font(text, {
+													color = if status.ok
+														then Color3.fromRGB(123, 165, 123)
+														else Color3.fromRGB(138, 90, 90),
+												})
+											end),
+											" / "
+										)}`
+									),
+								}
+							)
+							else nil,
+
+						-- RequiredResearch = if #entity_config.required_research > 0
+						-- 	then React.createElement(
+						-- 		"TextLabel",
+						-- 		themes.theme_description {
+						-- 			BackgroundTransparency = 1,
+						-- 			LayoutOrder = 4,
+						-- 			AutomaticSize = Enum.AutomaticSize.Y,
+						-- 			Size = UDim2.new(1, 0, 0, 0),
+						-- 			Text = "Requires Research: " .. table.concat(
+						-- 				util.table_map(entity_config.required_research, function(research_id)
+						-- 					local research = researches_mod.researches[research_id]
+						-- 					if props.researches[research_id] then
+						-- 						return `<font color="rgb(50, 155, 50)">{research.name}</font>`
+						-- 					else
+						-- 						return `<font color="rgb(155, 50, 50)">{research.name}</font>`
+						-- 					end
+						-- 				end),
+						-- 				", "
+						-- 			),
+						-- 			TextSize = 13,
+						-- 		}
+						-- 	)
+						-- 	else nil,
+
 						VerticalLayout = React.createElement("UIListLayout", {
 							Padding = UDim.new(0, 4),
 							SortOrder = Enum.SortOrder.LayoutOrder,

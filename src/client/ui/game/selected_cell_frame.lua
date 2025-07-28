@@ -48,6 +48,11 @@ function entities_from_cells(world: World, selected_cells: { CubicCoordinate })
 	for _, coord in selected_cells do
 		local cell = world:get_cell(coord)
 		for entity_id in cell.entities do
+			local entity = world.entities[entity_id]
+			local config = world.entity_configurations[entity.type]
+			if config.internal then
+				continue
+			end
 			entities_set[entity_id] = true
 		end
 	end

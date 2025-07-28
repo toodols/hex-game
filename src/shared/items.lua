@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
+local font = require(ReplicatedStorage.Shared.util).font
 
 type Inventory = types.Inventory
 type Item = types.Item
@@ -138,8 +139,22 @@ local item_names = {
 	zap = "Zap",
 }
 
+local colored_item_names = {
+	tar = font("Tar", { color = item_colors.tar }),
+	dye = font("Dye", { color = item_colors.dye }),
+	rad = font("Rad", { color = item_colors.rad }),
+	vit = font("Vit", { color = item_colors.vit }),
+	bar = font("Bar", { color = item_colors.bar }),
+	dew = font("Dew", { color = item_colors.dew }),
+	pow = font("Pow", { color = item_colors.pow }),
+	tek = font("Tek", { color = item_colors.tek }),
+	goo = font("Goo", { color = item_colors.goo }),
+	zap = font("Zap", { color = item_colors.zap }),
+}
+
 return {
 	count_items = count_items,
+	colored_item_names = colored_item_names,
 	consume_items = consume_items,
 	into_counted_items = into_counted_items,
 	item_match_filter = item_match_filter,

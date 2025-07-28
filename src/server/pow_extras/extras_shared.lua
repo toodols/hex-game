@@ -7,6 +7,7 @@ local coords_mod = require(ReplicatedStorage.Shared.coords)
 local cells_mod = require(ReplicatedStorage.Shared.cells)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local unlockable_mod = require(ReplicatedStorage.Shared.unlockable)
+local deposit_types = require(ReplicatedStorage.Shared.deposit).deposit_types
 
 type TeamData = types.TeamData
 type World = types.World
@@ -315,5 +316,9 @@ return function(extras, modules)
 
 	extra_types.unlockable = {
 		autocomplete_simple = unlockable_mod.get_unlockables(),
+	}
+
+	extra_types.deposit_type = {
+		autocomplete_simple = deposit_types,
 	}
 end

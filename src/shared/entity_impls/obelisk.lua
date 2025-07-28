@@ -10,6 +10,9 @@ entity_mod.registry.obelisk = entity_mod.with_defaults {
 	cost = {
 		bar = 2,
 	},
+	construction_condition = {
+		nearby = { "turret", "obelisk" },
+	},
 	layer = entity_mod.LAYER.building,
 }
 

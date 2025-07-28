@@ -6,6 +6,7 @@ entity_mod.registry.turret = entity_mod.with_defaults {
 	name = "Dagger",
 	description = "Attacks for {entity.turret.abilities.attack.damage.amount} damage to enemies in a {entity.turret.abilities.attack.range} tile radius. "
 		.. "Costs {entity.turret.abilities.attack.cost} to shoot. On kill, gain +1 max hp.",
+	short_description = "Deals {entity.turret.abilities.attack.damage.amount} damage with {entity.turret.abilities.attack.cost} but can't see very far",
 	max_health = 4,
 	build_time = 2,
 	cost = {
@@ -13,9 +14,15 @@ entity_mod.registry.turret = entity_mod.with_defaults {
 		rad = 2,
 		pow = 1,
 	},
-	required_research = {},
+	entity_group = {
+		["@weapon"] = true,
+	},
 	layer = entity_mod.LAYER.building,
 	can_revive = true,
+	construction_condition = {
+		nearby = { "factory" },
+		not_nearby = { "turret" },
+	},
 	abilities = {
 		attack = {
 			range = 3,

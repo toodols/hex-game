@@ -10,6 +10,7 @@ On death:
 - Building that killed this gains immunity to taunt
 
 ]],
+	short_description = "Draws enemy fire towards itself",
 	max_health = 4,
 	build_time = 2,
 	cost = {
@@ -17,8 +18,8 @@ On death:
 		bar = 4,
 	},
 	range = 3,
-	required_research = {
-		"taunt",
+	construction_condition = {
+		nearby = { "turret" },
 	},
 	can_revive = true,
 	layer = entity_mod.LAYER.building,

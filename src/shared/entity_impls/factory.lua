@@ -13,6 +13,9 @@ entity_mod.registry.factory = entity_mod.with_defaults {
 	},
 	can_revive = true,
 	can_disable = true,
+	construction_condition = {
+		nearby = { "stockpile" },
+	},
 	recipes = {
 		vit_to_tek = {
 			layout_order = 1,

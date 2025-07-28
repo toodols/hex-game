@@ -48,13 +48,13 @@ local PAGES = {
 				type = "factory",
 			},
 			{
-				type = "laboratory",
+				type = "terminal",
 			},
 			{
 				type = "turret",
 			},
 			{
-				type = "witness",
+				type = "fountain",
 			},
 			{
 				type = "impression",
@@ -91,12 +91,6 @@ local PAGES = {
 	{
 		name = "Page 4",
 		items = {
-			{
-				type = "fountain",
-			},
-			{
-				type = "terminal",
-			},
 			{
 				type = "heart",
 			},

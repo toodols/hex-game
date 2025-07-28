@@ -11,6 +11,7 @@ local presence_mod = require(ServerScriptService.Server.presence)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local server_entity_mod = require(ServerScriptService.Server.entity)
 local datastore_mod = require(ServerScriptService.Server.datastore)
+local set_deposit_type = require(ServerScriptService.Server.deposit).set_deposit_type
 
 return function(extras)
 	local commands = extras.commands
@@ -400,7 +401,48 @@ return function(extras)
 		end,
 	}
 
-	commands.cell_type = {
+	commands.set_deposit_type = {
+		description = "Sets the deposit type of a cell.",
+		permissions = { "gamemaster" },
+		overloads = {
+			{
+				returns = "nil",
+				args = {
+					{
+						name = "Deposit type",
+						type = "deposit_type",
+						description = "The new deposit type.",
+					},
+				},
+			},
+			{
+				returns = "nil",
+				args = {
+					{
+						name = "Deposit type",
+						type = "deposit_type",
+						description = "The new deposit type.",
+					},
+					{
+						name = "cell",
+						type = "coords",
+						description = "The cell to set the deposit type for.",
+					},
+				},
+			},
+		},
+		server_run = function(context)
+			local world = _G.world
+			local type = context.args[1]
+			local coords = context.args[2] or context.runtime.run_commands_string(context.process, "selected").ok
+
+			for _, coord in coords do
+				set_deposit_type(world, coord, type)
+			end
+		end,
+	}
+
+	commands.set_cell_type = {
 		description = "Sets the type of a cell.",
 		permissions = { "gamemaster" },
 		overloads = {
@@ -434,7 +476,7 @@ return function(extras)
 		server_run = function(context)
 			local world = _G.world
 			local type = context.args[1]
-			local coords = context.args[3] or context.runtime.run_commands_string(context.process, "selected").ok
+			local coords = context.args[2] or context.runtime.run_commands_string(context.process, "selected").ok
 
 			for _, coord in coords do
 				local cell = world:get_cell(coord)

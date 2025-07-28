@@ -8,8 +8,8 @@ entity_mod.registry.heart = entity_mod.with_defaults {
 	max_health = 7,
 	build_time = 2,
 
-	required_research = {
-		"heart",
+	construction_condition = {
+		nearby = { "scout" },
 	},
 	can_revive = true,
 	cost = {

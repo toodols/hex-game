@@ -12,11 +12,11 @@ entity_mod.registry.vault = entity_mod.with_defaults {
 		bar = 6,
 		rad = 1,
 	},
-	required_research = {
-		"vault",
-	},
 	required_unlockable = {
 		"vault",
+	},
+	construction_condition = {
+		nearby = { "stockpile" },
 	},
 	can_revive = true,
 	layer = entity_mod.LAYER.building,

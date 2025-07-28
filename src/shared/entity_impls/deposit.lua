@@ -3,10 +3,10 @@ local entity_mod = require(ReplicatedStorage.Shared.entity)
 
 entity_mod.registry.deposit = entity_mod.with_defaults {
 	type = "deposit",
-	name = "Deposit",
+	name = "Any Deposit",
 	description = "Deposit",
 	max_health = math.huge,
-	hidden = true,
+	internal = true,
 	buildable = false,
 	layer = entity_mod.LAYER.deposit,
 	abilities = {},

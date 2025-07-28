@@ -8,12 +8,16 @@ entity_mod.registry.anima = entity_mod.with_defaults {
 - {entity.extractor} produces items every turn.
 - Newly built buildings have 1 less max hp.
 - {entity.laboratory} is disabled.]],
+	short_description = "Risky alternative to {entity.heart}",
 	max_health = 3,
 	build_time = 2,
 	can_revive = true,
 	cost = {
 		bar = 3,
 		vit = 2,
+	},
+	construction_condition = {
+		nearby = { "heart" },
 	},
 	required_unlockable = {
 		"anima",
