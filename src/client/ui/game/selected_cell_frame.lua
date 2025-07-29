@@ -15,6 +15,7 @@ local EntityInformation = require(script.Parent.entity_information).EntityInform
 local CoordinateLabel = require(script.Parent.coordinate_label).CoordinateLabel
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local ui_types = require(ReplicatedStorage.Client.ui.types)
+local deposit_mod = require(ReplicatedStorage.Shared.deposit)
 
 local Corner = util_components.Corner
 
@@ -156,6 +157,11 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 		end
 		return function() end
 	end, {})
+
+	local deposit_type = nil
+	if #props.selected_cells == 1 then
+		deposit_type = deposit_mod.get_deposit_type(world, props.selected_cells[1])
+	end
 
 	return React.createElement("Frame", {
 		AnchorPoint = Vector2.new(0, 1),
@@ -300,7 +306,9 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 						"TextLabel",
 						themes.theme_title {
 							Text = if #props.selected_cells == 1
-								then cells_mod.cell_names[world:get_cell(props.selected_cells[1]).type]
+								then if deposit_type
+									then deposit_mod.deposit_names[deposit_type]
+									else cells_mod.cell_names[world:get_cell(props.selected_cells[1]).type]
 								else `{#props.selected_cells} Cells Selected`,
 							TextSize = 23,
 						},

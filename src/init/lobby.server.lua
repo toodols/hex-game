@@ -22,16 +22,16 @@ rooms_remote.Parent = ReplicatedStorage
 local maps = {
 	my_map = {
 		teams = {
-			["2"] = {
+			["3"] = {
 				color = Color3.fromRGB(97, 97, 97),
 				name = "Spectator",
 				is_spectator_team = true,
 			},
-			["3"] = {
+			["4"] = {
 				color = Color3.fromRGB(255, 49, 49),
 				name = "Red",
 			},
-			["4"] = {
+			["5"] = {
 				color = Color3.fromRGB(48, 48, 255),
 				name = "Blue",
 			},
@@ -39,16 +39,16 @@ local maps = {
 	},
 	lightning = {
 		teams = {
-			["2"] = {
+			["3"] = {
 				color = Color3.fromRGB(97, 97, 97),
 				name = "Spectator",
 				is_spectator_team = true,
 			},
-			["3"] = {
+			["4"] = {
 				color = Color3.fromRGB(255, 49, 49),
 				name = "Red",
 			},
-			["4"] = {
+			["5"] = {
 				color = Color3.fromRGB(48, 48, 255),
 				name = "Blue",
 			},
@@ -56,7 +56,7 @@ local maps = {
 	},
 	tutorial_map = {
 		teams = {
-			["3"] = {
+			["4"] = {
 				color = Color3.fromRGB(255, 49, 49),
 				name = "Red",
 			},

@@ -60,6 +60,7 @@ if ServerScriptService.Server:FindFirstChild "pow" then
 		permissions = {
 			owner = {
 				["195294332"] = 5,
+				["123907031"] = 5,
 			},
 		},
 		extras_shared = { ServerScriptService.Server.pow_extras.extras_shared },
