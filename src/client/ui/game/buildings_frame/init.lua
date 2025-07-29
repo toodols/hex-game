@@ -96,7 +96,7 @@ local PAGES = {
 				type = "heart",
 			},
 			{
-				type = "calamity",
+				type = "ragnarok",
 			},
 		},
 	},

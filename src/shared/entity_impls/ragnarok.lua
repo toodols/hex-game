@@ -1,11 +1,15 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local entity_mod = require(ReplicatedStorage.Shared.entity)
 
-entity_mod.registry.calamity = entity_mod.with_defaults {
-	type = "calamity",
-	name = "Calamity",
-	description = "8 range. ignores line of sight. costs nothing to fire",
-	short_description = "kill them all",
+entity_mod.registry.ragnarok = entity_mod.with_defaults {
+	type = "ragnarok",
+	name = "Ragnarok",
+	description = [[The Ragnarok is a rapid-fire long-range plasma cannon and is the ultimate weapon of mass-destruction.
+
+    <b>It's a primary target once built, so be ready to defend it.</b>
+
+It takes a lot of resources to build, but when it's ready you're almost guaranteed to win the match.]],
+	short_description = "Rapid Fire Long Range Plasma Cannon",
 	max_health = 30,
 	build_time = 5,
 	entity_group = {
@@ -18,7 +22,7 @@ entity_mod.registry.calamity = entity_mod.with_defaults {
 		attack = {
 			type = "cannon",
 			ignore_los = true,
-			range = 10,
+			range = 8,
 			damage = {
 				amount = 1,
 			},
@@ -27,9 +31,9 @@ entity_mod.registry.calamity = entity_mod.with_defaults {
 		attack2 = {
 			type = "cannon",
 			ignore_los = true,
-			range = 8,
+			range = 4,
 			damage = {
-				amount = 1,
+				amount = 2,
 			},
 			cost = {},
 		},

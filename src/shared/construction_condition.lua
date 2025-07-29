@@ -109,6 +109,9 @@ end
 function cell_blocked(world: World, coord: CubicCoordinate, team: TeamId, entity_type: string)
 	local cell = world:get_cell(coord)
 	local entity_config = world.entity_configurations[entity_type]
+	if entity_config == nil then
+		error("Entity configuration not found for entity type: " .. entity_type)
+	end
 	if not cell then
 		return true
 	end
@@ -119,8 +122,7 @@ function cell_blocked(world: World, coord: CubicCoordinate, team: TeamId, entity
 		function(entity)
 			if entity.owner == team then
 				if world.entity_configurations[entity.type] == nil then
-					warn("no entity config for " .. entity.type)
-					return nil
+					error("no entity config for " .. entity.type)
 				end
 				return world.entity_configurations[entity.type].layer == entity_config.layer
 			end

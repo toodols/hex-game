@@ -47,7 +47,7 @@ function construct_interaction(world: World, entry: Interaction, player_info: Pl
 	end
 
 	-- and is not blocked
-	if cell_blocked(world, cell.coordinate, player_info.team, entry.type) then
+	if cell_blocked(world, cell.coordinate, player_info.team, entry.entity_type) then
 		return {}
 	end
 

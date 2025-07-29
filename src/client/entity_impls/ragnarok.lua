@@ -9,7 +9,7 @@ local coords = require(ReplicatedStorage.Shared.coords)
 type Entity = types.Entity
 type World = types.World
 
-local model = asset_server.load "Entities/Calamity"
+local model = asset_server.load "Entities/Ragnarok"
 local indicator_template = asset_server.load "Effects/AttackArrow"
 
 local function update_model(self: Entity, world: World, ability_id: string)
@@ -39,7 +39,7 @@ local function update_model(self: Entity, world: World, ability_id: string)
 	end
 end
 
-entity_mod.registry.calamity = entity_mod.with_defaults {
+entity_mod.registry.ragnarok = entity_mod.with_defaults {
 	model = model,
 	update = function(self: Entity, world: World, old: Entity)
 		update_model(self, world, "attack")
