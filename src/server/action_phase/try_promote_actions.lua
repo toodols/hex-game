@@ -11,10 +11,9 @@ local server_entity_mod = require(ServerScriptService.Server.entity)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
 
 type World = types.World
-type ActionState = server_types.ActionState
 type EntityAction = types.EntityAction
 
-function handle_try_promote_actions(world: World, action_state: ActionState)
+function handle_try_promote_actions(world: World)
 	local try_promote_actions: { EntityAction } = util.table_extract(world.action_queue, function(action)
 		if action.type == "try_promote_blueprint" or action.type == "try_promote_scaffold" then
 			return true
@@ -45,23 +44,13 @@ function handle_try_promote_actions(world: World, action_state: ActionState)
 
 			-- can promote if it is neighboring a system
 			for encoded_neighbor, neighbor in server_util.get_neighbors_set(world, entity.coordinates) do
-				local system = action_state.system_by_cell[encoded_neighbor]
+				local system = world.systems[world.cell_system_map[encoded_neighbor]]
 				if system ~= nil and system.team == entity.owner then
 					table.insert(valid_systems, system)
 				end
 			end
 
 			local cell = world:get_cell(entity.primary_coordinate)
-
-			-- promote this blueprint if it is on a portal connected to a system
-			-- if cell.type == "portal" and cell.portal.open then
-			-- 	for _, coord in cell.portal.group do
-			-- 		local system = action_state.system_by_cell[coords.encode_coord(coord)]
-			-- 		if system ~= nil then
-			-- 			table.insert(valid_systems, system)
-			-- 		end
-			-- 	end
-			-- end
 
 			if #valid_systems == 0 then
 				continue
@@ -85,8 +74,7 @@ function handle_try_promote_actions(world: World, action_state: ActionState)
 						entity.cost_fulfilled[request_item_type] = 0
 					end
 					local difference = request_amount - entity.cost_fulfilled[request_item_type]
-					local net =
-						systems_mod.system_consume_item_type(world, action_state, system, request_item_type, difference)
+					local net = systems_mod.system_consume_item_type(world, system, request_item_type, difference)
 					entity.cost_fulfilled[request_item_type] += net
 					if net > 0 then
 						world:add_update {
@@ -157,7 +145,7 @@ function handle_try_promote_actions(world: World, action_state: ActionState)
 		-- if this blueprint, now a scaffold has a build time of zero, complete it immediately
 		elseif entity.status == "scaffold" and entity.build_time == 0 then
 			entity.status = "complete"
-			server_behavior.on_completed(entity, world, action_state)
+			server_behavior.on_completed(entity, world)
 			world:add_update {
 				type = "entity_update",
 				entity = entity,

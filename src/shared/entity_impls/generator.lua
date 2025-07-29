@@ -12,7 +12,6 @@ entity_mod.registry.generator = entity_mod.with_defaults {
 		bar = 3,
 		rad = 1,
 	},
-	abilities = {},
 	layer = entity_mod.LAYER.building,
 }
 

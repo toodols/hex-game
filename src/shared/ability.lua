@@ -17,11 +17,12 @@ function entity_attack_candidates(
 	world: World,
 	entity: Entity,
 	range: number,
-	player_team_id: TeamId
+	player_team_id: TeamId,
+	ignore_los: boolean
 ): { [EncodedCoordinate]: true }
 	local candidates: { [EncodedCoordinate]: true } = {}
 	for _, coord in world_mod.coords_filter(world, coords_mod.neighbors_leq(entity.primary_coordinate, range)) do
-		if not world_mod.line_of_sight(world, entity.primary_coordinate, coord, player_team_id) then
+		if not ignore_los and not world_mod.line_of_sight(world, entity.primary_coordinate, coord, player_team_id) then
 			continue
 		end
 

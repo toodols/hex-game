@@ -170,7 +170,7 @@ local researches = struct {
 local queued_decision = tagged_union({
 	ability = struct {
 		type = const "ability",
-		ability_type = str,
+		ability_id = str,
 		entity_id = entity_id,
 		coordinates = array(coord),
 	},

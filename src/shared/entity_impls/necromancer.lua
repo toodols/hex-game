@@ -16,7 +16,6 @@ entity_mod.registry.necromancer = entity_mod.with_defaults {
 	construction_condition = {
 		nearby = { "phony" },
 	},
-	abilities = {},
 	layer = entity_mod.LAYER.building,
 }
 

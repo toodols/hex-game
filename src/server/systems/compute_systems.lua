@@ -82,15 +82,19 @@ function compute_systems(world: World): { System }
 	end
 
 	-- convert system from a collection of connected coordinates to a collection of connected entities
+	local cell_system_map = {}
+	local entity_system_map = {}
 	local entities_set = {}
 	local result: { System } = {}
-	for _, system in systems do
+	for id, system in systems do
 		local system_entities_set = {}
 		local cells: { [EncodedCoordinate]: boolean } = {}
 		for _, coord in system do
 			local cell = world:get_cell(coord)
 			assert(cell, "cell not found")
-			cells[coords.encode_coord(coord)] = true
+			local encoded_coord = coords.encode_coord(coord)
+			cells[encoded_coord] = true
+			cell_system_map[encoded_coord] = id
 			for entity_id in cell.entities do
 				if world.entities[entity_id].status == "complete" then
 					entities_set[entity_id] = true
@@ -99,17 +103,19 @@ function compute_systems(world: World): { System }
 			end
 		end
 		local entities: { [EntityId]: boolean } = {}
+
 		for entity_id in system_entities_set do
+			entity_system_map[entity_id] = id
 			entities[entity_id] = true
 		end
 
-		table.insert(result, {
+		result[id] = {
 			entities = entities,
 			cells = cells,
 			overflow_items = {},
 			power = 0,
 			team = world.entities[next(entities) :: EntityId].owner,
-		})
+		}
 	end
 
 	for entity_id, entity in world:active_entities() do
@@ -119,12 +125,22 @@ function compute_systems(world: World): { System }
 				result,
 				{ entities = { [entity_id] = true }, cells = {}, overflow_items = {}, power = 0, team = entity.owner }
 			)
+			entity_system_map[entity_id] = #result
+			for _, coordinate in entity.coordinates do
+				local encoded_coord = coords.encode_coord(coordinate)
+				if cell_system_map[encoded_coord] == nil then
+					cell_system_map[encoded_coord] = #result
+				end
+			end
 		end
 	end
 
 	for _, system in result do
 		system.heart = get_heart(world, system)
 	end
+
+	world.cell_system_map = cell_system_map
+	world.entity_system_map = entity_system_map
 	world.systems = result
 	return result
 end

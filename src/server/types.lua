@@ -22,11 +22,7 @@ export type DamageResult = {
 	-- how much damage was applied
 	effective: number,
 }
-export type ActionState = {
-	systems: { System },
-	system_by_entity_id: { [EntityId]: System },
-	system_by_cell: { [EncodedCoordinate]: System },
-}
+
 
 export type PlayerInfo = {
 	team: TeamId,

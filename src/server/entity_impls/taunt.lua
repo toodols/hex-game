@@ -11,7 +11,6 @@ local server_types = require(ServerScriptService.Server.types)
 type Entity = types.Entity
 type World = types.World
 type EntityEvent = types.EntityEvent
-type ActionState = server_types.ActionState
 
 entity_mod.registry.taunt = entity_mod.with_defaults {
 	autogenerates_vertex = true,
@@ -23,7 +22,7 @@ entity_mod.registry.taunt = entity_mod.with_defaults {
 			cell.influences[self.id] = true
 		end
 	end,
-	on_event = function(self: Entity, world: World, event: EntityEvent, action_state: ActionState)
+	on_event = function(self: Entity, world: World, event: EntityEvent)
 		if event.entity_id == self.id and event.event_type == "destroy" and event.death_type == "killed" then
 			local neighbors = coords_mod.neighbors_leq(self.primary_coordinate, 1)
 			damage_mod.delayed_destruction(

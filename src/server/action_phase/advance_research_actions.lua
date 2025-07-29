@@ -1,24 +1,21 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
-local server_types = require(ServerScriptService.Server.types)
-local updates_mod = require(ServerScriptService.Server.updates)
 
 local util = require(ReplicatedStorage.Shared.util)
 local systems_mod = require(ServerScriptService.Server.systems)
 
 type World = types.World
-type ActionState = server_types.ActionState
 type EntityAction = types.EntityAction
 
-function handle_advance_research_actions(world: World, action_state: ActionState)
+function handle_advance_research_actions(world: World)
 	local advance_research_actions: { EntityAction } = util.table_extract(world.action_queue, function(action)
 		return action.type == "advance_research"
 	end)
 	for _, action in advance_research_actions do
 		local succeeded = false
 		local entity = world.entities[action.entity_id]
-		local system = action_state.system_by_entity_id[action.entity_id]
+		local system = world.systems[world.entity_system_map[entity.id]]
 		if not entity or entity.is_destroyed then
 			error "advance_research error"
 		end
@@ -26,12 +23,12 @@ function handle_advance_research_actions(world: World, action_state: ActionState
 		for _, research_id in entity.researches.queue do
 			local research_item = entity.researches.states[research_id]
 			if not research_item.cost_is_paid then
-				if not systems_mod.system_has_items(world, action_state, system, research_item.cost) then
+				if not systems_mod.system_has_items(world, system, research_item.cost) then
 					break
 				end
 				succeeded = true
 				for item_type, amount in research_item.cost do
-					systems_mod.system_consume_item_type(world, action_state, system, item_type, amount)
+					systems_mod.system_consume_item_type(world, system, item_type, amount)
 				end
 
 				local event = {

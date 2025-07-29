@@ -12,7 +12,6 @@ type HexCell = types.HexCell
 type World = types.World
 type PartialWorld = types.PartialWorld
 type Entity = types.Entity
-type ActionState = server_types.ActionState
 type CellType = types.CellType
 type TeamId = types.TeamId
 type CubicCoordinate = types.CubicCoordinate
@@ -24,7 +23,6 @@ export type ServerEntityBehavior = {
 	decayable: boolean,
 	type: string,
 
-	abilities: { [string]: (self: Entity, world: World) -> () },
 	incorporeal: boolean,
 	always_visible: boolean,
 
@@ -32,12 +30,12 @@ export type ServerEntityBehavior = {
 	influences: ((self: Entity, world: World) -> ())?,
 	init: (self: Entity, world: World) -> (),
 	on_completed: (self: Entity, world: World) -> (),
-	on_event: (self: Entity, world: World, event: EntityEvent, action_state: ActionState) -> (),
+	on_event: (self: Entity, world: World, event: EntityEvent) -> (),
 	-- laboratory only
 	on_research_completed: (self: Entity, world: World, research_id: string) -> ()?,
 
 	--- called at the start of every action phase
-	tick: (self: Entity, world: World, action_state: ActionState?) -> (),
+	tick: (self: Entity, world: World) -> (),
 }
 
 local registry: { [string]: ServerEntityBehavior } = {}
@@ -55,7 +53,6 @@ function with_defaults(behavior: any): ServerEntityBehavior
 	behavior.on_completed = behavior.on_completed or noop
 	-- behavior.influences = behavior.influences
 	behavior.on_event = behavior.on_event or noop
-	behavior.abilities = behavior.abilities or {}
 	behavior.illumination = behavior.illumination or function(self, world)
 		return {}
 	end

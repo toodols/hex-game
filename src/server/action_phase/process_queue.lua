@@ -1,8 +1,5 @@
-local ServerScriptService = game:GetService "ServerScriptService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 
-local server_types = require(ServerScriptService.Server.types)
-local entity_mod = require(ServerScriptService.Server.entity)
 local items_mod = require(ReplicatedStorage.Shared.items)
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
@@ -14,12 +11,11 @@ local handle_advance_research_actions = require(script.Parent.advance_research_a
 local handle_entity_event_actions = require(script.Parent.entity_event_actions).handle_entity_event_actions
 
 type World = types.World
-type ActionState = server_types.ActionState
 type EntityAction = types.EntityAction
 
 --- Processes all actions in world.action_queue. requires systems to be created
 --- @return All dropped actions
-function process_queue(world: World, action_state: ActionState): { EntityAction }
+function process_queue(world: World): { EntityAction }
 	local old_queue
 	local iterations = 0
 	local MAX_ALLOWED_ITERATIONS = 100
@@ -57,13 +53,13 @@ function process_queue(world: World, action_state: ActionState): { EntityAction 
 			table.insert(old_queue, action)
 		end
 
-		handle_exchange_actions(world, action_state)
-		handle_try_promote_actions(world, action_state)
-		handle_ability_actions(world, action_state)
-		handle_advance_research_actions(world, action_state)
-		handle_entity_event_actions(world, action_state)
+		handle_exchange_actions(world)
+		handle_try_promote_actions(world)
+		handle_ability_actions(world)
+		handle_advance_research_actions(world)
+		handle_entity_event_actions(world)
 
-		for _, system in action_state.systems do
+		for _, system in world.systems do
 			-- add overflow items to inventory
 			for _, open_inventory_entity in
 				util.table_filter_map(util.table_keys(system.entities), function(entity_id)

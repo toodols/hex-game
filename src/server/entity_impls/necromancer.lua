@@ -9,7 +9,6 @@ local damage_mod = require(ServerScriptService.Server.damage)
 type Entity = types.Entity
 type World = types.World
 type EntityEvent = types.EntityEvent
-type ActionState = server_types.ActionState
 type EntityId = types.EntityId
 
 entity_mod.registry.necromancer = entity_mod.with_defaults {
@@ -24,7 +23,7 @@ entity_mod.registry.necromancer = entity_mod.with_defaults {
 			end
 		end
 	end,
-	on_event = function(self: Entity, world: World, event: EntityEvent, action_state: ActionState)
+	on_event = function(self: Entity, world: World, event: EntityEvent)
 		if event.event_type == "destroy" and event.death_type == "killed" then
 			local entity = world.entities[event.entity_id]
 			if entity.owner ~= self.owner then

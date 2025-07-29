@@ -17,17 +17,15 @@ entity_mod.registry.scout = entity_mod.with_defaults {
 	},
 	abilities = {
 		attack = {
+			type = "cannon",
 			range = 3,
 			damage = {
-				type = "flat",
 				amount = 1,
-				lethal = true,
-				friendly_fire = false,
 			},
 			cost = {
 				bar = 1,
 			},
-		},
+		} :: any,
 	},
 	construction_condition = {
 		nearby = { "extractor" },

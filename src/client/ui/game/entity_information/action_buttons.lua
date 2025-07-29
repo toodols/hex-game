@@ -22,17 +22,16 @@ type World = types.World
 type HexCell = types.HexCell
 type Entity = types.Entity
 
-function AttackButton(props: { entity_id: EntityId, LayoutOrder: number? })
+function AttackButton(props: { ability_id: string, entity_id: EntityId, LayoutOrder: number? })
 	local context = React.useContext(MainContext)
 	local world: World = context.world
 	local selection_mode_stack: { SelectionMode } = context.selection_mode_stack
 	local entity = hooks.use_synced_entity(props.entity_id)
-	local shared_behavior = world.entity_configurations[entity.type]
+	local config = world.entity_configurations[entity.type]
 	local player_team = team_mod.team_of(world, Players.LocalPlayer)
 
-	local ability_type = "attack"
 	local is_attacking = util.table_any(entity.queued_decisions, function(v)
-		return v.type == "ability" and v.ability_type == ability_type
+		return v.type == "ability" and v.ability_id == props.ability_id
 	end)
 
 	return React.createElement(SquareActionButton, {
@@ -47,14 +46,14 @@ function AttackButton(props: { entity_id: EntityId, LayoutOrder: number? })
 						type = "cancel_decision",
 						decision_type = "ability",
 						entity_id = entity.id,
-						ability_type = ability_type,
+						ability_id = props.ability_id,
 					},
 				}
 				return
 			end
-			local ability = shared_behavior.abilities[ability_type]
-
-			local candidates = ability_mod.entity_attack_candidates(world, entity, ability.range, player_team.id)
+			local ability = config.abilities[props.ability_id]
+			local candidates =
+				ability_mod.entity_attack_candidates(world, entity, ability.range, player_team.id, ability.ignore_los)
 
 			table.insert(selection_mode_stack, {
 				type = "select_some_cell",
@@ -63,7 +62,7 @@ function AttackButton(props: { entity_id: EntityId, LayoutOrder: number? })
 					client_interaction_remote:FireServer {
 						{
 							type = "ability",
-							ability_type = ability_type,
+							ability_id = props.ability_id,
 							entity_id = entity.id,
 							coordinate = coord,
 						},
@@ -107,14 +106,14 @@ function DeconstructButton(props: { entity_id: EntityId, LayoutOrder: number? })
 	})
 end
 
-function DisguiseButton(props: { entity_id: EntityId, LayoutOrder: number? })
+function DisguiseButton(props: { ability_id: string, entity_id: EntityId, LayoutOrder: number? })
 	local context = React.useContext(MainContext)
 	local world: World = context.world
 	local entity = hooks.use_synced_entity(props.entity_id)
 	local shared_behavior = world.entity_configurations[entity.type]
 	local selection_mode_stack: { SelectionMode } = context.selection_mode_stack
 	local is_disguising = util.table_any(entity.queued_decisions, function(v)
-		return v.type == "ability" and v.ability_type == "disguise"
+		return v.type == "ability" and v.ability_id == "disguise"
 	end)
 	return React.createElement(SquareActionButton, {
 		Image = "rbxassetid://6034467796",
@@ -139,7 +138,7 @@ function DisguiseButton(props: { entity_id: EntityId, LayoutOrder: number? })
 					client_interaction_remote:FireServer {
 						{
 							type = "ability",
-							ability_type = "disguise",
+							ability_id = "disguise",
 							entity_id = entity.id,
 							coordinate = coord,
 						},
@@ -193,12 +192,11 @@ function RotateButton(props: { entity_id: EntityId, LayoutOrder: number? })
 end
 
 -- ActivateButton: Activates the "solution" entity's ability.
-function ActivateButton(props: { entity_id: EntityId, LayoutOrder: number? })
+function ActivateButton(props: { ability_id: string, entity_id: EntityId, LayoutOrder: number? })
 	local entity = hooks.use_synced_entity(props.entity_id)
 
-	local ability_type = "activate"
 	local is_using = util.table_any(entity.queued_decisions, function(v)
-		return v.type == "ability" and v.ability_type == ability_type
+		return v.type == "ability" and v.ability_id == props.ability_id
 	end)
 
 	return React.createElement(SquareActionButton, {
@@ -213,7 +211,7 @@ function ActivateButton(props: { entity_id: EntityId, LayoutOrder: number? })
 						type = "cancel_decision",
 						entity_id = entity.id,
 						decision_type = "ability",
-						ability_type = ability_type,
+						ability_id = props.ability_id,
 					},
 				}
 				return
@@ -221,7 +219,7 @@ function ActivateButton(props: { entity_id: EntityId, LayoutOrder: number? })
 				client_interaction_remote:FireServer {
 					{
 						type = "ability",
-						ability_type = ability_type,
+						ability_id = props.ability_id,
 						entity_id = entity.id,
 					},
 				}

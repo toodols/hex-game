@@ -12,7 +12,6 @@ entity_mod.registry.laboratory = entity_mod.with_defaults {
 		bar = 1,
 		rad = 3,
 	},
-	abilities = {},
 	can_revive = true,
 	buildable = false,
 	layer = entity_mod.LAYER.building,

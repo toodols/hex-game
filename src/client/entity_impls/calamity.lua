@@ -1,15 +1,16 @@
+local Debris = game:GetService "Debris"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local entity_mod = require(ReplicatedStorage.Client.entity)
 local types = require(ReplicatedStorage.Shared.types)
-local util = require(ReplicatedStorage.Shared.util)
 local asset_server = require(ReplicatedStorage.Shared.asset_server)
+local util = require(ReplicatedStorage.Shared.util)
 local coords = require(ReplicatedStorage.Shared.coords)
 
 type Entity = types.Entity
 type World = types.World
 
+local model = asset_server.load "Entities/Calamity"
 local indicator_template = asset_server.load "Effects/AttackArrow"
-local model = asset_server.load "Entities/Scout"
 
 local function update_model(self: Entity, world: World)
 	local instance = world.entity_instance_map[self.id]
@@ -17,27 +18,19 @@ local function update_model(self: Entity, world: World)
 		return v.type == "ability" and v.ability_id == "attack"
 	end)
 
-	local indicator: PVInstance? = instance:FindFirstChild "AttackArrow"
+	local indicator = instance:FindFirstChild "AttackArrow"
 	if attack then
-		if indicator then
-			(indicator :: any):PivotTo(
-				CFrame.lookAt(
-					instance:GetPivot().Position,
-					instance:GetPivot().Position
-						+ coords.into_vec3(coords.coords_sub(attack.coordinate, self.primary_coordinate))
-				)
-			)
-		else
-			indicator = indicator_template:Clone();
-			(indicator :: any).Parent = instance;
-			(indicator :: any):PivotTo(
-				CFrame.lookAt(
-					instance:GetPivot().Position,
-					instance:GetPivot().Position
-						+ coords.into_vec3(coords.coords_sub(attack.coordinate, self.primary_coordinate))
-				)
-			)
+		if not indicator then
+			indicator = indicator_template:Clone()
+			indicator.Parent = instance
 		end
+		indicator:PivotTo(
+			CFrame.lookAt(
+				instance:GetPivot().Position,
+				instance:GetPivot().Position
+					+ coords.into_vec3(coords.coords_sub(attack.coordinate, self.primary_coordinate))
+			)
+		)
 	else
 		if indicator then
 			indicator:Destroy()
@@ -45,13 +38,19 @@ local function update_model(self: Entity, world: World)
 	end
 end
 
-entity_mod.registry.scout = entity_mod.with_defaults {
+entity_mod.registry.calamity = entity_mod.with_defaults {
 	model = model,
 	update = function(self: Entity, world: World, old: Entity)
 		update_model(self, world)
 	end,
 	init = function(self: Entity, world: World)
 		update_model(self, world)
+	end,
+	on_destroy = function(self: Entity, world: World)
+		local instance: Instance = world.entity_instance_map[self.id]
+		world.entity_instance_map[self.id] = nil
+		world.instance_entity_map[instance] = nil
+		Debris:AddItem(instance, 1)
 	end,
 }
 

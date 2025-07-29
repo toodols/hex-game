@@ -9,7 +9,6 @@ entity_mod.registry.deposit = entity_mod.with_defaults {
 	internal = true,
 	buildable = false,
 	layer = entity_mod.LAYER.deposit,
-	abilities = {},
 }
 
 return {}

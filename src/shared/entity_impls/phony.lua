@@ -14,8 +14,9 @@ entity_mod.registry.phony = entity_mod.with_defaults {
 	},
 	abilities = {
 		disguise = {
+			type = "disguise",
 			range = 4,
-		},
+		} :: any,
 	},
 	construction_condition = {
 		nearby = { "scout" },

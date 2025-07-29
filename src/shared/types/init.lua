@@ -312,12 +312,14 @@ export type TeamData = {
 	-- is_ai: boolean -- not confident i am capable of implementing ai
 }
 
-export type Decision = {
+export type AbilityInteraction = {
 	type: "ability",
-	ability_type: string,
+	ability_id: string,
 	entity_id: EntityId,
 	coordinate: CubicCoordinate,
-} | {
+}
+
+export type Decision = AbilityInteraction | {
 	type: "construct",
 	entity_type: string,
 	coordinate: CubicCoordinate,
@@ -329,9 +331,6 @@ export type Decision = {
 	type: "rotate_entity",
 	entity_id: EntityId,
 	rotation: number,
-} | {
-	type: "update_settings",
-	settings: PlayerSettings,
 }
 
 export type Interaction = Decision | {
@@ -342,7 +341,7 @@ export type Interaction = Decision | {
 	type: "cancel_decision",
 	entity_id: EntityId,
 	decision_type: string,
-	ability_type: string?,
+	ability_id: string?,
 } | {
 	type: "quest_advance",
 	quest_id: string,
@@ -371,6 +370,9 @@ export type Interaction = Decision | {
 } | {
 	type: "tutorial_report_selection",
 	selected: { CubicCoordinate },
+} | {
+	type: "update_settings",
+	settings: PlayerSettings,
 }
 
 export type Damage = {
@@ -412,8 +414,7 @@ export type Icon = {
 
 -- A message from Server to Client about the state of the game
 export type WorldUpdate =
-	-- handles add, update, and destruction
-	{ type: "ability", ability_type: string, entity_id: EntityId, coordinate: CubicCoordinate }
+	AbilityInteraction
 	| { type: "cells", cells: { [EncodedCoordinate]: HexCell }, target: TeamTarget }
 	| {
 		type: "cell_update",
@@ -491,6 +492,24 @@ export type TurnSchedule = {
 	wait_thread: thread?,
 }
 
+export type Ability = {
+	type: "cannon",
+	ignore_los: boolean?,
+	range: number,
+	cost: { [Item]: number },
+	damage: Damage,
+} | {
+	type: "solution_activate",
+	shield_health: number,
+	shield_duration: number,
+	heal_amount: number,
+} | {
+	type: "disguise",
+	range: number,
+} | {
+	type: "impression_activate",
+}
+
 export type EntityConfiguration = {
 	type: string,
 	init: ((self: Entity, world: World) -> ())?,
@@ -500,13 +519,7 @@ export type EntityConfiguration = {
 	max_health: number,
 	buildable: boolean,
 	build_time: number,
-	abilities: {
-		[string]: { -- attack ability
-			range: number,
-			cost: { [Item]: number },
-			damage: Damage,
-		},
-	},
+	abilities: { [string]: Ability },
 	can_disable: boolean,
 
 	required_research: { ResearchId },
@@ -611,7 +624,7 @@ export type EntityAction =
 		input_power: number?,
 		output_items: { Item }?,
 		output_power: number?,
-		on_success: (world: World) -> (),
+		on_success: (world: World, system: System) -> (),
 	}
 	| {
 		type: "run_late",
@@ -677,6 +690,8 @@ export type World = {
 	-- for objects that don't have a team, and can be captured
 	capturable_team: TeamId,
 
+	entity_system_map: { [EntityId]: number },
+	cell_system_map: { [EncodedCoordinate]: number },
 	systems: { System },
 
 	conclusion: Conclusion?,

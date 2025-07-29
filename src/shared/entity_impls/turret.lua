@@ -1,6 +1,6 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local entity_mod = require(ReplicatedStorage.Shared.entity)
-
+local types = require(ReplicatedStorage.Shared.types)
 entity_mod.registry.turret = entity_mod.with_defaults {
 	type = "turret",
 	name = "Dagger",
@@ -25,17 +25,15 @@ entity_mod.registry.turret = entity_mod.with_defaults {
 	},
 	abilities = {
 		attack = {
+			type = "cannon",
 			range = 3,
 			damage = {
-				type = "flat",
 				amount = 3,
-				lethal = true,
-				friendly_fire = false,
 			},
 			cost = {
 				pow = 1,
 			},
-		},
+		} :: any,
 	},
 }
 

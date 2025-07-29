@@ -10,6 +10,7 @@ type Item = types.Item
 type Recipe = types.Recipe
 type ResearchId = types.ResearchId
 type EntityConfiguration = types.EntityConfiguration
+type Ability = types.Ability
 
 -- a higher layer indicates that damage will be passed to it first before the others
 local LAYER = {
@@ -43,6 +44,7 @@ type PartialEntityConfiguration = {
 	internal: boolean?,
 	construction_condition: {}?,
 	entity_group: { [string]: true }?,
+	abilities: { [string]: Ability }?,
 }
 
 function with_defaults(t: PartialEntityConfiguration): EntityConfiguration
@@ -59,6 +61,7 @@ function with_defaults(t: PartialEntityConfiguration): EntityConfiguration
 	t.max_health = t.max_health or 0
 	t.can_disable = t.can_disable or false
 	t.offsets = t.offsets or { { 0, 0, 0 } }
+	t.abilities = t.abilities or {}
 	t.layer = t.layer or LAYER.building
 	t.cost = t.cost or {}
 	t.required_research = t.required_research or {}

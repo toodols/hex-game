@@ -14,7 +14,6 @@ Spout can be built on deposits to produce items
 - Tar Deposit
 - Rad Deposit
 - Vit Deposit
-Portals allow buildings to be built far away.
 
 ## Systems
 

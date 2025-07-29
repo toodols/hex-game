@@ -6,7 +6,6 @@ local entity_mod = require(ServerScriptService.Server.entity)
 local get_deposit_type = require(ReplicatedStorage.Shared.deposit).get_deposit_type
 local set_deposit_type = require(ServerScriptService.Server.deposit).set_deposit_type
 
-type ActionState = server_types.ActionState
 type Entity = types.Entity
 type World = types.World
 type EntityEvent = types.EntityEvent
@@ -18,12 +17,12 @@ entity_mod.registry.extractor = entity_mod.with_defaults {
 		self.should_output = 0
 		self.deposit = get_deposit_type(world, self.primary_coordinate)
 	end,
-	tick = function(self: Entity, world: World, action_state: ActionState)
+	tick = function(self: Entity, world: World)
 		local config = world.entity_configurations[self.type]
 		if self.status == "complete" and self.enabled and self.owner ~= world.neutral_team then
 			local deposit_type = get_deposit_type(world, self.primary_coordinate)
 
-			local system = action_state.system_by_entity_id[self.id]
+			local system = world.systems[world.entity_system_map[self.id]]
 			local is_boosted = system.heart == "anima"
 			local function ok()
 				self.should_output = ((self.should_output :: any) + 1)

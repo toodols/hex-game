@@ -26,6 +26,7 @@ function blocked(world: World, cell: HexCell, team: TeamId?)
 			and entity.owner ~= team
 			and entity.type ~= "vertex"
 			and entity.type ~= "grave"
+			and entity.type ~= "deposit"
 		then
 			return true
 		end

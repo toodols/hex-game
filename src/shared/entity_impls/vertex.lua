@@ -10,7 +10,6 @@ entity_mod.registry.vertex = entity_mod.with_defaults {
 	cost = {
 		bar = 1,
 	},
-	abilities = {},
 	layer = entity_mod.LAYER.vertex,
 }
 

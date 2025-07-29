@@ -10,5 +10,6 @@ require(script.phony)
 require(script.obelisk)
 require(script.necromancer)
 require(script.deposit)
+require(script.calamity)
 
 return {}

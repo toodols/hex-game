@@ -53,20 +53,20 @@ function compute_visibility(world: World)
 			continue
 		end
 
-		-- occupying a portal gives r<=1 visibility for each connected portal
-		local cell = world:get_cell(entity.primary_coordinate)
-		if cell.type == "portal" and cell.portal.open then
-			for _, connected in cell.portal.group do
-				-- ignore self
-				if coords.coords_eq(connected, entity.primary_coordinate) then
-					continue
-				end
-				local neighbors = coords.neighbors_leq(connected, 1)
-				for _, coord in neighbors do
-					add_visibility(coord, entity.owner, "portal")
-				end
-			end
-		end
+		-- -- occupying a portal gives r<=1 visibility for each connected portal
+		-- local cell = world:get_cell(entity.primary_coordinate)
+		-- if cell.type == "portal" and cell.portal.open then
+		-- 	for _, connected in cell.portal.group do
+		-- 		-- ignore self
+		-- 		if coords.coords_eq(connected, entity.primary_coordinate) then
+		-- 			continue
+		-- 		end
+		-- 		local neighbors = coords.neighbors_leq(connected, 1)
+		-- 		for _, coord in neighbors do
+		-- 			add_visibility(coord, entity.owner, "portal")
+		-- 		end
+		-- 	end
+		-- end
 
 		-- local cell = world:get_cell(entity.primary_coordinate)
 		local neighbors = coords.neighbors_leq(entity.primary_coordinate, 2)

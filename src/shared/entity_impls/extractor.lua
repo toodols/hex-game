@@ -18,7 +18,6 @@ entity_mod.registry.extractor = entity_mod.with_defaults {
 	can_disable = true,
 	can_revive = true,
 	layer = entity_mod.LAYER.building,
-	abilities = {},
 }
 
 return {}

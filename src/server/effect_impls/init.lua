@@ -13,13 +13,12 @@ local registry = effect_mod.registry
 type World = types.World
 type Entity = types.Entity
 type Effect = types.Effect
-type ActionState = server_types.ActionState
 
 -- Blocks effect.amount damage
 registry.shield = effect_mod.with_defaults {}
 
 registry.regeneration = effect_mod.with_defaults {
-	tick = function(world: World, action_state: ActionState, entity: Entity, effect: Effect)
+	tick = function(world: World, entity: Entity, effect: Effect)
 		-- todo: replace this to use damage_mod
 		entity.health = math.min(entity.health + 1, entity.max_health)
 	end,
@@ -36,7 +35,7 @@ registry.infected = effect_mod.with_defaults {
 			type = "infected_immune",
 		})
 	end,
-	tick = function(world: World, action_state: ActionState, entity: Entity, effect: Effect)
+	tick = function(world: World, entity: Entity, effect: Effect)
 		for _, cell in world_mod.into_cells(world, coords.neighbors_leq(entity.primary_coordinate, 1)) do
 			for entity_id in cell.entities do
 				local other_entity = world.entities[entity_id]

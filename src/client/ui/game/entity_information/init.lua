@@ -142,7 +142,7 @@ function EntityInformation(props: {
 	end, { props.compressed })
 
 	local entity = hooks.use_synced_entity(props.entity_id)
-	local shared_behavior = world.entity_configurations[entity.type]
+	local config = world.entity_configurations[entity.type]
 
 	React.useEffect(function()
 		TweenService:Create(ref.current, TweenInfo.new(0.2), {
@@ -213,7 +213,7 @@ function EntityInformation(props: {
 					themes.theme_title {
 						TextColor3 = text_color,
 						Size = UDim2.new(1, 0, 1, 0),
-						Text = shared_behavior.name,
+						Text = config.name,
 					},
 					{
 						SidePad = React.createElement("UIPadding", {
@@ -281,7 +281,7 @@ function EntityInformation(props: {
 							AutomaticSize = Enum.AutomaticSize.Y,
 							LayoutOrder = 2,
 							Size = UDim2.new(1, 0, 0, 20),
-							Text = formatting.format_text(world, shared_behavior.description),
+							Text = formatting.format_text(world, config.description),
 						}
 					),
 					StatusLabel = if entity.status ~= "complete"
@@ -488,95 +488,103 @@ function EntityInformation(props: {
 					LayoutOrder = 2,
 					Size = UDim2.new(1, 0, 0, 30),
 				}, {
-					ActionButtons = React.createElement("Frame", {
-						BackgroundTransparency = 1,
-						Size = UDim2.new(1, 0, 0, 70),
-					}, {
-						SidePad = React.createElement("UIPadding", {
-							PaddingLeft = UDim.new(0, 15),
-							PaddingRight = UDim.new(0, 15),
-						}),
-						HorizontalLayout = React.createElement("UIListLayout", {
-							SortOrder = Enum.SortOrder.LayoutOrder,
-							FillDirection = Enum.FillDirection.Horizontal,
-							VerticalAlignment = Enum.VerticalAlignment.Center,
-							Padding = UDim.new(0, 10),
-						}),
-						DeconstructButton = if entity.active ~= false
-								and entity.owner == player_team.id
-								and not entity.is_decaying
-							then React.createElement(DeconstructButton, {
-								entity_id = entity.id,
-								LayoutOrder = 1,
-							})
-							else nil,
-						AttackButton = if entity.active ~= false
-								and entity.owner == player_team.id
-								and (entity.type == "scout" or entity.type == "turret")
-								and entity.status == "complete"
-							then React.createElement(AttackButton, {
-								entity_id = entity.id,
-								LayoutOrder = 2,
-							})
-							else nil,
+					ActionButtons = React.createElement(
+						"Frame",
+						{
+							BackgroundTransparency = 1,
+							Size = UDim2.new(1, 0, 0, 70),
+						},
+						{
+							SidePad = React.createElement("UIPadding", {
+								PaddingLeft = UDim.new(0, 15),
+								PaddingRight = UDim.new(0, 15),
+							}),
+							HorizontalLayout = React.createElement("UIListLayout", {
+								SortOrder = Enum.SortOrder.LayoutOrder,
+								FillDirection = Enum.FillDirection.Horizontal,
+								VerticalAlignment = Enum.VerticalAlignment.Center,
+								Padding = UDim.new(0, 10),
+							}),
+							DeconstructButton = if entity.active ~= false
+									and entity.owner == player_team.id
+									and not entity.is_decaying
+								then React.createElement(DeconstructButton, {
+									entity_id = entity.id,
+									LayoutOrder = 1,
+								})
+								else nil,
 
-						DisguiseButton = if entity.active ~= false
-								and entity.owner == player_team.id
-								and entity.type == "phony"
-							then React.createElement(DisguiseButton, {
-								entity_id = entity.id,
-								LayoutOrder = 2,
-							})
-							else nil,
+							FilterButton = if entity.active ~= false
+									and entity.owner == player_team.id
+									and entity.inventory ~= nil
+								then React.createElement(FilterButton, {
+									entity_id = entity.id,
+									LayoutOrder = 3,
+								})
+								else nil,
 
-						FilterButton = if entity.active ~= false
-								and entity.owner == player_team.id
-								and entity.inventory ~= nil
-							then React.createElement(FilterButton, {
-								entity_id = entity.id,
-								LayoutOrder = 3,
-							})
-							else nil,
+							ToggleEnableButton = if entity.active ~= false
+									and entity.owner == player_team.id
+									and config.can_disable
+									and entity.status == "complete"
+								then React.createElement(ToggleEnableButton, {
+									entity_id = entity.id,
+									LayoutOrder = 2,
+								})
+								else nil,
 
-						ActivateButton = if entity.active ~= false
-								and entity.owner == player_team.id
-								and (entity.type == "solution" or entity.type == "impression")
-							then React.createElement(ActivateButton, {
-								entity_id = entity.id,
-								LayoutOrder = 4,
-							})
-							else nil,
+							OpenRecipeButton = if entity.active ~= false
+									and entity.owner == player_team.id
+									and (entity.type == "factory")
+									and entity.status == "complete"
+								then React.createElement(OpenRecipeButton, {
+									entity_id = entity.id,
+									LayoutOrder = 5,
+								})
+								else nil,
 
-						ToggleEnableButton = if entity.active ~= false
-								and entity.owner == player_team.id
-								and shared_behavior.can_disable
-								and entity.status == "complete"
-							then React.createElement(ToggleEnableButton, {
-								entity_id = entity.id,
-								LayoutOrder = 2,
-							})
-							else nil,
-
-						OpenRecipeButton = if entity.active ~= false
-								and entity.owner == player_team.id
-								and (entity.type == "factory")
-								and entity.status == "complete"
-							then React.createElement(OpenRecipeButton, {
-								entity_id = entity.id,
-								LayoutOrder = 5,
-							})
-							else nil,
-
-						StoreEntityButton = if entity.active ~= false
-								and entity.owner == player_team.id
-								and (entity.type == "terminal")
-								and entity.status == "complete"
-							then React.createElement(StoreEntityButton, {
-								entity_id = entity.id,
-								LayoutOrder = 6,
-							})
-							else nil,
-					}),
+							StoreEntityButton = if entity.active ~= false
+									and entity.owner == player_team.id
+									and (entity.type == "terminal")
+									and entity.status == "complete"
+								then React.createElement(StoreEntityButton, {
+									entity_id = entity.id,
+									LayoutOrder = 6,
+								})
+								else nil,
+						},
+						if entity.active == true and entity.owner == player_team.id
+							then util.table_map(config.abilities, function(ability, ability_id)
+								if ability.type == "cannon" then
+									return React.createElement(AttackButton, {
+										entity_id = entity.id,
+										ability_id = ability_id,
+										LayoutOrder = 10,
+									})
+								elseif ability.type == "disguise" then
+									return React.createElement(DisguiseButton, {
+										entity_id = entity.id,
+										ability_id = ability_id,
+										LayoutOrder = 10,
+									})
+								elseif ability.type == "solution_activate" then
+									return React.createElement(ActivateButton, {
+										entity_id = entity.id,
+										ability_id = ability_id,
+										LayoutOrder = 10,
+									})
+								elseif ability.type == "impression_activate" then
+									return React.createElement(ActivateButton, {
+										entity_id = entity.id,
+										ability_id = ability_id,
+										LayoutOrder = 10,
+									})
+								else
+									error("Unknown ability type: " .. ability.type)
+								end
+							end)
+							else nil
+					),
 
 					-- Rotate = if entity.active ~= false
 					-- 		and entity.type == "torch"
@@ -595,7 +603,8 @@ function EntityInformation(props: {
 						Padding = UDim.new(0, 2),
 						SortOrder = Enum.SortOrder.LayoutOrder,
 					}),
-				}),
+				}
+),
 			}),
 		}),
 

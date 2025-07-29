@@ -9,20 +9,13 @@ local get_heart = require(script.get_heart).get_heart
 
 type World = types.World
 type System = types.System
-type ActionState = server_types.ActionState
 type Item = types.Item
 type Entity = types.Entity
 type Inventory = types.Inventory
 type EntityId = types.EntityId
 
 -- consume items from inventories, prioritizing overflow_items
-function system_consume_item_type(
-	world: World,
-	action_state: ActionState,
-	system: System,
-	request_item: Item,
-	amount: number
-)
+function system_consume_item_type(world: World, system: System, request_item: Item, amount: number)
 	local infinite_source = util.table_any(util.table_keys(system.entities), function(entity_id)
 		return world.entities[entity_id].type == "infinite_source"
 	end)
@@ -70,12 +63,7 @@ function system_consume_item_type(
 end
 
 -- returns true if the inventories + overflow_items can satisfy the request_items
-function system_has_items(
-	world: World,
-	action_state: ActionState,
-	system: System,
-	request_items: { [Item]: number? }
-): boolean
+function system_has_items(world: World, system: System, request_items: { [Item]: number? }): boolean
 	local infinite_source = util.table_any(util.table_keys(system.entities), function(entity_id)
 		return world.entities[entity_id].type == "infinite_source"
 	end)
@@ -113,7 +101,7 @@ function system_has_items(
 end
 
 -- add items to inventories in the system, then add overflow to overflow_items
-function system_add_items(world: World, action_state: ActionState, system: System, items: { Item })
+function system_add_items(world: World, system: System, items: { Item })
 	local open_inventory_entities: { Entity & { inventory: Inventory } } = util.table_filter_map(
 		util.table_keys(system.entities),
 		function(entity_id)

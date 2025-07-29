@@ -6,12 +6,11 @@ local server_types = require(ServerScriptService.Server.types)
 type World = types.World
 type Entity = types.Entity
 type Effect = types.Effect
-type ActionState = server_types.ActionState
 type EffectBehavior = {
 	description: string?,
 	desirability: "positive" | "negative" | "neutral" | nil,
 	init: (world: World, entity: Entity, effect: Effect) -> ()?,
-	tick: (world: World, action_state: ActionState, entity: Entity, effect: Effect) -> ()?,
+	tick: (world: World, entity: Entity, effect: Effect) -> ()?,
 	remove: (world: World, entity: Entity, effect: Effect) -> ()?,
 }
 local registry: { [string]: EffectBehavior } = {}

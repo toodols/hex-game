@@ -15,7 +15,7 @@ local indicator_template = asset_server.load "Effects/AttackArrow"
 local function update_model(self: Entity, world: World)
 	local instance = world.entity_instance_map[self.id]
 	local attack = util.table_find_pred(self.queued_decisions, function(v)
-		return v.type == "ability" and v.ability_type == "attack"
+		return v.type == "ability" and v.ability_id == "attack"
 	end)
 
 	local indicator = instance:FindFirstChild "AttackArrow"
@@ -45,18 +45,6 @@ entity_mod.registry.turret = entity_mod.with_defaults {
 	end,
 	init = function(self: Entity, world: World)
 		update_model(self, world)
-	end,
-	on_destroy = function(self: Entity, world: World)
-		if self.status ~= "complete" then
-			return
-		end
-		local explosion = Instance.new "Explosion"
-		explosion.DestroyJointRadiusPercent = 0
-		explosion.BlastPressure = 0
-		explosion.Parent = workspace
-		explosion.Position = world.entity_instance_map[self.id]:GetPivot().Position
-		Debris:AddItem(explosion, 1)
-		Debris:AddItem(world.entity_instance_map[self.id], 1)
 	end,
 }
 

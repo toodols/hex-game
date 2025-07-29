@@ -135,7 +135,8 @@ function TileAlerts()
 							is_deconstructing = true
 							indicators.deconstruction = (indicators.deconstruction or 0) + 1
 						elseif decision.type == "ability" then
-							if decision.ability_type == "activate" then
+							local ability = world.entity_configurations[entity.type].abilities[decision.ability_id]
+							if ability.type == "solution_activate" or ability.type == "impression_activate" then
 								indicators.activate = (indicators.activate or 0) + 1
 							end
 						end

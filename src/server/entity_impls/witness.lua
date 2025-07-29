@@ -7,7 +7,6 @@ local entity_mod = require(ServerScriptService.Server.entity)
 type Entity = types.Entity
 type World = types.World
 type EntityEvent = types.EntityEvent
-type ActionState = server_types.ActionState
 
 entity_mod.registry.witness = entity_mod.with_defaults {
 	autogenerates_vertex = true,
@@ -15,7 +14,7 @@ entity_mod.registry.witness = entity_mod.with_defaults {
 		self.charges = 0
 	end,
 	on_completed = function(self: Entity, world: World) end,
-	on_event = function(self: Entity, world: World, event: EntityEvent, action_state: ActionState)
+	on_event = function(self: Entity, world: World, event: EntityEvent)
 		if event.event_type == "took_damage" and event.damage and event.damage.from then
 			local from = world.entities[event.damage.from]
 			if from.owner ~= self.owner then

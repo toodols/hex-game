@@ -95,6 +95,9 @@ local PAGES = {
 			{
 				type = "heart",
 			},
+			{
+				type = "calamity",
+			},
 		},
 	},
 }

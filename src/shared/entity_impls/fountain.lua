@@ -14,7 +14,6 @@ entity_mod.registry.fountain = entity_mod.with_defaults {
 	},
 	range = 2,
 	construction_condition = { built_on = { "deposit" }, nearby = { "extractor" } },
-	abilities = {},
 	layer = entity_mod.LAYER.building,
 }
 

@@ -102,7 +102,7 @@ function get_updates(
 				return {
 					type = update.type,
 					entity_id = update.entity_id,
-					ability_type = update.ability_type,
+					ability_id = update.ability_id,
 					coordinate = update.coordinate,
 				}
 			end

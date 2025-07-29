@@ -364,10 +364,12 @@ function handle_updates(world: World, updates: { WorldUpdate })
 			local cell_instance = world.cell_instance_map[coords.encode_coord(update.coordinate)]
 			local entity_instance = world.entity_instance_map[update.entity_id]
 			if entity_instance == nil then
-				warn("entity not found", update.entity_id, "when handling ability", update.ability_type)
+				warn("entity not found", update.entity_id, "when handling ability", update.ability_id)
 				return
 			end
-			if update.ability_type == "attack" then
+			local entity = world.entities[update.entity_id]
+			local ability = world.entity_configurations[entity.type].abilities[update.ability_id]
+			if ability.type == "cannon" then
 				visuals.scout_attack_effect(entity_instance, cell_instance)
 			end
 		end

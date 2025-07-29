@@ -92,8 +92,8 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 			return {}
 		end
 		util.table_extract(entity.queued_decisions, function(decision)
-			if entry.ability_type then
-				return decision.type == entry.decision_type and decision.ability_type == entry.ability_type
+			if entry.ability_id then
+				return decision.type == entry.decision_type and decision.ability_id == entry.ability_id
 			else
 				return decision.type == entry.decision_type
 			end

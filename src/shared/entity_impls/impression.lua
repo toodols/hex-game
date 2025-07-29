@@ -12,7 +12,9 @@ entity_mod.registry.impression = entity_mod.with_defaults {
 		pow = 2,
 	},
 	abilities = {
-		activate = {},
+		activate = {
+			type = "impression_activate",
+		},
 	},
 	construction_condition = {
 		nearby = { "factory" },

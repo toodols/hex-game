@@ -9,7 +9,6 @@ local research_item = researches_mod.research_item
 
 type Entity = types.Entity
 type World = types.World
-type ActionState = server_types.ActionState
 type Heart = Entity & {
 	bonus_clock: number,
 }
@@ -37,7 +36,7 @@ entity_mod.registry.heart = entity_mod.with_defaults {
 		}
 	end,
 
-	tick = function(self: Heart, world: World, action_state: ActionState)
+	tick = function(self: Heart, world: World)
 		if self.status == "complete" then
 			assert(self.researches, "no researches")
 			local output_items = { "bar" }

@@ -7,12 +7,11 @@ local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 
 type World = types.World
-type ActionState = server_types.ActionState
 type EntityId = types.EntityId
 
 --- Sends entity_events in action_queue to relevant entities (entities and their influencers (!!))
 --- Then adds it to updates
-function handle_entity_event_actions(world: World, action_state: ActionState)
+function handle_entity_event_actions(world: World)
 	for _, event in
 		util.table_extract(world.action_queue, function(action)
 			return action.type == "entity_event"
@@ -48,7 +47,7 @@ function handle_entity_event_actions(world: World, action_state: ActionState)
 			local entity = world.entities[entity_id]
 			local behavior = server_entity_mod.registry[entity.type]
 			if behavior.on_event then
-				behavior.on_event(entity, world, event, action_state)
+				behavior.on_event(entity, world, event)
 			end
 		end
 	end

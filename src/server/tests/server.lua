@@ -496,7 +496,7 @@ function tests.scout_attack_each_other()
 
 	table.insert(scout.queued_decisions, {
 		type = "ability",
-		ability_type = "attack",
+		ability_id = "attack",
 		coordinate = { 1, -1, 0 },
 	})
 
@@ -514,12 +514,12 @@ function tests.scout_attack_each_other()
 	for i = 1, 3 do
 		table.insert(scout.queued_decisions, {
 			type = "ability",
-			ability_type = "attack",
+			ability_id = "attack",
 			coordinate = { 1, -1, 0 },
 		})
 		table.insert(scout2.queued_decisions, {
 			type = "ability",
-			ability_type = "attack",
+			ability_id = "attack",
 			coordinate = { -1, 1, 0 },
 		})
 		action_phase_mod.run_action_phase(world)
@@ -545,7 +545,7 @@ function tests.correct_phony_updates()
 
 	table.insert(phony.queued_decisions, {
 		type = "ability",
-		ability_type = "disguise",
+		ability_id = "disguise",
 		coordinate = disguise_target.primary_coordinate,
 	})
 
@@ -595,7 +595,7 @@ function tests.correct_scout_updates()
 	local scout = spawn_entity(world, "scout")
 	table.insert(scout.queued_decisions, {
 		type = "ability",
-		ability_type = "attack",
+		ability_id = "attack",
 		coordinate = { 1, -1, 0 },
 	})
 
@@ -752,7 +752,7 @@ function tests.taunt_chain_reaction()
 
 	table.insert(scout.queued_decisions, {
 		type = "ability",
-		ability_type = "attack",
+		ability_id = "attack",
 		coordinate = { 0, 0, 0 },
 	})
 
@@ -821,7 +821,7 @@ function tests.phony_generates_tek_on_death()
 
 	table.insert(phony.queued_decisions, {
 		type = "ability",
-		ability_type = "disguise",
+		ability_id = "disguise",
 		coordinate = scout.primary_coordinate,
 	})
 
@@ -831,7 +831,7 @@ function tests.phony_generates_tek_on_death()
 
 	table.insert(scout.queued_decisions, {
 		type = "ability",
-		ability_type = "attack",
+		ability_id = "attack",
 		coordinate = phony.primary_coordinate,
 	})
 
@@ -989,7 +989,7 @@ function tests.necromancer()
 
 	table.insert(turret.queued_decisions, {
 		type = "ability",
-		ability_type = "attack",
+		ability_id = "attack",
 		coordinate = scout.primary_coordinate,
 	})
 

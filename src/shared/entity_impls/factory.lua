@@ -51,7 +51,6 @@ entity_mod.registry.factory = entity_mod.with_defaults {
 			},
 		},
 	},
-	abilities = {},
 	layer = entity_mod.LAYER.building,
 }
 

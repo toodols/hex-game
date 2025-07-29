@@ -19,22 +19,30 @@ function ability_interaction(world: World, entry: Interaction, player_info: Play
 		return {}
 	end
 	local entity_config = world.entity_configurations[entity.type]
-	local ability = entity_config.abilities[entry.ability_type]
+	local ability = entity_config.abilities[entry.ability_id]
 	if ability == nil then
 		-- not a valid ability of this entity
 		return {}
 	end
-	if entry.ability_type == "attack" then
-		local candidates = ability_mod.entity_attack_candidates(world, entity, ability.range, player_info.team)
+
+	if ability.type == "cannon" then
+		local candidates =
+			ability_mod.entity_attack_candidates(world, entity, ability.range, player_info.team, ability.ignore_los)
 
 		if candidates[coords_mod.encode_coord(entry.coordinate)] == nil then
 			return {}
 		end
-	elseif entry.ability_type == "activate" then
+	elseif ability.type == "disguise" then
+		local cell = world:get_cell(entry.coordinate)
+		if cell == nil then
+			return {}
+		end
+	elseif ability.type == "solution_activate" or ability.type == "impression_activate" then
 		--ok
 	end
+
 	util.table_extract(entity.queued_decisions, function(decision)
-		return decision.type == "ability" and decision.ability_type == entry.ability_type
+		return decision.type == "ability" and decision.ability_id == entry.ability_id
 	end)
 	table.insert(entity.queued_decisions, entry)
 	return { [entity.id] = true }

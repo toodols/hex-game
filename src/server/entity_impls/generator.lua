@@ -8,11 +8,10 @@ local entity_mod = require(ServerScriptService.Server.entity)
 
 type Entity = types.Entity
 type World = types.World
-type ActionState = server_types.ActionState
 
 entity_mod.registry.generator = entity_mod.with_defaults {
 	autogenerates_vertex = true,
-	tick = function(self: Entity, world: World, action_state: ActionState)
+	tick = function(self: Entity, world: World)
 		local config = world.entity_configurations[self.type]
 		if self.status == "complete" and self.owner ~= world.capturable_team then
 			table.insert(world.action_queue, {

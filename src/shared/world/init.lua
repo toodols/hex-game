@@ -223,6 +223,8 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 		player_data = {},
 		quests = {},
 		systems = {},
+		entity_system_map = {},
+		cell_system_map = {},
 		active_entities = world_active_entities,
 		query_entity = world_query_entity,
 		add_update = world_add_update,

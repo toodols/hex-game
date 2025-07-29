@@ -16,10 +16,11 @@ entity_mod.registry.solution = entity_mod.with_defaults {
 	},
 	abilities = {
 		activate = {
+			type = "solution_activate",
 			shield_health = 1,
 			shield_duration = 3,
 			heal_amount = 2,
-		},
+		} :: any,
 	},
 	construction_condition = {
 		nearby = { "extractor" },

@@ -20,31 +20,28 @@ local conclusion = require(ServerScriptService.Server.conclusion)
 local systems_mod = require(ServerScriptService.Server.systems)
 
 local do_entity_decay = require(script.entity_decay).do_entity_decay
-local new_action_state = require(script.new_action_state).new_action_state
-local create_systems = require(script.create_systems).create_systems
 local process_queue = require(script.process_queue).process_queue
 
 type World = types.World
 type EntityId = types.EntityId
-type ActionState = server_types.ActionState
 type EntityAction = types.EntityAction
 type TeamId = types.TeamId
 type System = types.System
 type Effect = types.Effect
 
-function portals_tick(world: World)
-	for _, cell in world.cells do
-		if cell.type == "portal" then
-			local max_steps = cell.portal.open_time + cell.portal.close_time
-			cell.portal.steps = (cell.portal.steps + 1) % max_steps
-			if cell.portal.steps < cell.portal.open_time then
-				cell.portal.open = true
-			else
-				cell.portal.open = false
-			end
-		end
-	end
-end
+-- function portals_tick(world: World)
+-- 	for _, cell in world.cells do
+-- 		if cell.type == "portal" then
+-- 			local max_steps = cell.portal.open_time + cell.portal.close_time
+-- 			cell.portal.steps = (cell.portal.steps + 1) % max_steps
+-- 			if cell.portal.steps < cell.portal.open_time then
+-- 				cell.portal.open = true
+-- 			else
+-- 				cell.portal.open = false
+-- 			end
+-- 		end
+-- 	end
+-- end
 
 -- add all entities' queued_decisions into the global action queue
 function queue_entity_decisions(world: World, queue: { EntityAction })
@@ -100,7 +97,7 @@ function remove_occluded_blueprints(world: World)
 	end
 end
 
-function status_effects_tick(world: World, action_state: ActionState)
+function status_effects_tick(world: World)
 	local entity_and_effects: { [EntityId]: { Effect } } = {}
 
 	-- clone table so only effects that existed at the start of the tick are ticked
@@ -117,7 +114,7 @@ function status_effects_tick(world: World, action_state: ActionState)
 			local behavior = effect_mod.registry[effect.type]
 			if behavior then
 				if behavior.tick then
-					behavior.tick(world, action_state, entity, effect)
+					behavior.tick(world, entity, effect)
 				end
 			end
 			if effect.duration ~= nil then
@@ -138,10 +135,10 @@ function status_effects_tick(world: World, action_state: ActionState)
 end
 
 --- Requires influences to be computed
-function entities_tick(world: World, action_state: ActionState)
+function entities_tick(world: World)
 	for _, entity in world:active_entities() do
 		local server_behavior = server_entity_mod.registry[entity.type]
-		server_behavior.tick(entity, world, action_state)
+		server_behavior.tick(entity, world)
 	end
 end
 
@@ -171,7 +168,6 @@ end
 
 function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	local t0 = tick()
-	local action_state = new_action_state()
 
 	if #world.action_queue > 0 then
 		warn("there are leftover actions in the action queue", world.action_queue)
@@ -192,16 +188,15 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 
 	queue_entity_decisions(world, world.action_queue)
 	delete_deconstructed_entities(world, world.action_queue)
-	portals_tick(world)
+	-- portals_tick(world)
 
-	systems_mod.compute_systems(world, action_state)
+	systems_mod.compute_systems(world)
 	visibility_mod.compute_visibility(world)
 	influences_mod.compute_influences(world)
 	presence_mod.compute_presence(world)
-	create_systems(world, action_state)
 
-	entities_tick(world, action_state)
-	status_effects_tick(world, action_state)
+	entities_tick(world)
+	status_effects_tick(world)
 
 	queue_blueprints_and_scaffolds(world, world.action_queue)
 
@@ -214,7 +209,7 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 		end
 	end
 
-	local dropped = process_queue(world, action_state)
+	local dropped = process_queue(world)
 
 	for _, entity in world:active_entities() do
 		if
@@ -249,12 +244,11 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 		end
 	end
 
-	create_systems(world, action_state)
-	do_entity_decay(world, action_state)
+	do_entity_decay(world)
 
 	conclusion.handle_conclusion(world)
 
-	systems_mod.compute_systems(world, action_state)
+	systems_mod.compute_systems(world)
 	influences_mod.compute_influences(world) --recompute influences if entities DIE
 	presence_mod.compute_presence(world)
 	visibility_mod.compute_visibility(world)

@@ -7,10 +7,9 @@ local util = require(ReplicatedStorage.Shared.util)
 local entity_mod = require(ServerScriptService.Server.entity)
 
 type World = types.World
-type ActionState = server_types.ActionState
 
 --- Decays entities that are not connected. Requires systems to be created
-function do_entity_decay(world: World, action_state: ActionState)
+function do_entity_decay(world: World)
 	local decayable_entities = {}
 
 	-- initially mark all decayable entities as decayable
@@ -27,7 +26,7 @@ function do_entity_decay(world: World, action_state: ActionState)
 	end
 
 	-- remove connected entities from decay
-	for _, system in action_state.systems do
+	for _, system in world.systems do
 		for neighbor in
 			server_util.get_neighbors_set(
 				world,

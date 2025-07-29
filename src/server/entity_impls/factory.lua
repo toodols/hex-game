@@ -6,14 +6,13 @@ local server_types = require(ServerScriptService.Server.types)
 
 type Entity = types.Entity
 type World = types.World
-type ActionState = server_types.ActionState
 
 entity_mod.registry.factory = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	init = function(self: Entity, world: World)
 		self.current_recipe = "vit_to_tek"
 	end,
-	tick = function(self: Entity, world: World, action_state: ActionState)
+	tick = function(self: Entity, world: World)
 		local config = world.entity_configurations[self.type]
 		if self.status == "complete" and self.enabled and self.owner ~= world.capturable_team then
 			local recipe = config.recipes[self.current_recipe]
