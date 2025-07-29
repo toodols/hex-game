@@ -4,7 +4,7 @@ local entity_mod = require(ReplicatedStorage.Shared.entity)
 entity_mod.registry.calamity = entity_mod.with_defaults {
 	type = "calamity",
 	name = "Calamity",
-	description = "pew pew pew boom boom boom. deals 100 damage. 8 range. ignores line of sight",
+	description = "8 range. ignores line of sight. costs nothing to fire",
 	short_description = "kill them all",
 	max_health = 30,
 	build_time = 5,
@@ -18,15 +18,24 @@ entity_mod.registry.calamity = entity_mod.with_defaults {
 		attack = {
 			type = "cannon",
 			ignore_los = true,
+			range = 10,
+			damage = {
+				amount = 1,
+			},
+			cost = {},
+		},
+		attack2 = {
+			type = "cannon",
+			ignore_los = true,
 			range = 8,
 			damage = {
-				amount = 100,
+				amount = 1,
 			},
 			cost = {},
 		},
 	},
 	construction_condition = {
-		nearby = { "dagger" },
+		nearby = { "turret" },
 	},
 	can_revive = true,
 	layer = entity_mod.LAYER.building,

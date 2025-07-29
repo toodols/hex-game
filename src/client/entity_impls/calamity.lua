@@ -12,16 +12,17 @@ type World = types.World
 local model = asset_server.load "Entities/Calamity"
 local indicator_template = asset_server.load "Effects/AttackArrow"
 
-local function update_model(self: Entity, world: World)
+local function update_model(self: Entity, world: World, ability_id: string)
 	local instance = world.entity_instance_map[self.id]
 	local attack = util.table_find_pred(self.queued_decisions, function(v)
-		return v.type == "ability" and v.ability_id == "attack"
+		return v.type == "ability" and v.ability_id == ability_id
 	end)
 
-	local indicator = instance:FindFirstChild "AttackArrow"
+	local indicator = instance:FindFirstChild(ability_id .. "AttackArrow")
 	if attack then
 		if not indicator then
 			indicator = indicator_template:Clone()
+			indicator.Name = ability_id .. "AttackArrow"
 			indicator.Parent = instance
 		end
 		indicator:PivotTo(
@@ -41,10 +42,12 @@ end
 entity_mod.registry.calamity = entity_mod.with_defaults {
 	model = model,
 	update = function(self: Entity, world: World, old: Entity)
-		update_model(self, world)
+		update_model(self, world, "attack")
+		update_model(self, world, "attack2")
 	end,
 	init = function(self: Entity, world: World)
-		update_model(self, world)
+		update_model(self, world, "attack")
+		update_model(self, world, "attack2")
 	end,
 	on_destroy = function(self: Entity, world: World)
 		local instance: Instance = world.entity_instance_map[self.id]
