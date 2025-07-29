@@ -118,6 +118,10 @@ function cell_blocked(world: World, coord: CubicCoordinate, team: TeamId, entity
 		end),
 		function(entity)
 			if entity.owner == team then
+				if world.entity_configurations[entity.type] == nil then
+					warn("no entity config for " .. entity.type)
+					return nil
+				end
 				return world.entity_configurations[entity.type].layer == entity_config.layer
 			end
 			return nil

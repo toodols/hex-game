@@ -1,11 +1,9 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
-local server_types = require(ServerScriptService.Server.types)
 local util = require(ReplicatedStorage.Shared.util)
 local systems_mod = require(ServerScriptService.Server.systems)
 local items_mod = require(ReplicatedStorage.Shared.items)
-local updates_mod = require(ServerScriptService.Server.updates)
 
 type World = types.World
 type EntityAction = types.EntityAction
@@ -17,10 +15,7 @@ function handle_exchange_actions(world: World)
 		end)
 	do
 		local system = world.systems[world.entity_system_map[exchange_action.entity_id]]
-		if system == nil then
-			print(world)
-			print(exchange_action.entity_id)
-		end
+
 		local input_items = exchange_action.input_items
 		local output_items = util.deep_copy(exchange_action.output_items)
 		local input_power = exchange_action.input_power or 0

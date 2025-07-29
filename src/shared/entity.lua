@@ -45,6 +45,7 @@ type PartialEntityConfiguration = {
 	construction_condition: {}?,
 	entity_group: { [string]: true }?,
 	abilities: { [string]: Ability }?,
+	ignore_system: boolean?,
 }
 
 function with_defaults(t: PartialEntityConfiguration): EntityConfiguration
@@ -69,6 +70,7 @@ function with_defaults(t: PartialEntityConfiguration): EntityConfiguration
 	t.required_unlockable = t.required_unlockable or {}
 	t.can_revive = t.can_revive or false
 	t.entity_group = t.entity_group or {}
+	t.ignore_system = t.ignore_system or false
 	return t :: any
 end
 

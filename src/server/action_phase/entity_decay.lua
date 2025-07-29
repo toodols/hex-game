@@ -1,7 +1,6 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
-local server_types = require(ServerScriptService.Server.types)
 local server_util = require(ServerScriptService.Server.util)
 local util = require(ReplicatedStorage.Shared.util)
 local entity_mod = require(ServerScriptService.Server.entity)

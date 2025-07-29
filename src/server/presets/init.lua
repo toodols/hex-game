@@ -151,6 +151,27 @@ function my_map(): World
 	}
 end
 
+function small_map()
+	local world = world_mod.new_world_from_extents {
+		{ min = -3, max = 3 },
+		{ min = -3, max = 3 },
+		{ min = -3, max = 3 },
+	}
+	local team1 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) }, "red")
+	local team2 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(0.301960, 0.403921, 1) }, "blue")
+	turn_scheduler_init.bootstrap(world)
+
+	entity_mod.new_entity({
+		type = "heart",
+		primary_coordinate = { 0, 0, 0 },
+		owner = team1.id,
+	}, world)
+	return world, {
+		team1 = team1,
+		team2 = team2,
+	}
+end
+
 function lightning()
 	local world, teams = my_map()
 	world.speed_base = 6
@@ -178,4 +199,5 @@ return {
 	blank_map = prepare_preset(testing_maps.blank_map),
 	stress_test = prepare_preset(testing_maps.stress_test),
 	map_with_infinite_source = prepare_preset(testing_maps.map_with_infinite_source),
+	small_map = prepare_preset(small_map),
 }

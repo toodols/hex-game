@@ -302,6 +302,7 @@ function tests.capture_extractor()
 		{ min = -1, max = 1 },
 	}
 	local team1 = world_mod.new_team(world, {}, { type = "color3", color = Color3.new(1, 0.392156, 0.392156) })
+	team1.is_player_team = true
 	set_deposit_type(world, { 0, 0, 0 }, "bar_deposit")
 	local extractor = entity_mod.new_entity({
 		type = "extractor",

@@ -244,15 +244,16 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 		end
 	end
 
-	do_entity_decay(world)
-
-	conclusion.handle_conclusion(world)
-
 	systems_mod.compute_systems(world)
 	influences_mod.compute_influences(world) --recompute influences if entities DIE
 	presence_mod.compute_presence(world)
 	visibility_mod.compute_visibility(world)
+
 	remove_occluded_blueprints(world)
+
+	do_entity_decay(world)
+
+	conclusion.handle_conclusion(world)
 	world_mod.destroy_orphan_entities(world)
 
 	-- add entity update for all cells that are now visible to a team

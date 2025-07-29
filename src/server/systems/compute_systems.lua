@@ -43,6 +43,7 @@ function compute_systems(world: World): { System }
 					coordinate = coord,
 					owner = initial_entity.owner,
 				})[1]
+
 				local cell = world:get_cell(coord)
 
 				if ent and not system_visited[encoded_coord] and not visited[encoded_coord] then
@@ -96,7 +97,9 @@ function compute_systems(world: World): { System }
 			cells[encoded_coord] = true
 			cell_system_map[encoded_coord] = id
 			for entity_id in cell.entities do
-				if world.entities[entity_id].status == "complete" then
+				local entity = world.entities[entity_id]
+				local config = world.entity_configurations[entity.type]
+				if entity.status == "complete" and not config.ignore_system then
 					entities_set[entity_id] = true
 					system_entities_set[entity_id] = true
 				end
@@ -119,6 +122,10 @@ function compute_systems(world: World): { System }
 	end
 
 	for entity_id, entity in world:active_entities() do
+		local config = world.entity_configurations[entity.type]
+		if config.ignore_system then
+			continue
+		end
 		if not entities_set[entity_id] then
 			-- cells is empty because individual entities do not have a vertex and cells only count vertex
 			table.insert(

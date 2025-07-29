@@ -549,6 +549,8 @@ export type EntityConfiguration = {
 	recipes: { Recipe }?,
 	construction_condition: ConstructionCondition,
 	entity_group: { [string]: true },
+
+	ignore_system: boolean,
 }
 
 export type ConstructionCondition = {

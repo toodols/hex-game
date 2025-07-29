@@ -41,6 +41,9 @@ function TeamSection(props: {
 			},
 			util.table_map(props.team.players, function(user_id)
 				local player = game.Players:GetPlayerByUserId(user_id)
+				if player == nil then
+					return
+				end
 				return React.createElement("TextLabel", {
 					AutomaticSize = Enum.AutomaticSize.Y,
 					BackgroundTransparency = 1,
@@ -142,7 +145,6 @@ function PlayerList(props: { visible: boolean })
 				end
 			end
 		end)
-
 	end, {})
 
 	return React.createElement("Frame", {
