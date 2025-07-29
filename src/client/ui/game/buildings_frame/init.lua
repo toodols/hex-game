@@ -9,9 +9,10 @@ local researches_mod = require(ReplicatedStorage.Shared.researches)
 local team = require(ReplicatedStorage.Shared.team)
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
-local BuildingItem = require(script.building_item).BuildingItem
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local unlockable_mod = require(ReplicatedStorage.Shared.unlockable)
+
+local BuildingItem = require(script.building_item).BuildingItem
 
 local Corner = util_components.Corner
 
@@ -163,6 +164,9 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 	local cell = world:get_cell(props.cell)
 	assert(cell, "cell is nil")
 	local researches = researches_mod.get_cells_researches(world, { cell }, player_team.id)
+	local _, force_update = React.useReducer(function(x)
+		return x + 1
+	end, 0)
 
 	React.useEffect(function()
 		page_layout_ref.current:GetPropertyChangedSignal("CurrentPage"):Connect(function()
@@ -194,6 +198,17 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 			}):Play()
 		end
 	end, { is_expanded })
+
+	React.useEffect(function()
+		world.world_update_signal.listen(function(updates)
+			for _, update in updates do
+				if update.type == "entity_update" then
+					force_update(nil)
+					return
+				end
+			end
+		end)
+	end)
 
 	return React.createElement("Frame", {
 		Visible = props.Visible,

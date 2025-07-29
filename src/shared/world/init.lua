@@ -184,6 +184,15 @@ function world_active_entities(self: World): { [EntityId]: Entity }
 	-- ) :: { [EntityId]: Entity }
 end
 
+function default_global_configuration()
+	return {
+		decaying_enabled = true,
+		rated = true,
+		conclusion_enabled = true,
+		construction_condition_enabled = true,
+	}
+end
+
 function new_world_empty(entity_config: { [string]: EntityConfiguration }?, global_config: GlobalConfiguration?): World
 	local world: World
 	world = {
@@ -210,11 +219,7 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 		spectator_team = nil :: any,
 		capturable_team = nil :: any,
 		entity_configurations = entity_config or shared_entity_mod.create_configuration(),
-		global_configuration = global_config or {
-			decaying_enabled = true,
-			rated = true,
-			conclusion_enabled = true,
-		},
+		global_configuration = global_config or default_global_configuration(),
 		player_data = {},
 		quests = {},
 		systems = {},
@@ -319,17 +324,17 @@ function new_world_from_extents(extents: Extents): World
 	end
 	return world
 end
-
 return {
-	coords_filter = coords_filter,
-	into_cells = into_cells,
-	empty_cell = empty_cell,
-	new_world_from_extents = new_world_from_extents,
-	new_world_from_data = new_world_from_data,
-	new_world_empty = new_world_empty,
 	apply_world_data = apply_world_data,
+	coords_filter = coords_filter,
+	default_global_configuration = default_global_configuration,
+	destroy_orphan_entities = destroy_orphan_entities,
+	empty_cell = empty_cell,
+	into_cells = into_cells,
 	line_of_sight = line_of_sight,
 	new_team = new_team,
+	new_world_empty = new_world_empty,
+	new_world_from_data = new_world_from_data,
+	new_world_from_extents = new_world_from_extents,
 	purge_destroyed_entities = purge_destroyed_entities,
-	destroy_orphan_entities = destroy_orphan_entities,
 }

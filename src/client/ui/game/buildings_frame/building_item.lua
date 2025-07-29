@@ -5,16 +5,19 @@ local Players = game:GetService "Players"
 local React = require(ReplicatedStorage.Packages.react)
 
 local util = require(ReplicatedStorage.Shared.util)
-local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
-local client_entity_mod = require(ReplicatedStorage.Client.entity)
-local themes = require(ReplicatedStorage.Client.ui.themes)
-
+local coords = require(ReplicatedStorage.Shared.coords)
 local types = require(ReplicatedStorage.Shared.types)
 local formatting = require(ReplicatedStorage.Shared.formatting)
 local team_mod = require(ReplicatedStorage.Shared.team)
+local construction_condition_mod = require(ReplicatedStorage.Shared.construction_condition)
+local validate_condition = construction_condition_mod.validate_condition
+local cell_blocked = construction_condition_mod.cell_blocked
+
+local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
+local client_entity_mod = require(ReplicatedStorage.Client.entity)
+local themes = require(ReplicatedStorage.Client.ui.themes)
 local Items = require(ReplicatedStorage.Client.ui.game.items).Items
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
-local validate_condition = require(ReplicatedStorage.Shared.construction_condition).validate_condition
 
 local Corner = util_components.Corner
 local Separator = util_components.Separator
@@ -51,8 +54,24 @@ local BuildingItem = React.forwardRef(function(
 		model:PivotTo(CFrame.new(0, -2, -4))
 	end, { props.type })
 
-	local can_build, construction_condition_status =
-		validate_condition(world, props.cell, player_team.id, entity_config.construction_condition)
+	local coordinates = {}
+	for _, offset in entity_config.offsets do
+		table.insert(coordinates, coords.coords_add(props.cell, offset))
+	end
+
+	local can_build = true
+	local construction_condition_status
+	if world.global_configuration.construction_condition_enabled then
+		local success, status =
+			validate_condition(world, coordinates, player_team.id, entity_config.construction_condition, true)
+		if not success then
+			can_build = false
+		end
+		construction_condition_status = status
+	end
+	if cell_blocked(world, props.cell, player_team.id, props.type) then
+		can_build = false
+	end
 
 	return React.createElement("Frame", {
 		BackgroundTransparency = 1,
@@ -225,7 +244,8 @@ local BuildingItem = React.forwardRef(function(
 						-- 			else Color3.fromRGB(138, 90, 90),
 						-- 	}
 						-- ),
-						MustBeBuiltOn = if construction_condition_status.built_on
+						MustBeBuiltOn = if construction_condition_status
+								and construction_condition_status.built_on
 							then React.createElement(
 								"TextLabel",
 								themes.theme_description {
@@ -255,7 +275,7 @@ local BuildingItem = React.forwardRef(function(
 								}
 							)
 							else nil,
-						MustBeNearby = if construction_condition_status.nearby
+						MustBeNearby = if construction_condition_status and construction_condition_status.nearby
 							then React.createElement(
 								"TextLabel",
 								themes.theme_description {
@@ -286,7 +306,7 @@ local BuildingItem = React.forwardRef(function(
 								}
 							)
 							else nil,
-						MustNotBeNearby = if construction_condition_status.not_nearby
+						MustNotBeNearby = if construction_condition_status and construction_condition_status.not_nearby
 							then React.createElement(
 								"TextLabel",
 								themes.theme_description {

@@ -545,7 +545,11 @@ export type ConstructionCondition = {
 }
 
 export type GlobalConfiguration = {
+	--- whether entities decay when disconnected from heart
 	decaying_enabled: boolean,
+	--- when false, construction conditions will not be validated any any building can be placed without prerequisites
+	construction_condition_enabled: boolean,
+	--- whether player ratings update after conclusion
 	rated: boolean,
 	-- whether the game will end when one team is left
 	conclusion_enabled: boolean,

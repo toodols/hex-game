@@ -25,7 +25,6 @@ export type ServerEntityBehavior = {
 	type: string,
 
 	abilities: { [string]: (self: Entity, world: World) -> () },
-	built_on: { CellType },
 	incorporeal: boolean,
 	always_visible: boolean,
 
@@ -54,7 +53,6 @@ function with_defaults(behavior: any): ServerEntityBehavior
 	end
 	behavior.incorporeal = behavior.incorporeal or false
 	behavior.on_completed = behavior.on_completed or noop
-	behavior.built_on = behavior.built_on or {}
 	-- behavior.influences = behavior.influences
 	behavior.on_event = behavior.on_event or noop
 	behavior.abilities = behavior.abilities or {}
@@ -137,7 +135,7 @@ function new_entity(entity_: any, world: World): Entity
 	local defaults = {
 		active = true,
 		build_time = config.build_time,
-		coordinates = { entity.primary_coordinate },
+		coordinates = {},
 		cost = config.cost,
 		cost_fulfilled = {},
 		decay = 0,

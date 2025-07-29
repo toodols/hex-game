@@ -2,18 +2,26 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local coords_mod = require(ReplicatedStorage.Shared.coords)
+local util = require(ReplicatedStorage.Shared.util)
 
 type CubicCoordinate = types.CubicCoordinate
 type World = types.World
 type ConstructionCondition = types.ConstructionCondition
 type TeamId = types.TeamId
 
+type ConstructionConditionStatus = {
+	built_on: { { entity_type: string, ok: boolean } }?,
+	nearby: { { entity_type: string, ok: boolean } }?,
+	not_nearby: { { entity_type: string, ok: boolean } }?,
+}
+
 function validate_condition(
 	world: World,
-	coordinate: CubicCoordinate,
+	coordinates: { CubicCoordinate },
 	team: TeamId,
-	condition: ConstructionCondition
-): boolean
+	condition: ConstructionCondition,
+	permit_blueprints: boolean?
+): (boolean, ConstructionConditionStatus)
 	local status = {}
 	local built_on_ok = true
 	local nearby_ok = true
@@ -22,15 +30,17 @@ function validate_condition(
 	if condition.built_on then
 		built_on_ok = false
 		status.built_on = {}
-		local cell = world:get_cell(coordinate)
 
 		local entities_at_cell = {}
-		for entity_id in cell.entities do
-			local entity = world.entities[entity_id]
-			local config = world.entity_configurations[entity.type]
-			entities_at_cell[entity.type] = true
-			for group in config.entity_group do
-				entities_at_cell[group] = true
+		for _, coordinate in coordinates do
+			local cell = world:get_cell(coordinate)
+			for entity_id in cell.entities do
+				local entity = world.entities[entity_id]
+				local config = world.entity_configurations[entity.type]
+				entities_at_cell[entity.type] = true
+				for group in config.entity_group do
+					entities_at_cell[group] = true
+				end
 			end
 		end
 
@@ -48,12 +58,12 @@ function validate_condition(
 
 	if condition.nearby or condition.not_nearby then
 		local nearby_entity_types = {}
-		for _, coord in world_mod.coords_filter(world, coords_mod.neighbors_leq(coordinate, 2)) do
+		for _, coord in world_mod.coords_filter(world, coords_mod.neighbors_many_leq(coordinates, 2)) do
 			local cell = world:get_cell(coord)
 			for entity_id in cell.entities do
 				local entity = world.entities[entity_id]
 				local config = world.entity_configurations[entity.type]
-				if entity.owner == team then
+				if entity.owner == team and (entity.status == "complete" or permit_blueprints) then
 					nearby_entity_types[entity.type] = true
 					for group in config.entity_group do
 						nearby_entity_types[group] = true
@@ -96,6 +106,26 @@ function validate_condition(
 	return built_on_ok and nearby_ok and not_nearby_ok, status
 end
 
+function cell_blocked(world: World, coord: CubicCoordinate, team: TeamId, entity_type: string)
+	local cell = world:get_cell(coord)
+	local entity_config = world.entity_configurations[entity_type]
+	if not cell then
+		return true
+	end
+	return util.table_any(
+		util.table_map(cell.entities, function(_, id)
+			return world.entities[id]
+		end),
+		function(entity)
+			if entity.owner == team then
+				return world.entity_configurations[entity.type].layer == entity_config.layer
+			end
+			return nil
+		end
+	)
+end
+
 return {
+	cell_blocked = cell_blocked,
 	validate_condition = validate_condition,
 }

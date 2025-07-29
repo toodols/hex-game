@@ -3,11 +3,10 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local server_types = require(ServerScriptService.Server.types)
 local server_util = require(ServerScriptService.Server.util)
-local updates_mod = require(ServerScriptService.Server.updates)
+local validate_condition = require(ReplicatedStorage.Shared.construction_condition).validate_condition
 
 local util = require(ReplicatedStorage.Shared.util)
 local systems_mod = require(ServerScriptService.Server.systems)
-local coords = require(ReplicatedStorage.Shared.coords)
 local server_entity_mod = require(ServerScriptService.Server.entity)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
 
@@ -31,9 +30,17 @@ function handle_try_promote_actions(world: World, action_state: ActionState)
 	for _, action in try_promote_actions do
 		local entity = world.entities[action.entity_id]
 		local server_behavior = server_entity_mod.registry[entity.type]
-		local shared_config = world.entity_configurations[entity.type]
+		local config = world.entity_configurations[entity.type]
 
 		if action.type == "try_promote_blueprint" then
+			if world.global_configuration.construction_condition_enabled then
+				local ok =
+					validate_condition(world, entity.coordinates, entity.owner, config.construction_condition, false)
+				if not ok then
+					continue
+				end
+			end
+
 			local valid_systems = {}
 
 			-- can promote if it is neighboring a system
@@ -63,8 +70,8 @@ function handle_try_promote_actions(world: World, action_state: ActionState)
 				-- is this blueprint researched?
 				local cell_researches = researches_mod.get_cells_researches(world, { cell }, entity.owner)
 				if
-					shared_config.required_research
-					and not util.table_every(shared_config.required_research, function(research_id)
+					config.required_research
+					and not util.table_every(config.required_research, function(research_id)
 						return cell_researches[research_id]
 					end)
 				then

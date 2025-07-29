@@ -339,6 +339,7 @@ local team_data = struct {
 
 local global_configuration = struct {
 	decaying_enabled = boolean,
+	construction_condition_enabled = boolean,
 	rated = boolean,
 	conclusion_enabled = boolean,
 }

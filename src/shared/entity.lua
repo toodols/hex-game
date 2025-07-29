@@ -58,7 +58,7 @@ function with_defaults(t: PartialEntityConfiguration): EntityConfiguration
 	t.short_description = t.short_description or t.description
 	t.max_health = t.max_health or 0
 	t.can_disable = t.can_disable or false
-	t.offsets = t.offsets or {}
+	t.offsets = t.offsets or { { 0, 0, 0 } }
 	t.layer = t.layer or LAYER.building
 	t.cost = t.cost or {}
 	t.required_research = t.required_research or {}

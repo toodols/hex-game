@@ -2,18 +2,23 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 
 local types = require(ReplicatedStorage.Shared.types)
-local util = require(ReplicatedStorage.Shared.util)
 local unlockable_mod = require(ReplicatedStorage.Shared.unlockable)
+local construction_condition_mod = require(ReplicatedStorage.Shared.construction_condition)
+local validate_condition = construction_condition_mod.validate_condition
+local cell_blocked = construction_condition_mod.cell_blocked
+local coords = require(ReplicatedStorage.Shared.coords)
 
 local server_types = require(ServerScriptService.Server.types)
 local presence_mod = require(ServerScriptService.Server.presence)
 local entity_mod = require(ServerScriptService.Server.entity)
-local server_entity_mod = require(ServerScriptService.Server.entity)
 
 type World = types.World
 type Interaction = types.Interaction
 type PlayerInfo = server_types.PlayerInfo
 type EntityId = types.EntityId
+type HexCell = types.HexCell
+type TeamId = types.TeamId
+type CubicCoordinate = types.CubicCoordinate
 
 function construct_interaction(world: World, entry: Interaction, player_info: PlayerInfo): { [EntityId]: boolean }
 	assert(entry.type == "construct", "Expected entry to be a construct interaction")
@@ -42,33 +47,25 @@ function construct_interaction(world: World, entry: Interaction, player_info: Pl
 	end
 
 	-- and is not blocked
-	if
-		util.table_any(
-			util.table_map(cell.entities, function(_, id)
-				return world.entities[id]
-			end),
-			function(entity)
-				if entity.owner == player_info.team then
-					return world.entity_configurations[entity.type].layer == entity_config.layer
-				end
-				return nil
-			end
-		)
-	then
+	if cell_blocked(world, cell.coordinate, player_info.team, entry.type) then
 		return {}
-	end
-
-	-- and the entity is allowed to be built on the cell
-	local server_behavior = server_entity_mod.registry[entry.entity_type]
-	if #server_behavior.built_on > 0 then
-		if not table.find(server_behavior.built_on, cell.type) then
-			return {}
-		end
 	end
 
 	-- and can be built by the player
 	if not entity_config.buildable then
 		return {}
+	end
+
+	local coordinates = {}
+	for _, offset in entity_config.offsets do
+		table.insert(coordinates, coords.coords_add(entry.coordinate, offset))
+	end
+
+	if world.global_configuration.construction_condition_enabled then
+		local ok = validate_condition(world, coordinates, player_info.team, entity_config.construction_condition, true)
+		if not ok then
+			return {}
+		end
 	end
 
 	local entity = entity_mod.new_entity({
