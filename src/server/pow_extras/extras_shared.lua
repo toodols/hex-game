@@ -8,6 +8,8 @@ local cells_mod = require(ReplicatedStorage.Shared.cells)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local unlockable_mod = require(ReplicatedStorage.Shared.unlockable)
 local deposit_types = require(ReplicatedStorage.Shared.deposit).deposit_types
+local pathfinding = require(ReplicatedStorage.Shared.world.pathfinding)
+local team_mod = require(ReplicatedStorage.Shared.team)
 
 type TeamData = types.TeamData
 type World = types.World
@@ -67,6 +69,64 @@ return function(extras, modules)
 			end)
 			assert(selection, "Did not find select_cells")
 			return coords_mod.from_set(selection.selected)
+		end,
+	}
+
+	commands.astar = {
+		description = "Finds a path between two coords",
+		permissions = { "automation" },
+		overloads = {
+			{
+				returns = "coords",
+				args = {
+					{
+						name = "start",
+						type = "coord",
+						description = "The start coord",
+					},
+					{
+						name = "end",
+						type = "coord",
+						description = "The end coord",
+					},
+				},
+			},
+		},
+		client_run = function(context)
+			local start = context.args[1]
+			local finish = context.args[2]
+			local world = _G.world
+			local team = team_mod.team_of(world, context.executor)
+			return pathfinding.astar(_G.world, start, finish, team.id)
+		end,
+	}
+
+	commands.bfs = {
+		description = "Lists all coordinates that are reachable from the start coord without distance",
+		permissions = { "automation" },
+		overloads = {
+			{
+				returns = "coords",
+				args = {
+					{
+						name = "start",
+						type = "coord",
+						description = "The start coord",
+					},
+					{
+						name = "distance",
+						type = "number",
+						description = "The distance to search",
+					},
+				},
+			},
+		},
+		client_run = function(context)
+			local start = context.args[1]
+			local distance = context.args[2]
+			local world = _G.world
+			local team = team_mod.team_of(world, context.executor)
+			return pathfinding.bfs(_G.world, start, distance, team.id)
 		end,
 	}
 

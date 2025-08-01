@@ -359,4 +359,5 @@ end
 
 return {
 	on_client_interaction = on_client_interaction,
+	handle_interaction = handle_interaction,
 }

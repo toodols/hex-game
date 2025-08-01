@@ -82,6 +82,29 @@ return function(extras)
 			world.speed_multiplier = speed_multiplier
 		end,
 	}
+
+	commands.run_ai = {
+		description = "Runs ai for one turn",
+		permissions = { "gamemaster" },
+		overloads = {
+			{
+				returns = "nil",
+				args = {
+					{
+						type = "team",
+						name = "team",
+						description = "The team to run ai for.",
+					},
+				},
+			},
+		},
+		server_run = function(context)
+			local world = _G.world
+			local team = _G.world.teams[context.args[1]]
+			require(ServerScriptService.Server.ai).decide(world, team, {}, {})
+		end,
+	}
+
 	commands.set_team = {
 		description = "Sets the team of players",
 		permissions = { "gamemaster" },

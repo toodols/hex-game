@@ -9,7 +9,6 @@ type World = types.World
 type Entity = types.Entity
 type CubicCoordinate = types.CubicCoordinate
 type EncodedCoordinate = types.EncodedCoordinate
-type ActionState = server_types.ActionState
 type EntityId = types.EntityId
 
 -- global id implies a local id but i haven't found a compelling use case for client-only entities because they need to be replicated to teams and coalitions

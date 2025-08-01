@@ -3,6 +3,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local coords = require(ReplicatedStorage.Shared.coords)
 local util = require(ReplicatedStorage.Shared.util)
 local entity_mod = require(ReplicatedStorage.Shared.entity)
+local team_mod = require(ReplicatedStorage.Shared.team)
 
 local encode_coord = coords.encode_coord
 type World = types.World
@@ -15,15 +16,18 @@ function cell_is_open(world: World, cell: HexCell?, team: TeamId): boolean
 	if not cell then
 		return false
 	end
-	for presence_team in cell.server_data.presence do
-		if presence_team ~= team then
-			return false
+	if cell.server_data then
+		for presence_team in cell.server_data.presence do
+			if not team_mod.is_allied(world, team, presence_team) then
+				return false
+			end
 		end
 	end
+
 	for entity_id in cell.entities do
 		local entity = world.entities[entity_id]
 		local config = world.entity_configurations[entity.type]
-		if config.layer == entity_mod.LAYER.building then
+		if not team_mod.is_allied(world, team, entity.owner) and config.layer == entity_mod.LAYER.building then
 			return false
 		end
 	end
@@ -84,11 +88,30 @@ function astar(world: World, start: CubicCoordinate, goal: CubicCoordinate, team
 	return nil
 end
 
-function dfs(world: World, start: CubicCoordinate, team: TeamId, depth: number): { CubicCoordinate }
-	local visited = {}
-	local stack = {}
-	local depth_stack = {}
-	error "todo"
+-- Performs a bfs flood search limited by depth for open cells for a given team
+function bfs(world: World, start: CubicCoordinate, max_depth: number, team: TeamId): { CubicCoordinate }
+	local visited = { [encode_coord(start)] = true }
+	local stack = { start }
+	local depth = 0
+	local result = {}
+
+	while #stack > 0 and depth <= max_depth do
+		local new_stack = {}
+		for _, current in stack do
+			table.insert(result, current)
+			for _, neighbor in coords.neighbors_eq(current, 1) do
+				local cell = world:get_cell(neighbor)
+
+				if cell_is_open(world, cell, team) and not visited[encode_coord(neighbor)] then
+					table.insert(new_stack, neighbor)
+					visited[encode_coord(current)] = true
+				end
+			end
+		end
+		stack = new_stack
+		depth += 1
+	end
+	return result
 end
 
-return { astar = astar }
+return { astar = astar, bfs = bfs }

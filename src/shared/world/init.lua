@@ -4,6 +4,8 @@ local util = require(ReplicatedStorage.Shared.util)
 local new_signal = require(ReplicatedStorage.Shared.signal).new_signal
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local line_of_sight = require(script.line_of_sight).line_of_sight
+local astar = require(script.pathfinding).astar
+local bfs = require(script.pathfinding).bfs
 
 local coords_mod = require(script.Parent.coords)
 local encode_coord = coords_mod.encode_coord
@@ -339,4 +341,6 @@ return {
 	new_world_from_data = new_world_from_data,
 	new_world_from_extents = new_world_from_extents,
 	purge_destroyed_entities = purge_destroyed_entities,
+	astar = astar,
+	bfs = bfs,
 }
