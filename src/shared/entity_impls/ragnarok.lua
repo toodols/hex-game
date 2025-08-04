@@ -17,6 +17,9 @@ It takes a lot of resources to build, but when it's ready you're almost guarante
 	},
 	cost = {
 		pow = 20,
+		bar = 10,
+		rad = 10,
+		tek = 10,
 	},
 	abilities = {
 		attack = {
@@ -31,7 +34,7 @@ It takes a lot of resources to build, but when it's ready you're almost guarante
 		attack2 = {
 			type = "cannon",
 			ignore_los = true,
-			range = 4,
+			range = 5,
 			damage = {
 				amount = 2,
 			},

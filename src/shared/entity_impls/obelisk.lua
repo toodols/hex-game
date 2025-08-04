@@ -4,11 +4,11 @@ local entity_mod = require(ReplicatedStorage.Shared.entity)
 entity_mod.registry.obelisk = entity_mod.with_defaults {
 	type = "obelisk",
 	name = "Obelisk",
-	description = "3 hp",
+	description = "A body blocking unit with 3 hp",
 	max_health = 3,
 	build_time = 0,
 	cost = {
-		bar = 2,
+		bar = 3,
 	},
 	construction_condition = {
 		nearby = { "turret", "obelisk" },

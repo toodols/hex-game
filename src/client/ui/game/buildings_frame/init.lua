@@ -71,7 +71,6 @@ local PAGES = {
 			{
 				type = "vault",
 			},
-
 			{
 				type = "proxy",
 			},
@@ -97,6 +96,9 @@ local PAGES = {
 			},
 			{
 				type = "ragnarok",
+			},
+			{
+				type = "necromancer",
 			},
 		},
 	},

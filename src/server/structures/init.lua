@@ -36,19 +36,22 @@ local const = schemas.const
 local tagged_union = schemas.tagged_union
 local f64 = schemas.f64
 local i32_infinite = schemas.i32_infinite
-local keycode = schemas.keycode
 local u16 = schemas.u16
 
 if #util.table_keys(server_entity_mod.registry) == 0 then
 	error "No entities registered in server entity registry. Likely before it has loaded."
 end
+
 local entity_types = enum(util.table_keys(server_entity_mod.registry))
+entity_types.label = "entity_types"
 
 local entity_statuses = enum {
 	"blueprint",
 	"scaffold",
 	"complete",
 }
+entity_statuses.label = "entity_statuses"
+
 local item_type = enum {
 	"bar",
 	"tar",
@@ -60,9 +63,11 @@ local item_type = enum {
 	"goo",
 	"zap",
 }
+item_type.label = "item_type"
 
 -- 16 bytes
 local entity_id = {
+	label = "entity_id",
 	write = function(writer, data)
 		local inner = data:match "{([%x%-]+)}"
 		local hex = inner:gsub("-", "")
@@ -94,8 +99,10 @@ local inventory: Schema<Inventory> = struct {
 	capacity = i32,
 	items = array(item_type),
 }
+inventory.label = "inventory"
 
 local coord = {
+	label = "coord",
 	write = function(writer, data)
 		writer.write_i8(data[1])
 		writer.write_i8(data[2])
@@ -108,6 +115,7 @@ local coord = {
 }
 
 local encoded_coord = {
+	label = "encoded_coord",
 	write = function(writer, data)
 		local decoded = coords_mod.decode_coord(data)
 		writer.write_i8(decoded[1])
@@ -138,34 +146,39 @@ local icon = tagged_union({
 		text = str,
 	},
 }, "type")
+icon.label = "icon"
 
 -- 4 bytes
 local team_id = u8
+
 local player_id = i32
+
 local research_id = enum(util.table_keys(researches_mod.researches))
+research_id.label = "research_id"
+
+local research_state = struct {
+	cost = map(item_type, i32),
+	cost_is_paid = boolean,
+	time = i32,
+	progress = i32,
+	description = str,
+	name = str,
+	id = research_id,
+	icon = icon,
+	coord = coord,
+	status = enum {
+		"incomplete",
+		"researching",
+		"complete",
+	},
+}
+research_state.label = "research_state"
 
 local researches = struct {
-	states = collect_by_key(
-		struct {
-			cost = map(item_type, i32),
-			cost_is_paid = boolean,
-			time = i32,
-			progress = i32,
-			description = str,
-			name = str,
-			id = research_id,
-			icon = icon,
-			coord = coord,
-			status = enum {
-				"incomplete",
-				"researching",
-				"complete",
-			},
-		},
-		"id"
-	),
+	states = collect_by_key(research_state, "id"),
 	queue = array(research_id),
 }
+researches.label = "researches"
 
 local queued_decision = tagged_union({
 	ability = struct {
@@ -175,10 +188,10 @@ local queued_decision = tagged_union({
 		coordinates = array(coord),
 	},
 	-- construct = struct {
-	-- 	type = const "construct",
-	-- 	entity_id = entity_id,
-	-- 	coordinates = array(coord),
-	-- 	rotation = option(integer)
+	--  type = const "construct",
+	--  entity_id = entity_id,
+	--  coordinates = array(coord),
+	--  rotation = option(integer)
 	-- },
 	deconstruct = struct {
 		type = const "deconstruct",
@@ -190,6 +203,7 @@ local queued_decision = tagged_union({
 		rotation = u8,
 	},
 }, "type")
+queued_decision.label = "queued_decision"
 
 local effect = tagged_union({
 	shield = struct {
@@ -206,6 +220,7 @@ local effect = tagged_union({
 		type = const "regeneration",
 	},
 }, "type")
+effect.label = "effect"
 
 local deposit_type = enum {
 	"bar_deposit",
@@ -213,6 +228,7 @@ local deposit_type = enum {
 	"rad_deposit",
 	"vit_deposit",
 }
+deposit_type.label = "deposit_type"
 
 local entity: Schema<Entity> = struct {
 	active = boolean,
@@ -253,11 +269,13 @@ local entity: Schema<Entity> = struct {
 		incorporeal = boolean,
 	},
 }
+entity.label = "entity"
 
 local cell_types = enum {
 	"basic",
 	"portal",
 }
+cell_types.label = "cell_types"
 
 local cell: Schema<HexCell> = struct {
 	type = cell_types,
@@ -269,8 +287,10 @@ local cell: Schema<HexCell> = struct {
 		visibility = {},
 	},
 }
+cell.label = "cell"
 
 local color3 = {
+	label = "color3",
 	write = function(writer, data: Color3)
 		writer.write_f64(data.R)
 		writer.write_f64(data.G)
@@ -282,6 +302,7 @@ local color3 = {
 }
 
 local color_sequence_keypoint = {
+	label = "color_sequence_keypoint",
 	write = function(writer, data: ColorSequenceKeypoint)
 		writer.write_f64(data.Time)
 		color3.write(writer, data.Value)
@@ -292,6 +313,7 @@ local color_sequence_keypoint = {
 }
 
 local color_sequence = {
+	label = "color_sequence",
 	write = function(writer, data: ColorSequence)
 		writer.write_u16(#data.Keypoints)
 		for _, keypoint in data.Keypoints do
@@ -309,6 +331,7 @@ local color_sequence = {
 }
 
 local coalition_id = u8
+
 local team_color = tagged_union({
 	color3 = struct {
 		type = const "color3",
@@ -319,6 +342,8 @@ local team_color = tagged_union({
 		color_sequence = color_sequence,
 	},
 }, "type")
+team_color.label = "team_color"
+
 local team_data = struct {
 	id = team_id,
 	name = str,
@@ -336,6 +361,7 @@ local team_data = struct {
 		},
 	},
 }
+team_data.label = "team_data"
 
 local global_configuration = struct {
 	decaying_enabled = boolean,
@@ -343,9 +369,10 @@ local global_configuration = struct {
 	rated = boolean,
 	conclusion_enabled = boolean,
 }
+global_configuration.label = "global_configuration"
 
-local quest = {}
-
+local quest = schemas.dynamic
+quest.label = "quest"
 local turn_schedule_raw = struct {
 	end_time = f64,
 	now = f64,
@@ -353,8 +380,10 @@ local turn_schedule_raw = struct {
 	start_time = f64,
 	start_time_sync = f64,
 }
+turn_schedule_raw.label = "turn_schedule_raw"
 
 local turn_schedule = {
+	label = "turn_schedule",
 	write = function(writer, data)
 		data.now = os.clock()
 		turn_schedule_raw.write(writer, data)
@@ -364,12 +393,14 @@ local turn_schedule = {
 	end,
 }
 
-local unlockable: Unlockable = enum(unlockable_mod.get_unlockables())
+local unlockable: Schema<Unlockable> = enum(unlockable_mod.get_unlockables())
+unlockable.label = "unlockable"
 
 local rating: Schema<Rating> = struct {
 	mu = f64,
 	sigma = f64,
 }
+rating.label = "rating"
 
 local keybind_id = enum {
 	"construct",
@@ -381,10 +412,12 @@ local keybind_id = enum {
 	"previous_entity",
 	"next_entity",
 }
+keybind_id.label = "keybind_id"
 
 local player_settings: Schema<PlayerSettings> = struct {
 	keybinds = map(keybind_id, u16),
 }
+player_settings.label = "player_settings"
 
 local player_data: Schema<PlayerData> = struct {
 	rating = rating,
@@ -398,19 +431,20 @@ local player_data: Schema<PlayerData> = struct {
 	aborted = i32,
 	settings = player_settings,
 }
+player_data.label = "player_data"
+
+local coalition = struct {
+	id = coalition_id,
+	name = str,
+	teams = array(team_id),
+}
+coalition.label = "coalition"
 
 local world_schema = struct {
 	entities = collect_by_key(entity, "id"),
 	cells = map(encoded_coord, cell),
 	teams = collect_by_key(team_data, "id"),
-	coalitions = collect_by_key(
-		struct {
-			id = coalition_id,
-			name = str,
-			teams = array(team_id),
-		},
-		"id"
-	),
+	coalitions = collect_by_key(coalition, "id"),
 	global_configuration = global_configuration,
 	neutral_team = team_id,
 	spectator_team = team_id,
@@ -423,8 +457,10 @@ local world_schema = struct {
 	quests = collect_by_key(quest, "id"),
 	player_data = map(player_id, player_data),
 }
+world_schema.label = "world_schema"
 
 local timestamped_world = {
+	label = "timestamped_world",
 	write = function(writer, world)
 		writer.write_i64(DateTime.now().UnixTimestampMillis)
 		world_schema.write(writer, world)

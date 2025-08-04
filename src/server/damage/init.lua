@@ -3,7 +3,6 @@ local types = require(ReplicatedStorage.Shared.types)
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local is_allied = require(ReplicatedStorage.Shared.team).is_allied
 
-local server_types = require(script.Parent.types)
 local effect_mod = require(script.Parent.effect)
 local entity_mod = require(script.Parent.entity)
 
@@ -14,7 +13,6 @@ type World = types.World
 type HexCell = types.HexCell
 type CubicCoordinate = types.CubicCoordinate
 type EntityId = types.EntityId
-type ActionState = server_types.ActionState
 
 -- damage is applied independently for each cell
 -- for each cell, damage is a gauge gradually reduced for each entity

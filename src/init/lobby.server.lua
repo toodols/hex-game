@@ -1,5 +1,5 @@
 -- lobby.server.lua
-
+print "lobby 0801"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local HttpService = game:GetService "HttpService"
 local Players = game:GetService "Players"
@@ -105,6 +105,7 @@ function room_membership_changed(room: Room)
 					-- 	room = room,
 					-- }
 					-- TeleportService:TeleportAsync(placeids.game, code, party, options)
+					print("teleporting with", HttpService:JSONEncode(room))
 					TeleportService:TeleportToPrivateServer(placeids.game, code, party, nil, { room = room })
 				end)
 			end
@@ -155,7 +156,7 @@ rooms_remote.OnServerEvent:Connect(function(plr: Player, props: Props)
 			map = props.map_type,
 		}
 		room.players[tostring(plr.UserId)] = {
-			team = "3",
+			team = "4",
 		}
 		rooms[room.id] = room
 		room_membership_changed(room)
@@ -171,7 +172,7 @@ rooms_remote.OnServerEvent:Connect(function(plr: Player, props: Props)
 				end
 			end
 			rooms[props.room_id].players[tostring(plr.UserId)] = {
-				team = "3",
+				team = "4",
 			}
 			room_membership_changed(rooms[props.room_id])
 			rooms_remote:FireAllClients {

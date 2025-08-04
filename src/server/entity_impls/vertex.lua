@@ -1,18 +1,14 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
-local server_types = require(ServerScriptService.Server.types)
-local util = require(ReplicatedStorage.Shared.util)
 local entity_mod = require(ServerScriptService.Server.entity)
 
-local updates_mod = require(ServerScriptService.Server.updates)
 
 type Entity = types.Entity
 type EntityId = types.EntityId
 type HexCell = types.HexCell
 type CubicCoordinate = types.CubicCoordinate
 type World = types.World
-type ActionState = server_types.ActionState
 
 entity_mod.registry.vertex = entity_mod.with_defaults {
 	on_completed = function(self: Entity, world: World)

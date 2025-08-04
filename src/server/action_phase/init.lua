@@ -8,7 +8,6 @@ local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local get_deposit_type = require(ReplicatedStorage.Shared.deposit).get_deposit_type
 
 local presence_mod = require(ServerScriptService.Server.presence)
-local server_types = require(ServerScriptService.Server.types)
 local server_entity_mod = require(ServerScriptService.Server.entity)
 local updates_mod = require(ServerScriptService.Server.updates)
 local influences_mod = require(ServerScriptService.Server.influences)
@@ -76,6 +75,7 @@ function queue_blueprints_and_scaffolds(world: World, queue: { EntityAction })
 	end
 end
 
+--- requires: presence
 function remove_occluded_blueprints(world: World)
 	-- remove blueprints that are too close to enemies
 	-- presence is not allowed here cause we only want to remove
@@ -245,13 +245,14 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 	end
 
 	systems_mod.compute_systems(world)
-	influences_mod.compute_influences(world) --recompute influences if entities DIE
-	presence_mod.compute_presence(world)
-	visibility_mod.compute_visibility(world)
-
-	remove_occluded_blueprints(world)
 
 	do_entity_decay(world)
+
+	influences_mod.compute_influences(world) --recompute influences if entities DIE
+	visibility_mod.compute_visibility(world)
+	presence_mod.compute_presence(world)
+
+	remove_occluded_blueprints(world)
 
 	conclusion.handle_conclusion(world)
 	world_mod.destroy_orphan_entities(world)

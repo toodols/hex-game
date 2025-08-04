@@ -15,9 +15,7 @@ entity_mod.registry.stockpile = entity_mod.with_defaults {
 		rad = 1,
 		bar = 2,
 	},
-	construction_condition = {
-		nearby = { "extractor" },
-	},
+	construction_condition = {},
 	can_revive = true,
 	layer = entity_mod.LAYER.building,
 }

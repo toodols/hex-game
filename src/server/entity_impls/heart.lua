@@ -2,7 +2,6 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
 local entity_mod = require(ServerScriptService.Server.entity)
-local server_types = require(ServerScriptService.Server.types)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
 
 local research_item = researches_mod.research_item
@@ -37,6 +36,10 @@ entity_mod.registry.heart = entity_mod.with_defaults {
 	end,
 
 	tick = function(self: Heart, world: World)
+		if self.bonus_clock == nil then
+			self.bonus_clock = 0
+			-- error "no bonus_clock"
+		end
 		if self.status == "complete" then
 			assert(self.researches, "no researches")
 			local output_items = { "bar" }

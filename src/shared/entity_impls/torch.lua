@@ -8,7 +8,7 @@ entity_mod.registry.torch = entity_mod.with_defaults {
 	short_description = "Sees very far in a limited angle",
 	max_health = 4,
 	cost = {
-		bar = 3,
+		bar = 2,
 		rad = 3,
 	},
 	can_revive = true,

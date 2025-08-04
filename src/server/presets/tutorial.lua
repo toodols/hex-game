@@ -5,6 +5,7 @@ local entity_mod = require(ServerScriptService.Server.entity)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 local turn_scheduler_init = require(ServerScriptService.Server.turn_scheduler_init)
+local set_deposit_type = require(ServerScriptService.Server.deposit).set_deposit_type
 
 type World = types.World
 local quests = require(ServerScriptService.Server.quests)
@@ -41,7 +42,7 @@ function tutorial_map()
 		"Player"
 	)
 	player_team.server_data.visibility = "perfect"
-	world:get_cell({ -1, 0, 1 }).type = "bar_deposit"
+	set_deposit_type(world, { -1, 0, 1 }, "bar_deposit")
 	local extractor = entity_mod.new_entity({
 		type = "extractor",
 		primary_coordinate = { -1, 0, 1 },

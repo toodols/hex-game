@@ -9,6 +9,7 @@ local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 local util = require(ReplicatedStorage.Shared.util)
 local coords = require(ReplicatedStorage.Shared.coords)
 local presence_mod = require(ServerScriptService.Server.presence)
+local set_deposit_type = require(ServerScriptService.Server.deposit).set_deposit_type
 
 type World = types.World
 type Quest = types.Quest
@@ -146,7 +147,7 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 					end
 				end
 
-				(world:get_cell { 1, -2, 1 } :: any).type = "rad_deposit"
+				set_deposit_type(world, { 1, -2, 1 }, "rad_deposit")
 				visibility_mod.compute_visibility(world)
 				presence_mod.compute_presence(world)
 

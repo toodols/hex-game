@@ -3,7 +3,6 @@ local ServerScriptService = game:GetService "ServerScriptService"
 
 local types = require(ReplicatedStorage.Shared.types)
 local coords = require(ReplicatedStorage.Shared.coords)
-local server_types = require(ServerScriptService.Server.types)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
 
 local entity_mod = require(ServerScriptService.Server.entity)

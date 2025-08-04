@@ -1,10 +1,10 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local serialize = require(script.Parent.serialize)
-local result = require(ReplicatedStorage.Shared.result)
+local result_mod = require(ReplicatedStorage.Shared.result)
 
-local err = result.err
-local ok = result.ok
-type Result<T, E = nil> = result.Result<T, E>
+local err = result_mod.err
+local ok = result_mod.ok
+type Result<T, E = nil> = result_mod.Result<T, E>
 
 export type SerializingSchema<T> = {
 	write: (writer: serialize.Writer, data: T) -> (),
@@ -20,6 +20,7 @@ export type Schema<T> = SerializingSchema<T> & ValidatingSchema<T> & {
 }
 
 local f64: Schema<number> = {
+	label = "f64",
 	write = function(writer, data)
 		writer.write_f64(data)
 	end,
@@ -35,6 +36,7 @@ local f64: Schema<number> = {
 }
 
 local str: Schema<string> = {
+	label = "str",
 	write = function(writer, data)
 		writer.write_string(data)
 	end,
@@ -50,6 +52,7 @@ local str: Schema<string> = {
 }
 
 local i32: Schema<number> = {
+	label = "i32",
 	write = function(writer, data)
 		writer.write_i32(data)
 	end,
@@ -65,6 +68,7 @@ local i32: Schema<number> = {
 }
 
 local u8: Schema<number> = {
+	label = "u8",
 	write = function(writer, data)
 		writer.write_u8(data)
 	end,
@@ -80,6 +84,7 @@ local u8: Schema<number> = {
 }
 
 local u16: Schema<number> = {
+	label = "u16",
 	write = function(writer, data)
 		writer.write_u16(data)
 	end,
@@ -95,6 +100,7 @@ local u16: Schema<number> = {
 }
 
 local boolean: Schema<boolean> = {
+	label = "bool",
 	write = function(writer, data)
 		if data == true then
 			writer.write_u8(1)
@@ -117,6 +123,7 @@ local boolean: Schema<boolean> = {
 
 local array = function<T>(schema: Schema<T>): Schema<{ T }>
 	return {
+		label = `[{schema.label}]`,
 		write = function(writer, data)
 			local count = 0
 			for _ in data do
@@ -153,6 +160,7 @@ end
 -- where entries are optional
 local map = function<K, V>(key_schema: Schema<K>, value_schema: Schema<V>): Schema<{ [K]: V }>
 	return {
+		label = `\{[{key_schema.label}]: {value_schema.label}\}`,
 		write = function(writer, data)
 			local count = 0
 			for _ in data do
@@ -195,6 +203,7 @@ end
 
 local option = function<T>(schema: Schema<T>): Schema<T?>
 	return {
+		label = `{schema.label}?`,
 		write = function(writer, data)
 			if data == nil then
 				writer.write_u8(0)
@@ -292,7 +301,8 @@ local struct = function<T>(object: { [string]: Schema<any> | any }): Schema<T>
 		table.insert(keys, k)
 	end
 
-	return {
+	local self
+	self = {
 		write = function(writer, data)
 			for _, key in keys do
 				local value = data[key]
@@ -323,6 +333,7 @@ local struct = function<T>(object: { [string]: Schema<any> | any }): Schema<T>
 			return ok(data)
 		end,
 	}
+	return self
 end
 
 local function deep_clone(original)
@@ -337,6 +348,7 @@ end
 
 local const = function<T>(value: T): Schema<T>
 	return {
+		label = tostring(value),
 		write = function(writer, data)
 			-- do nothing
 		end,
@@ -358,6 +370,7 @@ end
 
 local tuple = function<T>(schemas: { Schema<any> }): Schema<{ T }>
 	return {
+		label = "tuple",
 		write = function(writer, data)
 			for i, schema in schemas do
 				schema.write(writer, data[i])
@@ -401,7 +414,11 @@ end
 
 -- Compactly stores {[Id]: {[key]: Id, ...}} as an array by only storing Id once per entry
 local collect_by_key = function<T>(schema: Schema<T>, key: string): Schema<{ [string]: T }>
+	if schema.label == nil then
+		error "label is nil"
+	end
 	return {
+		label = `{schema.label} by {key}`,
 		write = function(writer, data)
 			local count = 0
 			for _ in data do
@@ -449,6 +466,7 @@ local tagged_union = function<T>(cases: { [string]: Schema<T> }, tag_key: string
 	end
 	local discriminant_schema = enum(cases_keys)
 	return {
+		label = "tagged union",
 		write = function(writer, data)
 			local tag = data[tag_key]
 			discriminant_schema.write(writer, tag)
@@ -483,7 +501,7 @@ local keycode: Schema<Enum.KeyCode> = {
 
 	read = function(reader)
 		local value = reader.read_u16()
-		return (Enum.KeyCode :: any):FromValue(223)
+		return (Enum.KeyCode :: any):FromValue(value)
 	end,
 	validate = function(data: Enum.KeyCode)
 		if not keycode_set[data] then

@@ -6,7 +6,6 @@ local world_mod = require(ReplicatedStorage.Shared.world)
 
 local entity_mod = require(ServerScriptService.Server.entity)
 local damage_mod = require(ServerScriptService.Server.damage)
-local server_types = require(ServerScriptService.Server.types)
 
 type Entity = types.Entity
 type World = types.World

@@ -9,7 +9,8 @@ entity_mod.registry.terminal = entity_mod.with_defaults {
 	max_health = 4,
 	build_time = 2,
 	cost = {
-		bar = 4,
+		rad = 2,
+		tek = 2,
 	},
 	can_revive = true,
 	construction_condition = {

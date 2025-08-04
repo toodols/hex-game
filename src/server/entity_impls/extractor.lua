@@ -1,7 +1,6 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 local types = require(ReplicatedStorage.Shared.types)
-local server_types = require(ServerScriptService.Server.types)
 local entity_mod = require(ServerScriptService.Server.entity)
 local get_deposit_type = require(ReplicatedStorage.Shared.deposit).get_deposit_type
 local set_deposit_type = require(ServerScriptService.Server.deposit).set_deposit_type

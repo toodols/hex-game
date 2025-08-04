@@ -14,39 +14,35 @@ entity_mod.registry.factory = entity_mod.with_defaults {
 	can_revive = true,
 	can_disable = true,
 	construction_condition = {
-		nearby = { "stockpile" },
+		nearby = { "stockpile", "vault" },
 	},
 	recipes = {
-		vit_to_tek = {
+		bar_to_vit = {
 			layout_order = 1,
 			input_items = {
-				vit = 2,
+				bar = 2,
 			},
 			output_items = {
-				"tek",
-				"bar",
+				"vit",
 			},
 		},
-		rad_to_pow = {
+		bar_to_rad = {
 			layout_order = 2,
 			input_items = {
-				rad = 1,
-				bar = 1,
+				bar = 2,
 			},
 			output_items = {
-				"pow",
-				"pow",
+				"rad",
 			},
 		},
-		tar_to_tek = {
+		tar = {
 			layout_order = 3,
 			input_items = {
 				tar = 3,
 			},
 			output_items = {
-				"tek",
-				"rad",
-				"vit",
+				"pow",
+				"bar",
 				"bar",
 			},
 		},
