@@ -15,6 +15,8 @@ type ConstructionConditionStatus = {
 	not_nearby: { { entity_type: string, ok: boolean } }?,
 }
 
+local NEARBY_IS_RADIUS = 3
+
 function validate_condition(
 	world: World,
 	coordinates: { CubicCoordinate },
@@ -58,7 +60,7 @@ function validate_condition(
 
 	if condition.nearby or condition.not_nearby then
 		local nearby_entity_types = {}
-		for _, coord in world_mod.coords_filter(world, coords_mod.neighbors_many_leq(coordinates, 2)) do
+		for _, coord in world_mod.coords_filter(world, coords_mod.neighbors_many_leq(coordinates, NEARBY_IS_RADIUS)) do
 			local cell = world:get_cell(coord)
 			for entity_id in cell.entities do
 				local entity = world.entities[entity_id]
