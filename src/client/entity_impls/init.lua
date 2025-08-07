@@ -1,15 +1,6 @@
-require(script.vertex)
-require(script.stockpile)
-require(script.scout)
-require(script.vault)
-require(script.misc)
-require(script.turret)
-require(script.torch)
-require(script.fountain)
-require(script.phony)
-require(script.obelisk)
-require(script.necromancer)
-require(script.deposit)
-require(script.ragnarok)
+for _, child in script:GetChildren() do
+	assert(child:IsA "ModuleScript", "Expected child to be a ModuleScript")
+	require(child)
+end
 
 return {}
