@@ -13,7 +13,7 @@ entity_mod.registry.fountain = entity_mod.with_defaults {
 		tar = 3,
 	},
 	range = 2,
-	construction_condition = { built_on = { "deposit" }, nearby = { "extractor" } },
+	construction_condition = { built_on = { "deposit" }, nearby = { "vault", "stockpile" } },
 	layer = entity_mod.LAYER.building,
 }
 

@@ -4,7 +4,9 @@ local UserInputService = game:GetService "UserInputService"
 local types = require(ReplicatedStorage.Shared.types)
 local React = require(ReplicatedStorage.Packages.react)
 local themes = require(ReplicatedStorage.Client.ui.themes)
-local Corner = require(ReplicatedStorage.Client.ui.util_components).Corner
+local util_components = require(ReplicatedStorage.Client.ui.util_components)
+local Separator = util_components.Separator
+local Corner = util_components.Corner
 local contexts = require(ReplicatedStorage.Client.ui.context)
 local MainContext = contexts.MainContext
 local SettingsContext = contexts.SettingsContext
@@ -167,16 +169,23 @@ function SettingsMenu()
 				Header = React.createElement(
 					"TextLabel",
 					themes.theme_title {
+						BackgroundTransparency = 0.5,
+						BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 						Size = UDim2.new(0, 0, 0, 40),
 						Text = "Keybinds",
-						LayoutOrder = 2,
+						LayoutOrder = 1,
+						TextSize = 20,
 					},
 					{
-						LeftPad = React.createElement("UIPadding", {
-							PaddingLeft = UDim.new(0, 10),
+						Pad = React.createElement("UIPadding", {
+							PaddingLeft = UDim.new(0, 30),
+							PaddingRight = UDim.new(0, 30),
 						}),
 					}
 				),
+				Separator = React.createElement(Separator, {
+					LayoutOrder = 2,
+				}),
 				Construct = React.createElement(Rebindable, {
 					label = "Toggle Construct",
 					LayoutOrder = 3,

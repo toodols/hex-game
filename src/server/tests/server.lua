@@ -376,48 +376,37 @@ end
 function tests.factory_creates_items()
 	local world = presets.blank_map()
 	local factory = spawn_entity(world, "factory")
-	local rad_stockpile = spawn_entity(world, "stockpile")
-	rad_stockpile.inventory.items = { "rad", "rad", "rad", "rad", "rad" }
-	rad_stockpile.inventory.filter = {
-		type = "whitelist",
-		items = { ["rad"] = true },
-	}
 	local bar_stockpile = spawn_entity(world, "stockpile")
 	bar_stockpile.inventory.items = { "bar", "bar", "bar", "bar", "bar" }
 	bar_stockpile.inventory.filter = {
 		type = "whitelist",
 		items = { ["bar"] = true },
 	}
-	local pow_stockpile = spawn_entity(world, "stockpile")
-	pow_stockpile.inventory.items = { "pow" }
-	pow_stockpile.inventory.filter = {
+	local vit_stockpile = spawn_entity(world, "stockpile")
+	vit_stockpile.inventory.items = {}
+	vit_stockpile.inventory.filter = {
 		type = "whitelist",
-		items = { ["pow"] = true },
+		items = { ["vit"] = true },
 	}
 
-	factory.current_recipe = "rad_to_pow"
+	factory.current_recipe = "bar_to_vit"
 
 	action_phase_mod.run_action_phase(world)
 
-	assert_eq(#pow_stockpile.inventory.items, 3, "pow stockpile should have 3 item")
-	assert_eq(pow_stockpile.inventory.items[1], "pow", "stockpile should have pow")
-	assert_eq(#rad_stockpile.inventory.items, 4, "rad stockpile should have 4 items")
-	assert_eq(#bar_stockpile.inventory.items, 4, "bar stockpile should have 4 items")
+	assert_eq(#vit_stockpile.inventory.items, 1, "pow stockpile should have 3 item")
+	assert_eq(vit_stockpile.inventory.items[1], "vit", "vit stockpile should have vit")
+	assert_eq(#bar_stockpile.inventory.items, 3, "bar stockpile should have 4 items")
 
 	action_phase_mod.run_action_phase(world)
 
-	assert_eq(#pow_stockpile.inventory.items, 5, "pow stockpile should have 5 items")
-	assert_eq(#rad_stockpile.inventory.items, 3, "rad stockpile should have 1 items")
-	assert_eq(#bar_stockpile.inventory.items, 3, "bar stockpile should have 1 items")
+	assert_eq(#vit_stockpile.inventory.items, 2, "pow stockpile should have 5 items")
+	assert_eq(#bar_stockpile.inventory.items, 1, "bar stockpile should have 1 items")
 
-	-- it is unfeasible to make factory *not* run when there is no room for the output.
-	-- so rad+bar being consumed to make nothing is intended behavior
-	-- maybe this will change in the future
+	-- no more bar left to consume
 	action_phase_mod.run_action_phase(world)
 
-	assert_eq(#pow_stockpile.inventory.items, 5, "pow stockpile should have 5 items")
-	assert_eq(#rad_stockpile.inventory.items, 2, "rad stockpile should have 1 items")
-	assert_eq(#bar_stockpile.inventory.items, 2, "bar stockpile should have 1 items")
+	assert_eq(#vit_stockpile.inventory.items, 2, "pow stockpile should have 5 items")
+	assert_eq(#bar_stockpile.inventory.items, 1, "bar stockpile should have 1 items")
 end
 
 function tests.deposit_different_items_in_vault()

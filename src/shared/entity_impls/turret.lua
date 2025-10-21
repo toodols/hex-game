@@ -20,8 +20,7 @@ entity_mod.registry.turret = entity_mod.with_defaults {
 	layer = entity_mod.LAYER.building,
 	can_revive = true,
 	construction_condition = {
-		nearby = { "factory", "scout" },
-		not_nearby = { "turret" },
+		nearby = { "factory" },
 	},
 	abilities = {
 		attack = {
