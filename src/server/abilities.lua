@@ -8,6 +8,7 @@ local systems_mod = require(script.Parent.systems)
 local damage_mod = require(script.Parent.damage)
 local visibility_mod = require(script.Parent.visibility)
 local server_entity_mod = require(script.Parent.entity)
+local world_mod = require(ReplicatedStorage.Shared.world)
 
 type World = types.World
 type Entity = types.Entity
@@ -78,9 +79,7 @@ abilities.disguise = function(world: World, entity: Entity, ability: Ability, in
 		end
 	)
 
-	table.sort(entities, function(a, b)
-		return world.entity_configurations[a.type].layer > world.entity_configurations[b.type].layer
-	end)
+	table.sort(entities, world_mod.layer_comparator(world))
 
 	local top = entities[1]
 	if not top then
@@ -192,6 +191,13 @@ abilities.solution_activate = function(world: World, entity: Entity, ability: Ab
 	}
 	world:add_update(event)
 	entity.server_data.will_die = { death_type = "used" }
+end
+
+abilities.rash = function(world: World, entity: Entity, ability: Ability, interaction: Interaction?)
+	assert(ability.type == "rash", "Expected ability to be rash")
+	assert(interaction and interaction.type == "ability", "Expected interaction to be ability")
+
+	local coordinate = interaction.coordinate
 end
 
 return {

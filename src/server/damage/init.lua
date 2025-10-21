@@ -3,6 +3,7 @@ local types = require(ReplicatedStorage.Shared.types)
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local is_allied = require(ReplicatedStorage.Shared.team).is_allied
 
+local world_mod = require(ReplicatedStorage.Shared.world)
 local effect_mod = require(script.Parent.effect)
 local entity_mod = require(script.Parent.entity)
 
@@ -129,9 +130,7 @@ function get_attackable_entities(world: World, cell: HexCell, damage: Damage): {
 		end
 	end
 
-	table.sort(entities, function(a, b)
-		return world.entity_configurations[a.type].layer > world.entity_configurations[b.type].layer
-	end)
+	table.sort(entities, world_mod.layer_comparator(world))
 	return entities
 end
 

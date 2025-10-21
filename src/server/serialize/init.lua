@@ -100,9 +100,6 @@ function serialize_cell(
 				end
 			end
 		end
-		-- table.sort(entities, function(a, b)
-		-- 	return world.entity_configurations[a.type].layer > world.entity_configurations[b.type].layer
-		-- end)
 		return {
 			entities = entities,
 			coordinate = cell.coordinate,

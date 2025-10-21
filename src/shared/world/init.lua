@@ -328,6 +328,13 @@ function new_world_from_extents(extents: Extents): World
 	end
 	return world
 end
+
+function layer_comparator(world: World): (a: Entity, b: Entity) -> boolean
+	return function(a, b)
+		return world.entity_configurations[a.type].layer > world.entity_configurations[b.type].layer
+	end
+end
+
 return {
 	apply_world_data = apply_world_data,
 	coords_filter = coords_filter,
@@ -341,6 +348,7 @@ return {
 	new_world_from_data = new_world_from_data,
 	new_world_from_extents = new_world_from_extents,
 	purge_destroyed_entities = purge_destroyed_entities,
+	layer_comparator = layer_comparator,
 	astar = astar,
 	bfs = bfs,
 }
