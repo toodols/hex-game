@@ -15,6 +15,7 @@ local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local themes = require(ReplicatedStorage.Client.ui.themes)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local context = require(ReplicatedStorage.Client.ui.context)
+local stylesheet = require(ReplicatedStorage.Client.ui.stylesheet)
 local MainContext = context.MainContext
 local SettingsContext = context.SettingsContext
 
@@ -185,6 +186,10 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 					set_submenu {}
 				end,
 			}),
+
+		StyleLink  = React.createElement("StyleLink", {
+			StyleSheet = stylesheet.default_stylesheet,
+		}),
 
 			Center = React.createElement("Frame", {
 				AnchorPoint = Vector2.new(0.5, 0.5),

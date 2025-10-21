@@ -219,25 +219,17 @@ function TopCenter()
 				}),
 			}),
 			SkipButton = React.createElement("TextButton", {
-				AutomaticSize = Enum.AutomaticSize.X,
-				BackgroundColor3 = Color3.fromRGB(13, 13, 13),
-				BackgroundTransparency = 0.2,
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
-				BorderSizePixel = 0,
-				FontFace = Font.new "rbxasset://fonts/families/SourceSansPro.json",
 				LayoutOrder = 3,
 				Size = UDim2.new(0, 70, 0, 40),
 				Text = "",
-				TextColor3 = Color3.fromRGB(255, 255, 255),
-				TextSize = 20,
 				ref = skip_btn_ref,
+				[React.Tag] = "solid skip corner",
 				[React.Event.MouseButton1Click] = function()
 					client_interaction_remote:FireServer { {
 						type = "skip",
 					} }
 				end,
 			}, {
-				Corner = React.createElement(Corner),
 				ImageLabel = React.createElement("ImageLabel", {
 					AnchorPoint = Vector2.new(0, 0.5),
 					BackgroundTransparency = 1,
