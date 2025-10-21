@@ -100,6 +100,9 @@ local PAGES = {
 			{
 				type = "necromancer",
 			},
+			{
+				type = "rash",
+			},
 		},
 	},
 }

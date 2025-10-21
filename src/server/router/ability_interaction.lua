@@ -25,7 +25,7 @@ function ability_interaction(world: World, entry: Interaction, player_info: Play
 		return {}
 	end
 
-	if ability.type == "cannon" then
+	if ability.type == "cannon" or ability.type == "rash" then
 		local candidates =
 			ability_mod.entity_attack_candidates(world, entity, ability.range, player_info.team, ability.ignore_los)
 

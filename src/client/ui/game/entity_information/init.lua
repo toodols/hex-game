@@ -579,6 +579,12 @@ function EntityInformation(props: {
 										ability_id = ability_id,
 										LayoutOrder = 10,
 									})
+								elseif ability.type == "rash" then
+									return React.createElement(AttackButton, {
+										entity_id = entity.id,
+										ability_id = ability_id,
+										LayoutOrder = 10,
+									})
 								else
 									error("Unknown ability type: " .. ability.type)
 								end
@@ -603,8 +609,7 @@ function EntityInformation(props: {
 						Padding = UDim.new(0, 2),
 						SortOrder = Enum.SortOrder.LayoutOrder,
 					}),
-				}
-),
+				}),
 			}),
 		}),
 

@@ -508,6 +508,11 @@ export type Ability = {
 	range: number,
 } | {
 	type: "impression_activate",
+} | {
+	type: "rash",
+	initial_damage: Damage,
+	damage_per_turn: Damage,
+	duration: number,
 }
 
 export type EntityConfiguration = {
