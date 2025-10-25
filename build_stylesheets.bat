@@ -1,0 +1,1 @@
+cargo run --manifest-path lass/Cargo.toml src/client/ui/stylesheets/*.lass -o src/client/ui/default_stylesheet.lua

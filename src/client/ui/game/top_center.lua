@@ -121,12 +121,10 @@ function TopCenter()
 
 	return React.createElement("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0),
-		BackgroundTransparency = 1,
 		Position = UDim2.new(0.5, 0, 0, 20),
 	}, {
 		Top = React.createElement("Frame", {
 			Size = UDim2.new(0, 0, 0, 40),
-			BackgroundTransparency = 1,
 		}, {
 			HorizontalLayout = React.createElement("UIListLayout", {
 				FillDirection = Enum.FillDirection.Horizontal,
@@ -135,87 +133,47 @@ function TopCenter()
 				SortOrder = Enum.SortOrder.LayoutOrder,
 			}),
 			TurnIndicator = React.createElement("Frame", {
-				BackgroundColor3 = Color3.fromRGB(13, 13, 13),
-				BackgroundTransparency = 0.2,
-				BorderSizePixel = 0,
 				LayoutOrder = 1,
 				Size = UDim2.new(0, 120, 0, 40),
+				[React.Tag] = "solid",
 			}, {
 				Turns = React.createElement("TextLabel", {
-					RichText = true,
-					BackgroundTransparency = 1,
-					FontFace = Font.new(
-						"rbxasset://fonts/families/SourceSansPro.json",
-						Enum.FontWeight.Bold,
-						Enum.FontStyle.Normal
-					),
-					AnchorPoint = Vector2.new(0, 0.5),
-					Position = UDim2.new(0, 0, 0.5, 0),
 					Size = UDim2.new(1, 0, 0, 30),
 					Text = tostring(world.turn) .. '<font color="#00FF00" size="30"></font>',
-					TextColor3 = Color3.fromRGB(255, 255, 255),
 					TextSize = 50,
+					[React.Tag] = "aln-cc tx-c",
 				}),
-				Title = React.createElement(
-					"TextLabel",
-					themes.theme_title {
-						AutomaticSize = Enum.AutomaticSize.X,
-						BackgroundTransparency = 1,
-						FontFace = Font.new(
-							"rbxasset://fonts/families/Oswald.json",
-							Enum.FontWeight.Bold,
-							Enum.FontStyle.Normal
-						),
-						Position = UDim2.new(0, 0, 0, 5),
-						Size = UDim2.new(1, 0, 0, 25),
-						Text = "Turn",
-						TextColor3 = Color3.fromRGB(255, 255, 255),
-						TextSize = 18,
-						TextXAlignment = Enum.TextXAlignment.Left,
-					},
-					{
-						PaddingLeft = React.createElement("UIPadding", {
-							PaddingLeft = UDim.new(0, 10),
-						}),
-					}
-				),
-				Corner = React.createElement(Corner),
+				Title = React.createElement("TextLabel", {
+					Position = UDim2.new(0, 0, 0, 5),
+					Size = UDim2.new(1, 0, 0, 25),
+					Text = "Turn",
+					TextSize = 18,
+					[React.Tag] = "title",
+				}, {
+					PaddingLeft = React.createElement("UIPadding", {
+						PaddingLeft = UDim.new(0, 10),
+					}),
+				}),
 			}),
 			Timer = React.createElement("Frame", {
-				BackgroundColor3 = Color3.fromRGB(13, 13, 13),
-				BackgroundTransparency = 0.2,
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
-				BorderSizePixel = 0,
 				ref = timer_ref,
 				ClipsDescendants = true,
 				LayoutOrder = 2,
 				Size = UDim2.new(0, 500, 0, 40),
+				[React.Tag] = "solid",
 			}, {
 				Bar = React.createElement("Frame", {
 					BackgroundColor3 = Color3.fromRGB(57, 57, 57),
-					BorderColor3 = Color3.fromRGB(0, 0, 0),
-					BorderSizePixel = 0,
+					BackgroundTransparency = 0.8,
 					Size = UDim2.new(0, 0, 1, 0),
 					ref = bar_ref,
-				}, {
-					Corner = React.createElement(Corner),
 				}),
 				Display = React.createElement("TextLabel", {
-					AnchorPoint = Vector2.new(0.5, 0.5),
-					AutomaticSize = Enum.AutomaticSize.X,
-					BackgroundTransparency = 1,
 					ref = display_ref,
-					FontFace = Font.new(
-						"rbxasset://fonts/families/SourceSansPro.json",
-						Enum.FontWeight.Bold,
-						Enum.FontStyle.Normal
-					),
-					Position = UDim2.new(0.5, 0, 0.5, 0),
 					Size = UDim2.new(0, 0, 0, 20),
 					Text = "Next Turn: 0.0s",
-					TextColor3 = Color3.fromRGB(255, 255, 255),
-					TextSize = 20,
 					ZIndex = 2,
+					[React.Tag] = "aln-cc",
 				}),
 			}),
 			SkipButton = React.createElement("TextButton", {
@@ -223,7 +181,7 @@ function TopCenter()
 				Size = UDim2.new(0, 70, 0, 40),
 				Text = "",
 				ref = skip_btn_ref,
-				[React.Tag] = "solid skip corner",
+				[React.Tag] = "button",
 				[React.Event.MouseButton1Click] = function()
 					client_interaction_remote:FireServer { {
 						type = "skip",
