@@ -1,3 +1,6 @@
 [submodule "pow"]
 	path = pow
 	url = https://github.com/toodols/pow
+[submodule "lass"]
+	path = lass
+	url = https://github.com/toodols/lass
