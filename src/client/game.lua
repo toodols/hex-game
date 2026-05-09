@@ -314,6 +314,7 @@ function handle_updates(world: World, updates: { WorldUpdate })
 		elseif update.type == "turn_skips" then
 			world.current_skips = update.current_skips
 			world.needed_skips = update.needed_skips
+			world.skipped = update.skipped
 		elseif update.type == "teams" then
 			world.teams = update.teams
 			world.coalitions = update.coalitions

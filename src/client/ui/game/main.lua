@@ -12,7 +12,6 @@ local util = require(ReplicatedStorage.Shared.util)
 
 local ui_types = require(ReplicatedStorage.Client.ui.types)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local context = require(ReplicatedStorage.Client.ui.context)
 local stylesheet = require(ReplicatedStorage.Client.ui.stylesheets)

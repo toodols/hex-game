@@ -69,7 +69,6 @@ function ResearchPreview(props: {
 						LayoutOrder = 2,
 						Text = "<i>No researches in queue</i>",
 						[React.Tag] = "description",
-						Size = UDim2.new(1, 0, 0, 20),
 					}),
 				}
 				else util.table_map(entity.researches.queue, function(research_id, idx)
@@ -78,29 +77,17 @@ function ResearchPreview(props: {
 						LayoutOrder = idx + 2,
 						Size = UDim2.new(0, 30, 0, 30),
 						BackgroundTransparency = 1,
+						[React.Tag] = "stroke",
 					}, {
 						Icon = React.createElement(Icon, {
 							Size = UDim2.new(0, 30, 0, 30),
 							icon = state.icon,
 						}),
-						Corner = React.createElement(Corner),
-						Stroke = React.createElement("UIStroke", {
-							ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-							Color = Color3.fromRGB(255, 255, 255),
-							LineJoinMode = Enum.LineJoinMode.Round,
-							Thickness = 1,
-							Transparency = 0.9,
-						}),
 						Time = if state.cost_is_paid
-							then React.createElement(
-								"TextLabel",
-								themes.theme_description {
-									Text = `{state.time - state.progress}`,
-									Size = UDim2.new(0, 0, 0, 20),
-									AnchorPoint = Vector2.new(1, 1),
-									Position = UDim2.new(1, 0, 1, 0),
-								}
-							)
+							then React.createElement("TextLabel", {
+								Text = `{state.time - state.progress}`,
+								[React.Tag] = "description align-br",
+							})
 							else nil,
 					})
 				end)

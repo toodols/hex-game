@@ -69,6 +69,7 @@ function recalculate_skips(world: World)
 			type = "turn_skips",
 			current_skips = 0,
 			needed_skips = needed_skips,
+			skipped = world.skipped,
 		}
 		world:add_update {
 			type = "turn_skipped",
@@ -81,6 +82,7 @@ function recalculate_skips(world: World)
 			type = "turn_skips",
 			current_skips = #world.skipped,
 			needed_skips = needed_skips,
+			skipped = world.skipped,
 		}
 	end
 end

@@ -1,19 +1,19 @@
+local Players = game:GetService "Players"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local RunService = game:GetService "RunService"
 local TweenService = game:GetService "TweenService"
 
 local React = require(ReplicatedStorage.Packages.react)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
-local themes = require(ReplicatedStorage.Client.ui.themes)
-local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local util = require(ReplicatedStorage.Shared.util)
 local QuestDialogue = require(script.Parent.quest_dialogue).QuestDialogue
 local types = require(ReplicatedStorage.Shared.types)
 
-local Corner = util_components.Corner
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
 type World = types.World
+
+local local_player = Players.LocalPlayer
 
 function TopCenter()
 	local world: World = React.useContext(MainContext).world
@@ -170,7 +170,10 @@ function TopCenter()
 				Size = UDim2.new(0, 70, 0, 40),
 				Text = "",
 				ref = skip_btn_ref,
-				[React.Tag] = "solid",
+				[React.Tag] = `.skip-button solid {if local_player
+						and table.find(world.skipped, local_player.UserId)
+					then "active"
+					else ""}`,
 				[React.Event.MouseButton1Click] = function()
 					client_interaction_remote:FireServer { {
 						type = "skip",

@@ -26,7 +26,7 @@ TextButton
 	BackgroundTransparency: 0.8
 
 @priority(2)
-.pages-nav > .tab.active
+.pages-nav > .tab.active, .skip-button.active
 	TextColor3: Color3.fromRGB(255, 120, 120)
 
 @priority(1)
