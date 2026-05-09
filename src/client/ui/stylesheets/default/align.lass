@@ -1,0 +1,35 @@
+.align-cl
+  AnchorPoint: Vector2.new(0, 0.5)
+  Position: UDim2.new(0, 0, 0.5, 0)
+
+.align-cr
+  AnchorPoint: Vector2.new(1, 0.5)
+  Position: UDim2.new(1, 0, 0.5, 0)
+
+.align-cc
+  AnchorPoint: Vector2.new(0.5, 0.5)
+  Position: UDim2.new(0.5, 0, 0.5, 0)
+
+.align-tl
+  AnchorPoint: Vector2.new(0, 0)
+  Position: UDim2.new(0, 0, 0, 0)
+
+.align-tr
+  AnchorPoint: Vector2.new(1, 0)
+  Position: UDim2.new(1, 0, 0, 0)
+
+.align-tc
+  AnchorPoint: Vector2.new(0.5, 0)
+  Position: UDim2.new(0.5, 0, 0, 0)
+
+.align-bl
+  AnchorPoint: Vector2.new(0, 1)
+  Position: UDim2.new(0, 0, 1, 0)
+
+.align-br
+  AnchorPoint: Vector2.new(1, 1)
+  Position: UDim2.new(1, 0, 1, 0)
+
+.align-bc
+  AnchorPoint: Vector2.new(0.5, 1)
+  Position: UDim2.new(0.5, 0, 1, 0)

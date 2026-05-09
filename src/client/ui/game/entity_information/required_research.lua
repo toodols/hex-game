@@ -43,21 +43,17 @@ function RequiredResearch(props: {
 		return nil
 	end
 
-	return React.createElement(
-		"TextLabel",
-		themes.theme_description {
-			Text = `Required research: {table.concat(
-				util.table_map(required_list, function(id)
-					return researches_mod.researches[id].name
-				end),
-				", "
-			)}`,
-			TextColor3 = Color3.fromRGB(255, 0, 0),
-			Size = UDim2.new(1, 0, 0, 20),
-			LayoutOrder = props.LayoutOrder,
-			AutomaticSize = Enum.AutomaticSize.Y,
-		}
-	)
+	return React.createElement("TextLabel", {
+		Text = `Required research: {table.concat(
+			util.table_map(required_list, function(id)
+				return researches_mod.researches[id].name
+			end),
+			", "
+		)}`,
+		[React.Tag] = "description",
+		TextColor3 = Color3.fromRGB(255, 0, 0),
+		LayoutOrder = props.LayoutOrder,
+	})
 end
 
 return {

@@ -92,7 +92,7 @@ function Lobby()
 			Position = UDim2.new(1, -5, 1, -5),
 			AutomaticSize = Enum.AutomaticSize.XY,
 			BackgroundTransparency = 1,
-			TextXAlignment = Enum.TextXAlignment.Right,
+			[React.Tag] = "text-r",
 			Text = "♥︎",
 			TextSize = 15,
 			TextColor3 = Color3.fromRGB(255, 255, 255),

@@ -109,7 +109,7 @@ local PAGES = {
 
 local HEIGHT = 250
 
-local BuildingPage = function(
+local BuildingPage = React.forwardRef(function(
 	props: {
 		page: { name: string, items: { type: string } },
 		cell: CubicCoordinate,
@@ -156,7 +156,7 @@ local BuildingPage = function(
 			})
 		end)
 	)
-end
+end)
 
 function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 	local world: World = React.useContext(MainContext).world
@@ -168,7 +168,6 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 	local page_refs = React.useRef({} :: any)
 	local ref = React.useRef(nil :: any)
 	local expanded_content_ref = React.useRef(nil :: any)
-
 	local cell = world:get_cell(props.cell)
 	assert(cell, "cell is nil")
 	local researches = researches_mod.get_cells_researches(world, { cell }, player_team.id)
@@ -261,6 +260,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 			util.table_map(util.range(#PAGES), function(page_idx)
 				local page = PAGES[page_idx]
 				return React.createElement(BuildingPage, {
+					key = "page-" .. page_idx,
 					ref = function(s)
 						if s then
 							page_refs.current[s] = page_idx
@@ -273,82 +273,38 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 			end)
 		),
 		Navigation = React.createElement("Frame", {
-			BackgroundColor3 = Color3.fromRGB(12, 12, 12),
-			BackgroundTransparency = 0.2,
-			BorderColor3 = Color3.fromRGB(0, 0, 0),
-			BorderSizePixel = 0,
 			LayoutOrder = 2,
-			Size = UDim2.new(1, 0, 0, 40),
+			[React.Tag] = "header",
 		}, {
-			Corner = React.createElement(Corner),
-			Left2 = React.createElement(
-				"Frame",
-				themes.theme_container {
-					Visible = is_expanded,
-				},
-				{
-					LeftPad = React.createElement("UIPadding", {
-						PaddingLeft = UDim.new(0, 10),
-					}),
-					Title = React.createElement(
-						"TextLabel",
-						themes.theme_title {
-							Text = "Buildings",
-							Size = UDim2.new(0, 0, 1, 0),
-						}
-					),
-				}
-			),
+			Left2 = React.createElement("Frame", {
+				[React.Tag] = "container pad-l-10",
+				Visible = is_expanded,
+			}, {
+				Title = React.createElement("TextLabel", {
+					Text = "Buildings",
+					[React.Tag] = "title",
+				}),
+			}),
 			Left = React.createElement(
 				"Frame",
-				themes.theme_container {
-					Visible = not is_expanded,
-				},
 				{
-					HorizontalLayout = React.createElement("UIListLayout", {
-						FillDirection = Enum.FillDirection.Horizontal,
-						HorizontalAlignment = Enum.HorizontalAlignment.Left,
-						Padding = UDim.new(0, 10),
-						SortOrder = Enum.SortOrder.LayoutOrder,
-						VerticalAlignment = Enum.VerticalAlignment.Bottom,
-					}),
+					[React.Tag] = "container pages-nav list-h list-pad-5 list-bl",
+					Visible = not is_expanded,
 				},
 				util.table_map(util.range(#PAGES), function(i)
 					local page = PAGES[i]
 					return React.createElement("TextButton", {
-						RichText = true,
-						AutomaticSize = Enum.AutomaticSize.X,
-						BackgroundColor3 = Color3.fromRGB(12, 12, 12),
+						[React.Tag] = `tab {if i == current_page then "active" else ""} title pad-l-10 pad-r-10`,
 						BackgroundTransparency = 1,
-						FontFace = Font.new(
-							"rbxasset://fonts/families/Oswald.json",
-							Enum.FontWeight.Regular,
-							Enum.FontStyle.Normal
-						),
-						Size = UDim2.new(0, 0, 1, 0),
 						Text = if i == current_page then `<b>{page.name}</b>` else page.name,
-						TextColor3 = Color3.fromRGB(255, 255, 255),
-						TextSize = 18,
 						[React.Event.MouseButton1Click] = function()
-							set_current_page(i)
 							page_layout_ref.current:JumpToIndex(i - 1)
+							set_current_page(i)
 						end,
-					}, {
-						UIPadding = React.createElement("UIPadding", {
-							PaddingLeft = UDim.new(0, 10),
-							PaddingRight = UDim.new(0, 10),
-						}),
 					})
 				end)
 			),
-			Right = React.createElement("Frame", themes.theme_container {}, {
-				HorizontalLayout = React.createElement("UIListLayout", {
-					FillDirection = Enum.FillDirection.Horizontal,
-					HorizontalAlignment = Enum.HorizontalAlignment.Right,
-					Padding = UDim.new(0, 10),
-					SortOrder = Enum.SortOrder.LayoutOrder,
-					VerticalAlignment = Enum.VerticalAlignment.Center,
-				}),
+			Right = React.createElement("Frame", { [React.Tag] = "container list-h list-pad-10 list-cr" }, {
 				ExpandButton = React.createElement("ImageButton", {
 					BackgroundTransparency = 1,
 					Image = if is_expanded then "rbxassetid://6034818372" else "rbxassetid://6034818379",
@@ -362,32 +318,12 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 		ExpandedContent = React.createElement(
 			"ScrollingFrame",
 			{
-				BackgroundColor3 = Color3.fromRGB(12, 12, 12),
 				ref = expanded_content_ref,
-				BackgroundTransparency = 0.2,
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
-				BorderSizePixel = 0,
+				[React.Tag] = "background pad-l-10 pad-r-10 pad-t-5 pad-b-5 list-v list-pad-5",
 				LayoutOrder = 3,
-				ScrollBarImageTransparency = 1,
-				ScrollBarThickness = 2,
 				Size = UDim2.new(1, 0, 0, 0),
-				CanvasSize = UDim2.new(1, 0, 0, 0),
-				AutomaticCanvasSize = Enum.AutomaticSize.Y,
 			},
-			{
-				UIPadding = React.createElement("UIPadding", {
-					PaddingBottom = UDim.new(0, 5),
-					PaddingLeft = UDim.new(0, 10),
-					PaddingRight = UDim.new(0, 10),
-					PaddingTop = UDim.new(0, 5),
-				}),
-				VerticalLayout = React.createElement("UIListLayout", {
-					FillDirection = Enum.FillDirection.Vertical,
-					Padding = UDim.new(0, 4),
-					SortOrder = Enum.SortOrder.LayoutOrder,
-					VerticalAlignment = Enum.VerticalAlignment.Top,
-				}),
-			},
+			{},
 			util.table_map(util.range(#PAGES), function(page_idx)
 				local page = PAGES[page_idx]
 				local inst = {}

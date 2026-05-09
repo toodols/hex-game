@@ -1,0 +1,121 @@
+Frame, TextButton, TextLabel, ScrollingFrame
+	BorderSizePixel: 0
+	BackgroundColor3: Color3.fromRGB(0, 0, 0)
+
+ImageLabel, TextLabel, ViewportFrame
+	BackgroundTransparency: 1
+
+TextButton, TextLabel
+	AutomaticSize: Enum.AutomaticSize.X
+	RichText: true
+	TextColor3: Color3.fromRGB(255, 255, 255)
+	TextSize: 20
+	BorderSizePixel: 0
+	Size: UDim2.new(0, 0, 1, 0)
+	Text: ""
+
+TextLabel
+	FontFace: Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+	TextXAlignment: Enum.TextXAlignment.Left
+
+TextButton
+	FontFace: Font.fromName("Oswald", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+	TextXAlignment: Enum.TextXAlignment.Center
+
+.option
+	BackgroundTransparency: 0.8
+
+@priority(2)
+.pages-nav > .tab.active
+	TextColor3: Color3.fromRGB(255, 120, 120)
+
+@priority(1)
+.option.active
+	BackgroundTransparency: 0.2
+	FontFace: Font.fromName("Oswald", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+
+.solid
+	BackgroundTransparency: 0.2
+
+.bg-2
+	BackgroundTransparency: 0.5
+
+.bg-3
+	BackgroundTransparency: 0.7
+
+ScrollingFrame
+	AutomaticCanvasSize: Enum.AutomaticSize.Y
+	ScrollBarImageColor3: Color3.fromRGB(0, 0, 0)
+	ScrollBarThickness: 2
+	CanvasSize: UDim2.new(0, 0, 0, 0)
+
+@priority(1)
+.header::UICorner, .solid::UICorner, .background::UICorner, .option::UICorner
+	CornerRadius: UDim.new(0, 4)
+
+@priority(1)
+.container
+	AutomaticSize: Enum.AutomaticSize.XY
+	BackgroundTransparency: 1
+	Size: UDim2.new(1, 0, 1, 0)
+
+@priority(1)
+.square-action-button
+	Size: UDim2.new(0, 40, 0, 40)
+
+@priority(1)
+.stroke::UIStroke, .research-preview.editable::UIStroke, .item-filters-preview.editable::UIStroke, .square-action-button::UIStroke, .recipes::UIStroke
+	ApplyStrokeMode: Enum.ApplyStrokeMode.Border
+	LineJoinMode: Enum.LineJoinMode.Round
+	Thickness: 1
+	Transparency: 0.9
+	Color: Color3.fromRGB(255, 255, 255)
+
+.item-filters-preview.editable.active::UIStroke
+	Color: Color3.fromRGB(255, 120, 120)
+
+@priority(1)
+.container-v
+	BackgroundTransparency: 1
+	Size: UDim2.new(1, 0, 0, 0)
+	AutomaticSize: Enum.AutomaticSize.Y
+
+@priority(1)
+.container-h
+	BackgroundTransparency: 1
+	Size: UDim2.new(0, 0, 1, 0)
+	AutomaticSize: Enum.AutomaticSize.X
+
+@priority(1)
+.container-scroll-v
+	BackgroundTransparency: 1
+
+@priority(1)
+.description
+	AutomaticSize: Enum.AutomaticSize.Y
+	TextWrapped: true
+	TextColor3: Color3.fromRGB(200, 200, 200)
+	TextTruncate: Enum.TextTruncate.AtEnd
+	Size: UDim2.new(1, 0, 0, 0)
+	TextSize: 13
+
+.header
+	BackgroundTransparency: 0.2
+	Size: UDim2.new(1, 0, 0, 40)
+
+@priority(1)
+.subtitle
+	Size: UDim2.new(0, 0, 1, 0)
+	TextSize: 16
+
+.title
+	TextSize: 20
+	Size: UDim2.new(0, 0, 1, 0)
+
+.header >> .title::UIPadding
+	PaddingLeft: UDim.new(0, 10)
+	PaddingRight: UDim.new(0, 10)
+
+@priority(1)
+.background
+	BackgroundTransparency: 0.9

@@ -43,72 +43,63 @@ type SelectionMode = ui_types.SelectionMode
 function MenuIcon(props: { on_click: () -> (), label: string, icon: string })
 	local ref = React.useRef(nil :: any)
 	local layout_ref = React.useRef(nil :: any)
-	return React.createElement(
-		"TextButton",
-		themes.theme_solid {
-			Text = "",
+	return React.createElement("TextButton", {
+		Size = UDim2.new(0, 40, 0, 40),
+		ClipsDescendants = true,
+		ref = ref,
+		[React.Tag] = "as-none solid",
+		[React.Event.MouseButton1Click] = props.on_click,
+		[React.Event.MouseEnter] = function()
+			local width = layout_ref.current.AbsoluteContentSize.X
+			TweenService:Create(ref.current, TweenInfo.new(0.2), {
+				Size = UDim2.new(0, width, 0, 40),
+			}):Play()
+		end,
+		[React.Event.MouseLeave] = function()
+			TweenService:Create(ref.current, TweenInfo.new(0.2), {
+				Size = UDim2.new(0, 40, 0, 40),
+			}):Play()
+		end,
+	}, {
+		HorizontalLayout = React.createElement("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			HorizontalAlignment = Enum.HorizontalAlignment.Right,
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			VerticalAlignment = Enum.VerticalAlignment.Center,
+
+			ref = layout_ref,
+		}),
+		Label = React.createElement("TextLabel", {
+			Size = UDim2.new(0, 0, 1, 0),
+			Text = props.label,
+			TextSize = 14,
+			LayoutOrder = 1,
+		}, {
+			Padding = React.createElement("UIPadding", {
+				PaddingLeft = UDim.new(0, 5),
+			}),
+		}),
+		Icon = React.createElement("Frame", {
+			BackgroundTransparency = 1,
+			LayoutOrder = 2,
 			Size = UDim2.new(0, 40, 0, 40),
 			ClipsDescendants = true,
-			ref = ref,
-			[React.Event.MouseButton1Click] = props.on_click,
-			[React.Event.MouseEnter] = function()
-				local width = layout_ref.current.AbsoluteContentSize.X
-				TweenService:Create(ref.current, TweenInfo.new(0.2), {
-					Size = UDim2.new(0, width, 0, 40),
-				}):Play()
-			end,
-			[React.Event.MouseLeave] = function()
-				TweenService:Create(ref.current, TweenInfo.new(0.2), {
-					Size = UDim2.new(0, 40, 0, 40),
-				}):Play()
-			end,
-		},
-		{
-			HorizontalLayout = React.createElement("UIListLayout", {
-				FillDirection = Enum.FillDirection.Horizontal,
-				HorizontalAlignment = Enum.HorizontalAlignment.Right,
-				SortOrder = Enum.SortOrder.LayoutOrder,
-				VerticalAlignment = Enum.VerticalAlignment.Center,
-
-				ref = layout_ref,
-			}),
-			Label = React.createElement(
-				"TextLabel",
-				themes.theme_label {
-					AutomaticSize = Enum.AutomaticSize.X,
-					Size = UDim2.new(0, 0, 1, 0),
-					Text = props.label,
-					TextSize = 14,
-					LayoutOrder = 1,
-				},
-				{
-					Padding = React.createElement("UIPadding", {
-						PaddingLeft = UDim.new(0, 5),
-					}),
-				}
-			),
-			Icon = React.createElement("Frame", {
+		}, {
+			ImageButton = React.createElement("ImageLabel", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 				BackgroundTransparency = 1,
-				LayoutOrder = 2,
-				Size = UDim2.new(0, 40, 0, 40),
-				ClipsDescendants = true,
-			}, {
-				ImageButton = React.createElement("ImageLabel", {
-					AnchorPoint = Vector2.new(0.5, 0.5),
-					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-					BackgroundTransparency = 1,
-					BorderColor3 = Color3.fromRGB(0, 0, 0),
-					BorderSizePixel = 0,
-					Image = props.icon,
-					ImageColor3 = Color3.fromRGB(255, 255, 255),
-					Position = UDim2.new(0.5, 0, 0.5, 0),
-					Size = UDim2.new(1, -10, 1, -10),
-				}),
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BorderSizePixel = 0,
+				Image = props.icon,
+				ImageColor3 = Color3.fromRGB(255, 255, 255),
+				Position = UDim2.new(0.5, 0, 0.5, 0),
+				Size = UDim2.new(1, -10, 1, -10),
 			}),
+		}),
 
-			Corner = React.createElement(Corner),
-		}
-	)
+		Corner = React.createElement(Corner),
+	})
 end
 
 function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
@@ -230,23 +221,18 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 					VerticalAlignment = Enum.VerticalAlignment.Bottom,
 				}),
 			}, {
-				CancelButton = React.createElement(
-					"TextButton",
-					themes.theme_button {
-						Visible = selection_mode.type == "select_some_cell",
-						Text = "Cancel",
-						Size = UDim2.new(0, 100, 0, 30),
-						BackgroundColor3 = Color3.fromRGB(13, 13, 13),
-						BackgroundTransparency = 0.2,
-						[React.Event.MouseButton1Click] = function()
-							props.selection_mode_stack[#props.selection_mode_stack] = nil
-							force_update()
-						end,
-					},
-					{
-						Corner = React.createElement(Corner),
-					}
-				),
+				CancelButton = React.createElement("TextButton", {
+					Visible = selection_mode.type == "select_some_cell",
+					Text = "Cancel",
+					Size = UDim2.new(0, 100, 0, 30),
+					[React.Tag] = "solid",
+					[React.Event.MouseButton1Click] = function()
+						props.selection_mode_stack[#props.selection_mode_stack] = nil
+						force_update()
+					end,
+				}, {
+					Corner = React.createElement(Corner),
+				}),
 				SelectedCellFrame = if selection_mode.type == "select_cells"
 					then React.createElement(SelectedCellFrame, {
 						selected_cells = util.table_map(
@@ -271,62 +257,36 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 							VerticalAlignment = Enum.VerticalAlignment.Bottom,
 						}),
 						Corner = React.createElement(Corner),
-						Header = React.createElement(
-							"Frame",
-							themes.theme_solid {
-								LayoutOrder = 1,
-								Size = UDim2.new(1, 0, 0, 40),
-							},
-							{
-								Corner = React.createElement(Corner),
-								BackButton = React.createElement(
-									"TextButton",
-									themes.theme_button {
-										Text = "Back",
-										Size = UDim2.new(1, 0, 1, 0),
-										[React.Event.MouseButton1Click] = function()
-											props.selection_mode_stack[#props.selection_mode_stack] = nil
-											force_update()
-										end,
-									}
-								),
-							}
-						),
-						Content = React.createElement(
-							"Frame",
-							themes.theme_background {
-								AnchorPoint = Vector2.new(0.5, 0.5),
-								AutomaticSize = Enum.AutomaticSize.Y,
-								LayoutOrder = 2,
-								Position = UDim2.new(0.5, 0, 0.5, 0),
-								Size = UDim2.new(1, 0, 0, 0),
-							},
-							{
-								VerticalLayout = React.createElement("UIListLayout", {
-									Padding = UDim.new(0, 4),
-									SortOrder = Enum.SortOrder.LayoutOrder,
-								}),
-								Padding = React.createElement("UIPadding", {
-									PaddingBottom = UDim.new(0, 4),
-									PaddingLeft = UDim.new(0, 4),
-									PaddingRight = UDim.new(0, 4),
-									PaddingTop = UDim.new(0, 4),
-								}),
-							},
-							{
-								Info = React.createElement(EntityInformation, {
-									entity_id = selection_mode.entity_id,
-									compressed = false,
-									on_compress = function() end,
-									on_select = function() end,
-									toggle_submenu = function(menu)
-										set_submenu(function(current)
-											return if util.deep_equal(current, menu) then {} else menu
-										end)
-									end,
-								}),
-							}
-						),
+						Header = React.createElement("Frame", {
+							LayoutOrder = 1,
+							[React.Tag] = "header",
+						}, {
+							Corner = React.createElement(Corner),
+							BackButton = React.createElement("TextButton", {
+								Text = "Back",
+								Size = UDim2.new(1, 0, 1, 0),
+								[React.Event.MouseButton1Click] = function()
+									props.selection_mode_stack[#props.selection_mode_stack] = nil
+									force_update()
+								end,
+							}),
+						}),
+						Content = React.createElement("Frame", {
+							LayoutOrder = 2,
+							[React.Tag] = "background align-cc container-v ll-v ll-pad-5 pad-5",
+						}, {
+							Info = React.createElement(EntityInformation, {
+								entity_id = selection_mode.entity_id,
+								compressed = false,
+								on_compress = function() end,
+								on_select = function() end,
+								toggle_submenu = function(menu)
+									set_submenu(function(current)
+										return if util.deep_equal(current, menu) then {} else menu
+									end)
+								end,
+							}),
+						}),
 					})
 					else nil,
 				Recipes = if submenu.type == "recipes"
@@ -345,18 +305,9 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 			}),
 		}, {
 			BottomRight = React.createElement("Frame", {
-				AnchorPoint = Vector2.new(1, 1),
-				BackgroundTransparency = 1,
 				Position = UDim2.new(1, -20, 1, -20),
+				[React.Tag] = "align-br list-v list-pad-5 list-br",
 			}, {
-
-				VerticalLyaout = React.createElement("UIListLayout", {
-					FillDirection = Enum.FillDirection.Vertical,
-					HorizontalAlignment = Enum.HorizontalAlignment.Right,
-					Padding = UDim.new(0, 10),
-					SortOrder = Enum.SortOrder.LayoutOrder,
-					VerticalAlignment = Enum.VerticalAlignment.Bottom,
-				}),
 				Encyclopedia = React.createElement(MenuIcon, {
 					icon = "rbxassetid://6034509994",
 					label = "Encyclopedia",

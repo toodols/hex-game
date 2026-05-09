@@ -57,10 +57,8 @@ function IconAndNumber(props: {
 			}),
 		}),
 		Amount = React.createElement("TextLabel", {
-			AnchorPoint = Vector2.new(1, 0),
 			BackgroundTransparency = 1,
-			FontFace = Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
-			Position = UDim2.new(1, 0, 0, 0),
+			[React.Tag] = "align-tr",
 			Size = UDim2.new(1, 0, 1, 0),
 			Text = tostring(props.number),
 			TextColor3 = INDICATORS[props.type].color,

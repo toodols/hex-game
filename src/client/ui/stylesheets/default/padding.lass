@@ -1,0 +1,38 @@
+.pad-t-2::UIPadding
+	PaddingTop: UDim.new(0, 2)
+
+.pad-l-5::UIPadding
+	PaddingLeft: UDim.new(0, 5)
+
+.pad-r-5::UIPadding
+	PaddingRight: UDim.new(0, 5)
+
+.pad-t-5::UIPadding
+	PaddingTop: UDim.new(0, 5)
+
+.pad-b-5::UIPadding
+	PaddingBottom: UDim.new(0, 5)
+
+.pad-l-10::UIPadding
+	PaddingLeft: UDim.new(0, 10)
+
+.pad-r-10::UIPadding
+	PaddingRight: UDim.new(0, 10)
+
+.pad-t-10::UIPadding
+	PaddingTop: UDim.new(0, 10)
+
+.pad-b-10::UIPadding
+	PaddingBottom: UDim.new(0, 10)
+
+.pad-l-30::UIPadding
+	PaddingLeft: UDim.new(0, 30)
+
+.pad-r-30::UIPadding
+	PaddingRight: UDim.new(0, 30)
+
+.pad-5::UIPadding
+	PaddingLeft: UDim.new(0, 5)
+	PaddingRight: UDim.new(0, 5)
+	PaddingTop: UDim.new(0, 5)
+	PaddingBottom: UDim.new(0, 5)

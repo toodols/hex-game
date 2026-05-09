@@ -192,44 +192,32 @@ function EntityInformation(props: {
 		ref = ref,
 	}, {
 		Corner = React.createElement(Corner),
-		Container = React.createElement("Frame", themes.theme_container {}, {
+		Container = React.createElement("Frame", {
+			[React.Tag] = "container",
+		}, {
 			VerticalLayout = React.createElement("UIListLayout", {
 				Padding = UDim.new(0, 4),
 				SortOrder = Enum.SortOrder.LayoutOrder,
 				ref = layout_ref,
 			}),
 			Header = React.createElement("Frame", {
-				AutomaticSize = Enum.AutomaticSize.Y,
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundTransparency = 1,
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
-				BorderSizePixel = 0,
 				ref = header_ref,
 				LayoutOrder = 1,
-				Size = UDim2.new(1, 0, 0, 0),
+				[React.Tag] = "container-v pad-r-5",
 			}, {
-				title = React.createElement(
-					"TextLabel",
-					themes.theme_title {
-						TextColor3 = text_color,
-						Size = UDim2.new(1, 0, 1, 0),
-						Text = config.name,
-					},
-					{
-						SidePad = React.createElement("UIPadding", {
-							PaddingLeft = UDim.new(0, 15),
-							PaddingRight = UDim.new(0, 15),
-						}),
-					}
-				),
+				title = React.createElement("TextLabel", {
+					TextColor3 = text_color,
+					Size = UDim2.new(1, 0, 1, 0),
+					Text = config.name,
+					[React.Tag] = "subtitle pad-l-10 pad-r-10",
+				}),
 
 				Hitbox = React.createElement("TextButton", {
 					Active = props.compressed,
 					[React.Event.MouseButton1Click] = function()
 						props.on_select()
 					end,
-					BackgroundTransparency = 1,
-					Size = UDim2.new(1, 0, 1, 0),
+					[React.Tag] = "container",
 					Text = "",
 					ZIndex = 10,
 				}),
@@ -241,10 +229,6 @@ function EntityInformation(props: {
 				SizeConstraint = React.createElement("UISizeConstraint", {
 					MinSize = Vector2.new(0, 30),
 				}),
-
-				RightPad = React.createElement("UIPadding", {
-					PaddingRight = UDim.new(0, 5),
-				}),
 			}),
 
 			Separator = React.createElement(Separator, { LayoutOrder = 2 }),
@@ -254,83 +238,53 @@ function EntityInformation(props: {
 				LayoutOrder = 3,
 				Size = UDim2.new(1, 0, 0, 0),
 			}, {
-
+				VerticalLayout = React.createElement("UIListLayout", {
+					SortOrder = Enum.SortOrder.LayoutOrder,
+				}),
 				Top = React.createElement("ScrollingFrame", {
-					AutomaticCanvasSize = Enum.AutomaticSize.Y,
-					ScrollBarThickness = 1,
-					CanvasSize = UDim2.new(0, 0, 0, 0),
-					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-					BackgroundTransparency = 1,
-					BorderColor3 = Color3.fromRGB(0, 0, 0),
-					BorderSizePixel = 0,
 					LayoutOrder = 1,
 					Size = UDim2.new(1, 0, 0, 150),
+					[React.Tag] = "pad-l-10 pad-r-10 container-scroll-v list-v list-pad-5",
 				}, {
-					SidePad = React.createElement("UIPadding", {
-						PaddingLeft = UDim.new(0, 15),
-						PaddingRight = UDim.new(0, 15),
+					Description = React.createElement("TextLabel", {
+						LayoutOrder = 2,
+						Text = formatting.format_text(world, config.description),
+						[React.Tag] = "description",
 					}),
-					VerticalLayout = React.createElement("UIListLayout", {
-						SortOrder = Enum.SortOrder.LayoutOrder,
-						Padding = UDim.new(0, 5),
-					}),
-
-					Description = React.createElement(
-						"TextLabel",
-						themes.theme_description {
-							AutomaticSize = Enum.AutomaticSize.Y,
-							LayoutOrder = 2,
-							Size = UDim2.new(1, 0, 0, 20),
-							Text = formatting.format_text(world, config.description),
-						}
-					),
 					StatusLabel = if entity.status ~= "complete"
-						then React.createElement(
-							"TextLabel",
-							themes.theme_description {
-								AutomaticSize = Enum.AutomaticSize.Y,
-								LayoutOrder = 4,
-								Size = UDim2.new(1, 0, 0, 20),
-								Text = "Status: " .. entity.status,
-							}
-						)
+						then React.createElement("TextLabel", {
+							LayoutOrder = 4,
+							Text = "Status: " .. entity.status,
+							[React.Tag] = "description",
+						})
 						else nil,
 					RequiredResearchInfo = React.createElement(RequiredResearch, {
 						entity_id = entity.id,
 						LayoutOrder = 5,
 					}),
 					DecayLabel = if entity.is_decaying
-						then React.createElement(
-							"TextLabel",
-							themes.theme_description {
-								LayoutOrder = 5,
-								TextColor3 = Color3.fromRGB(255, 82, 82),
-								Size = UDim2.new(1, 0, 0, 20),
-								Text = "Decay: " .. tostring(entity.decay) .. "/ 3",
-							}
-						)
+						then React.createElement("TextLabel", {
+							LayoutOrder = 5,
+							TextColor3 = Color3.fromRGB(255, 82, 82),
+							[React.Tag] = "description",
+							Text = "Decay: " .. tostring(entity.decay) .. "/ 3",
+						})
 						else nil,
 
 					DisabledLabel = if entity.enabled == false
-						then React.createElement(
-							"TextLabel",
-							themes.theme_description {
-								LayoutOrder = 5,
-								TextColor3 = Color3.fromRGB(255, 255, 120),
-								Size = UDim2.new(1, 0, 0, 20),
-								Text = "This building is disabled.",
-							}
-						)
+						then React.createElement("TextLabel", {
+							LayoutOrder = 5,
+							TextColor3 = Color3.fromRGB(255, 255, 120),
+							[React.Tag] = "description",
+							Text = "This building is disabled.",
+						})
 						else nil,
 					TurnsUntilBuilt = if entity.status == "scaffold"
-						then React.createElement(
-							"TextLabel",
-							themes.theme_description {
-								LayoutOrder = 5,
-								Size = UDim2.new(1, 0, 0, 20),
-								Text = "Turns Left: " .. tostring(entity.build_time),
-							}
-						)
+						then React.createElement("TextLabel", {
+							LayoutOrder = 5,
+							[React.Tag] = "description",
+							Text = "Turns Left: " .. tostring(entity.build_time),
+						})
 						else nil,
 					OutputClock = if entity.type == "extractor"
 						then React.createElement(OutputClock, {
@@ -339,41 +293,31 @@ function EntityInformation(props: {
 						})
 						else nil,
 					Disguised = if entity.disguise
-						then React.createElement(
-							"TextButton",
-							themes.theme_button {
-								LayoutOrder = 5,
-								Text = "View Disguise",
-								TextColor3 = Color3.fromRGB(255, 255, 255),
-								AutoButtonColor = false,
-								Size = UDim2.new(0, 0, 0, 20),
-								[React.Event.MouseButton1Click] = function()
-									table.insert(selection_mode_stack, {
-										type = "show_one_entity",
-										entity_id = entity.disguise,
-									})
-									context.force_update()
-								end,
-								[React.Event.MouseEnter] = function(current)
-									TweenService:Create(current, TweenInfo.new(0.5), {
-										BackgroundColor3 = Color3.fromRGB(113, 172, 196),
-									}):Play()
-								end,
-								[React.Event.MouseLeave] = function(current)
-									TweenService:Create(current, TweenInfo.new(0.5), {
-										BackgroundColor3 = Color3.fromRGB(163, 162, 165),
-									}):Play()
-								end,
-							},
-							{
-								Padding = React.createElement("UIPadding", {
-									PaddingLeft = UDim.new(0, 10),
-									PaddingRight = UDim.new(0, 10),
-									PaddingTop = UDim.new(0, 5),
-									PaddingBottom = UDim.new(0, 5),
-								}),
-							}
-						)
+						then React.createElement("TextButton", {
+							LayoutOrder = 5,
+							Text = "View Disguise",
+							[React.Tag] = "pad-l-10 pad-r-10 pad-t-5 pad-b-5",
+							AutoButtonColor = false,
+							BackgroundColor3 = Color3.fromRGB(163, 162, 165),
+							Size = UDim2.new(0, 0, 0, 20),
+							[React.Event.MouseButton1Click] = function()
+								table.insert(selection_mode_stack, {
+									type = "show_one_entity",
+									entity_id = entity.disguise,
+								})
+								context.force_update()
+							end,
+							[React.Event.MouseEnter] = function(current)
+								TweenService:Create(current, TweenInfo.new(0.5), {
+									BackgroundColor3 = Color3.fromRGB(113, 172, 196),
+								}):Play()
+							end,
+							[React.Event.MouseLeave] = function(current)
+								TweenService:Create(current, TweenInfo.new(0.5), {
+									BackgroundColor3 = Color3.fromRGB(163, 162, 165),
+								}):Play()
+							end,
+						})
 						else nil,
 
 					Items = if entity.inventory
@@ -381,22 +325,16 @@ function EntityInformation(props: {
 							BackgroundTransparency = 1,
 							LayoutOrder = 6,
 							AutomaticSize = Enum.AutomaticSize.Y,
+							[React.Tag] = "list-h list-pad-5 list-cl",
 							Size = UDim2.new(1, 0, 0, 0),
 						}, {
-							HorizontalLayout = React.createElement("UIListLayout", {
-								SortOrder = Enum.SortOrder.LayoutOrder,
-								FillDirection = Enum.FillDirection.Horizontal,
-								Padding = UDim.new(0, 8),
-								VerticalAlignment = Enum.VerticalAlignment.Center,
+							ItemsLabel = React.createElement("TextLabel", {
+								LayoutOrder = 1,
+								AutomaticSize = Enum.AutomaticSize.X,
+								Size = UDim2.new(0, 0, 0, 20),
+								[React.Tag] = "description",
+								Text = "Items",
 							}),
-							ItemsLabel = React.createElement(
-								"TextLabel",
-								themes.theme_description {
-									LayoutOrder = 1,
-									Size = UDim2.new(0, 0, 0, 20),
-									Text = "Items",
-								}
-							),
 							Items = React.createElement(Items, {
 								items = items_mod.into_counted_items(entity.inventory.items),
 								LayoutOrder = 2,
@@ -454,29 +392,21 @@ function EntityInformation(props: {
 						})
 						else nil,
 
-					StatusEffects = React.createElement(
-						"TextLabel",
-						themes.theme_description {
-							AutomaticSize = Enum.AutomaticSize.Y,
-							LayoutOrder = 10,
-							Size = UDim2.new(1, 0, 0, 20),
-							Visible = #entity.effects > 0,
-							Text = "Status effects: " .. table.concat(
-								util.table_map(entity.effects, function(v)
-									if v.duration then
-										return v.type .. " (" .. v.duration .. " turns)"
-									else
-										return v.type
-									end
-								end),
-								", "
-							),
-						}
-					),
-				}),
-
-				VerticalLayout = React.createElement("UIListLayout", {
-					SortOrder = Enum.SortOrder.LayoutOrder,
+					StatusEffects = React.createElement("TextLabel", {
+						LayoutOrder = 10,
+						Visible = #entity.effects > 0,
+						[React.Tag] = "description",
+						Text = "Status effects: " .. table.concat(
+							util.table_map(entity.effects, function(v)
+								if v.duration then
+									return v.type .. " (" .. v.duration .. " turns)"
+								else
+									return v.type
+								end
+							end),
+							", "
+						),
+					}),
 				}),
 
 				Bottom = React.createElement("Frame", {
@@ -493,18 +423,9 @@ function EntityInformation(props: {
 						{
 							BackgroundTransparency = 1,
 							Size = UDim2.new(1, 0, 0, 70),
+							[React.Tag] = "list-h list-pad-5 list-cl pad-l-10 pad-r-10",
 						},
 						{
-							SidePad = React.createElement("UIPadding", {
-								PaddingLeft = UDim.new(0, 15),
-								PaddingRight = UDim.new(0, 15),
-							}),
-							HorizontalLayout = React.createElement("UIListLayout", {
-								SortOrder = Enum.SortOrder.LayoutOrder,
-								FillDirection = Enum.FillDirection.Horizontal,
-								VerticalAlignment = Enum.VerticalAlignment.Center,
-								Padding = UDim.new(0, 10),
-							}),
 							DeconstructButton = if entity.active ~= false
 									and entity.owner == player_team.id
 									and not entity.is_decaying
@@ -615,8 +536,7 @@ function EntityInformation(props: {
 
 		ViewportFrame = React.createElement("ViewportFrame", {
 			Size = UDim2.new(0, 200, 0, 150),
-			Position = UDim2.new(0.5, 0, 0.5, 0),
-			AnchorPoint = Vector2.new(0.5, 0.5),
+			[React.Tag] = "align-cc",
 			ImageTransparency = 0.6,
 			BackgroundTransparency = 1,
 			ref = viewport_ref,

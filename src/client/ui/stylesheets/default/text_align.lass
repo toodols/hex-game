@@ -1,0 +1,17 @@
+.text-c
+	TextXAlignment: Enum.TextXAlignment.Center
+
+.text-l
+	TextXAlignment: Enum.TextXAlignment.Left
+
+.text-r
+	TextXAlignment: Enum.TextXAlignment.Right
+
+.ty-t
+	TextYAlignment: Enum.TextYAlignment.Top
+
+.ty-c
+	TextYAlignment: Enum.TextYAlignment.Center
+
+.ty-b
+	TextYAlignment: Enum.TextYAlignment.Bottom

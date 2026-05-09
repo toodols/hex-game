@@ -62,10 +62,10 @@ function SquareActionButton(props: {
 	ImageColor3: Color3,
 })
 	return React.createElement("TextButton", {
-		Size = UDim2.new(0, 40, 0, 40),
 		Text = "",
 		BackgroundColor3 = Color3.fromRGB(71, 71, 71),
-		BackgroundTransparency = 0.8,
+		[React.Tag] = "background square-action-button",
+
 		[React.Event.MouseEnter] = function(current)
 			TweenService:Create(current, TweenInfo.new(0.5), {
 				BackgroundColor3 = props.color,
@@ -79,21 +79,11 @@ function SquareActionButton(props: {
 		LayoutOrder = props.LayoutOrder,
 		[React.Event.MouseButton1Click] = props.on_click,
 	}, {
-		Stroke = React.createElement("UIStroke", {
-			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			Color = Color3.fromRGB(255, 255, 255),
-			LineJoinMode = Enum.LineJoinMode.Round,
-			Thickness = 1,
-			Transparency = 0.9,
-		}),
-		Corner = React.createElement(Corner),
 		Icon = React.createElement("ImageLabel", {
-			AnchorPoint = Vector2.new(0.5, 0.5),
 			ImageColor3 = props.ImageColor3,
 			Image = props.Image,
 			Size = UDim2.new(0.5, 0, 0.5, 0),
-			Position = UDim2.new(0.5, 0, 0.5, 0),
-			BackgroundTransparency = 1,
+			[React.Tag] = "align-cc",
 		}),
 	})
 end

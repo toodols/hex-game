@@ -58,7 +58,7 @@ function QuestDialogue(props: {
 				Text = `{props.quest.title}`,
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 18,
-				TextXAlignment = Enum.TextXAlignment.Left,
+				[React.Tag] = "text-l",
 			}, {
 				PaddingLeft = React.createElement("UIPadding", {
 					PaddingLeft = UDim.new(0, 10),
@@ -82,7 +82,7 @@ function QuestDialogue(props: {
 				TextColor3 = Color3.fromRGB(200, 200, 200),
 				TextSize = 13,
 				TextWrapped = true,
-				TextXAlignment = Enum.TextXAlignment.Left,
+				[React.Tag] = "text-l",
 			}, {
 				PaddingLeft = React.createElement("UIPadding", {
 					PaddingLeft = UDim.new(0, 10),
@@ -105,7 +105,7 @@ function QuestDialogue(props: {
 				TextColor3 = Color3.fromRGB(130, 130, 130),
 				TextSize = 13,
 				TextWrapped = true,
-				TextXAlignment = Enum.TextXAlignment.Right,
+				[React.Tag] = "text-r",
 			}, {
 				PaddingLeft = React.createElement("UIPadding", {
 					PaddingLeft = UDim.new(0, 10),
@@ -129,32 +129,26 @@ function QuestDialogue(props: {
 						}),
 					},
 					util.table_map(current_stage_data.choices, function(choice)
-						return React.createElement(
-							"TextButton",
-							themes.theme_button {
-								BackgroundTransparency = 0.9,
-								BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-								Text = choice.text,
-								Size = UDim2.new(1, 0, 0, 30),
-								TextXAlignment = Enum.TextXAlignment.Left,
-								[React.Event.MouseButton1Click] = function()
-									client_interaction_remote:FireServer {
-										{
-											type = "quest_select_choice",
-											quest_id = props.quest.id,
-											current_stage = props.quest.current_stage,
-											choice_id = choice.id,
-										},
-									}
-								end,
-							},
-							{
-								Padding = React.createElement("UIPadding", {
-									PaddingLeft = UDim.new(0, 10),
-								}),
-								Corner = React.createElement(Corner),
-							}
-						)
+						return React.createElement("TextButton", {
+							Text = choice.text,
+							Size = UDim2.new(1, 0, 0, 30),
+							[React.Tag] = "text-l solid",
+							[React.Event.MouseButton1Click] = function()
+								client_interaction_remote:FireServer {
+									{
+										type = "quest_select_choice",
+										quest_id = props.quest.id,
+										current_stage = props.quest.current_stage,
+										choice_id = choice.id,
+									},
+								}
+							end,
+						}, {
+							Padding = React.createElement("UIPadding", {
+								PaddingLeft = UDim.new(0, 10),
+							}),
+							Corner = React.createElement(Corner),
+						})
 					end)
 				),
 			}

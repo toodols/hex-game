@@ -42,17 +42,15 @@ if #util.table_keys(server_entity_mod.registry) == 0 then
 	error "No entities registered in server entity registry. Likely before it has loaded."
 end
 
-local entity_types = enum(util.table_keys(server_entity_mod.registry))
-entity_types.label = "entity_types"
+local entity_types = enum "entity_types"(util.table_keys(server_entity_mod.registry))
 
-local entity_statuses = enum {
+local entity_statuses = enum "entity_statuses" {
 	"blueprint",
 	"scaffold",
 	"complete",
 }
-entity_statuses.label = "entity_statuses"
 
-local item_type = enum {
+local item_type = enum "item_type" {
 	"bar",
 	"tar",
 	"rad",
@@ -63,7 +61,6 @@ local item_type = enum {
 	"goo",
 	"zap",
 }
-item_type.label = "item_type"
 
 -- 16 bytes
 local entity_id = {
@@ -93,13 +90,12 @@ local entity_id = {
 	end,
 }
 
-local inventory: Schema<Inventory> = struct {
+local inventory: Schema<Inventory> = struct "inventory" {
 	filter = struct { type = enum { "whitelist", "blacklist" }, items = map(item_type, boolean) },
 	homogeneous = boolean,
 	capacity = i32,
 	items = array(item_type),
 }
-inventory.label = "inventory"
 
 local coord = {
 	label = "coord",
@@ -129,7 +125,7 @@ local encoded_coord = {
 	end,
 }
 
-local icon = tagged_union({
+local icon = tagged_union "icon" ({
 	image = struct {
 		type = const "image",
 		image = str,
@@ -146,7 +142,6 @@ local icon = tagged_union({
 		text = str,
 	},
 }, "type")
-icon.label = "icon"
 
 -- 4 bytes
 local team_id = u8
@@ -393,16 +388,14 @@ local turn_schedule = {
 	end,
 }
 
-local unlockable: Schema<Unlockable> = enum(unlockable_mod.get_unlockables())
-unlockable.label = "unlockable"
+local unlockable: Schema<Unlockable> = enum "unlockable"(unlockable_mod.get_unlockables())
 
-local rating: Schema<Rating> = struct {
+local rating: Schema<Rating> = struct "rating" {
 	mu = f64,
 	sigma = f64,
 }
-rating.label = "rating"
 
-local keybind_id = enum {
+local keybind_id = enum "keybind_id" {
 	"construct",
 	"skip",
 	"primary_ability",
@@ -412,14 +405,12 @@ local keybind_id = enum {
 	"previous_entity",
 	"next_entity",
 }
-keybind_id.label = "keybind_id"
 
-local player_settings: Schema<PlayerSettings> = struct {
+local player_settings: Schema<PlayerSettings> = struct "player_settings" {
 	keybinds = map(keybind_id, u16),
 }
-player_settings.label = "player_settings"
 
-local player_data: Schema<PlayerData> = struct {
+local player_data: Schema<PlayerData> = struct "player_data" {
 	rating = rating,
 	rating_ordinal = f64,
 	unlockables_owned = map(unlockable, const(true)),
@@ -431,14 +422,12 @@ local player_data: Schema<PlayerData> = struct {
 	aborted = i32,
 	settings = player_settings,
 }
-player_data.label = "player_data"
 
-local coalition = struct {
+local coalition = struct "coalition" {
 	id = coalition_id,
 	name = str,
 	teams = array(team_id),
 }
-coalition.label = "coalition"
 
 local world_schema = struct {
 	entities = collect_by_key(entity, "id"),

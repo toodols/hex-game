@@ -21,72 +21,40 @@ function Aside(props: { item: ResearchItem, state: ResearchState, on_add: () -> 
 
 	return React.createElement(
 		"Frame",
-		themes.theme_solid {
-			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, 0, 0.5, 0),
+		{
 			Size = UDim2.new(0, 200, 0, 0),
-			AutomaticSize = Enum.AutomaticSize.Y,
+			Position = UDim2.new(1, -10, 0.5, 0),
 			ZIndex = 2,
 			ClipsDescendants = true,
+			[React.Tag] = "solid align-cr container-v list-v stroke",
 		},
 		{
-			Corner = React.createElement(Corner),
-			VerticalLayout = React.createElement("UIListLayout", {
-				SortOrder = Enum.SortOrder.LayoutOrder,
-			}),
-			Stroke = React.createElement("UIStroke", {
-				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-				Color = Color3.fromRGB(255, 255, 255),
-				LineJoinMode = Enum.LineJoinMode.Round,
-				Thickness = 1,
-				Transparency = 0.9,
-			}),
 			Container = React.createElement(
 				"Frame",
 				{
-					BackgroundTransparency = 1,
-					Size = UDim2.new(1, 0, 0, 0),
-					AutomaticSize = Enum.AutomaticSize.Y,
+					[React.Tag] = "container-v pad-l-10 pad-r-10 pad-b-10 list-v list-pad-5",
 				},
 				{
-					Padding = React.createElement("UIPadding", {
-						PaddingLeft = UDim.new(0, 10),
-						PaddingRight = UDim.new(0, 10),
-						PaddingBottom = UDim.new(0, 10),
+					Title = React.createElement("TextLabel", {
+						Text = props.item.name,
+						[React.Tag] = "text-c title",
+						Size = UDim2.new(1, 0, 0, 30),
+						LayoutOrder = 1,
 					}),
-					VerticalLayout = React.createElement("UIListLayout", {
-						SortOrder = Enum.SortOrder.LayoutOrder,
-						Padding = UDim.new(0, 4),
+					Description = React.createElement("TextLabel", {
+						Text = formatting.format_text(world, props.item.description),
+						[React.Tag] = "description",
+						LayoutOrder = 2,
 					}),
-					Title = React.createElement(
-						"TextLabel",
-						themes.theme_title {
-							Text = props.item.name,
-							TextXAlignment = Enum.TextXAlignment.Center,
-							Size = UDim2.new(1, 0, 0, 30),
-							LayoutOrder = 1,
-						}
-					),
-					Description = React.createElement(
-						"TextLabel",
-						themes.theme_description {
-							Text = formatting.format_text(world, props.item.description),
-							Size = UDim2.new(1, 0, 0, 40),
-							LayoutOrder = 2,
-						}
-					),
 				},
 				if not is_available
 					then {
-						UnavailableLabel = React.createElement(
-							"TextLabel",
-							themes.theme_description {
-								Text = "Unavailable",
-								TextColor3 = Color3.fromRGB(150, 50, 50),
-								Size = UDim2.new(1, 0, 0, 40),
-								LayoutOrder = 4,
-							}
-						),
+						UnavailableLabel = React.createElement("TextLabel", {
+							Text = "Unavailable",
+							TextColor3 = Color3.fromRGB(150, 50, 50),
+							LayoutOrder = 4,
+							[React.Tag] = "description",
+						}),
 					}
 					else nil,
 				if props.item.status ~= "complete"
@@ -99,14 +67,11 @@ function Aside(props: { item: ResearchItem, state: ResearchState, on_add: () -> 
 					else {},
 				if props.item.status == "complete" or props.item.status == "researching"
 					then {
-						CompletedLabel = React.createElement(
-							"TextLabel",
-							themes.theme_description {
-								Text = if props.item.status == "complete" then "Complete" else "Researching",
-								Size = UDim2.new(1, 0, 0, 40),
-								LayoutOrder = 4,
-							}
-						),
+						CompletedLabel = React.createElement("TextLabel", {
+							Text = if props.item.status == "complete" then "Complete" else "Researching",
+							[React.Tag] = "description",
+							LayoutOrder = 4,
+						}),
 					}
 					else {}
 			),

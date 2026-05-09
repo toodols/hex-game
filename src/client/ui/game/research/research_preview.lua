@@ -27,11 +27,13 @@ function ResearchPreview(props: {
 	local is_owner = entity.owner == (team.team_of(world, Players.LocalPlayer) :: TeamData).id
 
 	return React.createElement("TextButton", {
-		BackgroundTransparency = 0.9,
-		Size = UDim2.new(0, 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.XY,
+		Size = UDim2.new(0, 0, 0, 100),
+		AutomaticSize = Enum.AutomaticSize.X,
 		LayoutOrder = props.LayoutOrder,
+		BackgroundColor3 = Color3.fromRGB(100, 100, 100),
+
 		[React.Event.MouseButton1Click] = props.click,
+		[React.Tag] = `research-preview background pad-l-5 pad-r-5 pad-b-5 list-v {if is_owner then "editable" else ""}`,
 		Text = "",
 		AutoButtonColor = false,
 		[React.Event.MouseEnter] = function(current)
@@ -41,64 +43,34 @@ function ResearchPreview(props: {
 		end,
 		[React.Event.MouseLeave] = function(current)
 			TweenService:Create(current, TweenInfo.new(0.5), {
-				BackgroundColor3 = Color3.fromRGB(163, 162, 165),
+				BackgroundColor3 = Color3.fromRGB(100, 100, 100),
 			}):Play()
 		end,
 	}, {
-		Padding = React.createElement("UIPadding", {
-			PaddingLeft = UDim.new(0, 5),
-			PaddingRight = UDim.new(0, 5),
-			PaddingBottom = UDim.new(0, 5),
-		}),
-		VerticalLayout = React.createElement("UIListLayout", {
-			SortOrder = Enum.SortOrder.LayoutOrder,
-		}),
-
 		-- SizeConstraint = React.createElement("UISizeConstraint", {
 		-- 	MinSize = Vector2.new(80, 0),
 		-- }),
-		Stroke = if is_owner
-			then React.createElement("UIStroke", {
-				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-				Color = Color3.fromRGB(255, 255, 255),
-				LineJoinMode = Enum.LineJoinMode.Round,
-				Thickness = 1,
-				Transparency = 0.9,
-			})
-			else nil,
-		Corner = React.createElement(Corner),
-		ResearchLabel = React.createElement(
-			"TextLabel",
-			themes.theme_description {
-				Text = "Research",
-				Size = UDim2.new(1, 0, 0, 20),
-				TextColor3 = Color3.new(0.0588235, 0.898039, 0),
-			}
-		),
+		ResearchLabel = React.createElement("TextLabel", {
+			Text = "Research",
+			Size = UDim2.new(1, 0, 0, 20),
+			TextColor3 = Color3.new(0.0588235, 0.898039, 0),
+			[React.Tag] = "subtitle",
+		}),
 		Container = React.createElement(
 			"Frame",
 			{
 				BackgroundTransparency = 1,
 				Size = UDim2.new(1, 0, 0, 30),
-			},
-			{
-				HorizontalLayout = React.createElement("UIListLayout", {
-					FillDirection = Enum.FillDirection.Horizontal,
-					VerticalAlignment = Enum.VerticalAlignment.Center,
-					Padding = UDim.new(0, 5),
-					SortOrder = Enum.SortOrder.LayoutOrder,
-				}),
+				[React.Tag] = "list-h list-pad-5 list-cc",
 			},
 			if #entity.researches.queue == 0
 				then {
-					TextLabel = React.createElement(
-						"TextLabel",
-						themes.theme_description {
-							LayoutOrder = 2,
-							Text = "<i>No researches in queue</i>",
-							Size = UDim2.new(0, 0, 0, 20),
-						}
-					),
+					TextLabel = React.createElement("TextLabel", {
+						LayoutOrder = 2,
+						Text = "<i>No researches in queue</i>",
+						[React.Tag] = "description",
+						Size = UDim2.new(1, 0, 0, 20),
+					}),
 				}
 				else util.table_map(entity.researches.queue, function(research_id, idx)
 					local state = entity.researches.states[research_id]

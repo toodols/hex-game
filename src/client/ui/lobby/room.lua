@@ -22,8 +22,9 @@ function Room(props: { room: Room })
 	React.useEffect(function()
 		local connection = RunService.RenderStepped:Connect(function()
 			if start_time_label_ref.current and props_ref.current and props_ref.current.room.starting_at then
-				start_time_label_ref.current.Text =
-					`Starting in {("%.1f"):format((props_ref.current.room.starting_at - workspace:GetServerTimeNow()))}s`
+				start_time_label_ref.current.Text = `Starting in {("%.1f"):format(
+					(props_ref.current.room.starting_at - workspace:GetServerTimeNow())
+				)}s`
 			end
 		end)
 
@@ -87,7 +88,7 @@ function Room(props: { room: Room })
 				Text = "Click To Join",
 				TextSize = 16,
 				TextTransparency = 0.6,
-				TextXAlignment = Enum.TextXAlignment.Right,
+				[React.Tag] = "text-r",
 				Visible = not is_expanded,
 			}
 		),

@@ -164,40 +164,16 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 	end
 
 	return React.createElement("Frame", {
-		AnchorPoint = Vector2.new(0, 1),
 		BackgroundTransparency = 1,
 		Position = UDim2.new(-250, 250, 20, -20),
 		Size = UDim2.new(0, 250, 0, 300),
+		[React.Tag] = "align-br list-v list-bc",
 	}, {
-		VerticalLayout = React.createElement("UIListLayout", {
-			HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			SortOrder = Enum.SortOrder.LayoutOrder,
-			VerticalAlignment = Enum.VerticalAlignment.Bottom,
-		}),
-
-		Corner = React.createElement(Corner),
-
 		Content = React.createElement(
 			"Frame",
-			themes.theme_background {
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				AutomaticSize = Enum.AutomaticSize.Y,
-				LayoutOrder = 2,
-				Position = UDim2.new(0.5, 0, 0.5, 0),
-				Size = UDim2.new(1, 0, 0, 0),
-			},
 			{
-				VerticalLayout = React.createElement("UIListLayout", {
-					Padding = UDim.new(0, 4),
-					SortOrder = Enum.SortOrder.LayoutOrder,
-				}),
-
-				Padding = React.createElement("UIPadding", {
-					PaddingBottom = UDim.new(0, 4),
-					PaddingLeft = UDim.new(0, 4),
-					PaddingRight = UDim.new(0, 4),
-					PaddingTop = UDim.new(0, 4),
-				}),
+				LayoutOrder = 2,
+				[React.Tag] = "background container-v align-cc list-v list-pad-5 pad-5",
 			},
 			util.table_from_entries(util.table_map(entities_ref.current, function(entity_id, idx)
 				return {
@@ -219,111 +195,92 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 			end))
 		),
 
-		Header = React.createElement(
-			"Frame",
-			themes.theme_solid {
-				LayoutOrder = 1,
-				Size = UDim2.new(1, 0, 0, 40),
-			},
-			{
-				Corner = React.createElement(Corner),
+		Header = React.createElement("Frame", {
+			LayoutOrder = 1,
+			[React.Tag] = "header",
+		}, {
+			BuildButton = if #props.selected_cells == 1
+				then React.createElement("ImageButton", {
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					BackgroundTransparency = 0.9,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					BorderSizePixel = 0,
+					ClipsDescendants = true,
+					[React.Event.MouseButton1Click] = function()
+						toggle_submenu { type = "build", cell = props.selected_cells[1] }
+					end,
+					[React.Tag] = "align-cr",
+					Size = UDim2.new(0, 89, 0, 40),
+				}, {
+					Corner = React.createElement(Corner),
 
-				BuildButton = if #props.selected_cells == 1
-					then React.createElement("ImageButton", {
-						AnchorPoint = Vector2.new(1, 0.5),
-						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-						BackgroundTransparency = 0.9,
-						BorderColor3 = Color3.fromRGB(0, 0, 0),
-						BorderSizePixel = 0,
-						ClipsDescendants = true,
-						[React.Event.MouseButton1Click] = function()
-							toggle_submenu { type = "build", cell = props.selected_cells[1] }
-						end,
-						Position = UDim2.new(1, 0, 0.5, 0),
-						Size = UDim2.new(0, 89, 0, 40),
-					}, {
-						Corner = React.createElement(Corner),
-
-						Gradient = React.createElement("UIGradient", {
-							Transparency = NumberSequence.new {
-								NumberSequenceKeypoint.new(0, 1),
-								NumberSequenceKeypoint.new(0.186, 0.331),
-								NumberSequenceKeypoint.new(0.505, 0.369),
-								NumberSequenceKeypoint.new(0.685, 1),
-								NumberSequenceKeypoint.new(1, 1),
-							},
-						}),
-
-						Stroke = React.createElement("UIStroke", {
-							Color = Color3.fromRGB(170, 170, 170),
-						}, {
-							Gradient = React.createElement("UIGradient", {
-								ref = gradient_ref,
-								Transparency = NumberSequence.new {
-									NumberSequenceKeypoint.new(0, 1),
-									NumberSequenceKeypoint.new(0.443, 1),
-									NumberSequenceKeypoint.new(0.649, 0.994),
-									NumberSequenceKeypoint.new(1, 0),
-								},
-							}),
-						}),
-
-						Image1 = React.createElement("ImageLabel", {
-							BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-							BackgroundTransparency = 1,
-							BorderColor3 = Color3.fromRGB(0, 0, 0),
-							BorderSizePixel = 0,
-							Image = "rbxassetid://6034275725",
-							ImageTransparency = 0.9,
-							Position = UDim2.new(0.135, 0, -0.375, 0),
-							Size = UDim2.new(0, 100, 0, 100),
-						}),
-
-						Image2 = React.createElement("ImageLabel", {
-							BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-							BackgroundTransparency = 1,
-							BorderColor3 = Color3.fromRGB(0, 0, 0),
-							BorderSizePixel = 0,
-							Image = "rbxassetid://6034275725",
-							Position = UDim2.new(0.292, 0, 0, 0),
-							Size = UDim2.new(0, 42, 0, 40),
-						}),
-					})
-					else nil,
-
-				Container = React.createElement("Frame", themes.theme_container {}, {
-					ListLayout = React.createElement("UIListLayout", {
-						FillDirection = Enum.FillDirection.Horizontal,
-						SortOrder = Enum.SortOrder.LayoutOrder,
-						VerticalAlignment = Enum.VerticalAlignment.Center,
+					Gradient = React.createElement("UIGradient", {
+						Transparency = NumberSequence.new {
+							NumberSequenceKeypoint.new(0, 1),
+							NumberSequenceKeypoint.new(0.186, 0.331),
+							NumberSequenceKeypoint.new(0.505, 0.369),
+							NumberSequenceKeypoint.new(0.685, 1),
+							NumberSequenceKeypoint.new(1, 1),
+						},
 					}),
 
-					Coordinate = if #props.selected_cells == 1
-						then React.createElement(CoordinateLabel, { coordinate = props.selected_cells[1] })
-						else nil,
+					Stroke = React.createElement("UIStroke", {
+						Color = Color3.fromRGB(170, 170, 170),
+					}, {
+						Gradient = React.createElement("UIGradient", {
+							ref = gradient_ref,
+							Transparency = NumberSequence.new {
+								NumberSequenceKeypoint.new(0, 1),
+								NumberSequenceKeypoint.new(0.443, 1),
+								NumberSequenceKeypoint.new(0.649, 0.994),
+								NumberSequenceKeypoint.new(1, 0),
+							},
+						}),
+					}),
 
-					Title = React.createElement(
-						"TextLabel",
-						themes.theme_title {
-							Text = if #props.selected_cells == 1
-								then if deposit_type
-									then deposit_mod.deposit_names[deposit_type]
-									else cells_mod.cell_names[world:get_cell(props.selected_cells[1]).type]
-								else `{#props.selected_cells} Cells Selected`,
-							TextSize = 23,
-						},
-						{
-							SidePad = React.createElement("UIPadding", {
-								PaddingLeft = UDim.new(0, 15),
-								PaddingRight = UDim.new(0, 8),
-							}),
-						}
-					),
+					Image1 = React.createElement("ImageLabel", {
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						BorderSizePixel = 0,
+						Image = "rbxassetid://6034275725",
+						ImageTransparency = 0.9,
+						Position = UDim2.new(0.135, 0, -0.375, 0),
+						Size = UDim2.new(0, 100, 0, 100),
+					}),
 
-					Corner = React.createElement(Corner),
+					Image2 = React.createElement("ImageLabel", {
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						BorderSizePixel = 0,
+						Image = "rbxassetid://6034275725",
+						Position = UDim2.new(0.292, 0, 0, 0),
+						Size = UDim2.new(0, 42, 0, 40),
+					}),
+				})
+			else nil,
+
+			Container = React.createElement("Frame", {
+				[React.Tag] = "container list-h list-cl",
+			}, {
+
+				Coordinate = if #props.selected_cells == 1
+					then React.createElement(CoordinateLabel, { coordinate = props.selected_cells[1] })
+					else nil,
+
+				Title = React.createElement("TextLabel", {
+					Text = if #props.selected_cells == 1
+						then if deposit_type
+							then deposit_mod.deposit_names[deposit_type]
+							else cells_mod.cell_names[world:get_cell(props.selected_cells[1]).type]
+						else `{#props.selected_cells} Cells Selected`,
+					[React.Tag] = "title",
 				}),
-			}
-		),
+
+				Corner = React.createElement(Corner),
+			}),
+		}),
 	})
 end
 

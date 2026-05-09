@@ -60,7 +60,7 @@ function TeamSection(props: {
 					TextColor3 = Color3.fromRGB(170, 170, 170),
 					TextSize = 15,
 					TextWrapped = true,
-					TextXAlignment = Enum.TextXAlignment.Left,
+					[React.Tag] = "text-l",
 				}, {
 					Padding = React.createElement("UIPadding", {
 						PaddingLeft = UDim.new(0, 5),
@@ -89,7 +89,7 @@ function TeamSection(props: {
 				TextColor3 = (props.team.color :: any).color,
 				TextSize = 20,
 				TextWrapped = true,
-				TextXAlignment = Enum.TextXAlignment.Left,
+				[React.Tag] = "text-l",
 			}, {
 				Padding = React.createElement("UIPadding", {
 					PaddingLeft = UDim.new(0, 5),
@@ -118,17 +118,13 @@ function TeamSection(props: {
 			-- 	TextColor3 = Color3.fromRGB(170, 170, 170),
 			-- 	TextSize = 20,
 			-- 	TextWrapped = true,
-			-- 	TextXAlignment = Enum.TextXAlignment.Right,
+			-- 	[React.Tag] = "text-r",
 			-- }, {
 			-- 	Padding = React.createElement("UIPadding", {
 			-- 		PaddingLeft = UDim.new(0, 5),
 			-- 		PaddingRight = UDim.new(0, 5),
 			-- 	}),
 			-- }),
-		}),
-
-		Corner = React.createElement("UICorner", {
-			CornerRadius = UDim.new(0, 4),
 		}),
 	})
 end
@@ -148,25 +144,22 @@ function PlayerList(props: { visible: boolean })
 	end, {})
 
 	return React.createElement("Frame", {
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		AutomaticSize = Enum.AutomaticSize.XY,
-		BackgroundTransparency = 1,
 		LayoutOrder = 1,
-		Position = UDim2.new(0.5, 0, 0.5, 0),
-		Size = UDim2.new(1, 0, 0, 0),
+		[React.Tag] = "align-cc background as-xy list-v list-pad-5",
 		Visible = props.visible,
 	}, {
-		VerticalLayout = React.createElement("UIListLayout", {
-			Padding = UDim.new(0, 1),
-			SortOrder = Enum.SortOrder.LayoutOrder,
+		Header = React.createElement("Frame", {
+			[React.Tag] = "header",
+			LayoutOrder = 1,
+		}, {
+			Title = React.createElement("TextLabel", {
+				Text = "Players",
+				[React.Tag] = "title",
+			}),
 		}),
-
 		Container = React.createElement("Frame", {
-			AutomaticSize = Enum.AutomaticSize.XY,
-			BackgroundTransparency = 1,
 			LayoutOrder = 2,
-			Position = UDim2.new(0, 0, 0.12, 0),
-			Size = UDim2.new(1, 0, 0, 0),
+			[React.Tag] = "container",
 		}, {
 			HorizontalLayout = React.createElement("UIListLayout", {
 				FillDirection = Enum.FillDirection.Horizontal,
@@ -174,81 +167,23 @@ function PlayerList(props: { visible: boolean })
 				SortOrder = Enum.SortOrder.LayoutOrder,
 			}),
 
-			ItemsScrollingFrame = React.createElement(
-				"ScrollingFrame",
-				themes.theme_solid {
-					AutomaticCanvasSize = Enum.AutomaticSize.Y,
-					AutomaticSize = Enum.AutomaticSize.Y,
-					BorderSizePixel = 0,
-					CanvasSize = UDim2.new(),
-					ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0),
-					ScrollBarThickness = 4,
-					Size = UDim2.new(1, 0, 0, 0),
-				},
-				{
-					Corner = React.createElement("UICorner", {
-						CornerRadius = UDim.new(0, 4),
-					}),
-
-					VerticalLayout = React.createElement("UIListLayout", {
-						Padding = UDim.new(0, 5),
-						SortOrder = Enum.SortOrder.LayoutOrder,
-					}),
-
-					Padding = React.createElement("UIPadding", {
-						PaddingTop = UDim.new(0, 3),
-					}),
-
-					UISizeConstraint = React.createElement("UISizeConstraint", {
-						MinSize = Vector2.new(0, 200),
-					}),
-				},
-				(
-					util.table_map(teams, function(team: TeamData)
-						if team.is_player_team or team.is_spectator_team then
-							return React.createElement(TeamSection, { team = team })
-						else
-							return React.createElement(React.Fragment)
-						end
-					end)
-				)
-			),
+			ItemsScrollingFrame = React.createElement("ScrollingFrame", {
+				[React.Tag] = "container-v list-v list-pad-5",
+			}, {
+				UISizeConstraint = React.createElement("UISizeConstraint", {
+					MinSize = Vector2.new(0, 200),
+				}),
+			}, (util.table_map(teams, function(team: TeamData)
+				if team.is_player_team or team.is_spectator_team then
+					return React.createElement(TeamSection, { team = team })
+				else
+					return React.createElement(React.Fragment)
+				end
+			end))),
 		}),
 
 		UISizeConstraint = React.createElement("UISizeConstraint", {
 			MaxSize = Vector2.new(600, math.huge),
-		}),
-
-		Header = React.createElement("Frame", {
-			BackgroundColor3 = Color3.fromRGB(13, 13, 13),
-			BackgroundTransparency = 0.2,
-			BorderColor3 = Color3.fromRGB(27, 42, 53),
-			BorderSizePixel = 0,
-			LayoutOrder = 1,
-			Size = UDim2.new(1, 0, 0, 40),
-		}, {
-			VerticalLayout = React.createElement("UIListLayout", {
-				SortOrder = Enum.SortOrder.LayoutOrder,
-			}),
-
-			Corner = React.createElement("UICorner", {
-				CornerRadius = UDim.new(0, 4),
-			}),
-
-			Title = React.createElement(
-				"TextLabel",
-				themes.theme_title {
-					Size = UDim2.new(0, 0, 1, 0),
-					Text = "Players",
-					TextSize = 18,
-				},
-				{
-					SidePad = React.createElement("UIPadding", {
-						PaddingLeft = UDim.new(0, 15),
-						PaddingRight = UDim.new(0, 15),
-					}),
-				}
-			),
 		}),
 	})
 end

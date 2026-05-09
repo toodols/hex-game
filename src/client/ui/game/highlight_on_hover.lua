@@ -26,35 +26,23 @@ end
 
 function HighlightOnHover(props: { Text: string, coords: { CubicCoordinate }, LayoutOrder: number? })
 	local context = React.useContext(MainContext)
-	return React.createElement(
-		"TextButton",
-		themes.theme_button {
-			BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-			BackgroundTransparency = 0.2,
-			AutomaticSize = Enum.AutomaticSize.X,
-			Size = UDim2.new(0, 0, 0, 25),
-			LayoutOrder = props.LayoutOrder,
-			TextSize = 14,
-			Text = props.Text,
-			[React.Event.MouseEnter] = function()
-				clear_show_cells(context)
-				table.insert(context.selection_mode_stack, {
-					type = "show_cells",
-					cells = into_cell_set(props.coords),
-				})
-			end,
-			[React.Event.MouseLeave] = function()
-				clear_show_cells(context)
-			end,
-		},
-		{
-			Corner = React.createElement(Corner),
-			SidePad = React.createElement("UIPadding", {
-				PaddingLeft = UDim.new(0, 5),
-				PaddingRight = UDim.new(0, 5),
-			}),
-		}
-	)
+	return React.createElement("TextButton", {
+		[React.Tag] = "solid as-x pad-l-5 pad-r-5",
+		Size = UDim2.new(0, 0, 0, 25),
+		LayoutOrder = props.LayoutOrder,
+		Text = props.Text,
+		[React.Event.MouseEnter] = function()
+			clear_show_cells(context)
+			table.insert(context.selection_mode_stack, {
+				type = "show_cells",
+				cells = into_cell_set(props.coords),
+			})
+		end,
+		[React.Event.MouseLeave] = function()
+			clear_show_cells(context)
+		end,
+	}
+)
 end
 
 return {

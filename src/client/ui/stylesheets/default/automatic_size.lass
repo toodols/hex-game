@@ -1,0 +1,16 @@
+@priority(10)
+.as-y
+	AutomaticSize: Enum.AutomaticSize.Y
+
+@priority(10)
+.as-x
+	AutomaticSize: Enum.AutomaticSize.X
+
+@priority(10)
+.as-xy
+	AutomaticSize: Enum.AutomaticSize.XY
+
+@priority(10)
+.as-none
+	AutomaticSize: Enum.AutomaticSize.None
+

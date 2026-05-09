@@ -125,34 +125,23 @@ function TopCenter()
 	}, {
 		Top = React.createElement("Frame", {
 			Size = UDim2.new(0, 0, 0, 40),
+			[React.Tag] = "list-h list-pad-5 list-cc",
 		}, {
-			HorizontalLayout = React.createElement("UIListLayout", {
-				FillDirection = Enum.FillDirection.Horizontal,
-				HorizontalAlignment = Enum.HorizontalAlignment.Center,
-				Padding = UDim.new(0, 10),
-				SortOrder = Enum.SortOrder.LayoutOrder,
-			}),
 			TurnIndicator = React.createElement("Frame", {
 				LayoutOrder = 1,
 				Size = UDim2.new(0, 120, 0, 40),
 				[React.Tag] = "solid",
 			}, {
 				Turns = React.createElement("TextLabel", {
-					Size = UDim2.new(1, 0, 0, 30),
-					Text = tostring(world.turn) .. '<font color="#00FF00" size="30"></font>',
-					TextSize = 50,
-					[React.Tag] = "aln-cc tx-c",
+					Size = UDim2.new(0.6, 0, 0, 30),
+					Position = UDim2.new(0.5, 0, 0.5, 0),
+					AnchorPoint = Vector2.new(0, 0.5),
+					Text = `{world.turn} <font color="#00FF00" size="30"></font>`,
+					TextSize = 25,
 				}),
 				Title = React.createElement("TextLabel", {
-					Position = UDim2.new(0, 0, 0, 5),
-					Size = UDim2.new(1, 0, 0, 25),
 					Text = "Turn",
-					TextSize = 18,
-					[React.Tag] = "title",
-				}, {
-					PaddingLeft = React.createElement("UIPadding", {
-						PaddingLeft = UDim.new(0, 10),
-					}),
+					[React.Tag] = "title align-cl pad-l-5 ty-c as-xy",
 				}),
 			}),
 			Timer = React.createElement("Frame", {
@@ -164,7 +153,7 @@ function TopCenter()
 			}, {
 				Bar = React.createElement("Frame", {
 					BackgroundColor3 = Color3.fromRGB(57, 57, 57),
-					BackgroundTransparency = 0.8,
+					[React.Tag] = "solid",
 					Size = UDim2.new(0, 0, 1, 0),
 					ref = bar_ref,
 				}),
@@ -173,7 +162,7 @@ function TopCenter()
 					Size = UDim2.new(0, 0, 0, 20),
 					Text = "Next Turn: 0.0s",
 					ZIndex = 2,
-					[React.Tag] = "aln-cc",
+					[React.Tag] = "align-cc",
 				}),
 			}),
 			SkipButton = React.createElement("TextButton", {
@@ -181,7 +170,7 @@ function TopCenter()
 				Size = UDim2.new(0, 70, 0, 40),
 				Text = "",
 				ref = skip_btn_ref,
-				[React.Tag] = "button",
+				[React.Tag] = "solid",
 				[React.Event.MouseButton1Click] = function()
 					client_interaction_remote:FireServer { {
 						type = "skip",
@@ -189,11 +178,10 @@ function TopCenter()
 				end,
 			}, {
 				ImageLabel = React.createElement("ImageLabel", {
-					AnchorPoint = Vector2.new(0, 0.5),
 					BackgroundTransparency = 1,
 					Image = "http://www.roblox.com/asset/?id=6026667005",
 					LayoutOrder = 1,
-					Position = UDim2.new(0, 0, 0.5, 0),
+					[React.Tag] = "align-cl",
 					Size = UDim2.new(0, 20, 0, 20),
 				}),
 				SkipLabel = React.createElement("TextLabel", {

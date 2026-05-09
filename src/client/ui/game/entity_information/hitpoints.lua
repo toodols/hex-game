@@ -49,7 +49,7 @@ function Hitpoints(props: { entity_id: EntityId })
 					TextColor3 = Color3.fromRGB(255, 255, 255),
 					Size = UDim2.new(0, 100, 0, 100),
 					TextSize = 12,
-					TextXAlignment = Enum.TextXAlignment.Right,
+					[React.Tag] = "text-r",
 					Text = if entity.max_health ~= math.huge and entity.status ~= "blueprint"
 						then `{entity.health} / {entity.max_health} {if shield_health > 0
 							then ` +{shield_health}`

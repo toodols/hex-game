@@ -19,6 +19,23 @@ export type Schema<T> = SerializingSchema<T> & ValidatingSchema<T> & {
 	label: string?,
 }
 
+local with_label = function<Args, T>(
+	constructor: (...Args) -> Schema<T>
+): (label: string) -> (...Args) -> Schema<T> | (...Args) -> Schema<T>
+	return function(...)
+		local label = ...
+		if type(label) == "string" then
+			return function(...)
+				local schema = constructor(...)
+				schema.label = label
+				return schema
+			end
+		else
+			return constructor(...)
+		end
+	end
+end
+
 local f64: Schema<number> = {
 	label = "f64",
 	write = function(writer, data)
@@ -121,7 +138,7 @@ local boolean: Schema<boolean> = {
 	end,
 }
 
-local array = function<T>(schema: Schema<T>): Schema<{ T }>
+local array = with_label(function<T>(schema: Schema<T>): Schema<{ T }>
 	return {
 		label = `[{schema.label}]`,
 		write = function(writer, data)
@@ -155,10 +172,10 @@ local array = function<T>(schema: Schema<T>): Schema<{ T }>
 			return ok(data)
 		end,
 	}
-end
+end)
 
 -- where entries are optional
-local map = function<K, V>(key_schema: Schema<K>, value_schema: Schema<V>): Schema<{ [K]: V }>
+local map = with_label(function<K, V>(key_schema: Schema<K>, value_schema: Schema<V>): Schema<{ [K]: V }>
 	return {
 		label = `\{[{key_schema.label}]: {value_schema.label}\}`,
 		write = function(writer, data)
@@ -199,9 +216,9 @@ local map = function<K, V>(key_schema: Schema<K>, value_schema: Schema<V>): Sche
 			return ok(data)
 		end,
 	}
-end
+end)
 
-local option = function<T>(schema: Schema<T>): Schema<T?>
+local option = with_label(function<T>(schema: Schema<T>): Schema<T?>
 	return {
 		label = `{schema.label}?`,
 		write = function(writer, data)
@@ -250,9 +267,9 @@ local option = function<T>(schema: Schema<T>): Schema<T?>
 			return ok(data)
 		end,
 	}
-end
+end)
 
-local enum = function<T>(values: { T }): Schema<T>
+local enum = with_label(function<T>(values: { T }): Schema<T>
 	local value_to_index = {}
 	for i, value in values do
 		value_to_index[value] = i
@@ -275,7 +292,7 @@ local enum = function<T>(values: { T }): Schema<T>
 			return ok(data)
 		end,
 	}
-end
+end)
 
 -- i32 with a special case for math.huge
 local i32_infinite = {
@@ -295,7 +312,7 @@ local i32_infinite = {
 	end,
 }
 
-local struct = function<T>(object: { [string]: Schema<any> | any }): Schema<T>
+local struct = with_label(function<T>(object: { [string]: Schema<any> | any }): Schema<T>
 	local keys = {}
 	for k in object do
 		table.insert(keys, k)
@@ -334,7 +351,7 @@ local struct = function<T>(object: { [string]: Schema<any> | any }): Schema<T>
 		end,
 	}
 	return self
-end
+end)
 
 local function deep_clone(original)
 	local clone = table.clone(original)
@@ -459,7 +476,7 @@ local collect_by_key = function<T>(schema: Schema<T>, key: string): Schema<{ [st
 	}
 end
 
-local tagged_union = function<T>(cases: { [string]: Schema<T> }, tag_key: string): Schema<T>
+local tagged_union = with_label(function<T>(cases: { [string]: Schema<T> }, tag_key: string): Schema<T>
 	local cases_keys = {}
 	for k in cases do
 		table.insert(cases_keys, k)
@@ -488,7 +505,7 @@ local tagged_union = function<T>(cases: { [string]: Schema<T> }, tag_key: string
 			return ok(data)
 		end,
 	}
-end
+end)
 
 local keycode_set = {}
 for _, keycode in Enum.KeyCode:GetEnumItems() do

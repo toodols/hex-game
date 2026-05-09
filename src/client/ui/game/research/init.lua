@@ -200,7 +200,7 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 				Text = "Research",
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 18,
-				TextXAlignment = Enum.TextXAlignment.Center,
+				[React.Tag] = "text-c",
 			}, {
 				SidePad = React.createElement("UIPadding", {
 					PaddingLeft = UDim.new(0, 15),
@@ -278,169 +278,118 @@ function ResearchBottom(props: {
 	local entity = props.entity
 	local refs = React.useRef {}
 	local tween_refs = React.useRef {}
-	return React.createElement(
-		"Frame",
-		themes.theme_solid {
-			Position = UDim2.new(0.5, 0, 1, 0),
-			AnchorPoint = Vector2.new(0.5, 1),
-			Size = UDim2.new(1, 0, 0, 150),
-		},
-		{
-			Gradient = React.createElement("UIGradient", {
-				Transparency = NumberSequence.new {
-					NumberSequenceKeypoint.new(0, 1),
-					NumberSequenceKeypoint.new(1, 0),
-				},
-				Rotation = 90,
-			}),
-			Container = React.createElement(
-				"Frame",
-				{
-					BackgroundTransparency = 1,
-					Size = UDim2.new(1, 0, 1, 0),
-				},
-				{
-					PaddingBottom = React.createElement("UIPadding", {
-						PaddingBottom = UDim.new(0, 10),
+	return React.createElement("Frame", {
+		Size = UDim2.new(1, 0, 0, 150),
+		[React.Tag] = "solid align-bc",
+	}, {
+		Gradient = React.createElement("UIGradient", {
+			Transparency = NumberSequence.new {
+				NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(1, 0),
+			},
+			Rotation = 90,
+		}),
+		Container = React.createElement(
+			"Frame",
+			{
+				[React.Tag] = "container pad-b-10 list-h list-bc list-pad-5",
+			},
+			util.table_map(entity.researches.queue, function(id, idx)
+				local state = entity.researches.states[id]
+				return React.createElement("Frame", {
+					Size = UDim2.new(0, 180, 0, 100),
+					[React.Tag] = "background",
+				}, {
+					Stroke = React.createElement("UIStroke", {
+						ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+						Color = Color3.fromRGB(255, 255, 255),
+						LineJoinMode = Enum.LineJoinMode.Round,
+						Thickness = 1,
+						Transparency = 0.9,
 					}),
-					HorizontalLayout = React.createElement("UIListLayout", {
-						Padding = UDim.new(0, 10),
-						FillDirection = Enum.FillDirection.Horizontal,
-						SortOrder = Enum.SortOrder.LayoutOrder,
-						VerticalAlignment = Enum.VerticalAlignment.Bottom,
-						HorizontalAlignment = Enum.HorizontalAlignment.Center,
-					}),
-				},
-				util.table_map(entity.researches.queue, function(id, idx)
-					local state = entity.researches.states[id]
-					return React.createElement(
+					Corner = React.createElement(Corner),
+
+					Container = React.createElement(
 						"Frame",
-						themes.theme_solid {
-							Size = UDim2.new(0, 180, 0, 100),
-							BackgroundTransparency = 1,
+						{
+							LayoutOrder = 1,
+							[React.Tag] = "container pad-5 list-v list-pad-5",
 						},
 						{
-							Stroke = React.createElement("UIStroke", {
-								ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-								Color = Color3.fromRGB(255, 255, 255),
-								LineJoinMode = Enum.LineJoinMode.Round,
-								Thickness = 1,
-								Transparency = 0.9,
+							Title = React.createElement("TextLabel", {
+								Size = UDim2.new(1, 0, 0, 30),
+								Text = state.name,
+								[React.Tag] = "title pad-l-5 ",
 							}),
-							Corner = React.createElement(Corner),
-
-							Container = React.createElement(
-								"Frame",
-								themes.theme_container {
-									LayoutOrder = 1,
-								},
+						},
+						if state.cost_is_paid
+							then {
+								Progress = React.createElement("TextLabel", {
+									Text = `{state.time - state.progress} turns left`,
+									[React.Tag] = "description",
+								}),
+							}
+							else {
+								Items = React.createElement(Items, {
+									items = state.cost,
+								}),
+							}
+					),
+					RemoveButton = React.createElement(TextActionButton, {
+						color = Color3.fromRGB(200, 0, 0),
+						Size = UDim2.new(1, 0, 0, 20),
+						LayoutOrder = 2,
+						Text = "Remove",
+						ref = function(ref)
+							refs.current[idx] = ref
+						end,
+						[React.Event.MouseEnter] = function()
+							for i = idx, #tween_refs.current do
+								tween_refs.current[i]:Pause()
+							end
+							for i = idx, #refs.current do
+								tween_refs.current[i] = TweenService:Create(refs.current[i], TweenInfo.new(0.2), {
+									BackgroundTransparency = 0.8,
+								})
+								tween_refs.current[i]:Play()
+							end
+						end,
+						[React.Event.MouseLeave] = function()
+							for i = idx, #tween_refs.current do
+								tween_refs.current[i]:Pause()
+							end
+							for i = idx, #refs.current do
+								tween_refs.current[i] = TweenService:Create(refs.current[i], TweenInfo.new(0.2), {
+									BackgroundTransparency = 1,
+								})
+								tween_refs.current[i]:Play()
+							end
+						end,
+						Position = UDim2.new(0, 0, 1, 0),
+						AnchorPoint = Vector2.new(0, 1),
+						on_click = function()
+							client_interaction_remote:FireServer {
 								{
-									Padding = React.createElement("UIPadding", {
-										PaddingLeft = UDim.new(0, 5),
-										PaddingRight = UDim.new(0, 5),
-										PaddingBottom = UDim.new(0, 5),
-										PaddingTop = UDim.new(0, 5),
-									}),
-									Title = React.createElement(
-										"TextLabel",
-										themes.theme_title {
-											BackgroundTransparency = 1,
-											Size = UDim2.new(1, 0, 0, 30),
-											TextColor3 = Color3.fromRGB(255, 255, 255),
-											Text = state.name,
-										},
-										{
-											Padding = React.createElement("UIPadding", {
-												PaddingLeft = UDim.new(0, 5),
-											}),
-										}
-									),
-									VerticalLayout = React.createElement("UIListLayout", {
-										Padding = UDim.new(0, 4),
-										SortOrder = Enum.SortOrder.LayoutOrder,
-										FillDirection = Enum.FillDirection.Vertical,
-									}),
+									type = "remove_research",
+									entity_id = entity.id,
+									research_id = id,
 								},
-								if state.cost_is_paid
-									then {
-										Progress = React.createElement(
-											"TextLabel",
-											themes.theme_description {
-												Size = UDim2.new(1, 0, 0, 30),
-												Text = `{state.time - state.progress} turns left`,
-											}
-										),
-									}
-									else {
-										Items = React.createElement(Items, {
-											items = state.cost,
-										}),
-									}
-							),
-							RemoveButton = React.createElement(TextActionButton, {
-								color = Color3.fromRGB(200, 0, 0),
-								Size = UDim2.new(1, 0, 0, 20),
-								LayoutOrder = 2,
-								Text = "Remove",
-								ref = function(ref)
-									refs.current[idx] = ref
-								end,
-								[React.Event.MouseEnter] = function()
-									for i = idx, #tween_refs.current do
-										tween_refs.current[i]:Pause()
-									end
-									for i = idx, #refs.current do
-										tween_refs.current[i] =
-											TweenService:Create(refs.current[i], TweenInfo.new(0.2), {
-												BackgroundTransparency = 0.8,
-											})
-										tween_refs.current[i]:Play()
-									end
-								end,
-								[React.Event.MouseLeave] = function()
-									for i = idx, #tween_refs.current do
-										tween_refs.current[i]:Pause()
-									end
-									for i = idx, #refs.current do
-										tween_refs.current[i] =
-											TweenService:Create(refs.current[i], TweenInfo.new(0.2), {
-												BackgroundTransparency = 1,
-											})
-										tween_refs.current[i]:Play()
-									end
-								end,
-								Position = UDim2.new(0, 0, 1, 0),
-								AnchorPoint = Vector2.new(0, 1),
-								on_click = function()
-									client_interaction_remote:FireServer {
-										{
-											type = "remove_research",
-											entity_id = entity.id,
-											research_id = id,
-										},
-									}
-								end,
-							}),
-						}
-					)
-				end)
-			),
-			ExitButton = React.createElement("TextButton", {
-				BackgroundTransparency = 0.5,
-				BorderSizePixel = 0,
-				BackgroundColor3 = Color3.fromRGB(12, 12, 12),
-				TextColor3 = Color3.fromRGB(255, 255, 255),
-				TextSize = 14,
-				Text = "Back",
-				Size = UDim2.new(0, 100, 0, 30),
-				AnchorPoint = Vector2.new(1, 1),
-				Position = UDim2.new(1, 0, 1, 0),
-				[React.Event.MouseButton1Click] = function()
-					props.on_close()
-				end,
-			}),
-		}
-	)
+							}
+						end,
+					}),
+				})
+			end)
+		),
+		ExitButton = React.createElement("TextButton", {
+			Text = "Back",
+			[React.Tag] = "title align-br",
+			Size = UDim2.new(0, 100, 0, 40),
+			Position = UDim2.new(1, -10, 1, -10),
+			[React.Event.MouseButton1Click] = function()
+				props.on_close()
+			end,
+		}),
+	})
 end
 
 return {

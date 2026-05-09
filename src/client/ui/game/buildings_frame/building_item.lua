@@ -78,296 +78,201 @@ local BuildingItem = React.forwardRef(function(
 		ref = ref,
 		Size = UDim2.new(0, 160, 0, if props.do_animation then 0 else height),
 	}, {
-		Inner = React.createElement("Frame", {
-			BackgroundTransparency = 1,
-			Position = if props.do_animation then UDim2.new(0, 0, 0, -30) else UDim2.new(0, 0, 0, 0),
-			Size = UDim2.new(1, 0, 0, height),
+
+		LockedFrame = if props.locked
+			then React.createElement("Frame", {
+				Size = UDim2.new(1, 0, 1, 0),
+				[React.Tag] = "solid",
+			}, {
+				UIPadding = React.createElement("UIPadding", {
+					PaddingBottom = UDim.new(0, 5),
+					PaddingLeft = UDim.new(0, 10),
+					PaddingRight = UDim.new(0, 10),
+					PaddingTop = UDim.new(0, 5),
+				}),
+				LockedTitle = React.createElement("TextLabel", {
+					Position = UDim2.new(0.5, 0, 0.5, -30),
+					Size = UDim2.new(1, 0, 0, 30),
+					Text = "Locked",
+					[React.Tag] = "text-c align-cc title",
+				}),
+				RequiredLabel = if #entity_config.required_unlockable > 0
+					then React.createElement("TextLabel", {
+						LayoutOrder = 4,
+						Position = UDim2.new(0.5, 0, 0.5, 10),
+						Size = UDim2.new(0, 150, 0, 0),
+						Text = "You haven't unlocked this building yet.",
+						[React.Tag] = "description align-cc as-y",
+						TextWrapped = true,
+						[React.Tag] = "text-c",
+					})
+					else nil,
+			})
+			else nil,
+		Content = React.createElement("TextButton", {
+			Text = "",
 			ref = item_ref,
-		}, {
-			LockedFrame = if props.locked
-				then React.createElement("Frame", {
-					Size = UDim2.new(1, 0, 1, 0),
-					BackgroundTransparency = 0.2,
-					BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-				}, {
-					UIPadding = React.createElement("UIPadding", {
-						PaddingBottom = UDim.new(0, 5),
-						PaddingLeft = UDim.new(0, 10),
-						PaddingRight = UDim.new(0, 10),
-						PaddingTop = UDim.new(0, 5),
-					}),
-					LockedTitle = React.createElement(
-						"TextLabel",
-						themes.theme_title {
-							AnchorPoint = Vector2.new(0.5, 0.5),
-							BackgroundTransparency = 1,
-							Position = UDim2.new(0.5, 0, 0.5, -30),
-							Size = UDim2.new(1, 0, 0, 30),
-							Text = "Locked",
-							TextColor3 = Color3.fromRGB(255, 255, 255),
-							TextSize = 25,
-							TextXAlignment = Enum.TextXAlignment.Center,
-						}
-					),
-					RequiredLabel = if #entity_config.required_unlockable > 0
-						then React.createElement(
-							"TextLabel",
-							themes.theme_description {
-								AnchorPoint = Vector2.new(0.5, 0.5),
-								AutomaticSize = Enum.AutomaticSize.Y,
-								BackgroundTransparency = 1,
-								LayoutOrder = 4,
-								Position = UDim2.new(0.5, 0, 0.5, 10),
-								Size = UDim2.new(0, 150, 0, 0),
-								Text = "You haven't unlocked this building yet.",
-								TextSize = 13,
-								TextWrapped = true,
-								TextXAlignment = Enum.TextXAlignment.Center,
-							}
-						)
-						else nil,
-				})
-				else nil,
-			Content = React.createElement(
-				"TextButton",
-				themes.theme_solid {
-					Size = UDim2.new(1, 0, 1, 0),
-					Text = "",
-					[React.Event.MouseEnter] = function()
-						if props.locked then
-							return
-						end
-						props.mouse_enter()
-						if props.do_animation then
-							TweenService:Create(item_ref.current, TweenInfo.new(0.3), {
-								Position = UDim2.new(0, 0, 0, -height),
-								BackgroundColor3 = Color3.fromRGB(30, 30, 30),
-							}):Play()
-						end
-					end,
-					[React.Event.MouseLeave] = function()
-						if props.locked then
-							return
-						end
-						props.mouse_leave()
-						if props.do_animation then
-							TweenService:Create(item_ref.current, TweenInfo.new(0.3), {
-								Position = UDim2.new(0, 0, 0, -30),
-								BackgroundColor3 = Color3.fromRGB(13, 13, 13),
-							}):Play()
-						end
-					end,
-					[React.Event.MouseButton1Click] = function()
-						if props.locked then
-							return
-						end
-						client_interaction_remote:FireServer {
-							{
-								type = "construct",
-								entity_type = props.type,
-								coordinate = props.cell,
-							},
-						}
-					end,
-				},
-				{
-					UIPadding = React.createElement("UIPadding", {
-						PaddingBottom = UDim.new(0, 5),
-						PaddingLeft = UDim.new(0, 10),
-						PaddingRight = UDim.new(0, 10),
-						PaddingTop = UDim.new(0, 5),
-					}),
-					ViewportFrame = React.createElement("ViewportFrame", {
-						Size = UDim2.new(0, 200, 0, 150),
-						Position = UDim2.new(0.5, 0, 0.5, 0),
-						AnchorPoint = Vector2.new(0.5, 0.5),
-						BackgroundTransparency = 1,
-						ImageTransparency = 0.6,
-						ref = viewport_ref,
-					}),
-					Corner = React.createElement(Corner, {}),
-
-					Top = React.createElement("Frame", {
-						BackgroundTransparency = 1,
-						Size = UDim2.new(1, 0, 1, 0),
-					}, {
-
-						ItemTitle = React.createElement(
-							"TextLabel",
-							themes.theme_title {
-								BackgroundTransparency = 1,
-								LayoutOrder = 1,
-								Size = UDim2.new(1, 0, 0, 25),
-								Text = entity_config.name,
-								TextSize = 18,
-								TextColor3 = if can_build
-									then Color3.fromRGB(255, 255, 255)
-									else Color3.fromRGB(90, 90, 90),
-								TextXAlignment = Enum.TextXAlignment.Left,
-							}
-						),
-
-						Separator = React.createElement(Separator, {
-							LayoutOrder = 2,
-						}),
-						Description = React.createElement(
-							"TextLabel",
-							themes.theme_description {
-								AutomaticSize = Enum.AutomaticSize.Y,
-								BackgroundTransparency = 1,
-								LayoutOrder = 3,
-								Size = UDim2.new(1, 0, 0, 0),
-								Text = formatting.format_text(world, entity_config.short_description),
-								TextWrapped = true,
-								TextSize = 12,
-								TextTruncate = Enum.TextTruncate.AtEnd,
-							},
-							{
-								SizeConstraint = React.createElement("UISizeConstraint", {
-									MaxSize = Vector2.new(math.huge, 100),
-								}),
-							}
-						),
-						Items = React.createElement(Items, {
-							items = entity_config.cost,
-							LayoutOrder = 5,
-						}),
-						-- CanBuild = React.createElement(
-						-- 	"TextLabel",
-						-- 	themes.theme_description {
-						-- 		LayoutOrder = 6,
-						-- 		TextSize = 14,
-						-- 		Size = UDim2.new(1, 0, 0, 25),
-						-- 		Text = "Conditions",
-						-- 		TextColor3 = if can_build
-						-- 			then Color3.fromRGB(123, 165, 123)
-						-- 			else Color3.fromRGB(138, 90, 90),
-						-- 	}
-						-- ),
-						MustBeBuiltOn = if construction_condition_status
-								and construction_condition_status.built_on
-							then React.createElement(
-								"TextLabel",
-								themes.theme_description {
-									TextSize = 12,
-									AutomaticSize = Enum.AutomaticSize.Y,
-									LayoutOrder = 7,
-									Size = UDim2.new(1, 0, 0, 0),
-									Text = formatting.format_text(
-										world,
-										`Built On: {table.concat(
-											util.table_map(construction_condition_status.built_on, function(status)
-												local text
-												if status.entity_type:sub(1, 1) == "@" then
-													text = status.entity_type
-												else
-													text = "{entity." .. status.entity_type .. "}"
-												end
-												return util.font(text, {
-													color = if status.ok
-														then Color3.fromRGB(123, 165, 123)
-														else Color3.fromRGB(138, 90, 90),
-												})
-											end),
-											" / "
-										)}`
-									),
-								}
-							)
-							else nil,
-						MustBeNearby = if construction_condition_status and construction_condition_status.nearby
-							then React.createElement(
-								"TextLabel",
-								themes.theme_description {
-									LayoutOrder = 8,
-									Size = UDim2.new(1, 0, 0, 0),
-									TextSize = 12,
-									AutomaticSize = Enum.AutomaticSize.Y,
-
-									Text = formatting.format_text(
-										world,
-										`Nearby: {table.concat(
-											util.table_map(construction_condition_status.nearby, function(status)
-												local text
-												if status.entity_type:sub(1, 1) == "@" then
-													text = status.entity_type
-												else
-													text = "{entity." .. status.entity_type .. "}"
-												end
-												return util.font(text, {
-													color = if status.ok
-														then Color3.fromRGB(123, 165, 123)
-														else Color3.fromRGB(138, 90, 90),
-												})
-											end),
-											" / "
-										)}`
-									),
-								}
-							)
-							else nil,
-						MustNotBeNearby = if construction_condition_status and construction_condition_status.not_nearby
-							then React.createElement(
-								"TextLabel",
-								themes.theme_description {
-									LayoutOrder = 9,
-									Size = UDim2.new(1, 0, 0, 0),
-									TextSize = 12,
-									AutomaticSize = Enum.AutomaticSize.Y,
-									Text = formatting.format_text(
-										world,
-										`Not Nearby: {table.concat(
-											util.table_map(construction_condition_status.not_nearby, function(status)
-												local text
-												if status.entity_type:sub(1, 1) == "@" then
-													text = status.entity_type
-												else
-													text = "{entity." .. status.entity_type .. "}"
-												end
-												return util.font(text, {
-													color = if status.ok
-														then Color3.fromRGB(123, 165, 123)
-														else Color3.fromRGB(138, 90, 90),
-												})
-											end),
-											" / "
-										)}`
-									),
-								}
-							)
-							else nil,
-
-						-- RequiredResearch = if #entity_config.required_research > 0
-						-- 	then React.createElement(
-						-- 		"TextLabel",
-						-- 		themes.theme_description {
-						-- 			BackgroundTransparency = 1,
-						-- 			LayoutOrder = 4,
-						-- 			AutomaticSize = Enum.AutomaticSize.Y,
-						-- 			Size = UDim2.new(1, 0, 0, 0),
-						-- 			Text = "Requires Research: " .. table.concat(
-						-- 				util.table_map(entity_config.required_research, function(research_id)
-						-- 					local research = researches_mod.researches[research_id]
-						-- 					if props.researches[research_id] then
-						-- 						return `<font color="rgb(50, 155, 50)">{research.name}</font>`
-						-- 					else
-						-- 						return `<font color="rgb(155, 50, 50)">{research.name}</font>`
-						-- 					end
-						-- 				end),
-						-- 				", "
-						-- 			),
-						-- 			TextSize = 13,
-						-- 		}
-						-- 	)
-						-- 	else nil,
-
-						VerticalLayout = React.createElement("UIListLayout", {
-							Padding = UDim.new(0, 4),
-							SortOrder = Enum.SortOrder.LayoutOrder,
-						}),
-					}),
+			Size = UDim2.new(1, 0, 0, height),
+			Position = if props.do_animation then UDim2.new(0, 0, 0, -30) else UDim2.new(0, 0, 0, 0),
+			[React.Tag] = "solid pad-5",
+			[React.Event.MouseEnter] = function()
+				if props.locked then
+					return
+				end
+				props.mouse_enter()
+				if props.do_animation then
+					TweenService:Create(item_ref.current, TweenInfo.new(0.3), {
+						Position = UDim2.new(0, 0, 0, -height),
+						BackgroundColor3 = Color3.fromRGB(30, 30, 30),
+					}):Play()
+				end
+			end,
+			[React.Event.MouseLeave] = function()
+				if props.locked then
+					return
+				end
+				props.mouse_leave()
+				if props.do_animation then
+					TweenService:Create(item_ref.current, TweenInfo.new(0.3), {
+						Position = UDim2.new(0, 0, 0, -30),
+						BackgroundColor3 = Color3.fromRGB(13, 13, 13),
+					}):Play()
+				end
+			end,
+			[React.Event.MouseButton1Click] = function()
+				if props.locked then
+					return
+				end
+				client_interaction_remote:FireServer {
+					{
+						type = "construct",
+						entity_type = props.type,
+						coordinate = props.cell,
+					},
 				}
-			),
+			end,
+		}, {
+
+			ViewportFrame = React.createElement("ViewportFrame", {
+				Size = UDim2.new(1, 0, 0, 150),
+				[React.Tag] = "align-cc",
+				ImageTransparency = 0.6,
+				ref = viewport_ref,
+			}),
+
+			Top = React.createElement("Frame", {
+				BackgroundTransparency = 1,
+				Size = UDim2.new(1, 0, 1, 0),
+			}, {
+
+				ItemTitle = React.createElement("TextLabel", {
+					LayoutOrder = 1,
+					Size = UDim2.new(1, 0, 0, 25),
+					Text = entity_config.name,
+					TextColor3 = if can_build then Color3.fromRGB(255, 255, 255) else Color3.fromRGB(90, 90, 90),
+					[React.Tag] = "text-l subtitle",
+				}),
+
+				Separator = React.createElement(Separator, {
+					LayoutOrder = 2,
+				}),
+				Description = React.createElement("TextLabel", {
+					AutomaticSize = Enum.AutomaticSize.Y,
+					LayoutOrder = 3,
+					Text = formatting.format_text(world, entity_config.short_description),
+					[React.Tag] = "description",
+				}, {
+					SizeConstraint = React.createElement("UISizeConstraint", {
+						MaxSize = Vector2.new(math.huge, 100),
+					}),
+				}),
+				Items = React.createElement(Items, {
+					items = entity_config.cost,
+					LayoutOrder = 5,
+				}),
+				MustBeBuiltOn = if construction_condition_status and construction_condition_status.built_on
+					then React.createElement("TextLabel", {
+						LayoutOrder = 7,
+						[React.Tag] = "description",
+						Text = formatting.format_text(
+							world,
+							`Built On: {table.concat(
+								util.table_map(construction_condition_status.built_on, function(status)
+									local text
+									if status.entity_type:sub(1, 1) == "@" then
+										text = status.entity_type
+									else
+										text = "{entity." .. status.entity_type .. "}"
+									end
+									return util.font(text, {
+										color = if status.ok
+											then Color3.fromRGB(123, 165, 123)
+											else Color3.fromRGB(138, 90, 90),
+									})
+								end),
+								" / "
+							)}`
+						),
+					})
+					else nil,
+				MustBeNearby = if construction_condition_status and construction_condition_status.nearby
+					then React.createElement("TextLabel", {
+						LayoutOrder = 8,
+						[React.Tag] = "description",
+
+						Text = formatting.format_text(
+							world,
+							`Nearby: {table.concat(
+								util.table_map(construction_condition_status.nearby, function(status)
+									local text
+									if status.entity_type:sub(1, 1) == "@" then
+										text = status.entity_type
+									else
+										text = "{entity." .. status.entity_type .. "}"
+									end
+									return util.font(text, {
+										color = if status.ok
+											then Color3.fromRGB(123, 165, 123)
+											else Color3.fromRGB(138, 90, 90),
+									})
+								end),
+								" / "
+							)}`
+						),
+					})
+					else nil,
+				MustNotBeNearby = if construction_condition_status
+						and construction_condition_status.not_nearby
+					then React.createElement("TextLabel", {
+						LayoutOrder = 9,
+						[React.Tag] = "description",
+						Text = formatting.format_text(
+							world,
+							`Not Nearby: {table.concat(
+								util.table_map(construction_condition_status.not_nearby, function(status)
+									local text
+									if status.entity_type:sub(1, 1) == "@" then
+										text = status.entity_type
+									else
+										text = "{entity." .. status.entity_type .. "}"
+									end
+									return util.font(text, {
+										color = if status.ok
+											then Color3.fromRGB(123, 165, 123)
+											else Color3.fromRGB(138, 90, 90),
+									})
+								end),
+								" / "
+							)}`
+						),
+					})
+					else nil,
+
+				VerticalLayout = React.createElement("UIListLayout", {
+					Padding = UDim.new(0, 4),
+					SortOrder = Enum.SortOrder.LayoutOrder,
+				}),
+			}),
 		}),
 	})
 end)

@@ -8,23 +8,19 @@ local Corner = util_components.Corner
 type CubicCoordinate = types.CubicCoordinate
 
 function CoordinateLabel(props: { coordinate: CubicCoordinate })
-	return React.createElement(
-		"TextButton",
-		themes.theme_description {
-			LayoutOrder = 1,
-			Position = UDim2.new(0, 0, 0.5, 0),
-			Size = UDim2.new(0, 0, 0, 20),
-			Text = ("%s, %s, %s"):format(unpack(props.coordinate)),
-		},
-		{
-			Corner = React.createElement(Corner),
+	return React.createElement("TextButton", {
+		LayoutOrder = 1,
+		Position = UDim2.new(0, 0, 0.5, 0),
+		Size = UDim2.new(0, 0, 0, 20),
+		Text = ("%s, %s, %s"):format(unpack(props.coordinate)),
+	}, {
+		Corner = React.createElement(Corner),
 
-			SidePad = React.createElement("UIPadding", {
-				PaddingLeft = UDim.new(0, 5),
-				PaddingRight = UDim.new(0, 5),
-			}),
-		}
-	)
+		SidePad = React.createElement("UIPadding", {
+			PaddingLeft = UDim.new(0, 5),
+			PaddingRight = UDim.new(0, 5),
+		}),
+	})
 end
 
 return {

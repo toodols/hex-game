@@ -5,7 +5,6 @@ local util = require(ReplicatedStorage.Shared.util)
 local items_mod = require(ReplicatedStorage.Shared.items)
 
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local Items = require(script.Parent.items).Items
 
@@ -77,94 +76,52 @@ function Recipes(props: { entity_id: EntityId, on_close: () -> () })
 	local entity = hooks.use_synced_entity(props.entity_id)
 	local world = React.useContext(MainContext).world
 	local config = world.entity_configurations["factory"]
-	return React.createElement(
-		"Frame",
-		themes.theme_vertical_container {
-			Active = true,
-			AnchorPoint = Vector2.new(0, 1),
-			AutomaticSize = Enum.AutomaticSize.Y,
-			BackgroundTransparency = 1,
-			BorderColor3 = Color3.fromRGB(27, 42, 53),
+	return React.createElement("Frame", {
+		Active = true,
+		[React.Tag] = "container-v align-br recipes list-v list-pad-2",
+		LayoutOrder = 1,
+		Position = UDim2.new(-250, 250, 20, -20),
+		Size = UDim2.new(0, 250, 0, 0),
+	}, {
+		Header = React.createElement("Frame", {
 			LayoutOrder = 1,
-			Position = UDim2.new(-250, 250, 20, -20),
-			Size = UDim2.new(0, 250, 0, 0),
-		},
-		{
-			Header = React.createElement(
-				"Frame",
-				themes.theme_solid {
-					LayoutOrder = 1,
-					Size = UDim2.new(1, 0, 0, 40),
-				},
-				{
-					VerticalLayout = React.createElement("UIListLayout", {
-						SortOrder = Enum.SortOrder.LayoutOrder,
-					}),
-
-					Corner = React.createElement("UICorner", {
-						CornerRadius = UDim.new(0, 4),
-					}),
-
-					Title = React.createElement(
-						"TextLabel",
-						themes.theme_title {
-							Size = UDim2.new(0, 0, 1, 0),
-							Text = "Recipes",
-						},
-						{
-							SidePad = React.createElement("UIPadding", {
-								PaddingLeft = UDim.new(0, 15),
-								PaddingRight = UDim.new(0, 15),
-							}),
-						}
-					),
-				}
-			),
-
-			Container = React.createElement(
-				"Frame",
-				{
-					AutomaticSize = Enum.AutomaticSize.XY,
-					BackgroundTransparency = 1,
-					LayoutOrder = 2,
-					Position = UDim2.new(0, 0, 0.12, 0),
-					Size = UDim2.new(1, 0, 0, 0),
-				},
-				{
-					UIPadding = React.createElement("UIPadding", {
-						PaddingTop = UDim.new(0, 2),
-					}),
-
-					VerticalLayout = React.createElement("UIListLayout", {
-						Padding = UDim.new(0, 1),
-						SortOrder = Enum.SortOrder.LayoutOrder,
-					}),
-				},
-				util.table_map(config.recipes, function(v, k)
-					return React.createElement(RecipeItem, {
-						on_click = function()
-							client_interaction_remote:FireServer {
-								{
-									type = "set_recipe",
-									recipe_id = k,
-									entity_id = props.entity_id,
-								},
-							}
-							-- props.on_close()
-						end,
-						current_recipe = entity.current_recipe,
-						recipe = v,
-						recipe_id = k,
-					})
-				end)
-			),
-
-			VerticalLayout = React.createElement("UIListLayout", {
-				Padding = UDim.new(0, 1),
-				SortOrder = Enum.SortOrder.LayoutOrder,
+			[React.Tag] = "header list-v",
+		}, {
+			Title = React.createElement("TextLabel", {
+				Text = "Recipes",
+				[React.Tag] = "title",
 			}),
-		}
-	)
+		}),
+
+		Container = React.createElement(
+			"Frame",
+			{
+				AutomaticSize = Enum.AutomaticSize.XY,
+				BackgroundTransparency = 1,
+				LayoutOrder = 2,
+				Position = UDim2.new(0, 0, 0.12, 0),
+				Size = UDim2.new(1, 0, 0, 0),
+				[React.Tag] = "pad-t-2 list-v list-pad-2",
+			},
+			util.table_map(config.recipes, function(v, k)
+				return React.createElement(RecipeItem, {
+					on_click = function()
+						client_interaction_remote:FireServer {
+							{
+								type = "set_recipe",
+								recipe_id = k,
+								entity_id = props.entity_id,
+							},
+						}
+						-- props.on_close()
+					end,
+					current_recipe = entity.current_recipe,
+					recipe = v,
+					recipe_id = k,
+				})
+			end)
+		),
+	})
 end
 
 return {

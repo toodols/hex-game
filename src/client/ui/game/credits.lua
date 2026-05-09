@@ -6,7 +6,6 @@ local Corner = require(ReplicatedStorage.Client.ui.util_components).Corner
 
 function Credits()
 	local context = React.useContext(MainContext)
-	local world = context.world
 	return React.createElement("Frame", {
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, -20, 1, -20),

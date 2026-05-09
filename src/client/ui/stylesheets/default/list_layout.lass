@@ -1,0 +1,48 @@
+.list-v::UIListLayout
+	SortOrder: Enum.SortOrder.LayoutOrder
+	FillDirection: Enum.FillDirection.Vertical
+
+.list-h::UIListLayout
+	SortOrder: Enum.SortOrder.LayoutOrder
+	FillDirection: Enum.FillDirection.Horizontal
+
+.list-cc::UIListLayout
+	VerticalAlignment: Enum.VerticalAlignment.Center
+	HorizontalAlignment: Enum.HorizontalAlignment.Center
+
+.list-cl::UIListLayout
+	VerticalAlignment: Enum.VerticalAlignment.Center
+	HorizontalAlignment: Enum.HorizontalAlignment.Left
+
+.list-cr::UIListLayout
+	VerticalAlignment: Enum.VerticalAlignment.Center
+	HorizontalAlignment: Enum.HorizontalAlignment.Right
+
+.list-br::UIListLayout
+	VerticalAlignment: Enum.VerticalAlignment.Bottom
+	HorizontalAlignment: Enum.HorizontalAlignment.Right
+
+.list-bl::UIListLayout
+	VerticalAlignment: Enum.VerticalAlignment.Bottom
+	HorizontalAlignment: Enum.HorizontalAlignment.Left
+
+.list-bc::UIListLayout
+	VerticalAlignment: Enum.VerticalAlignment.Bottom
+	HorizontalAlignment: Enum.HorizontalAlignment.Center
+
+.list-pad-5::UIListLayout
+	Padding: UDim.new(0, 5)
+
+.list-pad-2::UIListLayout
+	Padding: UDim.new(0, 2)
+
+.grid-cc::UIGridLayout
+	SortOrder: Enum.SortOrder.LayoutOrder
+	HorizontalAlignment: Enum.HorizontalAlignment.Center
+	VerticalAlignment: Enum.VerticalAlignment.Center
+
+.grid-cell-36::UIGridLayout
+	CellSize: UDim2.new(0, 36, 0, 36)
+
+.grid-pad-6::UIGridLayout
+	Padding: UDim.new(0, 6)
