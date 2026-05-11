@@ -8,7 +8,6 @@ local util = require(ReplicatedStorage.Shared.util)
 local coords = require(ReplicatedStorage.Shared.coords)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
 
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 

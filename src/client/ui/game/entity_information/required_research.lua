@@ -2,7 +2,6 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local React = require(ReplicatedStorage.Packages.react)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
-local themes = require(ReplicatedStorage.Client.ui.themes)
 
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)

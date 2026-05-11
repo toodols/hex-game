@@ -15,11 +15,9 @@ local cell_blocked = construction_condition_mod.cell_blocked
 
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local client_entity_mod = require(ReplicatedStorage.Client.entity)
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local Items = require(ReplicatedStorage.Client.ui.game.items).Items
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 
-local Corner = util_components.Corner
 local Separator = util_components.Separator
 
 type World = types.World

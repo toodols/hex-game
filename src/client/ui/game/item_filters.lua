@@ -7,7 +7,6 @@ local items_mod = require(ReplicatedStorage.Shared.items)
 local util = require(ReplicatedStorage.Shared.util)
 local team = require(ReplicatedStorage.Shared.team)
 
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
@@ -178,7 +177,7 @@ function ItemFiltersPreview(props: { LayoutOrder: number?, entity_id: EntityId, 
 		Text = "",
 		Size = UDim2.new(0, 0, 0, 25),
 		LayoutOrder = props.LayoutOrder,
-		[React.Tag] = `background list-h pad-l-5 pad-r-5 item-filters-preview {if is_owner then "editable" else ""} {if opened
+		[React.Tag] = `background list-h pad-h-5 item-filters-preview {if is_owner then "editable" else ""} {if opened
 			then "active"
 			else ""}`,
 		[React.Event.MouseButton1Click] = props.click,

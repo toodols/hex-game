@@ -14,7 +14,7 @@ local ui_types = require(ReplicatedStorage.Client.ui.types)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local context = require(ReplicatedStorage.Client.ui.context)
-local stylesheet = require(ReplicatedStorage.Client.ui.stylesheets)
+local stylesheets = require(ReplicatedStorage.Client.ui.stylesheets)
 local MainContext = context.MainContext
 local SettingsContext = context.SettingsContext
 
@@ -178,7 +178,7 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 			}),
 
 			StyleLink = React.createElement("StyleLink", {
-				StyleSheet = stylesheet.default_stylesheet,
+				StyleSheet = stylesheets.default_stylesheet,
 			}),
 
 			Center = React.createElement("Frame", {

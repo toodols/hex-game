@@ -6,6 +6,16 @@
 	SortOrder: Enum.SortOrder.LayoutOrder
 	FillDirection: Enum.FillDirection.Horizontal
 
+.list-tc::UIListLayout
+	VerticalAlignment: Enum.VerticalAlignment.Top
+	HorizontalAlignment: Enum.HorizontalAlignment.Center
+.list-tl::UIListLayout
+	VerticalAlignment: Enum.VerticalAlignment.Top
+	HorizontalAlignment: Enum.HorizontalAlignment.Left
+.list-tr::UIListLayout
+	VerticalAlignment: Enum.VerticalAlignment.Top
+	HorizontalAlignment: Enum.HorizontalAlignment.Right
+
 .list-cc::UIListLayout
 	VerticalAlignment: Enum.VerticalAlignment.Center
 	HorizontalAlignment: Enum.HorizontalAlignment.Center

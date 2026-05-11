@@ -5,7 +5,7 @@ local React = require(ReplicatedStorage.Packages.react)
 local ReactRoblox = require(ReplicatedStorage.Packages["react-roblox"])
 
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
-local themes = require(ReplicatedStorage.Client.ui.themes)
+local stylesheets = require(ReplicatedStorage.Client.ui.stylesheets)
 
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
@@ -52,6 +52,9 @@ function Lobby()
 		ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets,
 		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 	}, {
+		StyleLink = React.createElement("StyleLink", {
+			StyleSheet = stylesheets.default_stylesheet,
+		}),
 		Background = React.createElement("Frame", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(0, 0, 0),
@@ -88,21 +91,15 @@ function Lobby()
 			}),
 		}),
 		Hearts = React.createElement("TextButton", {
-			AnchorPoint = Vector2.new(1, 1),
 			Position = UDim2.new(1, -5, 1, -5),
-			AutomaticSize = Enum.AutomaticSize.XY,
-			BackgroundTransparency = 1,
-			[React.Tag] = "text-r",
+			Size = UDim2.new(0, 50, 0, 50),
+			TextSize = 18,
+			[React.Tag] = "text-r align-br",
 			Text = "♥︎",
-			TextSize = 15,
-			TextColor3 = Color3.fromRGB(255, 255, 255),
 		}),
 		Rooms = React.createElement("Frame", {
-			AnchorPoint = Vector2.new(0.5, 0),
-			AutomaticSize = Enum.AutomaticSize.XY,
-			BackgroundTransparency = 1,
 			LayoutOrder = 1,
-			Position = UDim2.new(0.5, 0, 0, 0),
+			[React.Tag] = "container align-tc",
 		}, {
 			VerticalLayout = React.createElement("UIListLayout", {
 				HorizontalAlignment = Enum.HorizontalAlignment.Center,
@@ -110,59 +107,35 @@ function Lobby()
 				SortOrder = Enum.SortOrder.LayoutOrder,
 			}),
 			CurrentRooms = React.createElement("Frame", {
-				AnchorPoint = Vector2.new(0.5, 0),
-				AutomaticSize = Enum.AutomaticSize.Y,
-				BackgroundTransparency = 1,
 				LayoutOrder = 1,
-				Position = UDim2.new(0.5, 0, 0, 0),
 				Size = UDim2.new(0, 1000, 0, 0),
+				[React.Tag] = "align-tc container-v list-v list-tc",
 			}, {
-				VerticalLayout = React.createElement("UIListLayout", {
-					HorizontalAlignment = Enum.HorizontalAlignment.Center,
-					Padding = UDim.new(0, 10),
-					SortOrder = Enum.SortOrder.LayoutOrder,
-				}),
 				Container = React.createElement(
 					"Frame",
-					themes.theme_vertical_container {
-						LayoutOrder = 3,
-					},
 					{
-						VerticalLayout = React.createElement("UIListLayout", {
-							HorizontalAlignment = Enum.HorizontalAlignment.Center,
-							Padding = UDim.new(0, 10),
-							SortOrder = Enum.SortOrder.LayoutOrder,
-						}),
+						LayoutOrder = 3,
+						[React.Tag] = "container-v list-v list-pad-5 list-tc",
 					},
 					util.table_map(rooms, function(room)
 						return React.createElement(Room, { room = room })
 					end)
 				),
-				Title = React.createElement(
-					"Frame",
-					themes.theme_vertical_container {
+				Title = React.createElement("Frame", {
+					LayoutOrder = 1,
+					[React.Tag] = "container-v list-v list-tc",
+				}, {
+					Text = React.createElement("TextLabel", {
 						LayoutOrder = 1,
-					},
-					{
-						Text = React.createElement(
-							"TextLabel",
-							themes.theme_title {
-								LayoutOrder = 1,
-								Position = UDim2.new(0, 400, 0, 0),
-								Size = UDim2.new(0, 0, 0, 50),
-								Text = "Rooms",
-								TextSize = 50,
-							}
-						),
-						Separator = React.createElement(Separator, {
-							LayoutOrder = 2,
-						}),
-						UIListLayout = React.createElement("UIListLayout", {
-							HorizontalAlignment = Enum.HorizontalAlignment.Center,
-							SortOrder = Enum.SortOrder.LayoutOrder,
-						}),
-					}
-				),
+						Position = UDim2.new(0, 400, 0, 0),
+						Size = UDim2.new(0, 0, 0, 50),
+						Text = "Rooms",
+						TextSize = 50,
+					}),
+					Separator = React.createElement(Separator, {
+						LayoutOrder = 2,
+					}),
+				}),
 				CreateRoom = React.createElement(CreateRoom, {
 					expanded = is_creating_room,
 					set_expanded = set_is_creating_room,

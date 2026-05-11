@@ -3,7 +3,6 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 
 local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local ui_components = require(ReplicatedStorage.Client.ui.util_components)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local team_mod = require(ReplicatedStorage.Shared.team)

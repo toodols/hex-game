@@ -2,7 +2,6 @@ local Players = game:GetService "Players"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local React = require(ReplicatedStorage.Packages.react)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local util = require(ReplicatedStorage.Shared.util)
 local Corner = util_components.Corner
 local Dropdown = util_components.Dropdown
@@ -54,15 +53,12 @@ function ExpandedMember(props: {
 			}, {
 				UICorner = React.createElement(Corner),
 			}),
-			PlayerNameLabel = React.createElement(
-				"TextLabel",
-				themes.theme_label {
-					LayoutOrder = 2,
-					Size = UDim2.new(0, 0, 1, 0),
-					Text = `<font size="25">{props.player.DisplayName}</font>\n<i>@{props.player.Name}</i>`,
-					TextSize = 12,
-				}
-			),
+			PlayerNameLabel = React.createElement("TextLabel", {
+				LayoutOrder = 2,
+				Size = UDim2.new(0, 0, 1, 0),
+				Text = `<font size="25">{props.player.DisplayName}</font>\n<i>@{props.player.Name}</i>`,
+				TextSize = 12,
+			}),
 		}),
 		Team = React.createElement(Dropdown, {
 			Position = UDim2.new(1, -5, 0.5, 0),

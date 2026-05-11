@@ -3,7 +3,6 @@ local Players = game:GetService "Players"
 local RunService = game:GetService "RunService"
 
 local util_components = require(ReplicationStorage.Client.ui.util_components)
-local themes = require(ReplicationStorage.Client.ui.themes)
 local util = require(ReplicationStorage.Shared.util)
 local React = require(ReplicationStorage.Packages.react)
 local types = require(ReplicationStorage.Shared.types)
@@ -33,13 +32,7 @@ function Room(props: { room: Room })
 		end
 	end, {})
 	return React.createElement("Frame", {
-		AutomaticSize = Enum.AutomaticSize.Y,
-		BackgroundColor3 = Color3.fromRGB(13, 13, 13),
-		BackgroundTransparency = 0.3,
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		BorderSizePixel = 0,
-		Position = UDim2.new(0, 0, 0, 0),
-		Size = UDim2.new(1, 0, 0, 0),
+		[React.Tag] = "background container-v",
 	}, {
 		MemberContainer = React.createElement(
 			"Frame",
@@ -79,71 +72,52 @@ function Room(props: { room: Room })
 				})
 			end)
 		),
-		ClickToJoinLabel = React.createElement(
-			"TextLabel",
-			themes.theme_label {
-				AnchorPoint = Vector2.new(1, 0.5),
-				Position = UDim2.new(1, -15, 0.5, 0),
+		ClickToJoinLabel = React.createElement("TextLabel", {
+			Position = UDim2.new(1, -15, 0.5, 0),
+			Size = UDim2.new(0, 200, 0, 50),
+			Text = "Click To Join",
+			TextTransparency = 0.6,
+			[React.Tag] = "text-r subtitle align-cr",
+			Visible = not is_expanded,
+		}),
+		Hitbox = React.createElement("TextButton", {
+			Visible = not is_expanded,
+			Text = "",
+			[React.Tag] = "container",
+			[React.Event.MouseButton1Click] = function()
+				rooms_remote:FireServer {
+					type = "join_room",
+					room_id = props.room.id,
+				}
+			end,
+		}),
+
+		StartTimeLabel = if props.room.starting_at ~= nil
+			then React.createElement("TextLabel", {
 				Size = UDim2.new(0, 200, 0, 50),
-				Text = "Click To Join",
-				TextSize = 16,
-				TextTransparency = 0.6,
-				[React.Tag] = "text-r",
-				Visible = not is_expanded,
-			}
-		),
-		Corner = React.createElement(Corner),
-		Hitbox = React.createElement(
-			"TextButton",
-			themes.theme_container {
-				Visible = not is_expanded,
-				Text = "",
+				Text = "Starting in",
+				[React.Tag] = "align-bc",
+				TextSize = 20,
+				ref = start_time_label_ref,
+			})
+			else nil,
+		ExpandedFrame = React.createElement("Frame", {
+			Visible = is_expanded,
+			[React.Tag] = "container-v",
+		}, {
+			LeaveRoomButton = React.createElement("TextButton", {
+				Size = UDim2.new(0, 200, 0, 50),
+				[React.Tag] = "align-br",
+				Text = "Leave Room",
 				[React.Event.MouseButton1Click] = function()
 					rooms_remote:FireServer {
-						type = "join_room",
+						type = "leave_room",
 						room_id = props.room.id,
 					}
 				end,
-			}
-		),
-
-		StartTimeLabel = if props.room.starting_at ~= nil
-			then React.createElement(
-				"TextLabel",
-				themes.theme_label {
-					AnchorPoint = Vector2.new(0.5, 1),
-					Position = UDim2.new(0.5, 0, 1, 0),
-					Size = UDim2.new(0, 200, 0, 50),
-					Text = "Starting in",
-					TextSize = 20,
-					ref = start_time_label_ref,
-				}
-			)
-			else nil,
-		ExpandedFrame = React.createElement("Frame", {
-			AutomaticSize = Enum.AutomaticSize.Y,
-			BackgroundTransparency = 1,
-			Size = UDim2.new(1, 0, 0, 0),
-			Visible = is_expanded,
-		}, {
-			LeaveRoomButton = React.createElement(
-				"TextButton",
-				themes.theme_button {
-					AnchorPoint = Vector2.new(1, 1),
-					Position = UDim2.new(1, 0, 1, 0),
-					Size = UDim2.new(0, 200, 0, 50),
-					Text = "Leave Room",
-					[React.Event.MouseButton1Click] = function()
-						rooms_remote:FireServer {
-							type = "leave_room",
-							room_id = props.room.id,
-						}
-					end,
-				},
-				{
-					Corner = React.createElement(Corner),
-				}
-			),
+			}, {
+				Corner = React.createElement(Corner),
+			}),
 			ImageLabel = React.createElement("ImageLabel", {
 				BackgroundTransparency = 1,
 				Image = "rbxassetid://14073589622",
@@ -151,39 +125,25 @@ function Room(props: { room: Room })
 				Position = UDim2.new(0.334, 0, 0.0467, 0),
 				Size = UDim2.new(0, 331, 0, 344),
 			}),
-			MapLabel = React.createElement(
-				"TextLabel",
-				themes.theme_label {
-					Size = UDim2.new(0, 200, 0, 50),
-					Text = `Map: {props.room.map}`,
-					TextSize = 20,
-				}
-			),
+			MapLabel = React.createElement("TextLabel", {
+				Size = UDim2.new(0, 200, 0, 50),
+				Text = `Map: {props.room.map}`,
+				TextSize = 20,
+			}),
 			ExpandedMemberContainer = React.createElement(
 				"Frame",
-				themes.theme_vertical_container {
-					AnchorPoint = Vector2.new(1, 0),
+				{
 					Position = UDim2.new(1, -10, 0, 0),
 					Size = UDim2.new(0, 300, 0, 0),
+					[React.Tag] = "container-v align-tr list-v list-pad-5 pad-v-10",
 				},
 				{
-					UIListLayout = React.createElement("UIListLayout", {
-						Padding = UDim.new(0, 5),
-						SortOrder = Enum.SortOrder.LayoutOrder,
+					MembersLabel = React.createElement("TextLabel", {
+						LayoutOrder = 1,
+						Size = UDim2.new(1, 0, 0, 30),
+						Text = "Members",
+						[React.Tag] = "title",
 					}),
-					UIPadding = React.createElement("UIPadding", {
-						PaddingBottom = UDim.new(0, 10),
-						PaddingTop = UDim.new(0, 10),
-					}),
-					MembersLabel = React.createElement(
-						"TextLabel",
-						themes.theme_label {
-							LayoutOrder = 1,
-							Size = UDim2.new(1, 0, 0, 30),
-							Text = "Members",
-							TextSize = 25,
-						}
-					),
 					UISizeConstraint = React.createElement("UISizeConstraint", {
 						MinSize = Vector2.new(0, 400),
 					}),

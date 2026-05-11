@@ -1,11 +1,9 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local React = require(ReplicatedStorage.Packages.react)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local Corner = require(ReplicatedStorage.Client.ui.util_components).Corner
 
 function Credits()
-	local context = React.useContext(MainContext)
 	return React.createElement("Frame", {
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, -20, 1, -20),
@@ -26,6 +24,7 @@ function Credits()
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			FontFace = Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
 			Size = UDim2.new(1, 0, 1, 0),
+			[React.Tag] = "pad-l-10",
 			Text = table.concat({
 				"My beloved modeler",
 				"♥♥♥ Leo",
@@ -36,10 +35,6 @@ function Credits()
 				"♥ Roid",
 				"♥ quin",
 			}, "\n"),
-		}, {
-			SidePad = React.createElement("UIPadding", {
-				PaddingLeft = UDim.new(0, 10),
-			}),
 		}),
 	})
 end

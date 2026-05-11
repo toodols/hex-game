@@ -6,8 +6,6 @@ local util = require(ReplicatedStorage.Shared.util)
 local format_text = require(ReplicatedStorage.Shared.formatting).format_text
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
-local hooks = require(ReplicatedStorage.Client.ui.hooks)
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local Corner = util_components.Corner
 
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent

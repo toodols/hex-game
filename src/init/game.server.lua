@@ -76,7 +76,6 @@ end
 
 local main_world
 remotes_mod.get_world_data_remote.OnServerInvoke = function(player)
-	-- todo: change this to return nil when world is not set up, and make the client poll instead
 	while not main_world or not team_mod.team_of(main_world, player) do
 		task.wait()
 	end
@@ -111,8 +110,11 @@ function start_game(teleport_data: { room: types.Room }?)
 		local team = Instance.new "Team"
 		team.Parent = game:GetService "Teams"
 		team.Name = team_data.name
-		-- todo: support color sequence
-		team.TeamColor = BrickColor.new(team_data.color.color)
+		if team_data.color.type == "color3" then
+			team.TeamColor = BrickColor.new(team_data.color.color)
+		else
+			error("todo color type: " .. team_data.color.type)
+		end
 		team_instances[i] = team
 	end
 

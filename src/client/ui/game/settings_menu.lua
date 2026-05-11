@@ -3,12 +3,10 @@ local UserInputService = game:GetService "UserInputService"
 
 local types = require(ReplicatedStorage.Shared.types)
 local React = require(ReplicatedStorage.Packages.react)
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local Separator = util_components.Separator
 local Corner = util_components.Corner
 local contexts = require(ReplicatedStorage.Client.ui.context)
-local MainContext = contexts.MainContext
 local SettingsContext = contexts.SettingsContext
 
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent

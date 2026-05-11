@@ -13,7 +13,6 @@ local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local ui_types = require(ReplicatedStorage.Client.ui.types)
 local client_entity_mod = require(ReplicatedStorage.Client.ui.Parent.entity)
 local context_mod = require(ReplicatedStorage.Client.ui.context)
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 
 local Items = require(script.Parent.items).Items
@@ -209,7 +208,7 @@ function EntityInformation(props: {
 					TextColor3 = text_color,
 					Size = UDim2.new(1, 0, 1, 0),
 					Text = config.name,
-					[React.Tag] = "subtitle pad-l-10 pad-r-10",
+					[React.Tag] = "subtitle pad-h-10",
 				}),
 
 				Hitbox = React.createElement("TextButton", {
@@ -244,7 +243,7 @@ function EntityInformation(props: {
 				Top = React.createElement("ScrollingFrame", {
 					LayoutOrder = 1,
 					Size = UDim2.new(1, 0, 0, 150),
-					[React.Tag] = "pad-l-10 pad-r-10 container-scroll-v list-v list-pad-5",
+					[React.Tag] = "pad-h-10 container-scroll-v list-v list-pad-5",
 				}, {
 					Description = React.createElement("TextLabel", {
 						LayoutOrder = 2,
@@ -296,7 +295,7 @@ function EntityInformation(props: {
 						then React.createElement("TextButton", {
 							LayoutOrder = 5,
 							Text = "View Disguise",
-							[React.Tag] = "pad-l-10 pad-r-10 pad-t-5 pad-b-5",
+							[React.Tag] = "pad-h-10 pad-v-5",
 							AutoButtonColor = false,
 							BackgroundColor3 = Color3.fromRGB(163, 162, 165),
 							Size = UDim2.new(0, 0, 0, 20),
@@ -423,7 +422,7 @@ function EntityInformation(props: {
 						{
 							BackgroundTransparency = 1,
 							Size = UDim2.new(1, 0, 0, 70),
-							[React.Tag] = "list-h list-pad-5 list-cl pad-l-10 pad-r-10",
+							[React.Tag] = "list-h list-pad-5 list-cl pad-h-10",
 						},
 						{
 							DeconstructButton = if entity.active ~= false

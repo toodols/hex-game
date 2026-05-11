@@ -7,7 +7,6 @@ local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
 local team = require(ReplicatedStorage.Shared.team)
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local unlockable_mod = require(ReplicatedStorage.Shared.unlockable)
@@ -294,7 +293,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 				util.table_map(util.range(#PAGES), function(i)
 					local page = PAGES[i]
 					return React.createElement("TextButton", {
-						[React.Tag] = `tab {if i == current_page then "active" else ""} title pad-l-10 pad-r-10`,
+						[React.Tag] = `tab {if i == current_page then "active" else ""} title pad-h-10`,
 						BackgroundTransparency = 1,
 						Text = if i == current_page then `<b>{page.name}</b>` else page.name,
 						[React.Event.MouseButton1Click] = function()
@@ -304,7 +303,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 					})
 				end)
 			),
-			Right = React.createElement("Frame", { [React.Tag] = "container list-h list-pad-10 list-cr" }, {
+			Right = React.createElement("Frame", { [React.Tag] = "container list-h list-pad-5 list-cr" }, {
 				ExpandButton = React.createElement("ImageButton", {
 					BackgroundTransparency = 1,
 					Image = if is_expanded then "rbxassetid://6034818372" else "rbxassetid://6034818379",
@@ -319,7 +318,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 			"ScrollingFrame",
 			{
 				ref = expanded_content_ref,
-				[React.Tag] = "background pad-l-10 pad-r-10 pad-t-5 pad-b-5 list-v list-pad-5",
+				[React.Tag] = "background pad-h-10 pad-v-5 list-v list-pad-5",
 				LayoutOrder = 3,
 				Size = UDim2.new(1, 0, 0, 0),
 			},

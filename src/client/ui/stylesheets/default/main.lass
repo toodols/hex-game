@@ -34,6 +34,11 @@ TextButton
 	BackgroundTransparency: 0.2
 	FontFace: Font.fromName("Oswald", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 
+@priority(2)
+.background
+	BackgroundTransparency: 0.9
+
+@priority(2)
 .solid
 	BackgroundTransparency: 0.2
 
@@ -115,7 +120,3 @@ ScrollingFrame
 .header >> .title::UIPadding
 	PaddingLeft: UDim.new(0, 10)
 	PaddingRight: UDim.new(0, 10)
-
-@priority(1)
-.background
-	BackgroundTransparency: 0.9

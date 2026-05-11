@@ -10,7 +10,6 @@ local cells_mod = require(ReplicatedStorage.Shared.cells)
 
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local EntityInformation = require(script.Parent.entity_information).EntityInformation
 local CoordinateLabel = require(script.Parent.coordinate_label).CoordinateLabel
 local util_components = require(ReplicatedStorage.Client.ui.util_components)

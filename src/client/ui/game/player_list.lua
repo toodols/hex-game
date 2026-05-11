@@ -1,11 +1,8 @@
-local ContextActionService = game:GetService "ContextActionService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
-local RunService = game:GetService "RunService"
 
 type TeamData = types.TeamData
 type World = types.World

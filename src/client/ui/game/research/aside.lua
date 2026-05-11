@@ -5,7 +5,6 @@ local types = require(ReplicatedStorage.Shared.types)
 local formatting = require(ReplicatedStorage.Shared.formatting)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
 
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local Items = require(ReplicatedStorage.Client.ui.game.items).Items
@@ -32,7 +31,7 @@ function Aside(props: { item: ResearchItem, state: ResearchState, on_add: () -> 
 			Container = React.createElement(
 				"Frame",
 				{
-					[React.Tag] = "container-v pad-l-10 pad-r-10 pad-b-10 list-v list-pad-5",
+					[React.Tag] = "container-v pad-h-10 pad-b-10 list-v list-pad-5",
 				},
 				{
 					Title = React.createElement("TextLabel", {

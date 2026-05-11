@@ -3,7 +3,6 @@ local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local Corner = require(ReplicatedStorage.Client.ui.util_components).Corner
 local coords_mod = require(ReplicatedStorage.Shared.coords)
 
@@ -27,7 +26,7 @@ end
 function HighlightOnHover(props: { Text: string, coords: { CubicCoordinate }, LayoutOrder: number? })
 	local context = React.useContext(MainContext)
 	return React.createElement("TextButton", {
-		[React.Tag] = "solid as-x pad-l-5 pad-r-5",
+		[React.Tag] = "solid as-x pad-h-5",
 		Size = UDim2.new(0, 0, 0, 25),
 		LayoutOrder = props.LayoutOrder,
 		Text = props.Text,
@@ -41,8 +40,7 @@ function HighlightOnHover(props: { Text: string, coords: { CubicCoordinate }, La
 		[React.Event.MouseLeave] = function()
 			clear_show_cells(context)
 		end,
-	}
-)
+	})
 end
 
 return {

@@ -7,12 +7,10 @@ local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local team = require(ReplicatedStorage.Shared.team)
 
-local themes = require(ReplicatedStorage.Client.ui.themes)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local Icon = require(script.Parent.icon).Icon
-local Corner = util_components.Corner
 
 type EntityId = types.EntityId
 type TeamData = types.TeamData
@@ -33,7 +31,7 @@ function ResearchPreview(props: {
 		BackgroundColor3 = Color3.fromRGB(100, 100, 100),
 
 		[React.Event.MouseButton1Click] = props.click,
-		[React.Tag] = `research-preview background pad-l-5 pad-r-5 pad-b-5 list-v {if is_owner then "editable" else ""}`,
+		[React.Tag] = `research-preview background pad-h-5 pad-b-5 list-v {if is_owner then "editable" else ""}`,
 		Text = "",
 		AutoButtonColor = false,
 		[React.Event.MouseEnter] = function(current)
