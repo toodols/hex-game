@@ -1,31 +1,32 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 
+local settings = require(ReplicatedStorage.Client.settings)
 local React = require(ReplicatedStorage.Packages.react)
+
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
-local Separator = util_components.Separator
 local contexts = require(ReplicatedStorage.Client.ui.context)
-local SettingsContext = contexts.SettingsContext
+
+local default_settings = require(ReplicatedStorage.Shared.settings).default_settings
+
 local Rebindable = require(script.rebindable).Rebindable
+
+local Separator = util_components.Separator
+local SettingsContext = contexts.SettingsContext
 
 local client_interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
 function SettingsMenu()
 	local player_settings = React.useContext(SettingsContext)
 
-	local get_keybind_value = function(id: string, default: Enum.KeyCode): Enum.KeyCode
-		local value = player_settings.keybinds[id]
-		if value ~= nil then
-			return (Enum.KeyCode :: any):FromValue(value)
-		end
-		return default or Enum.KeyCode.Unknown
-	end
-
 	local handle_keybind_change = function(id: string, new_key: Enum.KeyCode)
 		if new_key == Enum.KeyCode.Unknown then
 			player_settings.keybinds[id] = nil
 		else
-			player_settings.keybinds[id] = new_key.Value
+			player_settings.keybinds[id] = new_key
 		end
+		-- client tells server the updated settings and server triggers updates for Main with the new settings
+		-- so the duration when keybinds are updated to when they are actually bound by the ui is the player's ping
+		-- i could have client -> self but it would cause double rendering which is redundant
 		client_interaction_remote:FireServer { {
 			type = "update_settings",
 			settings = player_settings,
@@ -67,9 +68,9 @@ function SettingsMenu()
 			Construct = React.createElement(Rebindable, {
 				label = "Toggle Construct",
 				LayoutOrder = 3,
-				default = Enum.KeyCode.B,
+				default = default_settings.keybinds.construct,
 				id = "construct",
-				value = get_keybind_value("construct", Enum.KeyCode.B),
+				value = settings.get_keybind(player_settings, "construct"),
 				on_changed = function(new_key)
 					handle_keybind_change("construct", new_key)
 				end,
@@ -77,9 +78,9 @@ function SettingsMenu()
 			Skip = React.createElement(Rebindable, {
 				label = "Skip Turn",
 				LayoutOrder = 4,
-				default = Enum.KeyCode.Y,
 				id = "skip",
-				value = get_keybind_value("skip", Enum.KeyCode.Y),
+				default = default_settings.keybinds.skip,
+				value = settings.get_keybind(player_settings, "skip"),
 				on_changed = function(new_key)
 					handle_keybind_change("skip", new_key)
 				end,
@@ -87,9 +88,9 @@ function SettingsMenu()
 			PrimaryAbility = React.createElement(Rebindable, {
 				label = "Primary Ability",
 				LayoutOrder = 5,
-				default = Enum.KeyCode.Q,
 				id = "primary_ability",
-				value = get_keybind_value("primary_ability", Enum.KeyCode.Q),
+				default = default_settings.keybinds.primary_ability,
+				value = settings.get_keybind(player_settings, "primary_ability"),
 				on_changed = function(new_key)
 					handle_keybind_change("primary_ability", new_key)
 				end,
@@ -97,9 +98,9 @@ function SettingsMenu()
 			Research = React.createElement(Rebindable, {
 				label = "Open Research",
 				LayoutOrder = 6,
-				default = Enum.KeyCode.R,
 				id = "research",
-				value = get_keybind_value("research", Enum.KeyCode.R),
+				default = default_settings.keybinds.research,
+				value = settings.get_keybind(player_settings, "research"),
 				on_changed = function(new_key)
 					handle_keybind_change("research", new_key)
 				end,
@@ -107,9 +108,9 @@ function SettingsMenu()
 			ShowPlayerList = React.createElement(Rebindable, {
 				label = "Show Player List",
 				LayoutOrder = 6,
-				default = Enum.KeyCode.T,
 				id = "show_player_list",
-				value = get_keybind_value("show_player_list", Enum.KeyCode.T),
+				default = default_settings.keybinds.show_player_list,
+				value = settings.get_keybind(player_settings, "show_player_list"),
 				on_changed = function(new_key)
 					handle_keybind_change("show_player_list", new_key)
 				end,
@@ -117,9 +118,9 @@ function SettingsMenu()
 			Deconstruct = React.createElement(Rebindable, {
 				label = "Deconstruct Selected",
 				LayoutOrder = 7,
-				default = Enum.KeyCode.X,
 				id = "deconstruct",
-				value = get_keybind_value("deconstruct", Enum.KeyCode.X),
+				default = default_settings.keybinds.deconstruct,
+				value = settings.get_keybind(player_settings, "deconstruct"),
 				on_changed = function(new_key)
 					handle_keybind_change("deconstruct", new_key)
 				end,
@@ -127,9 +128,9 @@ function SettingsMenu()
 			PreviousEntity = React.createElement(Rebindable, {
 				label = "Previous Entity",
 				LayoutOrder = 8,
-				default = Enum.KeyCode.LeftBracket,
 				id = "previous_entity",
-				value = get_keybind_value("previous_entity", Enum.KeyCode.LeftBracket),
+				default = default_settings.keybinds.previous_entity,
+				value = settings.get_keybind(player_settings, "previous_entity"),
 				on_changed = function(new_key)
 					handle_keybind_change("previous_entity", new_key)
 				end,
@@ -137,9 +138,9 @@ function SettingsMenu()
 			NextEntity = React.createElement(Rebindable, {
 				label = "Next Entity",
 				LayoutOrder = 9,
-				default = Enum.KeyCode.RightBracket,
 				id = "next_entity",
-				value = get_keybind_value("next_entity", Enum.KeyCode.RightBracket),
+				default = default_settings.keybinds.next_entity,
+				value = settings.get_keybind(player_settings, "next_entity"),
 				on_changed = function(new_key)
 					handle_keybind_change("next_entity", new_key)
 				end,

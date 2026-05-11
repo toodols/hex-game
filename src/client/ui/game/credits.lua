@@ -1,16 +1,13 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local React = require(ReplicatedStorage.Packages.react)
-local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local Corner = require(ReplicatedStorage.Client.ui.util_components).Corner
 
 function Credits()
 	return React.createElement("Frame", {
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, -20, 1, -20),
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.new(0.5, 0, 0.5, 0),
+		[React.Tag] = "align-cc",
 	}, {
-		Corner = React.createElement(Corner),
 		SizeConstraint = React.createElement("UISizeConstraint", {
 			MaxSize = Vector2.new(400, 200),
 		}),

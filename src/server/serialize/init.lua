@@ -22,25 +22,25 @@ type System = types.System
 type EncodedCoordinate = types.EncodedCoordinate
 type Quest = types.Quest
 
-type SerializeFor = server_types.SerializeFor
+type SerializeTarget = server_types.SerializeTarget
 type SerializationContext = server_types.SerializationContext
 
 -- se_ctx is not used but included for consistency
 function buildable_for_team(
 	world: World,
 	se_ctx: SerializationContext,
-	serialize_for: SerializeFor,
+	serialize_target: SerializeTarget,
 	cell: HexCell
 ): boolean
 	local result = false
 	for _, coordinate in coords.neighbors_eq(cell.coordinate, 1) do
 		local neighbor_cell = world:get_cell(coordinate)
-		if neighbor_cell and neighbor_cell.owner == serialize_for.team then
+		if neighbor_cell and neighbor_cell.owner == serialize_target.team then
 			result = true
 		end
 	end
 	for other_team, value in cell.server_data.presence do
-		if value and serialize_for.team ~= other_team then
+		if value and serialize_target.team ~= other_team then
 			result = false
 		end
 	end
@@ -60,21 +60,21 @@ end
 function serialize_cell(
 	world: World,
 	se_ctx: SerializationContext,
-	serialize_for: SerializeFor,
+	serialize_target: SerializeTarget,
 	coord: EncodedCoordinate
 ): HexCell | nil
-	local team_data = if serialize_for.team ~= nil then world.teams[serialize_for.team] else nil
+	local team_data = if serialize_target.team ~= nil then world.teams[serialize_target.team] else nil
 
 	local cell = world.cells[coord]
-	local visible_for_team = if serialize_for.team ~= nil
-		then visibility_mod.cell_visibility(cell.server_data.visibility[serialize_for.team])
+	local visible_for_team = if serialize_target.team ~= nil
+		then visibility_mod.cell_visibility(cell.server_data.visibility[serialize_target.team])
 		else true
 	local influences = {}
 
 	for entity_id in cell.influences do
 		local entity = world.entities[entity_id]
 		-- if this entity is visible, replicate the influence
-		if serialize_for.team == nil or visibility_mod.entity_visibility(world, serialize_for, entity) then
+		if serialize_target.team == nil or visibility_mod.entity_visibility(world, serialize_target, entity) then
 			influences[entity_id] = true
 		end
 	end
@@ -83,13 +83,13 @@ function serialize_cell(
 		local entities = {}
 		for entity_id in cell.entities do
 			local entity = world.entities[entity_id]
-			if serialize_for.team == nil or visibility_mod.entity_visibility(world, serialize_for, entity) then
+			if serialize_target.team == nil or visibility_mod.entity_visibility(world, serialize_target, entity) then
 				-- organically add a disguised entity to a serialized cell
 				if entity.disguise then
 					if
-						serialize_for.team == nil
+						serialize_target.team == nil
 						or team_data.server_data.visibility == "perfect"
-						or team_mod.is_allied(world, serialize_for.team, entity.owner)
+						or team_mod.is_allied(world, serialize_target.team, entity.owner)
 					then
 						entities[entity_id] = true
 					else
@@ -106,7 +106,7 @@ function serialize_cell(
 			owner = cell.owner,
 			type = cell.type,
 			visible_for_team = visible_for_team,
-			buildable_for_team = buildable_for_team(world, se_ctx, serialize_for, cell),
+			buildable_for_team = buildable_for_team(world, se_ctx, serialize_target, cell),
 			influences = influences,
 			server_data = nil :: any,
 		}
@@ -115,9 +115,9 @@ function serialize_cell(
 			entities = util.table_filter(cell.entities, function(_, entity_id)
 				local entity = world.entities[entity_id]
 				-- if one of its coordinates is visible or it is .server_data.always_visible
-				return serialize_for.team == nil
+				return serialize_target.team == nil
 					or entity.server_data.always_visible
-					or team_mod.is_allied(world, serialize_for.team, entity.owner)
+					or team_mod.is_allied(world, serialize_target.team, entity.owner)
 			end),
 			coordinate = cell.coordinate,
 			type = cell.type,
@@ -131,16 +131,16 @@ end
 function serialize_system(
 	world: World,
 	se_ctx: SerializationContext,
-	serialize_for: SerializeFor,
+	serialize_target: SerializeTarget,
 	system: System
 ): System?
-	if serialize_for.team == nil or team_mod.is_allied(world, system.team, serialize_for.team) then
+	if serialize_target.team == nil or team_mod.is_allied(world, system.team, serialize_target.team) then
 		return system
 	end
 	return nil
 end
 
-function serialize_world(world: World, se_ctx: SerializationContext, serialize_for: SerializeFor): PartialWorld
+function serialize_world(world: World, se_ctx: SerializationContext, serialize_target: SerializeTarget): PartialWorld
 	local global_cache = get_cache(se_ctx, {})
 	if global_cache.systems == nil then
 		compute_systems(world)
@@ -149,16 +149,16 @@ function serialize_world(world: World, se_ctx: SerializationContext, serialize_f
 
 	local entities: { [EntityId]: Entity } = {}
 	for entity_id, entity in world.entities do
-		local serialized = serialize_entity(world, se_ctx, serialize_for, entity)
+		local serialized = serialize_entity(world, se_ctx, serialize_target, entity)
 		if serialized then
 			entities[entity_id] = serialized
 		end
 	end
 
-	local cache = get_cache(se_ctx, { team = serialize_for.team })
+	local cache = get_cache(se_ctx, { team = serialize_target.team })
 	if cache.systems == nil then
 		cache.systems = util.table_filter_map(world.systems, function(system)
-			return serialize_system(world, se_ctx, serialize_for, system)
+			return serialize_system(world, se_ctx, serialize_target, system)
 		end)
 	end
 
@@ -176,7 +176,7 @@ function serialize_world(world: World, se_ctx: SerializationContext, serialize_f
 
 	if cache.cells == nil then
 		cache.cells = util.table_map(world.cells, function(cell, coord)
-			return serialize_cell(world, se_ctx, serialize_for, coord)
+			return serialize_cell(world, se_ctx, serialize_target, coord)
 		end)
 	end
 

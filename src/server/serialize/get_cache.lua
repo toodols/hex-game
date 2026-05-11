@@ -1,14 +1,14 @@
 local ServerScriptService = game:GetService "ServerScriptService"
 local server_types = require(ServerScriptService.Server.types)
 
-type SerializeFor = server_types.SerializeFor
+type SerializeTarget = server_types.SerializeTarget
 type SerializationContext = server_types.SerializationContext
 type SerializingCache = server_types.SerializingCache
 
 local nil_key = "nil"
-function get_cache(context: SerializationContext, serialize_for: SerializeFor): SerializingCache
-	local team = serialize_for.team or nil_key
-	local player = serialize_for.player or nil_key
+function get_cache(context: SerializationContext, serialize_target: SerializeTarget): SerializingCache
+	local team = serialize_target.team or nil_key
+	local player = serialize_target.player or nil_key
 	if context[team] == nil then
 		context[team] = {}
 	end

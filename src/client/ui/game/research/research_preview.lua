@@ -9,7 +9,8 @@ local team = require(ReplicatedStorage.Shared.team)
 
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
-local util_components = require(ReplicatedStorage.Client.ui.util_components)
+local KeybindLabel = require(ReplicatedStorage.Client.ui.keybind_label).KeybindLabel
+
 local Icon = require(script.Parent.icon).Icon
 
 type EntityId = types.EntityId
@@ -18,6 +19,7 @@ type TeamData = types.TeamData
 function ResearchPreview(props: {
 	LayoutOrder: number?,
 	entity_id: EntityId,
+	active: boolean,
 	click: () -> (),
 })
 	local world = React.useContext(MainContext).world
@@ -45,6 +47,7 @@ function ResearchPreview(props: {
 			}):Play()
 		end,
 	}, {
+
 		-- SizeConstraint = React.createElement("UISizeConstraint", {
 		-- 	MinSize = Vector2.new(80, 0),
 		-- }),
@@ -53,6 +56,17 @@ function ResearchPreview(props: {
 			Size = UDim2.new(1, 0, 0, 20),
 			TextColor3 = Color3.new(0.0588235, 0.898039, 0),
 			[React.Tag] = "subtitle",
+		}, {
+			KeybindLabel = React.createElement(KeybindLabel, {
+				Position = UDim2.new(1, 0, 1, 0),
+				AnchorPoint = Vector2.new(1, 1),
+				action_id = "research",
+				action = function(action_name, input_state, input_object)
+					if input_state == Enum.UserInputState.Begin and props.active then
+						props.click()
+					end
+				end,
+			}),
 		}),
 		Container = React.createElement(
 			"Frame",

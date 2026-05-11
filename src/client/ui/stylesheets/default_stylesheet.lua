@@ -339,35 +339,44 @@ style_rule_41:SetProperties{
 
 local style_rule_42 = Instance.new "StyleRule"
 style_rule_42.Parent = style_sheet
-style_rule_42.Selector = ".header::UICorner, .solid::UICorner, .background::UICorner, .option::UICorner"
+style_rule_42.Selector = ".scroll-h"
 style_rule_42.Priority = 1
 style_rule_42:SetProperties{
-	["CornerRadius"] = UDim.new(0, 4)
+	["AutomaticCanvasSize"] = Enum.AutomaticSize.X, 
+	["CanvasSize"] = UDim2.new(0, 0, 0, 0)
 }
 
 local style_rule_43 = Instance.new "StyleRule"
 style_rule_43.Parent = style_sheet
-style_rule_43.Selector = ".container"
+style_rule_43.Selector = ".header::UICorner, .solid::UICorner, .background::UICorner, .option::UICorner"
 style_rule_43.Priority = 1
 style_rule_43:SetProperties{
+	["CornerRadius"] = UDim.new(0, 4)
+}
+
+local style_rule_44 = Instance.new "StyleRule"
+style_rule_44.Parent = style_sheet
+style_rule_44.Selector = ".container"
+style_rule_44.Priority = 1
+style_rule_44:SetProperties{
 	["AutomaticSize"] = Enum.AutomaticSize.XY, 
 	["BackgroundTransparency"] = 1, 
 	["Size"] = UDim2.new(1, 0, 1, 0)
 }
 
-local style_rule_44 = Instance.new "StyleRule"
-style_rule_44.Parent = style_sheet
-style_rule_44.Selector = ".square-action-button"
-style_rule_44.Priority = 1
-style_rule_44:SetProperties{
+local style_rule_45 = Instance.new "StyleRule"
+style_rule_45.Parent = style_sheet
+style_rule_45.Selector = ".square-action-button"
+style_rule_45.Priority = 1
+style_rule_45:SetProperties{
 	["Size"] = UDim2.new(0, 40, 0, 40)
 }
 
-local style_rule_45 = Instance.new "StyleRule"
-style_rule_45.Parent = style_sheet
-style_rule_45.Selector = ".stroke::UIStroke, .research-preview.editable::UIStroke, .item-filters-preview.editable::UIStroke, .square-action-button::UIStroke, .recipes::UIStroke"
-style_rule_45.Priority = 1
-style_rule_45:SetProperties{
+local style_rule_46 = Instance.new "StyleRule"
+style_rule_46.Parent = style_sheet
+style_rule_46.Selector = ".stroke::UIStroke, .research-preview.editable::UIStroke, .item-filters-preview.editable::UIStroke, .square-action-button::UIStroke, .recipes::UIStroke"
+style_rule_46.Priority = 1
+style_rule_46:SetProperties{
 	["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border, 
 	["LineJoinMode"] = Enum.LineJoinMode.Round, 
 	["Thickness"] = 1, 
@@ -375,46 +384,48 @@ style_rule_45:SetProperties{
 	["Color"] = Color3.fromRGB(255, 255, 255)
 }
 
-local style_rule_46 = Instance.new "StyleRule"
-style_rule_46.Parent = style_sheet
-style_rule_46.Selector = ".item-filters-preview.editable.active::UIStroke"
-style_rule_46:SetProperties{
+local style_rule_47 = Instance.new "StyleRule"
+style_rule_47.Parent = style_sheet
+style_rule_47.Selector = ".stroke.active::UIStroke, .item-filters-preview.editable.active::UIStroke"
+style_rule_47.Priority = 2
+style_rule_47:SetProperties{
+	["Transparency"] = 0, 
 	["Color"] = Color3.fromRGB(255, 120, 120)
 }
 
-local style_rule_47 = Instance.new "StyleRule"
-style_rule_47.Parent = style_sheet
-style_rule_47.Selector = ".container-v"
-style_rule_47.Priority = 1
-style_rule_47:SetProperties{
+local style_rule_48 = Instance.new "StyleRule"
+style_rule_48.Parent = style_sheet
+style_rule_48.Selector = ".container-v"
+style_rule_48.Priority = 1
+style_rule_48:SetProperties{
 	["BackgroundTransparency"] = 1, 
 	["Size"] = UDim2.new(1, 0, 0, 0), 
 	["AutomaticSize"] = Enum.AutomaticSize.Y
 }
 
-local style_rule_48 = Instance.new "StyleRule"
-style_rule_48.Parent = style_sheet
-style_rule_48.Selector = ".container-h"
-style_rule_48.Priority = 1
-style_rule_48:SetProperties{
+local style_rule_49 = Instance.new "StyleRule"
+style_rule_49.Parent = style_sheet
+style_rule_49.Selector = ".container-h"
+style_rule_49.Priority = 1
+style_rule_49:SetProperties{
 	["BackgroundTransparency"] = 1, 
 	["Size"] = UDim2.new(0, 0, 1, 0), 
 	["AutomaticSize"] = Enum.AutomaticSize.X
 }
 
-local style_rule_49 = Instance.new "StyleRule"
-style_rule_49.Parent = style_sheet
-style_rule_49.Selector = ".container-scroll-v"
-style_rule_49.Priority = 1
-style_rule_49:SetProperties{
+local style_rule_50 = Instance.new "StyleRule"
+style_rule_50.Parent = style_sheet
+style_rule_50.Selector = ".container-scroll-v"
+style_rule_50.Priority = 1
+style_rule_50:SetProperties{
 	["BackgroundTransparency"] = 1
 }
 
-local style_rule_50 = Instance.new "StyleRule"
-style_rule_50.Parent = style_sheet
-style_rule_50.Selector = ".description"
-style_rule_50.Priority = 1
-style_rule_50:SetProperties{
+local style_rule_51 = Instance.new "StyleRule"
+style_rule_51.Parent = style_sheet
+style_rule_51.Selector = ".description"
+style_rule_51.Priority = 1
+style_rule_51:SetProperties{
 	["AutomaticSize"] = Enum.AutomaticSize.Y, 
 	["TextWrapped"] = true, 
 	["TextColor3"] = Color3.fromRGB(200, 200, 200), 
@@ -423,207 +434,210 @@ style_rule_50:SetProperties{
 	["TextSize"] = 13
 }
 
-local style_rule_51 = Instance.new "StyleRule"
-style_rule_51.Parent = style_sheet
-style_rule_51.Selector = ".header"
-style_rule_51:SetProperties{
+local style_rule_52 = Instance.new "StyleRule"
+style_rule_52.Parent = style_sheet
+style_rule_52.Selector = ".header"
+style_rule_52:SetProperties{
 	["BackgroundTransparency"] = 0.2, 
 	["Size"] = UDim2.new(1, 0, 0, 40)
 }
 
-local style_rule_52 = Instance.new "StyleRule"
-style_rule_52.Parent = style_sheet
-style_rule_52.Selector = ".subtitle"
-style_rule_52.Priority = 1
-style_rule_52:SetProperties{
+local style_rule_53 = Instance.new "StyleRule"
+style_rule_53.Parent = style_sheet
+style_rule_53.Selector = ".subtitle"
+style_rule_53.Priority = 1
+style_rule_53:SetProperties{
 	["Size"] = UDim2.new(0, 0, 1, 0), 
 	["TextSize"] = 16
 }
 
-local style_rule_53 = Instance.new "StyleRule"
-style_rule_53.Parent = style_sheet
-style_rule_53.Selector = ".title"
-style_rule_53:SetProperties{
+local style_rule_54 = Instance.new "StyleRule"
+style_rule_54.Parent = style_sheet
+style_rule_54.Selector = ".title"
+style_rule_54:SetProperties{
 	["TextSize"] = 20, 
 	["Size"] = UDim2.new(0, 0, 1, 0)
 }
 
-local style_rule_54 = Instance.new "StyleRule"
-style_rule_54.Parent = style_sheet
-style_rule_54.Selector = ".header >> .title::UIPadding"
-style_rule_54:SetProperties{
-	["PaddingLeft"] = UDim.new(0, 10), 
-	["PaddingRight"] = UDim.new(0, 10)
-}
-
 local style_rule_55 = Instance.new "StyleRule"
 style_rule_55.Parent = style_sheet
-style_rule_55.Selector = ".pad-t-2::UIPadding"
+style_rule_55.Selector = ".header >> .title::UIPadding"
 style_rule_55:SetProperties{
-	["PaddingTop"] = UDim.new(0, 2)
+	["PaddingLeft"] = UDim.new(0, 10), 
+	["PaddingRight"] = UDim.new(0, 10)
 }
 
 local style_rule_56 = Instance.new "StyleRule"
 style_rule_56.Parent = style_sheet
-style_rule_56.Selector = ".pad-l-5::UIPadding"
+style_rule_56.Selector = ".pad-t-2::UIPadding"
 style_rule_56:SetProperties{
-	["PaddingLeft"] = UDim.new(0, 5)
+	["PaddingTop"] = UDim.new(0, 2)
 }
 
 local style_rule_57 = Instance.new "StyleRule"
 style_rule_57.Parent = style_sheet
-style_rule_57.Selector = ".pad-r-5::UIPadding"
+style_rule_57.Selector = ".pad-l-5::UIPadding"
 style_rule_57:SetProperties{
-	["PaddingRight"] = UDim.new(0, 5)
+	["PaddingLeft"] = UDim.new(0, 5)
 }
 
 local style_rule_58 = Instance.new "StyleRule"
 style_rule_58.Parent = style_sheet
-style_rule_58.Selector = ".pad-t-5::UIPadding"
+style_rule_58.Selector = ".pad-r-5::UIPadding"
 style_rule_58:SetProperties{
-	["PaddingTop"] = UDim.new(0, 5)
+	["PaddingRight"] = UDim.new(0, 5)
 }
 
 local style_rule_59 = Instance.new "StyleRule"
 style_rule_59.Parent = style_sheet
-style_rule_59.Selector = ".pad-b-5::UIPadding"
+style_rule_59.Selector = ".pad-t-5::UIPadding"
 style_rule_59:SetProperties{
-	["PaddingBottom"] = UDim.new(0, 5)
+	["PaddingTop"] = UDim.new(0, 5)
 }
 
 local style_rule_60 = Instance.new "StyleRule"
 style_rule_60.Parent = style_sheet
-style_rule_60.Selector = ".pad-l-10::UIPadding"
+style_rule_60.Selector = ".pad-b-5::UIPadding"
 style_rule_60:SetProperties{
-	["PaddingLeft"] = UDim.new(0, 10)
+	["PaddingBottom"] = UDim.new(0, 5)
 }
 
 local style_rule_61 = Instance.new "StyleRule"
 style_rule_61.Parent = style_sheet
-style_rule_61.Selector = ".pad-r-10::UIPadding"
+style_rule_61.Selector = ".pad-l-10::UIPadding"
 style_rule_61:SetProperties{
-	["PaddingRight"] = UDim.new(0, 10)
+	["PaddingLeft"] = UDim.new(0, 10)
 }
 
 local style_rule_62 = Instance.new "StyleRule"
 style_rule_62.Parent = style_sheet
-style_rule_62.Selector = ".pad-t-10::UIPadding"
+style_rule_62.Selector = ".pad-r-10::UIPadding"
 style_rule_62:SetProperties{
-	["PaddingTop"] = UDim.new(0, 10)
+	["PaddingRight"] = UDim.new(0, 10)
 }
 
 local style_rule_63 = Instance.new "StyleRule"
 style_rule_63.Parent = style_sheet
-style_rule_63.Selector = ".pad-b-10::UIPadding"
+style_rule_63.Selector = ".pad-t-10::UIPadding"
 style_rule_63:SetProperties{
-	["PaddingBottom"] = UDim.new(0, 10)
+	["PaddingTop"] = UDim.new(0, 10)
 }
 
 local style_rule_64 = Instance.new "StyleRule"
 style_rule_64.Parent = style_sheet
-style_rule_64.Selector = ".pad-l-30::UIPadding"
+style_rule_64.Selector = ".pad-b-10::UIPadding"
 style_rule_64:SetProperties{
-	["PaddingLeft"] = UDim.new(0, 30)
+	["PaddingBottom"] = UDim.new(0, 10)
 }
 
 local style_rule_65 = Instance.new "StyleRule"
 style_rule_65.Parent = style_sheet
-style_rule_65.Selector = ".pad-r-30::UIPadding"
+style_rule_65.Selector = ".pad-l-30::UIPadding"
 style_rule_65:SetProperties{
-	["PaddingRight"] = UDim.new(0, 30)
+	["PaddingLeft"] = UDim.new(0, 30)
 }
 
 local style_rule_66 = Instance.new "StyleRule"
 style_rule_66.Parent = style_sheet
-style_rule_66.Selector = ".pad-h-5::UIPadding"
+style_rule_66.Selector = ".pad-r-30::UIPadding"
 style_rule_66:SetProperties{
-	["PaddingLeft"] = UDim.new(0, 5), 
-	["PaddingRight"] = UDim.new(0, 5)
+	["PaddingRight"] = UDim.new(0, 30)
 }
 
 local style_rule_67 = Instance.new "StyleRule"
 style_rule_67.Parent = style_sheet
-style_rule_67.Selector = ".pad-h-10::UIPadding"
+style_rule_67.Selector = ".pad-h-5::UIPadding"
 style_rule_67:SetProperties{
-	["PaddingLeft"] = UDim.new(0, 10), 
-	["PaddingRight"] = UDim.new(0, 10)
+	["PaddingLeft"] = UDim.new(0, 5), 
+	["PaddingRight"] = UDim.new(0, 5)
 }
 
 local style_rule_68 = Instance.new "StyleRule"
 style_rule_68.Parent = style_sheet
-style_rule_68.Selector = ".pad-v-5::UIPadding"
+style_rule_68.Selector = ".pad-h-10::UIPadding"
 style_rule_68:SetProperties{
-	["PaddingTop"] = UDim.new(0, 5), 
-	["PaddingBottom"] = UDim.new(0, 5)
+	["PaddingLeft"] = UDim.new(0, 10), 
+	["PaddingRight"] = UDim.new(0, 10)
 }
 
 local style_rule_69 = Instance.new "StyleRule"
 style_rule_69.Parent = style_sheet
-style_rule_69.Selector = ".pad-v-10::UIPadding"
+style_rule_69.Selector = ".pad-v-5::UIPadding"
 style_rule_69:SetProperties{
-	["PaddingTop"] = UDim.new(0, 10), 
-	["PaddingBottom"] = UDim.new(0, 10)
+	["PaddingTop"] = UDim.new(0, 5), 
+	["PaddingBottom"] = UDim.new(0, 5)
 }
 
 local style_rule_70 = Instance.new "StyleRule"
 style_rule_70.Parent = style_sheet
-style_rule_70.Selector = ".pad-5::UIPadding"
+style_rule_70.Selector = ".pad-v-10::UIPadding"
 style_rule_70:SetProperties{
+	["PaddingTop"] = UDim.new(0, 10), 
+	["PaddingBottom"] = UDim.new(0, 10)
+}
+
+local style_rule_71 = Instance.new "StyleRule"
+style_rule_71.Parent = style_sheet
+style_rule_71.Selector = ".pad-5::UIPadding"
+style_rule_71:SetProperties{
 	["PaddingLeft"] = UDim.new(0, 5), 
 	["PaddingRight"] = UDim.new(0, 5), 
 	["PaddingTop"] = UDim.new(0, 5), 
 	["PaddingBottom"] = UDim.new(0, 5)
 }
 
-local style_rule_71 = Instance.new "StyleRule"
-style_rule_71.Parent = style_sheet
-style_rule_71.Selector = ".pad-10::UIPadding"
-style_rule_71:SetProperties{
+local style_rule_72 = Instance.new "StyleRule"
+style_rule_72.Parent = style_sheet
+style_rule_72.Selector = ".pad-10::UIPadding"
+style_rule_72:SetProperties{
 	["PaddingLeft"] = UDim.new(0, 10), 
 	["PaddingRight"] = UDim.new(0, 10), 
 	["PaddingTop"] = UDim.new(0, 10), 
 	["PaddingBottom"] = UDim.new(0, 10)
 }
 
-local style_rule_72 = Instance.new "StyleRule"
-style_rule_72.Parent = style_sheet
-style_rule_72.Selector = ".text-c"
-style_rule_72:SetProperties{
-	["TextXAlignment"] = Enum.TextXAlignment.Center
-}
-
 local style_rule_73 = Instance.new "StyleRule"
 style_rule_73.Parent = style_sheet
-style_rule_73.Selector = ".text-l"
+style_rule_73.Selector = ".text-c"
+style_rule_73.Priority = 2
 style_rule_73:SetProperties{
-	["TextXAlignment"] = Enum.TextXAlignment.Left
+	["TextXAlignment"] = Enum.TextXAlignment.Center
 }
 
 local style_rule_74 = Instance.new "StyleRule"
 style_rule_74.Parent = style_sheet
-style_rule_74.Selector = ".text-r"
+style_rule_74.Selector = ".text-l"
 style_rule_74:SetProperties{
-	["TextXAlignment"] = Enum.TextXAlignment.Right
+	["TextXAlignment"] = Enum.TextXAlignment.Left
 }
 
 local style_rule_75 = Instance.new "StyleRule"
 style_rule_75.Parent = style_sheet
-style_rule_75.Selector = ".ty-t"
+style_rule_75.Selector = ".text-r"
+style_rule_75.Priority = 2
 style_rule_75:SetProperties{
-	["TextYAlignment"] = Enum.TextYAlignment.Top
+	["TextXAlignment"] = Enum.TextXAlignment.Right
 }
 
 local style_rule_76 = Instance.new "StyleRule"
 style_rule_76.Parent = style_sheet
-style_rule_76.Selector = ".ty-c"
+style_rule_76.Selector = ".ty-t"
 style_rule_76:SetProperties{
-	["TextYAlignment"] = Enum.TextYAlignment.Center
+	["TextYAlignment"] = Enum.TextYAlignment.Top
 }
 
 local style_rule_77 = Instance.new "StyleRule"
 style_rule_77.Parent = style_sheet
-style_rule_77.Selector = ".ty-b"
+style_rule_77.Selector = ".ty-c"
+style_rule_77.Priority = 2
 style_rule_77:SetProperties{
+	["TextYAlignment"] = Enum.TextYAlignment.Center
+}
+
+local style_rule_78 = Instance.new "StyleRule"
+style_rule_78.Parent = style_sheet
+style_rule_78.Selector = ".ty-b"
+style_rule_78:SetProperties{
 	["TextYAlignment"] = Enum.TextYAlignment.Bottom
 }
 

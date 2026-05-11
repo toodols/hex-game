@@ -37,7 +37,7 @@ local const = schema.const
 local tagged_union = schema.tagged_union
 local f64 = schema.f64
 local i32_infinite = schema.i32_infinite
-local u16 = schema.u16
+local keycode = schema.keycode
 
 if #util.table_keys(server_entity_mod.registry) == 0 then
 	error "No entities registered in server entity registry. Likely before it has loaded."
@@ -390,6 +390,7 @@ local keybind_id = enum "keybind_id" {
 	"construct",
 	"skip",
 	"primary_ability",
+	"secondary_ability",
 	"research",
 	"show_player_list",
 	"deconstruct",
@@ -398,7 +399,7 @@ local keybind_id = enum "keybind_id" {
 }
 
 local player_settings: Schema<PlayerSettings> = struct "player_settings" {
-	keybinds = map(keybind_id, u16),
+	keybinds = map(keybind_id, keycode),
 }
 
 local player_data: Schema<PlayerData> = struct "player_data" {
@@ -438,4 +439,11 @@ local world_schema = struct "world" {
 	player_data = map(player_id, player_data),
 }
 
-return { id = "v20260511", player_settings = player_settings, world_schema = world_schema, next = nil, migrate = nil }
+return {
+	id = "v20260511",
+	player_settings = player_settings,
+	player_data = player_data,
+	world_schema = world_schema,
+	next = nil,
+	migrate = nil,
+}

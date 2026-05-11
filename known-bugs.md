@@ -1,0 +1,2 @@
+- When vertex decays and loses visibility on the same turn the vertex's death cannot be handled because visibility is lost first.
+	- solution: make visibility loss happen after death is processed

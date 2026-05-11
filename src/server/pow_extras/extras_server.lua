@@ -284,6 +284,36 @@ return function(extras)
 		end,
 	}
 
+	commands.reset_player_data = {
+		description = "Resets the player data for a player",
+		permissions = { "admin" },
+		overloads = {
+			{
+				returns = "nil",
+				args = {
+					{
+						name = "players",
+						type = "players",
+						description = "The players to reset the player data for.",
+					},
+				},
+			},
+		},
+		server_run = function(context)
+			local players = context.args[1]
+
+			datastore_mod.set_player_data(players[1].UserId, datastore_mod.default_player_data())
+			for _, player in players do
+				_G.world:add_update {
+					type = "player_data",
+					player_data = { [tostring(player.UserId)] = datastore_mod.default_player_data() },
+				}
+			end
+			print(_G.world.updates_buffer)
+			updates_mod.flush_updates(_G.world)
+		end,
+	}
+
 	commands.add_unlockable = {
 		description = "Adds an unlockable for a player",
 		permissions = { "admin" },
@@ -318,6 +348,7 @@ return function(extras)
 					player_data = { [tostring(user_id)] = player_data },
 				}
 			end
+			updates_mod.flush_updates(_G.world)
 		end,
 	}
 
@@ -357,6 +388,7 @@ return function(extras)
 					},
 				}
 			end
+			updates_mod.flush_updates(_G.world)
 		end,
 	}
 

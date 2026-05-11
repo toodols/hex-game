@@ -8,12 +8,9 @@ local types = require(ReplicatedStorage.Shared.types)
 local researches_mod = require(ReplicatedStorage.Shared.researches)
 local team = require(ReplicatedStorage.Shared.team)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
-local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local unlockable_mod = require(ReplicatedStorage.Shared.unlockable)
 
 local BuildingItem = require(script.building_item).BuildingItem
-
-local Corner = util_components.Corner
 
 type CubicCoordinate = types.CubicCoordinate
 type Item = types.Item

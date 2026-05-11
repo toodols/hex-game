@@ -3,7 +3,6 @@ local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
-local Corner = require(ReplicatedStorage.Client.ui.util_components).Corner
 local coords_mod = require(ReplicatedStorage.Shared.coords)
 
 type CubicCoordinate = types.CubicCoordinate

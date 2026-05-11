@@ -3,18 +3,21 @@ local ContextActionService = game:GetService "ContextActionService"
 local RunService = game:GetService "RunService"
 
 local React = require(ReplicatedStorage.Packages.react)
+
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local cells_mod = require(ReplicatedStorage.Shared.cells)
+local deposit_mod = require(ReplicatedStorage.Shared.deposit)
 
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
-local EntityInformation = require(script.Parent.entity_information).EntityInformation
-local CoordinateLabel = require(script.Parent.coordinate_label).CoordinateLabel
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local ui_types = require(ReplicatedStorage.Client.ui.types)
-local deposit_mod = require(ReplicatedStorage.Shared.deposit)
+local KeybindLabel = require(ReplicatedStorage.Client.ui.keybind_label).KeybindLabel
+
+local EntityInformation = require(script.Parent.entity_information).EntityInformation
+local CoordinateLabel = require(script.Parent.coordinate_label).CoordinateLabel
 
 local Corner = util_components.Corner
 
@@ -110,58 +113,53 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 		return cleanup
 	end, {})
 
-	React.useEffect(function()
-		if RunService:IsClient() then
-			ContextActionService:BindAction("build", function(action_name, input_state, input_object)
-				if input_state == Enum.UserInputState.Begin and #props_ref.current.selected_cells == 1 then
-					toggle_submenu { type = "build", cell = props_ref.current.selected_cells[1] }
-				end
-			end, false, Enum.KeyCode.B)
-
-			ContextActionService:BindAction("next_entity", function(action_name, input_state, input_object)
-				if input_state == Enum.UserInputState.Begin then
-					if uncompressed_entity.current == nil then
-						uncompressed_entity.current = best_uncompressed_entity(
-							world,
-							entities_from_cells(world, props_ref.current.selected_cells)
-						)
-					else
-						local current_idx = table.find(entities_ref.current, uncompressed_entity.current)
-						current_idx = (current_idx % #entities_ref.current) + 1
-						uncompressed_entity.current = entities_ref.current[current_idx]
-					end
-					force_update(nil)
-				end
-			end, false, Enum.KeyCode.RightBracket)
-
-			ContextActionService:BindAction("previous_entity", function(action_name, input_state, input_object)
-				if input_state == Enum.UserInputState.Begin then
-					if uncompressed_entity.current == nil then
-						uncompressed_entity.current = best_uncompressed_entity(
-							world,
-							entities_from_cells(world, props_ref.current.selected_cells)
-						)
-					else
-						local current_idx = table.find(entities_ref.current, uncompressed_entity.current)
-						current_idx = (current_idx - 2 + #entities_ref.current) % #entities_ref.current + 1
-						uncompressed_entity.current = entities_ref.current[current_idx]
-					end
-					force_update(nil)
-				end
-			end, false, Enum.KeyCode.LeftBracket)
-
-			return function()
-				ContextActionService:UnbindAction "build"
-			end
+	local function get_previous()
+		if uncompressed_entity.current == nil then
+			return best_uncompressed_entity(world, entities_from_cells(world, props_ref.current.selected_cells))
+		else
+			local current_idx = table.find(entities_ref.current, uncompressed_entity.current)
+			return entities_ref.current[(current_idx - 2 + #entities_ref.current) % #entities_ref.current + 1]
 		end
-		return function() end
-	end, {})
+	end
+	local function get_next()
+		if uncompressed_entity.current == nil then
+			return best_uncompressed_entity(world, entities_from_cells(world, props_ref.current.selected_cells))
+		else
+			local current_idx = table.find(entities_ref.current, uncompressed_entity.current)
+			return entities_ref.current[(current_idx % #entities_ref.current) + 1]
+		end
+	end
+
+	local next_entity = get_next()
+	local previous_entity = get_previous()
+
+	-- React.useEffect(function()
+	-- 	if RunService:IsClient() then
+	-- 		ContextActionService:BindAction("next_entity", function(action_name, input_state, input_object)
+	-- 			if input_state == Enum.UserInputState.Begin then
+	-- 				uncompressed_entity.current = get_next()
+	-- 				force_update(nil)
+	-- 			end
+	-- 		end, false, Enum.KeyCode.RightBracket)
+
+	-- 		ContextActionService:BindAction("previous_entity", function(action_name, input_state, input_object)
+	-- 			if input_state == Enum.UserInputState.Begin then
+	-- 				uncompressed_entity.current = get_previous()
+	-- 				force_update(nil)
+	-- 			end
+	-- 		end, false, Enum.KeyCode.LeftBracket)
+
+	-- 		return function()
+	-- 			ContextActionService:UnbindAction "build"
+	-- 		end
+	-- 	end
+	-- 	return function() end
+	-- end, {})
 
 	local deposit_type = nil
 	if #props.selected_cells == 1 then
 		deposit_type = deposit_mod.get_deposit_type(world, props.selected_cells[1])
 	end
-
 	return React.createElement("Frame", {
 		BackgroundTransparency = 1,
 		Position = UDim2.new(-250, 250, 20, -20),
@@ -181,6 +179,8 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 						entity_id = entity_id,
 						LayoutOrder = idx,
 						compressed = uncompressed_entity.current ~= entity_id,
+						is_next = entity_id == next_entity,
+						is_previous = entity_id == previous_entity,
 						on_select = function()
 							uncompressed_entity.current = entity_id
 							force_update(nil)
@@ -211,6 +211,16 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 					[React.Tag] = "align-cr",
 					Size = UDim2.new(0, 89, 0, 40),
 				}, {
+					KeybindLabel = React.createElement(KeybindLabel, {
+						action_id = "construct",
+						AnchorPoint = Vector2.new(1, 1),
+						Position = UDim2.new(1, 0, 1, 0),
+						action = function(action_name, input_state, input_object)
+							if input_state == Enum.UserInputState.Begin then
+								toggle_submenu { type = "build", cell = props.selected_cells[1] }
+							end
+						end,
+					}),
 					Corner = React.createElement(Corner),
 
 					Gradient = React.createElement("UIGradient", {
@@ -258,7 +268,7 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 						Size = UDim2.new(0, 42, 0, 40),
 					}),
 				})
-			else nil,
+				else nil,
 
 			Container = React.createElement("Frame", {
 				[React.Tag] = "container list-h list-cl",

@@ -92,17 +92,16 @@ local BuildingItem = React.forwardRef(function(
 					Position = UDim2.new(0.5, 0, 0.5, -30),
 					Size = UDim2.new(1, 0, 0, 30),
 					Text = "Locked",
-					[React.Tag] = "text-c align-cc title",
+					[React.Tag] = "text-c align-tc title",
 				}),
 				RequiredLabel = if #entity_config.required_unlockable > 0
 					then React.createElement("TextLabel", {
 						LayoutOrder = 4,
-						Position = UDim2.new(0.5, 0, 0.5, 10),
+						Position = UDim2.new(0.5, 0, 0.5, 15),
 						Size = UDim2.new(0, 150, 0, 0),
 						Text = "You haven't unlocked this building yet.",
-						[React.Tag] = "description align-cc as-y",
+						[React.Tag] = "text-c description align-cc as-y",
 						TextWrapped = true,
-						[React.Tag] = "text-c",
 					})
 					else nil,
 			})

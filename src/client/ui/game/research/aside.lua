@@ -9,7 +9,6 @@ local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local Items = require(ReplicatedStorage.Client.ui.game.items).Items
 local TextActionButton = require(ReplicatedStorage.Client.ui.game.action_button).TextActionButton
-local Corner = util_components.Corner
 
 type ResearchItem = types.ResearchItem
 type ResearchState = types.ResearchState

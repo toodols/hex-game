@@ -9,18 +9,13 @@ type Item = types.Item
 -- Displays items labeled with numbers
 function Items(props: { LayoutOrder: number?, items: { [Item]: number | string } })
 	return React.createElement(
-		"Frame",
+		"ScrollingFrame",
 		{
-			AutomaticSize = Enum.AutomaticSize.XY,
+			AutomaticSize = Enum.AutomaticSize.Y,
+			Size = UDim2.new(1, 0, 0, 0),
 			LayoutOrder = props.LayoutOrder,
 			BackgroundTransparency = 1,
-		},
-		{
-			VerticalLayout = React.createElement("UIListLayout", {
-				FillDirection = Enum.FillDirection.Horizontal,
-				Padding = UDim.new(0, 10),
-				SortOrder = Enum.SortOrder.LayoutOrder,
-			}),
+			[React.Tag] = "scroll-h list-h list-pad-5 list-cl",
 		},
 		util.table_map(props.items, function(v, k)
 			return React.createElement("Frame", {

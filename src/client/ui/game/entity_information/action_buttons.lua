@@ -73,7 +73,7 @@ function AttackButton(props: { ability_id: string, entity_id: EntityId, LayoutOr
 	})
 end
 
-function DeconstructButton(props: { entity_id: EntityId, LayoutOrder: number? })
+function DeconstructButton(props: { entity_id: EntityId, LayoutOrder: number?, active: boolean? })
 	local entity = hooks.use_synced_entity(props.entity_id)
 
 	local is_deconstructing = util.table_any(entity.queued_decisions, function(v)
@@ -85,6 +85,8 @@ function DeconstructButton(props: { entity_id: EntityId, LayoutOrder: number? })
 		LayoutOrder = props.LayoutOrder,
 		color = Color3.fromRGB(255, 0, 0),
 		ImageColor3 = if is_deconstructing then Color3.fromRGB(255, 0, 0) else Color3.fromRGB(200, 200, 200),
+		action_id = "deconstruct",
+		active = props.active,
 		on_click = function()
 			if is_deconstructing then
 				client_interaction_remote:FireServer {
@@ -106,7 +108,7 @@ function DeconstructButton(props: { entity_id: EntityId, LayoutOrder: number? })
 	})
 end
 
-function DisguiseButton(props: { ability_id: string, entity_id: EntityId, LayoutOrder: number? })
+function DisguiseButton(props: { ability_id: string, entity_id: EntityId, LayoutOrder: number?, active: boolean? })
 	local context = React.useContext(MainContext)
 	local world: World = context.world
 	local entity = hooks.use_synced_entity(props.entity_id)
@@ -120,6 +122,8 @@ function DisguiseButton(props: { ability_id: string, entity_id: EntityId, Layout
 		LayoutOrder = props.LayoutOrder,
 		color = Color3.fromRGB(255, 0, 0),
 		ImageColor3 = if is_disguising then Color3.fromRGB(113, 172, 196) else Color3.fromRGB(200, 200, 200),
+		action_id = "primary_ability",
+		active = props.active,
 		on_click = function()
 			local ability = shared_behavior.abilities.disguise
 			local candidates: { [EncodedCoordinate]: true } = {}
@@ -149,7 +153,7 @@ function DisguiseButton(props: { ability_id: string, entity_id: EntityId, Layout
 	})
 end
 
-function FilterButton(props: { entity_id: EntityId, LayoutOrder: number? })
+function FilterButton(props: { entity_id: EntityId, LayoutOrder: number?, active: boolean? })
 	local entity = hooks.use_synced_entity(props.entity_id)
 	local context = React.useContext(MainContext)
 
@@ -166,6 +170,8 @@ function FilterButton(props: { entity_id: EntityId, LayoutOrder: number? })
 		LayoutOrder = props.LayoutOrder,
 		color = Color3.fromRGB(163, 255, 150),
 		ImageColor3 = if opened then Color3.fromRGB(163, 255, 150) else Color3.fromRGB(200, 200, 200),
+		action_id = "filter",
+		active = props.active,
 		on_click = function()
 			toggle_submenu {
 				type = "item_filters",
@@ -267,6 +273,7 @@ function OpenRecipeButton(props: { entity_id: EntityId, LayoutOrder: number? })
 		LayoutOrder = props.LayoutOrder,
 		color = Color3.fromRGB(255, 255, 120),
 		ImageColor3 = if opened then Color3.fromRGB(255, 255, 120) else Color3.fromRGB(200, 200, 200),
+		action_id = "open_recipes",
 		on_click = function()
 			toggle_submenu {
 				type = "recipes",

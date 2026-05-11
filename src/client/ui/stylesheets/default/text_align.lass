@@ -1,15 +1,18 @@
+@priority(2)
 .text-c
 	TextXAlignment: Enum.TextXAlignment.Center
 
 .text-l
 	TextXAlignment: Enum.TextXAlignment.Left
 
+@priority(2)
 .text-r
 	TextXAlignment: Enum.TextXAlignment.Right
 
 .ty-t
 	TextYAlignment: Enum.TextYAlignment.Top
 
+@priority(2)
 .ty-c
 	TextYAlignment: Enum.TextYAlignment.Center
 

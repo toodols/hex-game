@@ -8,10 +8,8 @@ local util = require(ReplicatedStorage.Shared.util)
 local team = require(ReplicatedStorage.Shared.team)
 
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
-local util_components = require(ReplicatedStorage.Client.ui.util_components)
 local MainContext = require(ReplicatedStorage.Client.ui.context).MainContext
 
-local Corner = util_components.Corner
 local interaction_remote = ReplicatedStorage:FindFirstChild "ClientInteractionRemote" :: RemoteEvent
 
 type EntityId = types.EntityId

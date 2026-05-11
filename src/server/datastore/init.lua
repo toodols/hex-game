@@ -1,10 +1,14 @@
 local DataStoreService = game:GetService "DataStoreService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
+
 local types = require(ReplicatedStorage.Shared.types)
 local openskill = require(ServerScriptService.Server.openskill)
 local structures = require(ServerScriptService.Server.structures)
+
 local base64 = require(ReplicatedStorage.Shared.base64)
+local util = require(ReplicatedStorage.Shared.util)
+local default_settings = require(ReplicatedStorage.Shared.settings).default_settings
 
 type PlayerId = types.PlayerId
 type PlayerData = types.PlayerData
@@ -14,12 +18,6 @@ type PlayerSettings = types.PlayerSettings
 
 local player_data_store = DataStoreService:GetDataStore "player_data"
 local game_saves_store = DataStoreService:GetDataStore "game_saves"
-
-function default_settings(): PlayerSettings
-	return {
-		keybinds = {},
-	}
-end
 
 function with_default_player_data(value): PlayerData
 	value = value or {}
@@ -32,28 +30,31 @@ function with_default_player_data(value): PlayerData
 	value.wins = value.wins or 0
 	value.losses = value.losses or 0
 	value.aborted = value.aborted or 0
-	value.settings = value.settings or default_settings()
+	value.settings = value.settings or util.deep_copy(default_settings)
 	return value
 end
 
 function load_world(key: string): World
-	local timestamp, world =
-		structures.deserialize_world(base64.decode(DataStoreService:GetDataStore("saves"):GetAsync(key)))
+	local timestamp, world = structures.deserialize_world(base64.decode(game_saves_store:GetAsync(key)))
 	return world
 end
 
 function save_world(world: World, key: string)
 	local data = base64.encode(structures.serialize_world(world))
-	DataStoreService:GetDataStore("saves"):SetAsync(key, data)
+	game_saves_store:SetAsync(key, data)
 	return data
 end
 
 function set_player_data(player_id: PlayerId, data: PlayerData)
-	player_data_store:SetAsync(player_id, data)
+	player_data_store:SetAsync(player_id, base64.encode(structures.serialize_player_data(data)))
 end
 
 function get_player_data(player_id: PlayerId): PlayerData
-	return with_default_player_data(player_data_store:GetAsync(player_id))
+	local data = player_data_store:GetAsync(player_id)
+	if not data then
+		return with_default_player_data()
+	end
+	return with_default_player_data(structures.deserialize_player_data(base64.decode(data)))
 end
 
 function update_player_data(player_id: PlayerId, update: (PlayerData) -> PlayerData)

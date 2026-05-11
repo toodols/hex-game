@@ -14,7 +14,7 @@ type World = types.World
 type CellTeamVisibility = types.CellTeamVisibility
 type CubicCoordinate = types.CubicCoordinate
 type EncodedCoordinate = types.EncodedCoordinate
-type SerializeFor = server_types.SerializeFor
+type SerializeTarget = server_types.SerializeTarget
 
 -- Computes cell visibility for each team
 -- This also sets changed_to_true field of visibility
@@ -97,25 +97,25 @@ function cell_visibility(visibility: CellTeamVisibility?)
 	return visibility and (visibility.contact or visibility.fogless or visibility.portal or visibility.illumination)
 end
 
-function entity_visibility(world: World, serialize_for: SerializeFor, entity: Entity): boolean
+function entity_visibility(world: World, serialize_target: SerializeTarget, entity: Entity): boolean
 	if entity.server_data.always_visible then
 		return true
 	end
 
-	if serialize_for.team == nil then
+	if serialize_target.team == nil then
 		return true
 	end
 
-	if entity.server_data.always_visible_for[serialize_for.team] then
+	if entity.server_data.always_visible_for[serialize_target.team] then
 		return true
 	end
 
-	if world.teams[serialize_for.team].server_data.visibility == "perfect" then
+	if world.teams[serialize_target.team].server_data.visibility == "perfect" then
 		return true
 	end
 
 	-- this entity is visible if it is owned by this coalition
-	if team_mod.is_allied(world, entity.owner, serialize_for.team) then
+	if team_mod.is_allied(world, entity.owner, serialize_target.team) then
 		return true
 	end
 
@@ -125,7 +125,7 @@ function entity_visibility(world: World, serialize_for: SerializeFor, entity: En
 
 	if entity.server_data.parent ~= nil and entity.server_data.child_relationship == "disguise" then
 		local cell = world:get_cell(entity.primary_coordinate)
-		if cell and cell_visibility(cell.server_data.visibility[serialize_for.team]) then
+		if cell and cell_visibility(cell.server_data.visibility[serialize_target.team]) then
 			return true
 		end
 		return false
@@ -133,7 +133,7 @@ function entity_visibility(world: World, serialize_for: SerializeFor, entity: En
 
 	local cell = world:get_cell(entity.primary_coordinate)
 	if
-		cell_visibility(cell.server_data.visibility[serialize_for.team])
+		cell_visibility(cell.server_data.visibility[serialize_target.team])
 		and entity.status ~= "blueprint"
 		and entity.active
 		and entity.disguise == nil

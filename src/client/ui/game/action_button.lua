@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local React = require(ReplicatedStorage.Packages.react)
 local TweenService = game:GetService "TweenService"
-local Corner = require(ReplicatedStorage.Client.ui.util_components).Corner
+local KeybindLabel = require(ReplicatedStorage.Client.ui.keybind_label).KeybindLabel
 
 function TextActionButton(
 	props: {
@@ -60,6 +60,8 @@ function SquareActionButton(props: {
 	Image: string,
 	LayoutOrder: number?,
 	ImageColor3: Color3,
+	action_id: string?,
+	active: boolean?,
 })
 	return React.createElement("TextButton", {
 		Text = "",
@@ -85,6 +87,18 @@ function SquareActionButton(props: {
 			Size = UDim2.new(0.5, 0, 0.5, 0),
 			[React.Tag] = "align-cc",
 		}),
+		KeybindLabel = if props.action_id and props.active
+			then React.createElement(KeybindLabel, {
+				action_id = props.action_id,
+				Position = UDim2.new(1, 0, 1, 0),
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				action = function(action_name, input_state, input_object)
+					if input_state == Enum.UserInputState.Begin then
+						props.on_click()
+					end
+				end,
+			})
+			else nil,
 	})
 end
 

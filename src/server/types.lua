@@ -23,13 +23,12 @@ export type DamageResult = {
 	effective: number,
 }
 
-
 export type PlayerInfo = {
 	team: TeamId,
 	player: Player?,
 }
 
-export type SerializeFor = {
+export type SerializeTarget = {
 	team: TeamId,
 	player: PlayerId,
 } | {

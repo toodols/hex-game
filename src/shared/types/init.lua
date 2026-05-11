@@ -278,7 +278,7 @@ export type KeybindId =
 	| "next_entity"
 
 export type PlayerSettings = {
-	keybinds: { [KeybindId]: number },
+	keybinds: { [KeybindId]: Enum.KeyCode },
 }
 
 -- PlayerData is an outdated service so no name conflicts here
@@ -482,6 +482,8 @@ export type WorldUpdate =
 	| {
 		type: "player_data",
 		-- PlayerId as a string
+		-- this update is split into individual player updates for each player
+		-- if multiple entries are present
 		player_data: { [string]: PlayerData },
 	}
 

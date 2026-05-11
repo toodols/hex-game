@@ -55,6 +55,11 @@ ScrollingFrame
 	CanvasSize: UDim2.new(0, 0, 0, 0)
 
 @priority(1)
+.scroll-h
+	AutomaticCanvasSize: Enum.AutomaticSize.X
+	CanvasSize: UDim2.new(0, 0, 0, 0)
+
+@priority(1)
 .header::UICorner, .solid::UICorner, .background::UICorner, .option::UICorner
 	CornerRadius: UDim.new(0, 4)
 
@@ -76,7 +81,9 @@ ScrollingFrame
 	Transparency: 0.9
 	Color: Color3.fromRGB(255, 255, 255)
 
-.item-filters-preview.editable.active::UIStroke
+@priority(2)
+.stroke.active::UIStroke, .item-filters-preview.editable.active::UIStroke
+	Transparency: 0
 	Color: Color3.fromRGB(255, 120, 120)
 
 @priority(1)

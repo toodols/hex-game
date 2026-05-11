@@ -14,13 +14,13 @@ local ui_types = require(ReplicatedStorage.Client.ui.types)
 local client_entity_mod = require(ReplicatedStorage.Client.ui.Parent.entity)
 local context_mod = require(ReplicatedStorage.Client.ui.context)
 local util_components = require(ReplicatedStorage.Client.ui.util_components)
+local KeybindLabel = require(ReplicatedStorage.Client.ui.keybind_label).KeybindLabel
 
 local Items = require(script.Parent.items).Items
 local HighlightOnHover = require(script.Parent.highlight_on_hover).HighlightOnHover
 local ResearchPreview = require(script.Parent.research).ResearchPreview
 local RequiredResearch = require(script.required_research).RequiredResearch
 local action_buttons = require(script.action_buttons)
-
 local Hitpoints = require(script.hitpoints).Hitpoints
 
 local MainContext = context_mod.MainContext
@@ -107,6 +107,8 @@ function EntityInformation(props: {
 	LayoutOrder: number?,
 	on_compress: () -> (),
 	on_select: () -> (),
+	is_next: boolean,
+	is_previous: boolean,
 })
 	local context = React.useContext(MainContext)
 	local world: World = context.world
@@ -179,18 +181,18 @@ function EntityInformation(props: {
 
 	local player_team = team_mod.team_of(world, Players.LocalPlayer)
 
+	local active = not props.compressed
+
 	return React.createElement("Frame", {
-		BackgroundColor3 = Color3.fromRGB(25, 25, 25),
-		BackgroundTransparency = 0.2,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		ClipsDescendants = true,
 		LayoutOrder = props.LayoutOrder,
 		Position = UDim2.new(0, 0, 0, 0),
+		[React.Tag] = "solid",
 		ZIndex = 2,
+		ClipsDescendants = true,
 		ref = ref,
 	}, {
-		Corner = React.createElement(Corner),
 		Container = React.createElement("Frame", {
 			[React.Tag] = "container",
 		}, {
@@ -219,6 +221,31 @@ function EntityInformation(props: {
 					[React.Tag] = "container",
 					Text = "",
 					ZIndex = 10,
+				}, {
+					NextKeybindLabel = if props.compressed and props.is_next
+						then React.createElement(KeybindLabel, {
+							action_id = "next_entity",
+							AnchorPoint = Vector2.new(1, 0),
+							Position = UDim2.new(1, 0, 0, 0),
+							action = function(action_name, input_state, input_object)
+								if input_state == Enum.UserInputState.Begin then
+									props.on_select()
+								end
+							end,
+						})
+						else nil,
+					PreviousKeybindLabel = if props.compressed and props.is_previous
+						then React.createElement(KeybindLabel, {
+							action_id = "previous_entity",
+							AnchorPoint = Vector2.new(1, 0),
+							Position = UDim2.new(1, 0, 0, 0),
+							action = function(action_name, input_state, input_object)
+								if input_state == Enum.UserInputState.Begin then
+									props.on_select()
+								end
+							end,
+						})
+						else nil,
 				}),
 
 				Hitpoints = React.createElement(Hitpoints, {
@@ -367,6 +394,7 @@ function EntityInformation(props: {
 						then React.createElement(ResearchPreview, {
 							LayoutOrder = 9,
 							entity_id = entity.id,
+							active = active,
 							click = function()
 								toggle_submenu {
 									type = "research",
@@ -429,6 +457,7 @@ function EntityInformation(props: {
 									and entity.owner == player_team.id
 									and not entity.is_decaying
 								then React.createElement(DeconstructButton, {
+									active = active,
 									entity_id = entity.id,
 									LayoutOrder = 1,
 								})
@@ -479,30 +508,36 @@ function EntityInformation(props: {
 									return React.createElement(AttackButton, {
 										entity_id = entity.id,
 										ability_id = ability_id,
+										action_id = "primary_ability",
 										LayoutOrder = 10,
+										active = active,
 									})
 								elseif ability.type == "disguise" then
 									return React.createElement(DisguiseButton, {
 										entity_id = entity.id,
 										ability_id = ability_id,
+										action_id = "primary_ability",
 										LayoutOrder = 10,
 									})
 								elseif ability.type == "solution_activate" then
 									return React.createElement(ActivateButton, {
 										entity_id = entity.id,
 										ability_id = ability_id,
+										action_id = "primary_ability",
 										LayoutOrder = 10,
 									})
 								elseif ability.type == "impression_activate" then
 									return React.createElement(ActivateButton, {
 										entity_id = entity.id,
 										ability_id = ability_id,
+										action_id = "primary_ability",
 										LayoutOrder = 10,
 									})
 								elseif ability.type == "rash" then
 									return React.createElement(AttackButton, {
 										entity_id = entity.id,
 										ability_id = ability_id,
+										action_id = "primary_ability",
 										LayoutOrder = 10,
 									})
 								else

@@ -17,7 +17,7 @@ type EntityId = types.EntityId
 type TeamId = types.TeamId
 type TeamData = types.TeamData
 
-type SerializeFor = server_types.SerializeFor
+type SerializeTarget = server_types.SerializeTarget
 type SerializationContext = server_types.SerializationContext
 
 -- Removes all but the last "entity_update" for each entity_id from a list of updates.
@@ -42,35 +42,35 @@ end
 function get_updates(
 	world: World,
 	se_ctx: SerializationContext,
-	serialize_for: SerializeFor,
+	serialize_target: SerializeTarget,
 	buffer: { WorldUpdate }
 ): { WorldUpdate }
-	local team = if serialize_for.team then world.teams[serialize_for.team] else nil
+	local team = if serialize_target.team then world.teams[serialize_target.team] else nil
 	if team and #team.players == 0 and not RunService:IsStudio() then
 		return {}
 	end
-	if serialize_for.team ~= nil and team == nil then
-		warn(world.teams, serialize_for.team)
+	if serialize_target.team ~= nil and team == nil then
+		warn(world.teams, serialize_target.team)
 		error "^ wtf"
 	end
 	local mapped = filter_duplicate_entity_updates(util.table_filter_map(buffer, function(update: WorldUpdate)
 		local target = (update :: any).target or "everyone"
 		if
-			serialize_for.team ~= nil
+			serialize_target.team ~= nil
 			and team.server_data.visibility ~= "perfect"
 			and target ~= "everyone"
-			and table.find(target, serialize_for.team) == nil
+			and table.find(target, serialize_target.team) == nil
 		then
 			return
 		end
 		if update.type == "entity_update" then
-			local serialized = serialize_mod.serialize_entity(world, se_ctx, serialize_for, update.entity)
+			local serialized = serialize_mod.serialize_entity(world, se_ctx, serialize_target, update.entity)
 			return serialized and {
 				type = update.type,
 				entity = serialized,
 			}
 		elseif update.type == "entity_created" then
-			if visibility.entity_visibility(world, serialize_for, world.entities[update.entity_id]) then
+			if visibility.entity_visibility(world, serialize_target, world.entities[update.entity_id]) then
 				return {
 					type = update.type,
 					entity_id = update.entity_id,
@@ -79,14 +79,14 @@ function get_updates(
 				return nil
 			end
 		elseif update.type == "entity_event" then
-			if visibility.entity_visibility(world, serialize_for, world.entities[update.entity_id]) then
+			if visibility.entity_visibility(world, serialize_target, world.entities[update.entity_id]) then
 				return update
 			else
 				return nil
 			end
 		elseif update.type == "cell_update" then
 			local serialized =
-				serialize_mod.serialize_cell(world, se_ctx, serialize_for, coords_mod.encode_coord(update.coord))
+				serialize_mod.serialize_cell(world, se_ctx, serialize_target, coords_mod.encode_coord(update.coord))
 			return serialized and {
 				type = update.type,
 				entity = serialized,
@@ -95,9 +95,9 @@ function get_updates(
 			local hit_cell = world:get_cell(update.coordinate)
 			local entity = world.entities[update.entity_id]
 			if
-				serialize_for.team == nil
+				serialize_target.team == nil
 				or team_mod.is_allied(world, hit_cell.owner, team.id)
-				or team_mod.is_allied(world, entity.owner, serialize_for.team)
+				or team_mod.is_allied(world, entity.owner, serialize_target.team)
 			then
 				return {
 					type = update.type,
@@ -111,37 +111,37 @@ function get_updates(
 			return {
 				type = update.type,
 				cells = util.table_map(update.cells, function(cell, coord)
-					return serialize_mod.serialize_cell(world, se_ctx, serialize_for, coord)
+					return serialize_mod.serialize_cell(world, se_ctx, serialize_target, coord)
 				end),
 			}
 		elseif update.type == "world" then
 			return {
 				type = update.type,
-				world = serialize_mod.serialize_world(world, se_ctx, serialize_for),
+				world = serialize_mod.serialize_world(world, se_ctx, serialize_target),
 			}
 		elseif update.type == "systems" then
 			return {
 				type = update.type,
 				systems = util.table_filter_map(update.systems, function(system)
-					return serialize_mod.serialize_system(world, se_ctx, serialize_for, system)
+					return serialize_mod.serialize_system(world, se_ctx, serialize_target, system)
 				end),
 			}
 		elseif update.type == "player_data" then
-			if serialize_for.team == nil then
+			if serialize_target.team == nil then
 				return {
 					type = update.type,
 					player_data = world.player_data,
 				}
 			end
-			if serialize_for.player then
-				local player_data = world.player_data[tostring(serialize_for.player)]
+			if serialize_target.player then
+				local player_data = world.player_data[tostring(serialize_target.player)]
 				if player_data == nil then
 					return nil
 				end
 				return {
 					type = update.type,
 					player_data = {
-						[tostring(serialize_for.player)] = player_data,
+						[tostring(serialize_target.player)] = player_data,
 					},
 				}
 			else

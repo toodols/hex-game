@@ -1,6 +1,4 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local RunService = game:GetService "RunService"
-local ContextActionService = game:GetService "ContextActionService"
 local TweenService = game:GetService "TweenService"
 local Players = game:GetService "Players"
 
@@ -9,6 +7,7 @@ local React = require(ReplicatedStorage.Packages.react)
 local types = require(ReplicatedStorage.Shared.types)
 local coords = require(ReplicatedStorage.Shared.coords)
 local util = require(ReplicatedStorage.Shared.util)
+local default_settings = require(ReplicatedStorage.Shared.settings).default_settings
 
 local ui_types = require(ReplicatedStorage.Client.ui.types)
 local hooks = require(ReplicatedStorage.Client.ui.hooks)
@@ -18,6 +17,7 @@ local stylesheets = require(ReplicatedStorage.Client.ui.stylesheets)
 local MainContext = context.MainContext
 local SettingsContext = context.SettingsContext
 
+local KeybindLabel = require(script.Parent.Parent.keybind_label).KeybindLabel
 local TileAlerts = require(script.Parent.tile_alerts).TileAlerts
 local Research = require(script.Parent.research).Research
 local PlayerList = require(script.Parent.player_list).PlayerList
@@ -39,12 +39,11 @@ local local_player = Players.LocalPlayer
 type World = types.World
 type SelectionMode = ui_types.SelectionMode
 
-function MenuIcon(props: { on_click: () -> (), label: string, icon: string })
+function MenuIcon(props: { on_click: () -> (), label: string, icon: string, children: any })
 	local ref = React.useRef(nil :: any)
 	local layout_ref = React.useRef(nil :: any)
 	return React.createElement("TextButton", {
 		Size = UDim2.new(0, 40, 0, 40),
-		ClipsDescendants = true,
 		ref = ref,
 		[React.Tag] = "as-none solid",
 		[React.Event.MouseButton1Click] = props.on_click,
@@ -60,45 +59,48 @@ function MenuIcon(props: { on_click: () -> (), label: string, icon: string })
 			}):Play()
 		end,
 	}, {
-		HorizontalLayout = React.createElement("UIListLayout", {
-			FillDirection = Enum.FillDirection.Horizontal,
-			HorizontalAlignment = Enum.HorizontalAlignment.Right,
-			SortOrder = Enum.SortOrder.LayoutOrder,
-			VerticalAlignment = Enum.VerticalAlignment.Center,
-
-			ref = layout_ref,
-		}),
-		Label = React.createElement("TextLabel", {
-			Size = UDim2.new(0, 0, 1, 0),
-			Text = props.label,
-			TextSize = 14,
-			LayoutOrder = 1,
-		}, {
-			Padding = React.createElement("UIPadding", {
-				PaddingLeft = UDim.new(0, 5),
-			}),
-		}),
-		Icon = React.createElement("Frame", {
-			BackgroundTransparency = 1,
-			LayoutOrder = 2,
-			Size = UDim2.new(0, 40, 0, 40),
+		Container = React.createElement("Frame", {
+			[React.Tag] = "container as-none",
 			ClipsDescendants = true,
 		}, {
-			ImageButton = React.createElement("ImageLabel", {
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			HorizontalLayout = React.createElement("UIListLayout", {
+				FillDirection = Enum.FillDirection.Horizontal,
+				HorizontalAlignment = Enum.HorizontalAlignment.Right,
+				SortOrder = Enum.SortOrder.LayoutOrder,
+				VerticalAlignment = Enum.VerticalAlignment.Center,
+
+				ref = layout_ref,
+			}),
+			Label = React.createElement("TextLabel", {
+				Size = UDim2.new(0, 0, 1, 0),
+				Text = props.label,
+				TextSize = 14,
+				LayoutOrder = 1,
+			}, {
+				Padding = React.createElement("UIPadding", {
+					PaddingLeft = UDim.new(0, 5),
+				}),
+			}),
+			Icon = React.createElement("Frame", {
 				BackgroundTransparency = 1,
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
-				BorderSizePixel = 0,
-				Image = props.icon,
-				ImageColor3 = Color3.fromRGB(255, 255, 255),
-				Position = UDim2.new(0.5, 0, 0.5, 0),
-				Size = UDim2.new(1, -10, 1, -10),
+				LayoutOrder = 2,
+				Size = UDim2.new(0, 40, 0, 40),
+				ClipsDescendants = true,
+			}, {
+				ImageButton = React.createElement("ImageLabel", {
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					BackgroundTransparency = 1,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					BorderSizePixel = 0,
+					Image = props.icon,
+					ImageColor3 = Color3.fromRGB(255, 255, 255),
+					Position = UDim2.new(0.5, 0, 0.5, 0),
+					Size = UDim2.new(1, -10, 1, -10),
+				}),
 			}),
 		}),
-
-		Corner = React.createElement(Corner),
-	})
+	}, props.children)
 end
 
 function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
@@ -124,23 +126,6 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 	end))
 
 	React.useEffect(function()
-		if RunService:IsClient() then
-			ContextActionService:BindAction("player_list", function(actionName, inputState, inputObject)
-				if inputState == Enum.UserInputState.Begin then
-					set_players_visible(true)
-				elseif inputState == Enum.UserInputState.End then
-					set_players_visible(false)
-				end
-			end, false, Enum.KeyCode.T)
-		end
-		return function()
-			if RunService:IsClient() then
-				ContextActionService:UnbindAction "player_list"
-			end
-		end
-	end, {})
-
-	React.useEffect(function()
 		local cleanup = props.world.world_update_signal.listen(function(updates)
 			for _, update in updates do
 				if update.type == "player_data" then
@@ -152,7 +137,7 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 	end, {})
 
 	local player_data = if local_player then props.world.player_data[tostring(local_player.UserId)] else nil
-	local player_settings = if player_data then player_data.settings else nil
+	local player_settings = if player_data then player_data.settings else util.deep_copy(default_settings)
 
 	return React.createElement(
 		MainContext.Provider,
@@ -320,6 +305,17 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 					on_click = function()
 						set_players_visible(not players_visible)
 					end,
+				}, {
+					KeybindLabel = React.createElement(KeybindLabel, {
+						action_id = "show_player_list",
+						AnchorPoint = Vector2.new(0.5, 0.5),
+						Position = UDim2.new(1, 0, 0, 0),
+						action = function(action_name, input_state, input_object)
+							if input_state == Enum.UserInputState.Begin then
+								set_players_visible(not players_visible)
+							end
+						end,
+					}),
 				}),
 				Settings = React.createElement(MenuIcon, {
 					label = "Settings",
