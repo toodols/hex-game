@@ -45,7 +45,7 @@ function do_entity_decay(world: World)
 		end
 
 		for entity_id in system.entities do
-			if system.heart ~= nil then
+			if system.heart_type ~= nil then
 				decayable_entities[entity_id] = false
 			end
 		end

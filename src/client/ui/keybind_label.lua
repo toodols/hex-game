@@ -33,6 +33,10 @@ function KeybindLabel(props: {
 			ContextActionService:UnbindAction(props.action_id)
 		end
 	end, { props.action })
+	local text = UserInputService:GetStringForKeyCode(keycode)
+	if keycode == Enum.KeyCode.Backspace then
+		text = "←"
+	end
 	return React.createElement("TextLabel", {
 		AnchorPoint = props.AnchorPoint,
 		Position = props.Position,
@@ -40,7 +44,7 @@ function KeybindLabel(props: {
 		[React.Tag] = `stroke solid text-c ty-c`,
 		Size = UDim2.new(0, 15, 0, 15),
 		TextSize = 10,
-		Text = UserInputService:GetStringForKeyCode(keycode),
+		Text = text,
 	})
 end
 

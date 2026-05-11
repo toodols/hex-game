@@ -22,7 +22,7 @@ entity_mod.registry.extractor = entity_mod.with_defaults {
 			local deposit_type = get_deposit_type(world, self.primary_coordinate)
 
 			local system = world.systems[world.entity_system_map[self.id]]
-			local is_boosted = system.heart == "anima"
+			local is_boosted = system.heart_type == "anima"
 			local function ok()
 				self.should_output = ((self.should_output :: any) + 1)
 					% (if is_boosted then 1 else config.cycles_to_output)

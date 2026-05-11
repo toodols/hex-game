@@ -21,7 +21,7 @@ entity_mod.registry.laboratory = entity_mod.with_defaults {
 		if system == nil then
 			error "No system found"
 		end
-		if system.heart == "anima" then
+		if system.heart_type == "anima" then
 			return
 		end
 		local config = world.entity_configurations[self.type]

@@ -34,7 +34,9 @@ function Rebindable(props: {
 			LayoutOrder = 1,
 		}),
 		Right = React.createElement("TextButton", {
-			Text = if props.value == Enum.KeyCode.Unknown then "None" else UserInputService:GetStringForKeyCode(props.value),
+			Text = if props.value == Enum.KeyCode.Unknown
+				then "None"
+				else UserInputService:GetStringForKeyCode(props.value),
 			Position = UDim2.new(1, -10, 0, 0),
 			Size = UDim2.new(0, 60, 0, 30),
 			[React.Tag] = "solid align-tr bg-3",
@@ -67,9 +69,8 @@ function Rebindable(props: {
 					end)
 				end,
 				[React.Event.FocusLost] = function(enter_pressed)
-					button_ref.current.Text = if props.value == Enum.KeyCode.Unknown
-						then "None"
-						else UserInputService:GetStringForKeyCode(props.value)
+					button_ref.current.Text = if props.value == Enum.KeyCode.Unknown then "None" else props.value.Name
+
 					connection_ref.current:Disconnect()
 				end,
 			}),

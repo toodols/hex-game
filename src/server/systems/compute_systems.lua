@@ -143,7 +143,7 @@ function compute_systems(world: World): { System }
 	end
 
 	for _, system in result do
-		system.heart = get_heart(world, system)
+		system.heart_type = get_heart(world, system)
 	end
 
 	world.cell_system_map = cell_system_map

@@ -654,7 +654,7 @@ export type System = {
 	cells: { [EncodedCoordinate]: boolean },
 	overflow_items: { Item },
 	power: number,
-	heart: string?,
+	heart_type: string?,
 	team: TeamId,
 }
 
