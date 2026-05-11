@@ -23,7 +23,7 @@
 
 # Ongoing
 - [ ] `terminal` A building that can allow buildings to "fast travel"
-	- New entity status `reservation`
+	- New entity status `lock`
 - [ ] Entities get respective buffs while on a resource tile
 	- [x] Vit: Passive Healing
 - [ ] Add settings menu 

@@ -13,7 +13,7 @@ type EntityEvent = types.EntityEvent
 entity_mod.registry.fountain = entity_mod.with_defaults {
 	model = asset_server.load "Entities/Fountain",
 	update = function(self: Entity, world: World)
-		local deposit_type = get_deposit_type(world, world:get_cell(self.primary_coordinate) :: types.HexCell)
+		local deposit_type = get_deposit_type(world, self.primary_coordinate)
 		local item_type
 		if deposit_type == "bar_deposit" then
 			item_type = "bar"

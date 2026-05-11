@@ -149,7 +149,11 @@ export type Entity = {
 	-- terminal only
 	stored_entity: EntityId?,
 
-	status: "reservation" | "blueprint" | "scaffold" | "complete",
+	status: "blueprint" --[[ Blueprints are entities queued for construction. They are only visible for the team who built them
+Different teams cannot build blueprints on the same cell at the same time ]]
+		| "scaffold" -- Nonfunctional equivalent of a complete entity. If an entity has a build time, it will stay on this stage for that many turns
+		| "complete" -- The entity is fully constructed
+		| "lock", -- Similar to blueprints except they are created by a complete entity. That entity can "lock" this cell
 	is_destroyed: boolean?,
 	build_time: number,
 
@@ -159,10 +163,12 @@ export type Entity = {
 	-- for clients: .always_visible or .always_visible_for[team_id]
 	always_visible: boolean?,
 	server_data: {
-		subject_type: ("reservation" | "disguise" | "revived")?,
 
-		-- if subject_of is destroyed, this entity is also destroyed
-		subject_of: EntityId?,
+		-- if parent is destroyed, this entity is also destroyed
+		parent: EntityId?,
+
+		child_relationship: ("lock" | "disguise" | "revived")?,
+
 		-- whether this entity is always visible regardless of whether the cell it is on is visible
 		always_visible: boolean,
 		-- whether this entity is always visible for a specific team

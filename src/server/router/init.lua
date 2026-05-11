@@ -13,7 +13,7 @@ local server_entity_mod = require(script.Parent.entity)
 local updates_mod = require(script.Parent.updates)
 local server_types = require(script.Parent.types)
 local entity_mod = require(script.Parent.entity)
-local structures = require(script.Parent.structures)
+local main_schema = require(script.Parent.structures.versions).main
 
 local ability_interaction = require(script.ability_interaction).ability_interaction
 local construct_interaction = require(script.construct_interaction).construct_interaction
@@ -268,7 +268,7 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 			error "no player"
 		end
 		local player_data = world.player_data[tostring(player_info.player.UserId)]
-		local res = structures.player_settings.validate(entry.settings)
+		local res = main_schema.player_settings.validate(entry.settings)
 		local player_settings = result.unwrap(res)
 		player_data.settings = player_settings
 		world:add_update {

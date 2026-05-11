@@ -4,6 +4,8 @@ local util = require(ReplicatedStorage.Shared.util)
 local formatting = require(ReplicatedStorage.Shared.formatting)
 local coords = require(ReplicatedStorage.Shared.coords)
 local OpenSkill = require(ServerScriptService.Server.openskill)
+local binary_encoder = require(ServerScriptService.Server.structures.binary_encoder)
+local schema = require(ServerScriptService.Server.structures.schema)
 
 local assert_eq = util.assert_eq
 
@@ -85,6 +87,45 @@ function tests.openskill()
 	local bob_new_ordinal = OpenSkill.Ordinal(bob)
 	assert(alice_new_ordinal > alice_ordinal, "alice's ordinal should go up")
 	assert(bob_new_ordinal < bob_ordinal, "bob's ordinal should go down")
+end
+
+function tests.binary_encoder()
+	local struct = schema.struct
+	local i32 = schema.i32
+	local str = schema.str
+	local boolean = schema.boolean
+	local const = schema.const
+	local dynamic_table = schema.dynamic_table
+
+	local person = struct {
+		type = const "person",
+		name = str,
+		age = i32,
+		alive = boolean,
+	}
+	local writer = binary_encoder.write()
+	i32.write(writer, 30)
+	local sample = {
+		type = "person",
+		name = "John Doe",
+		age = 30,
+		alive = true,
+	}
+	person.write(writer, sample)
+	dynamic_table.write(writer, sample)
+	local text = writer.to_string()
+	local reader = binary_encoder.read(text)
+	assert(i32.read(reader) == 30, "number")
+	local data = person.read(reader)
+	assert(data.type == "person", "type")
+	assert(data.name == "John Doe", "name")
+	assert(data.age == 30, "age")
+	assert(data.alive == true, "alive")
+	local data2 = dynamic_table.read(reader)
+	assert(data2.type == "person", "type")
+	assert(data2.name == "John Doe", "name")
+	assert(data2.age == 30, "age")
+	assert(data2.alive == true, "alive")
 end
 
 return tests

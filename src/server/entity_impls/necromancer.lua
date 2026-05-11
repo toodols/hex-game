@@ -64,7 +64,7 @@ entity_mod.registry.necromancer = entity_mod.with_defaults {
 				owner = self.owner,
 			}, world)
 
-			revived_entity.server_data.subject_of = grave.id
+			revived_entity.server_data.parent = grave.id
 		end
 	end,
 }
@@ -83,11 +83,10 @@ entity_mod.registry.grave = entity_mod.with_defaults {
 			death_type = "used",
 		}
 		local revived_entity = world.entities[self.revives_into :: EntityId]
-		revived_entity.server_data.subject_of = nil
-		revived_entity.server_data.subject_type = nil
+		revived_entity.server_data.parent = nil
+		revived_entity.server_data.child_relationship = nil
 		entity_mod.activate_entity(world, revived_entity)
 		entity_mod.autogenerate_vertex(world, revived_entity)
-		print(revived_entity)
 	end,
 }
 

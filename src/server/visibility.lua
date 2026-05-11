@@ -123,7 +123,7 @@ function entity_visibility(world: World, serialize_for: SerializeFor, entity: En
 		return false
 	end
 
-	if entity.server_data.subject_of ~= nil and entity.server_data.subject_type == "disguise" then
+	if entity.server_data.parent ~= nil and entity.server_data.child_relationship == "disguise" then
 		local cell = world:get_cell(entity.primary_coordinate)
 		if cell and cell_visibility(cell.server_data.visibility[serialize_for.team]) then
 			return true

@@ -307,7 +307,7 @@ function destroy_orphan_entities(world: World)
 		-- 1. is unlikely to occur in practice
 		-- 2. not destroying will not cause behavior changes
 		-- 3. this is called at the end of every turn so multiple turns will eventually destroy all orphans
-		if entity.server_data.subject_of and not is_active_entity(world.entities[entity.server_data.subject_of]) then
+		if entity.server_data.parent and not is_active_entity(world.entities[entity.server_data.parent]) then
 			entity.is_destroyed = true
 		end
 	end

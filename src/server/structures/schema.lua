@@ -1,14 +1,34 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local serialize = require(script.Parent.serialize)
 local result_mod = require(ReplicatedStorage.Shared.result)
 
 local err = result_mod.err
 local ok = result_mod.ok
 type Result<T, E = nil> = result_mod.Result<T, E>
 
+export type Writer = {
+	write_f64: (number) -> (),
+	write_u8: (number) -> (),
+	write_i8: (number) -> (),
+	write_u16: (number) -> (),
+	write_i32: (number) -> (),
+	write_i64: (number) -> (),
+	write_string: (string) -> (),
+	write_usize: (number) -> (),
+}
+export type Reader = {
+	read_f64: () -> number,
+	read_u8: () -> number,
+	read_i8: () -> number,
+	read_u16: () -> number,
+	read_i32: () -> number,
+	read_i64: () -> number,
+	read_string: () -> string,
+	read_usize: () -> number,
+}
+
 export type SerializingSchema<T> = {
-	write: (writer: serialize.Writer, data: T) -> (),
-	read: (reader: serialize.Reader) -> T,
+	write: (writer: Writer, data: T) -> (),
+	read: (reader: Reader) -> T,
 }
 
 export type ValidatingSchema<T> = {
@@ -528,7 +548,7 @@ local keycode: Schema<Enum.KeyCode> = {
 	end,
 }
 
-local roblox_types = enum {
+local roblox_types = enum "roblox_type" {
 	"string",
 	"number",
 	"boolean",
@@ -543,6 +563,7 @@ local roblox_types = enum {
 local dynamic_table
 
 local dynamic: Schema<any> = {
+	label = "dyn",
 	write = function(writer, data)
 		local t = typeof(data)
 		if t == "number" then
@@ -579,40 +600,6 @@ local dynamic: Schema<any> = {
 
 dynamic_table = map(dynamic, dynamic)
 
-function test()
-	local person = struct {
-		type = const "person",
-		name = str,
-		age = i32,
-		alive = boolean,
-	}
-	local writer = serialize.write()
-	i32.write(writer, 30)
-	local sample = {
-		type = "person",
-		name = "John Doe",
-		age = 30,
-		alive = true,
-	}
-	person.write(writer, sample)
-	dynamic_table.write(writer, sample)
-	local text = writer.to_string()
-	local reader = serialize.read(text)
-	assert(i32.read(reader) == 30, "number")
-	local data = person.read(reader)
-	assert(data.type == "person", "type")
-	assert(data.name == "John Doe", "name")
-	assert(data.age == 30, "age")
-	assert(data.alive == true, "alive")
-	local data2 = dynamic_table.read(reader)
-	assert(data2.type == "person", "type")
-	assert(data2.name == "John Doe", "name")
-	assert(data2.age == 30, "age")
-	assert(data2.alive == true, "alive")
-end
-
-test()
-
 return {
 	f64 = f64,
 	i32 = i32,
@@ -623,13 +610,13 @@ return {
 	array = array,
 	boolean = boolean,
 	dynamic = dynamic,
+	dynamic_table = dynamic_table,
 	const = const,
 	tuple = tuple,
 	enum = enum,
 	struct = struct,
 	option = option,
 	map = map,
-	test = test,
 	debug_size = debug_size,
 	collect_by_key = collect_by_key,
 	tagged_union = tagged_union,

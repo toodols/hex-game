@@ -573,8 +573,7 @@ function tests.archive_world()
 	local as_json = HttpService:JSONEncode(world)
 	print("World saved as", #compressed, "bytes")
 	print(("Is %d%% of JSON size"):format(math.floor(#compressed / #as_json * 100)))
-	local decompressed = structures.deserialize_world(compressed)
-	print(decompressed)
+	local timestamp, decompressed_world = structures.deserialize_world(compressed)
 	cleanup(world)
 end
 
@@ -878,7 +877,8 @@ end
 function tests.weird_presence_after_load()
 	local world, teams = presets.my_map()
 	local bin = structures.serialize_world(world)
-	local data = structures.deserialize_world(bin)
+	local timestamp, data = structures.deserialize_world(bin)
+
 	turn_scheduler.turn_schedule_kill(world.turn_schedule)
 	world_mod.apply_world_data(world, data)
 	turn_scheduler_init.hydrate(world, world.turn_schedule)
@@ -1013,7 +1013,6 @@ function tests.deposit_is_incorporeal()
 	local deposit = world:query_entity({ type = "deposit", coordinate = { 0, 0, 0 } })[1]
 	assert(deposit.server_data.incorporeal, "Deposit should be incorporeal")
 	action_phase_mod.run_action_phase(world)
-	print(world:get_cell { 0, 0, 0 })
 	assert(
 		world:get_cell({ 0, 0, 0 }).server_data.presence[world.neutral_team] == nil,
 		"Deposit should not create a presence"

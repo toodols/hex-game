@@ -109,8 +109,8 @@ abilities.disguise = function(world: World, entity: Entity, ability: Ability, in
 	end
 
 	local copied = server_entity_mod.clone_entity(top)
-	copied.server_data.subject_type = "disguise"
-	copied.server_data.subject_of = entity.id
+	copied.server_data.child_relationship = "disguise"
+	copied.server_data.parent = entity.id
 	copied.active = false
 	copied.disguise = nil
 	copied.is_destroyed = false

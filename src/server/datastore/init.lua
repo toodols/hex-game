@@ -37,7 +37,9 @@ function with_default_player_data(value): PlayerData
 end
 
 function load_world(key: string): World
-	return structures.deserialize_world(base64.decode(DataStoreService:GetDataStore("saves"):GetAsync(key)))
+	local timestamp, world =
+		structures.deserialize_world(base64.decode(DataStoreService:GetDataStore("saves"):GetAsync(key)))
+	return world
 end
 
 function save_world(world: World, key: string)
