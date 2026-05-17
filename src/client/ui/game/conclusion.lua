@@ -64,12 +64,8 @@ function Conclusion()
 	}, {
 		Corner = React.createElement(Corner),
 		Top = React.createElement("Frame", {
-			[React.Tag] = "container",
+			[React.Tag] = "container list-v list-tc",
 		}, {
-			VerticalLayout = React.createElement("UIListLayout", {
-				SortOrder = Enum.SortOrder.LayoutOrder,
-				HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			}),
 			Title = React.createElement("TextLabel", {
 				LayoutOrder = 1,
 				Size = UDim2.new(1, 0, 0, 50),

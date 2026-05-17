@@ -6,14 +6,10 @@ function Credits()
 	return React.createElement("Frame", {
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, -20, 1, -20),
-		[React.Tag] = "align-cc",
+		[React.Tag] = "align-cc list-v list-pad-5",
 	}, {
 		SizeConstraint = React.createElement("UISizeConstraint", {
 			MaxSize = Vector2.new(400, 200),
-		}),
-		VerticalLayout = React.createElement("UIListLayout", {
-			Padding = UDim.new(0, 4),
-			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
 		Text = React.createElement("TextLabel", {
 			BackgroundTransparency = 1,

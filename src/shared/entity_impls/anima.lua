@@ -4,11 +4,8 @@ local entity_mod = require(ReplicatedStorage.Shared.entity)
 entity_mod.registry.anima = entity_mod.with_defaults {
 	type = "anima",
 	name = "Anima",
-	description = [[In systems exclusively supported by {entity.anima}:
-- {entity.extractor} produces items every turn.
-- Newly built buildings have 1 less max hp.
-- {entity.laboratory} is disabled.]],
-	short_description = "Risky alternative to {entity.heart}",
+	description = "{lang.desc.anima}",
+	short_description = "{lang.short.anima}",
 	max_health = 3,
 	build_time = 2,
 	can_revive = true,

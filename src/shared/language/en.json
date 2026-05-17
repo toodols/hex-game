@@ -1,0 +1,9 @@
+{
+	"desc": {
+		"anima": "In systems exclusively supported by {entity.anima}:\n- {entity.extractor} produces items every turn.\n- Newly built buildings have 1 less max hp.\n- {entity.laboratory} is disabled.\n",
+		"extractor": "Produces an item every {entity.extractor.cycles_to_output} turns.\nOn death, creates a deposit of what it was last extracting where it died."
+	},
+	"short": {
+		"anima": "Risky alternative to {entity.heart}"
+	}
+}

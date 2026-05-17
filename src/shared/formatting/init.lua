@@ -5,6 +5,8 @@ local items_mod = require(script.Parent.items)
 local types = require(script.Parent.types)
 local util = require(script.Parent.util)
 
+local en_lang = require(ReplicatedStorage.Shared.language.en)
+
 function resolve_path(namespaces: any, path: string)
 	local parts = path:split "."
 	local start = namespaces
@@ -72,6 +74,7 @@ function format_text(world: types.World, text: string, ns: { [string]: any }?, d
 		entity = world.entity_configurations,
 		quest = world.quests,
 		turn = world.turn,
+		lang = en_lang,
 	}
 	if ns then
 		for key, value in ns do

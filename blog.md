@@ -79,3 +79,25 @@ All other requires must follow the format `local module = require(...)`
 10. No OOP allowed.
 
 These rules are only being followed like 70% so it will take a while to clean up my code.
+
+# May 17, 2026
+I just spent a day tracking down bugs i introduced in order to accomodate a simple change.
+1. I wanted to allow "big" entities (occupy more than 1 cell). To do so I needed a 'fit' function that gave me all possible orientations + translations that allowed the shape to fit in another shape.
+2. Shapes are never going to be any larger than 10 cells but I'm stubborn and want sets, efficient lookup, and the alike, so I do a lot of encode_coord conversions.
+3. encode_coord converts it to a string because that's the most obvious way to pair keys in lua but strings are inefficient so I do some bitshifting thing that packs them as a single number. This is okay since doubles have like 43 integer bits and coord components are never going to be bigger than like 1000.
+4. I benchmark and it's like 200% faster so I decide to switch. But at the same time encoding with strings isn't even that intensive so this was completely unnecessary.
+5. Storing numbers for dictionary keys are actually fine in lua, but they're not fine when you send them across a RemoteEvent.
+6. After tracking this down instead of doing the sane thing, which is to convert back to numbers afterwards (or not bother changing encode_coord to numbers), I decide, "no, this wouldn't have happened if I serialized with my custom binary serializer :heart:"
+7. I change it to my binary serializer but guess what? It errors! If the schema doesn't match up exactly with how I use them, it will give an unreadable error that is a nightmare to debug. Multiply this by 10 for every single mistake I could have in my definitions and my entire day is just doing this.
+8. Just getting this to work isn't enough. I'll be forever scared that somewhere, during playing, there will be like one discrepancy, so I write tests that make sure decoded output matches exactly.
+9. I find a lot of mistakes over the course of hours and amend the schema like crazy. Problem, the schema is bloated! It is still smaller (25%) than json but I want it to be *way* (10%) smaller.
+10. After reading binary output I find out that it's still storing a lot of strings. Mostly names and descriptions. Entity configurations like health and damage are stored in the same place as text descriptions. Those get serialized but also descriptions are unlikely to actually be configured. It's not really feasible to separate the descriptions from these configurations
+11. Solution? Make those descriptions point to a set of text definitions. Other games/apps already do this for localization, so why not get on top of that?
+
+At this point I'm so far removed from my original purpose it's making me rethink what the hell am I even accomplishing.
+
+My code is a mess. I purposely avoided OOP style when I started out to make serialization straightforward but I ended up needing a serialization module anyway because I have to sanitize the data for each client.
+
+Then I added a binary serialization thing, which is gimmicky at best, and now I have two serialization modules which I have to refer to by the same name but do different things and are both necessary.
+
+Instead of using a less error prone way to pass world data without desync, I opted to write copious amounts of tests that don't even have decent coverage. Fun part is these tests hardly apply to client and ui because it's impossible to test user input on the ui.
