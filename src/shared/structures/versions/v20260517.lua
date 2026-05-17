@@ -633,7 +633,7 @@ local world_update = tagged_union "world_update"({
 local world_updates = array(world_update)
 
 return {
-	id = "v20260516",
+	id = "v20260517",
 	next = nil,
 	migrate = nil,
 
