@@ -27,13 +27,8 @@ function IconAndNumber(props: {
 	number: number,
 })
 	return React.createElement("Frame", {
-		BackgroundTransparency = 1,
-		Size = UDim2.new(1, 0, 1, 0),
+		[React.Tag] = "container list-h",
 	}, {
-		HorizontalLayout = React.createElement("UIListLayout", {
-			FillDirection = Enum.FillDirection.Horizontal,
-			SortOrder = Enum.SortOrder.LayoutOrder,
-		}),
 		ImageLabel = React.createElement("ImageLabel", {
 			BackgroundTransparency = 1,
 			Image = INDICATORS[props.type].icon,
@@ -90,12 +85,7 @@ function TileAlert(props: { adornee: Instance, indicators: { [string]: number } 
 				{
 					BackgroundTransparency = 1,
 					Size = UDim2.new(1, 0, 0.5, 0),
-				},
-				{
-					VerticalLayout = React.createElement("UIListLayout", {
-						SortOrder = Enum.SortOrder.LayoutOrder,
-						VerticalAlignment = Enum.VerticalAlignment.Bottom,
-					}),
+					[React.Tag] = "list-v list-bl",
 				},
 				util.table_map(props.indicators, function(v, k)
 					return React.createElement(IconAndNumber, { type = k, number = v })

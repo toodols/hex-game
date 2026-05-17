@@ -21,8 +21,6 @@ function TextActionButton(
 	return React.createElement("TextButton", {
 		BackgroundColor3 = props.color,
 		BackgroundTransparency = 1,
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		BorderSizePixel = 0,
 		LayoutOrder = props.LayoutOrder,
 		FontFace = Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
 		ref = ref,

@@ -76,14 +76,7 @@ function OutputClock(props: { entity: Entity, LayoutOrder: number? })
 			Size = UDim2.new(0.5, 0, 0, 10),
 			BackgroundTransparency = 1,
 			LayoutOrder = props.LayoutOrder,
-		},
-		{
-			Layout = React.createElement("UIListLayout", {
-				SortOrder = Enum.SortOrder.LayoutOrder,
-				FillDirection = Enum.FillDirection.Horizontal,
-				HorizontalAlignment = Enum.HorizontalAlignment.Center,
-				Padding = UDim.new(0, 5),
-			}),
+			[React.Tag] = "list-h list-cc list-pad-5",
 		},
 		util.table_map(util.table_reverse(util.range(cycles_to_output)), function(idx)
 			return React.createElement("Frame", {
@@ -185,7 +178,6 @@ function EntityInformation(props: {
 
 	return React.createElement("Frame", {
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		BorderSizePixel = 0,
 		LayoutOrder = props.LayoutOrder,
 		Position = UDim2.new(0, 0, 0, 0),
 		[React.Tag] = "solid",
@@ -263,10 +255,8 @@ function EntityInformation(props: {
 				BackgroundTransparency = 1,
 				LayoutOrder = 3,
 				Size = UDim2.new(1, 0, 0, 0),
+				[React.Tag] = "list-v",
 			}, {
-				VerticalLayout = React.createElement("UIListLayout", {
-					SortOrder = Enum.SortOrder.LayoutOrder,
-				}),
 				Top = React.createElement("ScrollingFrame", {
 					LayoutOrder = 1,
 					Size = UDim2.new(1, 0, 0, 150),
@@ -437,13 +427,9 @@ function EntityInformation(props: {
 				}),
 
 				Bottom = React.createElement("Frame", {
-					AutomaticSize = Enum.AutomaticSize.Y,
-					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-					BackgroundTransparency = 1,
-					BorderColor3 = Color3.fromRGB(0, 0, 0),
-					BorderSizePixel = 0,
 					LayoutOrder = 2,
 					Size = UDim2.new(1, 0, 0, 30),
+					[React.Tag] = "container-v list-v list-pad-2",
 				}, {
 					ActionButtons = React.createElement(
 						"Frame",
@@ -559,11 +545,6 @@ function EntityInformation(props: {
 					-- 		end,
 					-- 	})
 					-- 	else nil,
-
-					VerticalLayout = React.createElement("UIListLayout", {
-						Padding = UDim.new(0, 2),
-						SortOrder = Enum.SortOrder.LayoutOrder,
-					}),
 				}),
 			}),
 		}),

@@ -9,19 +9,13 @@ function TeamDropdownItem(props: {
 		Icon = React.createElement("ImageLabel", {
 			Image = "http://www.roblox.com/asset/?id=6022852108",
 			ImageColor3 = props.icon_color,
-			[React.Tag] = "align-cc",
+			[React.Tag] = "align-cc list-h list-pad-10 list-cl",
 			Size = UDim2.new(0, 30, 0, 30),
 		}),
 		Label = React.createElement("TextLabel", {
 			[React.Tag] = "pad-l-5",
 			LayoutOrder = 2,
 			Text = props.text,
-		}),
-		HorizontalLayout = React.createElement("UIListLayout", {
-			FillDirection = Enum.FillDirection.Horizontal,
-			Padding = UDim.new(0, 10),
-			SortOrder = Enum.SortOrder.LayoutOrder,
-			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 	})
 end

@@ -88,15 +88,10 @@ function MenuIcon(props: { on_click: () -> (), label: string, icon: string, chil
 				ClipsDescendants = true,
 			}, {
 				ImageButton = React.createElement("ImageLabel", {
-					AnchorPoint = Vector2.new(0.5, 0.5),
-					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-					BackgroundTransparency = 1,
-					BorderColor3 = Color3.fromRGB(0, 0, 0),
-					BorderSizePixel = 0,
 					Image = props.icon,
 					ImageColor3 = Color3.fromRGB(255, 255, 255),
-					Position = UDim2.new(0.5, 0, 0.5, 0),
 					Size = UDim2.new(1, -10, 1, -10),
+					[React.Tag] = "align-cc",
 				}),
 			}),
 		}),
@@ -167,10 +162,7 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 			}),
 
 			Center = React.createElement("Frame", {
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				BackgroundTransparency = 1,
-				Position = UDim2.new(0.5, 0, 0.5, 0),
-				Size = UDim2.new(1, 0, 1, 0),
+				[React.Tag] = "container align-cc",
 			}, {
 				PlayerList = React.createElement(PlayerList, {
 					visible = players_visible,
@@ -182,28 +174,19 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 			}),
 			TopCenter = React.createElement(TopCenter),
 			BottomCenter = React.createElement("Frame", {
-				AnchorPoint = Vector2.new(0.5, 1),
-				BackgroundTransparency = 1,
 				Position = UDim2.new(0.5, 0, 1, -20),
-				Size = UDim2.new(1, 0, 1, 0),
 				Active = false,
 				ZIndex = 2,
+				[React.Tag] = "align-bc container",
 			}, {
 				BuildingsFrame = submenu.type == "build" and React.createElement(BuildingsFrame, {
 					cell = submenu.cell,
 				}),
 			}),
 			BottomLeft = React.createElement("Frame", {
-				AnchorPoint = Vector2.new(0, 1),
 				BackgroundTransparency = 1,
 				Position = UDim2.new(0, 20, 1, -20),
-			}, {
-				HorizontalLayout = React.createElement("UIListLayout", {
-					FillDirection = Enum.FillDirection.Horizontal,
-					Padding = UDim.new(0, 10),
-					SortOrder = Enum.SortOrder.LayoutOrder,
-					VerticalAlignment = Enum.VerticalAlignment.Bottom,
-				}),
+				[React.Tag] = "list-pad-10 list-h list-bl align-bl",
 			}, {
 				CancelButton = React.createElement("TextButton", {
 					Visible = selection_mode.type == "select_some_cell",
@@ -233,14 +216,8 @@ function Main(props: { world: World, selection_mode_stack: { SelectionMode } })
 						BackgroundTransparency = 1,
 						Position = UDim2.new(-250, 250, 20, -20),
 						Size = UDim2.new(0, 250, 0, 300),
+						[React.Tag] = "list-v list-bc",
 					}, {
-
-						VerticalLayout = React.createElement("UIListLayout", {
-							HorizontalAlignment = Enum.HorizontalAlignment.Center,
-							SortOrder = Enum.SortOrder.LayoutOrder,
-							VerticalAlignment = Enum.VerticalAlignment.Bottom,
-						}),
-						Corner = React.createElement(Corner),
 						Header = React.createElement("Frame", {
 							LayoutOrder = 1,
 							[React.Tag] = "header",

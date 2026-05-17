@@ -68,8 +68,7 @@ function Node(props: { item: ResearchItem, state: ResearchState, on_click: () ->
 			ZIndex = 1,
 		}),
 		Hitbox = React.createElement("TextButton", {
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, 0, 0.5, 0),
+			[React.Tag] = "align-cc",
 			Size = UDim2.new(0.9, 0, 0.9, 0),
 			BackgroundTransparency = 1,
 			Text = "",
@@ -162,31 +161,17 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 		end
 	end, {})
 	return React.createElement("Frame", {
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		BackgroundColor3 = Color3.fromRGB(12, 12, 12),
-		BackgroundTransparency = 0.05,
-		BorderColor3 = Color3.fromRGB(27, 42, 53),
 		LayoutOrder = 1,
-		Position = UDim2.new(0.5, 0, 0.5, 0),
 		Size = UDim2.new(1, 0, 1, 0),
 		Active = true,
+		[React.Tag] = "solid align-cc",
 	}, {
 		Header = React.createElement("Frame", {
-			BackgroundColor3 = Color3.fromRGB(13, 13, 13),
-			BackgroundTransparency = 0.2,
-			BorderColor3 = Color3.fromRGB(27, 42, 53),
-			BorderSizePixel = 0,
 			LayoutOrder = 1,
 			Size = UDim2.new(1, 0, 0, 40),
 			ZIndex = 2,
+			[React.Tag] = "solid list-v",
 		}, {
-			VerticalLayout = React.createElement("UIListLayout", {
-				SortOrder = Enum.SortOrder.LayoutOrder,
-			}),
-
-			Corner = React.createElement("UICorner", {
-				CornerRadius = UDim.new(0, 4),
-			}),
 			Title = React.createElement("TextLabel", {
 				BackgroundTransparency = 1,
 				BorderColor3 = Color3.fromRGB(27, 42, 53),
@@ -199,12 +184,7 @@ function Research(props: { entity_id: EntityId, Visible: boolean, on_close: () -
 				Text = "Research",
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 18,
-				[React.Tag] = "text-c",
-			}, {
-				SidePad = React.createElement("UIPadding", {
-					PaddingLeft = UDim.new(0, 15),
-					PaddingRight = UDim.new(0, 15),
-				}),
+				[React.Tag] = "text-c pad-h-10",
 			}),
 		}),
 

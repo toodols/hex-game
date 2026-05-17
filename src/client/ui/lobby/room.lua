@@ -38,35 +38,23 @@ function Room(props: { room: Room })
 			"Frame",
 			{
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
-				BorderSizePixel = 0,
 				Position = UDim2.new(0, 10, 0, 0),
 				Size = UDim2.new(0, 0, 0, 50),
 				Visible = not is_expanded,
-			},
-			{
-				UIListLayout = React.createElement("UIListLayout", {
-					FillDirection = Enum.FillDirection.Horizontal,
-					Padding = UDim.new(0, 10),
-					SortOrder = Enum.SortOrder.LayoutOrder,
-					VerticalAlignment = Enum.VerticalAlignment.Center,
-				}),
+				[React.Tag] = "list-h list-pad-10 list-cl",
 			},
 			util.table_map(props.room.players, function(_, userid)
 				return React.createElement("ImageLabel", {
-					AnchorPoint = Vector2.new(0.5, 0.5),
 					BackgroundColor3 = Color3.fromRGB(29, 29, 29),
 					BackgroundTransparency = 0.5,
-					BorderColor3 = Color3.fromRGB(0, 0, 0),
-					BorderSizePixel = 0,
 					LayoutOrder = 1,
 					Image = Players:GetUserThumbnailAsync(
 						userid,
 						Enum.ThumbnailType.HeadShot,
 						Enum.ThumbnailSize.Size48x48
 					),
-					Position = UDim2.new(0.5, 0, 0.5, 0),
 					Size = UDim2.new(0, 30, 0, 30),
+					[React.Tag] = "align-cc",
 				}, {
 					UICorner = React.createElement(Corner),
 				})

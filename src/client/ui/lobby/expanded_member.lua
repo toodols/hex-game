@@ -26,32 +26,18 @@ function ExpandedMember(props: {
 		ZIndex = props.ZIndex,
 	}, {
 		Container = React.createElement("Frame", {
-			BackgroundTransparency = 1,
-			Size = UDim2.new(1, 0, 1, 0),
 			ZIndex = 2,
+			[React.Tag] = "container list-h list-pad-10 list-cl",
 		}, {
-			HorizontalLayout = React.createElement("UIListLayout", {
-				FillDirection = Enum.FillDirection.Horizontal,
-				Padding = UDim.new(0, 10),
-				SortOrder = Enum.SortOrder.LayoutOrder,
-				VerticalAlignment = Enum.VerticalAlignment.Center,
-			}),
 			Headshot = React.createElement("ImageLabel", {
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				BackgroundColor3 = Color3.fromRGB(29, 29, 29),
-				BackgroundTransparency = 0.5,
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
-				BorderSizePixel = 0,
 				LayoutOrder = 1,
 				Image = Players:GetUserThumbnailAsync(
 					props.player.UserId,
 					Enum.ThumbnailType.HeadShot,
 					Enum.ThumbnailSize.Size48x48
 				),
-				Position = UDim2.new(0.5, 0, 0.5, 0),
 				Size = UDim2.new(0, 30, 0, 30),
-			}, {
-				UICorner = React.createElement(Corner),
+				[React.Tag] = "align-cc background",
 			}),
 			PlayerNameLabel = React.createElement("TextLabel", {
 				LayoutOrder = 2,
@@ -62,7 +48,7 @@ function ExpandedMember(props: {
 		}),
 		Team = React.createElement(Dropdown, {
 			Position = UDim2.new(1, -5, 0.5, 0),
-			AnchorPoint = Vector2.new(1, 0.5),
+			[React.Tag] = "align-cr",
 			current = props.team,
 			options = util.table_map(
 				if is_local_player then props.teams else { [props.team] = props.teams[props.team] },

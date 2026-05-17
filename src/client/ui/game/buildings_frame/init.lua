@@ -127,17 +127,7 @@ local BuildingPage = React.forwardRef(function(
 			BorderColor3 = Color3.fromRGB(0, 0, 0),
 			Size = UDim2.new(1, 0, 0, 30),
 			ref = ref,
-		},
-		{
-			HorizontalLayout = React.createElement("UIListLayout", {
-				FillDirection = Enum.FillDirection.Horizontal,
-				Padding = UDim.new(0, 4),
-				VerticalAlignment = Enum.VerticalAlignment.Bottom,
-				SortOrder = Enum.SortOrder.LayoutOrder,
-			}),
-			Padding = React.createElement("UIPadding", {
-				PaddingLeft = UDim.new(0, 10),
-			}),
+			[React.Tag] = "list-h list-pad-5 list-bl pad-l-10",
 		},
 		util.table_map(props.page.items, function(item)
 			return React.createElement(BuildingItem, {
@@ -220,18 +210,11 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 		Visible = props.Visible,
 		AnchorPoint = Vector2.new(0.5, 1),
 		BackgroundTransparency = 1,
-		BorderColor3 = Color3.fromRGB(27, 42, 53),
 		LayoutOrder = 2,
 		Position = UDim2.new(0.5, 0, 1, HEIGHT),
 		Size = UDim2.new(0, 1000, 0.8, 0),
 		ref = ref,
-	}, {
-		VerticalLayout = React.createElement("UIListLayout", {
-			FillDirection = Enum.FillDirection.Vertical,
-			SortOrder = Enum.SortOrder.LayoutOrder,
-			VerticalAlignment = Enum.VerticalAlignment.Bottom,
-			Padding = UDim.new(0, 1),
-		}),
+		[React.Tag] = "list-v list-bl list-pad-2",
 	}, {
 		SizeConstraint = React.createElement("UISizeConstraint", {
 			MinSize = Vector2.new(0, 300),
@@ -332,14 +315,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 					{
 						BackgroundTransparency = 1,
 						Size = UDim2.new(1, 0, 0, HEIGHT),
-					},
-					{
-						HorizontalLayout = React.createElement("UIListLayout", {
-							FillDirection = Enum.FillDirection.Horizontal,
-							Padding = UDim.new(0, 4),
-							VerticalAlignment = Enum.VerticalAlignment.Bottom,
-							SortOrder = Enum.SortOrder.LayoutOrder,
-						}),
+						[React.Tag] = "list-h list-pad-5 list-bl",
 					},
 					util.table_map(page.items, function(item, col)
 						return React.createElement(BuildingItem, {

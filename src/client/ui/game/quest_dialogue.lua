@@ -119,12 +119,7 @@ function QuestDialogue(props: {
 						BackgroundTransparency = 1,
 						Size = UDim2.new(1, 0, 0, 40),
 						Position = UDim2.new(0, 0, 1, 5),
-					},
-					{
-						HorizontalLayout = React.createElement("UIListLayout", {
-							HorizontalAlignment = Enum.HorizontalAlignment.Left,
-							Padding = UDim.new(0, 5),
-						}),
+						[React.Tag] = "list-h list-pad-5",
 					},
 					util.table_map(current_stage_data.choices, function(choice)
 						return React.createElement("TextButton", {

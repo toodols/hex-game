@@ -11,30 +11,13 @@ function TeamSection(props: {
 	team: TeamData,
 })
 	return React.createElement("Frame", {
-		AutomaticSize = Enum.AutomaticSize.Y,
-		BackgroundColor3 = Color3.fromRGB(12, 12, 12),
-		BackgroundTransparency = 0.2,
-		BorderColor3 = Color3.fromRGB(27, 42, 53),
-		Size = UDim2.new(1, 0, 0, 0),
+		[React.Tag] = "solid container-v list-v list-pad-2",
 	}, {
-		VerticalLayout = React.createElement("UIListLayout", {
-			Padding = UDim.new(0, 1),
-			SortOrder = Enum.SortOrder.LayoutOrder,
-		}),
-
 		Body = React.createElement(
 			"Frame",
 			{
-				AutomaticSize = Enum.AutomaticSize.Y,
-				BackgroundTransparency = 1,
 				LayoutOrder = 3,
-				Size = UDim2.new(1, 0, 0, 0),
-			},
-			{
-				VerticalLayout3 = React.createElement("UIListLayout", {
-					Padding = UDim.new(0, 1),
-					SortOrder = Enum.SortOrder.LayoutOrder,
-				}),
+				[React.Tag] = "container-v list-v list-pad-2",
 			},
 			util.table_map(props.team.players, function(user_id)
 				local player = game.Players:GetPlayerByUserId(user_id)
@@ -156,14 +139,8 @@ function PlayerList(props: { visible: boolean })
 		}),
 		Container = React.createElement("Frame", {
 			LayoutOrder = 2,
-			[React.Tag] = "container",
+			[React.Tag] = "container list-h list-pad-5",
 		}, {
-			HorizontalLayout = React.createElement("UIListLayout", {
-				FillDirection = Enum.FillDirection.Horizontal,
-				Padding = UDim.new(0, 4),
-				SortOrder = Enum.SortOrder.LayoutOrder,
-			}),
-
 			ItemsScrollingFrame = React.createElement("ScrollingFrame", {
 				[React.Tag] = "container-v list-v list-pad-5",
 			}, {

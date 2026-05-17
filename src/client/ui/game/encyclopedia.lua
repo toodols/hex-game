@@ -8,14 +8,10 @@ function Encyclopedia()
 	local world = context.world
 	return React.createElement("Frame", {
 		Size = UDim2.new(1, -20, 1, -20),
-		[React.Tag] = "align-cc background",
+		[React.Tag] = "align-cc background list-v list-pad-5",
 	}, {
 		SizeConstraint = React.createElement("UISizeConstraint", {
 			MaxSize = Vector2.new(600, 600),
-		}),
-		VerticalLayout = React.createElement("UIListLayout", {
-			Padding = UDim.new(0, 4),
-			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
 		Header = React.createElement("Frame", {
 			LayoutOrder = 1,

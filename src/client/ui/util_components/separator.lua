@@ -15,7 +15,6 @@ function Separator(props: { Position: UDim2?, LayoutOrder: number? })
 			Size = UDim2.new(0.8, 0, 0, 1),
 			BackgroundTransparency = 0.7,
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-			BorderSizePixel = 0,
 		})
 	)
 end

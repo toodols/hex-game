@@ -23,11 +23,7 @@ function RecipeItem(props: {
 	recipe_id: string,
 })
 	return React.createElement("TextButton", {
-		BackgroundColor3 = Color3.fromRGB(12, 12, 12),
 		BackgroundTransparency = if props.current_recipe == props.recipe_id then 0.6 else 0.8,
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		BorderSizePixel = 0,
-		FontFace = Font.new "rbxasset://fonts/families/SourceSansPro.json",
 		Size = UDim2.new(1, 0, 0, 40),
 		Text = "",
 		TextColor3 = Color3.fromRGB(0, 0, 0),
@@ -35,19 +31,8 @@ function RecipeItem(props: {
 		[React.Event.MouseButton1Click] = function()
 			props.on_click()
 		end,
+		[React.Tag] = "solid list-h list-pad-5 list-cc pad-l-5",
 	}, {
-		HorizontalLayout = React.createElement("UIListLayout", {
-			FillDirection = Enum.FillDirection.Horizontal,
-			HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			Padding = UDim.new(0, 4),
-			SortOrder = Enum.SortOrder.LayoutOrder,
-			VerticalAlignment = Enum.VerticalAlignment.Center,
-		}),
-
-		UIPadding = React.createElement("UIPadding", {
-			PaddingLeft = UDim.new(0, 5),
-		}),
-
 		Input = React.createElement(Items, {
 			items = props.recipe.input_items,
 			LayoutOrder = 1,
@@ -64,10 +49,6 @@ function RecipeItem(props: {
 		Output = React.createElement(Items, {
 			items = items_mod.into_counted_items(props.recipe.output_items),
 			LayoutOrder = 3,
-		}),
-
-		Corner = React.createElement("UICorner", {
-			CornerRadius = UDim.new(0, 4),
 		}),
 	})
 end

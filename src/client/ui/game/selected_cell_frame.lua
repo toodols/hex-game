@@ -209,8 +209,6 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 				then React.createElement("ImageButton", {
 					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 					BackgroundTransparency = 0.9,
-					BorderColor3 = Color3.fromRGB(0, 0, 0),
-					BorderSizePixel = 0,
 					ClipsDescendants = true,
 					[React.Event.MouseButton1Click] = function()
 						toggle_submenu { type = "build", cell = props.selected_cells[1] }
@@ -258,7 +256,6 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 						BackgroundTransparency = 1,
 						BorderColor3 = Color3.fromRGB(0, 0, 0),
-						BorderSizePixel = 0,
 						Image = "rbxassetid://6034275725",
 						ImageTransparency = 0.9,
 						Position = UDim2.new(0.135, 0, -0.375, 0),
@@ -269,7 +266,6 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 						BackgroundTransparency = 1,
 						BorderColor3 = Color3.fromRGB(0, 0, 0),
-						BorderSizePixel = 0,
 						Image = "rbxassetid://6034275725",
 						Position = UDim2.new(0.292, 0, 0, 0),
 						Size = UDim2.new(0, 42, 0, 40),

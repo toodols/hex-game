@@ -103,7 +103,7 @@ function ItemFilters(props: { entity_id: EntityId })
 					Size = UDim2.new(1, 0, 0, 20),
 					Text = "",
 					TextSize = 14,
-					[React.Tag] = "solid",
+					[React.Tag] = "solid list-h list-cc list-pad-5",
 					[React.Event.MouseButton1Click] = function()
 						inventory.filter.items[item] = not inventory.filter.items[item]
 						interaction_remote:FireServer {
@@ -123,14 +123,7 @@ function ItemFilters(props: { entity_id: EntityId })
 						label_ref.current.Visible = false
 					end,
 				}, {
-					HorizontalLayout = React.createElement("UIListLayout", {
-						FillDirection = Enum.FillDirection.Horizontal,
-						HorizontalAlignment = Enum.HorizontalAlignment.Center,
-						Padding = UDim.new(0, 4),
-						SortOrder = Enum.SortOrder.LayoutOrder,
-						VerticalAlignment = Enum.VerticalAlignment.Center,
-					}),
-					LabelRef = React.createElement("TextLabel", {
+					Label = React.createElement("TextLabel", {
 						ref = label_ref,
 						TextColor3 = items_mod.item_colors[item],
 						Visible = false,
@@ -142,18 +135,11 @@ function ItemFilters(props: { entity_id: EntityId })
 						ref = icon_ref,
 					}, {
 						Inner = React.createElement("Frame", {
-							AnchorPoint = Vector2.new(0.5, 0.5),
 							BackgroundColor3 = items_mod.item_colors[item],
-							BorderColor3 = Color3.fromRGB(0, 0, 0),
-							BorderSizePixel = 0,
-							Position = UDim2.new(0.5, 0, 0.5, 0),
 							Rotation = 45,
 							Size = UDim2.new(0, 10, 0, 10),
+							[React.Tag] = "align-cc",
 						}),
-					}),
-
-					Corner = React.createElement("UICorner", {
-						CornerRadius = UDim.new(0, 4),
 					}),
 				})
 			end)

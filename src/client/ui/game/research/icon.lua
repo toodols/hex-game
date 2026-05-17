@@ -31,22 +31,18 @@ function Icon(props: {
 	if icon.type == "model" then
 		return React.createElement("ViewportFrame", {
 			Size = Size,
-			BackgroundTransparency = 1,
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, 0, 0.5, 0),
 			ref = ref,
 			ZIndex = ZIndex,
 			LayoutOrder = props.LayoutOrder,
+			[React.Tag] = "align-cc",
 		})
 	elseif icon.type == "image" then
 		return React.createElement("ImageLabel", {
 			Size = Size,
-			BackgroundTransparency = 1,
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, 0, 0.5, 0),
 			Image = icon.image,
 			ZIndex = ZIndex,
 			LayoutOrder = props.LayoutOrder,
+			[React.Tag] = "align-cc",
 		})
 	else
 		return React.createElement(React.Fragment)

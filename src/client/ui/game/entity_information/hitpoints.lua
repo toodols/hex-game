@@ -45,7 +45,6 @@ function Hitpoints(props: { entity_id: EntityId })
 			then {
 				React.createElement("TextLabel", {
 					BackgroundTransparency = 1,
-					BorderSizePixel = 0,
 					TextColor3 = Color3.fromRGB(255, 255, 255),
 					Size = UDim2.new(0, 100, 0, 100),
 					TextSize = 12,
@@ -84,7 +83,6 @@ function Hitpoints(props: { entity_id: EntityId })
 				end
 				return React.createElement("Frame", {
 					BackgroundColor3 = color,
-					BorderSizePixel = 0,
 					Size = UDim2.new(0, 100, 0, 100),
 				})
 			end)

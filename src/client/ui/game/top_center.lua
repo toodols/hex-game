@@ -170,7 +170,7 @@ function TopCenter()
 				Size = UDim2.new(0, 70, 0, 40),
 				Text = "",
 				ref = skip_btn_ref,
-				[React.Tag] = `.skip-button solid {if local_player
+				[React.Tag] = `list-h list-pad-5 list-cl pad-l-5 pad-r-10 skip-button solid {if local_player
 						and table.find(world.skipped, local_player.UserId)
 					then "active"
 					else ""}`,
@@ -197,16 +197,6 @@ function TopCenter()
 					TextColor3 = Color3.fromRGB(255, 255, 255),
 					TextSize = 20,
 				}),
-				HorizontalLayout = React.createElement("UIListLayout", {
-					FillDirection = Enum.FillDirection.Horizontal,
-					Padding = UDim.new(0, 5),
-					SortOrder = Enum.SortOrder.LayoutOrder,
-					VerticalAlignment = Enum.VerticalAlignment.Center,
-				}),
-				SidePad = React.createElement("UIPadding", {
-					PaddingLeft = UDim.new(0, 5),
-					PaddingRight = UDim.new(0, 10),
-				}),
 				AmountLabel = React.createElement("TextLabel", {
 					AutomaticSize = Enum.AutomaticSize.X,
 					BackgroundTransparency = 1,
@@ -232,14 +222,7 @@ function TopCenter()
 			{
 				Position = UDim2.new(0.5, 0, 0, 50),
 				BackgroundTransparency = 1,
-			},
-			{
-				VerticalLayout = React.createElement("UIListLayout", {
-					FillDirection = Enum.FillDirection.Vertical,
-					HorizontalAlignment = Enum.HorizontalAlignment.Center,
-					Padding = UDim.new(0, 10),
-					SortOrder = Enum.SortOrder.LayoutOrder,
-				}),
+				[React.Tag] = "list-v list-pad-10 list-tc",
 			},
 			util.table_map(world.quests, function(quest)
 				return quest.current_stage_data.messages

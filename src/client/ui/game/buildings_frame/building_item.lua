@@ -160,8 +160,8 @@ local BuildingItem = React.forwardRef(function(
 			Top = React.createElement("Frame", {
 				BackgroundTransparency = 1,
 				Size = UDim2.new(1, 0, 1, 0),
+				[React.Tag] = "list-v list-pad-5",
 			}, {
-
 				ItemTitle = React.createElement("TextLabel", {
 					LayoutOrder = 1,
 					Size = UDim2.new(1, 0, 0, 25),
@@ -264,11 +264,6 @@ local BuildingItem = React.forwardRef(function(
 						),
 					})
 					else nil,
-
-				VerticalLayout = React.createElement("UIListLayout", {
-					Padding = UDim.new(0, 4),
-					SortOrder = Enum.SortOrder.LayoutOrder,
-				}),
 			}),
 		}),
 	})

@@ -56,13 +56,7 @@ function Lobby()
 			StyleSheet = stylesheets.default_stylesheet,
 		}),
 		Background = React.createElement("Frame", {
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-			BackgroundTransparency = 0.2,
-			BorderColor3 = Color3.fromRGB(0, 0, 0),
-			BorderSizePixel = 0,
-			Position = UDim2.new(0.5, 0, 0.5, 0),
-			Size = UDim2.new(1, 0, 1, 0),
+			[React.Tag] = "solid container align-cc",
 			ZIndex = 0,
 		}, {
 			PatternContainer = React.createElement("Frame", {
@@ -99,13 +93,8 @@ function Lobby()
 		}),
 		Rooms = React.createElement("Frame", {
 			LayoutOrder = 1,
-			[React.Tag] = "container align-tc",
+			[React.Tag] = "container align-tc list-v list-tc list-pad-10",
 		}, {
-			VerticalLayout = React.createElement("UIListLayout", {
-				HorizontalAlignment = Enum.HorizontalAlignment.Center,
-				Padding = UDim.new(0, 10),
-				SortOrder = Enum.SortOrder.LayoutOrder,
-			}),
 			CurrentRooms = React.createElement("Frame", {
 				LayoutOrder = 1,
 				Size = UDim2.new(0, 1000, 0, 0),

@@ -57,10 +57,9 @@ function Conclusion()
 	end
 
 	return React.createElement("Frame", {
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.new(0.5, 0, 0.5, 0),
 		Size = UDim2.new(0, 400, 0, 400),
 		BackgroundTransparency = 1,
+		[React.Tag] = "align-cc",
 	}, {
 		Corner = React.createElement(Corner),
 		Top = React.createElement("Frame", {
