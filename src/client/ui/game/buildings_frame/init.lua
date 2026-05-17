@@ -99,6 +99,9 @@ local PAGES = {
 			{
 				type = "rash",
 			},
+			{
+				type = "big",
+			},
 		},
 	},
 }

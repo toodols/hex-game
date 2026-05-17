@@ -53,33 +53,39 @@ end
 --- Rotates a CubicCoordinate around the origin counterclockwise 60 degrees `rotation` times
 function rotate_coord(coord: CubicCoordinate, rotation: number): CubicCoordinate
 	local x, y, z = coord[1], coord[2], coord[3]
-	for i = 1, rotation do
-		local temp = x
-		x = -z
-		y = -x
-		z = -temp
+	local rot = rotation % 6
+	if rot == 0 then
+		return coord
+	elseif rot == 1 then
+		return { -z, -x, -y }
+	elseif rot == 2 then
+		return { y, z, x }
+	elseif rot == 3 then
+		return { -x, -y, -z }
+	elseif rot == 4 then
+		return { z, x, y }
+	else
+		return { -y, -z, -x }
 	end
-	return { x, y, z }
 end
 
 --- Encodes a CubicCoordinate into a string
 --- Makes no guarantees on the output format, only that
 --- - `forall coord: CubicCoordinate. coord == decode_coord(encode_coord(coord))`
 ---
---- <em>This will produce a different value for signed zero `(tostring(0) ~= tostring(-0))`,
---- but signed zero should only occur for the z (-x-y) component which is not used in encoding
---- may be motivated to change if that does cause a bug</em>
+
+local BITS_PER_COMPONENT = 21
+local UNSIGNED_MAX = 2 ^ BITS_PER_COMPONENT
+local SIGNED_MAX = UNSIGNED_MAX / 2
 function encode_coord(coord: CubicCoordinate): EncodedCoordinate
-	return string.format("%d %d", coord[1], coord[2])
+	return (coord[1] + SIGNED_MAX) * UNSIGNED_MAX + coord[2] + SIGNED_MAX
 end
 
 --  Decodes a string back into a CubicCoordinate
 function decode_coord(s: EncodedCoordinate): CubicCoordinate
-	local res = string.split(s, " ")
-	local x = tonumber(res[1])
-	local y = tonumber(res[2])
-	local z = -x - y
-	return { x, y, z }
+	local decode_y = (s % UNSIGNED_MAX) - SIGNED_MAX
+	local decode_x = math.floor(s / UNSIGNED_MAX) - SIGNED_MAX
+	return { decode_x, decode_y, -decode_x - decode_y }
 end
 
 function display_coord(coord: CubicCoordinate): string
@@ -210,6 +216,30 @@ function coords_round(coord: { number }): { CubicCoordinate }
 	end
 
 	table.insert(results, { q == -0 and 0 or q, r == -0 and 0 or r, s == -0 and 0 or s })
+
+	return results
+end
+
+function fit(src: { CubicCoordinate }, target: { CubicCoordinate }): { [number]: CubicCoordinate }
+	local results = {}
+
+	local target_set = into_set(target)
+	for rot = 1, 6 do
+		local rotated = util.table_map(src, rotate_coord)
+		-- choose the first coordinate in rotated to be the 'origin'
+		local src_origin = rotated[1]
+
+		for _, target_origin in target do
+			for _, coord in rotated do
+				-- (target_origin - src_origin) + coord = target_coord
+				local translation = coords_sub(target_origin, src_origin)
+				local target_coord = coords_add(translation, coord)
+				if target_set[encode_coord(target_coord)] then
+					results[rot] = translation
+				end
+			end
+		end
+	end
 
 	return results
 end

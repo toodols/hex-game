@@ -5,7 +5,6 @@ local util = require(ReplicatedStorage.Shared.util)
 local entity_mod = require(ReplicatedStorage.Shared.entity)
 local team_mod = require(ReplicatedStorage.Shared.team)
 
-local encode_coord = coords.encode_coord
 type World = types.World
 type CubicCoordinate = types.CubicCoordinate
 type EncodedCoordinate = types.EncodedCoordinate
@@ -35,6 +34,7 @@ function cell_is_open(world: World, cell: HexCell?, team: TeamId): boolean
 end
 
 function astar(world: World, start: CubicCoordinate, goal: CubicCoordinate, team: TeamId): { CubicCoordinate }?
+	local encode_coord = coords.encode_coord
 	local open: { CubicCoordinate } = { start }
 	local open_set: { [EncodedCoordinate]: true } = { [encode_coord(start)] = true }
 	local from: { [EncodedCoordinate]: CubicCoordinate } = {}
@@ -90,6 +90,7 @@ end
 
 -- Performs a bfs flood search limited by depth for open cells for a given team
 function bfs(world: World, start: CubicCoordinate, max_depth: number, team: TeamId): { CubicCoordinate }
+	local encode_coord = coords.encode_coord
 	local visited = { [encode_coord(start)] = true }
 	local stack = { start }
 	local depth = 0

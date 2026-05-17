@@ -1,10 +1,12 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
+local ServerScriptService = game:GetService "ServerScriptService"
 
 local entity_mod = require(ReplicatedStorage.Shared.entity)
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local coords_mod = require(ReplicatedStorage.Shared.coords)
 local cells_mod = require(ReplicatedStorage.Shared.cells)
+local structures = require(ReplicatedStorage.Shared.structures)
 local world_mod = require(ReplicatedStorage.Shared.world)
 local unlockable_mod = require(ReplicatedStorage.Shared.unlockable)
 local deposit_types = require(ReplicatedStorage.Shared.deposit).deposit_types
@@ -132,10 +134,22 @@ return function(extras, modules)
 
 	commands.debug_world_client = {
 		description = "Prints the world",
-		permissions = { "automation" },
+		permissions = { "debug" },
 		overloads = { { returns = "nil", args = {} } },
 		client_run = function(context)
 			local world = _G.world
+			print(world)
+		end,
+	}
+
+	commands.debug_fetch_world = {
+		description = "Prints the world",
+		permissions = { "debug" },
+		overloads = { { returns = "nil", args = {} } },
+		client_run = function(context)
+			local get_world_data_remote = ReplicatedStorage:FindFirstChild "GetWorldDataRemote" :: RemoteFunction
+			local world_data = get_world_data_remote:InvokeServer()
+			local world = structures.deserialize_partial_world(world_data)
 			print(world)
 		end,
 	}
@@ -179,6 +193,26 @@ return function(extras, modules)
 			return util.table_map(entities_map, function(_, entity_id)
 				return _G.world.entities[entity_id]
 			end)
+		end,
+	}
+
+	commands.selected_cells = {
+		description = "Gets the selected cells visible to the client.",
+		permissions = { "automation" },
+		overloads = { { returns = "cells", args = {} } },
+		client_run = function(context)
+			local coords
+			if context.args[1] then
+				coords = world_mod.coords_filter(_G.world, context.args[1])
+			else
+				coords = context.runtime.run_commands_string(context.process, "selected").ok
+			end
+			local cells = {}
+			for _, coord in coords do
+				local cell = _G.world:get_cell(coord)
+				cells[coords_mod.encode_coord(coord)] = cell
+			end
+			return cells
 		end,
 	}
 

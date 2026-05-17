@@ -180,6 +180,8 @@ function serialize_world(world: World, se_ctx: SerializationContext, serialize_t
 		end)
 	end
 
+	local turn_schedule = world.turn_schedule
+
 	local partial_world: PartialWorld = {
 		cells = cache.cells,
 		coalitions = world.coalitions,
@@ -190,7 +192,14 @@ function serialize_world(world: World, se_ctx: SerializationContext, serialize_t
 		current_skips = world.current_skips,
 		needed_skips = world.needed_skips,
 		highest_turn = world.highest_turn,
-		turn_schedule = world.turn_schedule,
+		skipped = world.skipped,
+		turn_schedule = {
+			start_time = turn_schedule.start_time,
+			running = turn_schedule.running,
+			now = turn_schedule.now,
+			end_time = turn_schedule.end_time,
+			start_time_sync = turn_schedule.start_time_sync,
+		},
 		entities = entities,
 		entity_configurations = world.entity_configurations,
 		global_configuration = world.global_configuration,

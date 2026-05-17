@@ -309,7 +309,6 @@ return function(extras)
 					player_data = { [tostring(player.UserId)] = datastore_mod.default_player_data() },
 				}
 			end
-			print(_G.world.updates_buffer)
 			updates_mod.flush_updates(_G.world)
 		end,
 	}

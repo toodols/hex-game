@@ -2,6 +2,8 @@ local ServerScriptService = game:GetService "ServerScriptService"
 
 local entity_mod = require(ServerScriptService.Server.entity)
 
+entity_mod.registry.big = entity_mod.with_defaults {}
+
 entity_mod.registry.barrier = entity_mod.with_defaults {
 	decayable = false,
 }

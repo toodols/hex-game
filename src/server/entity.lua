@@ -110,10 +110,10 @@ function new_entity(entity_: any, world: World): Entity
 	end
 	local server_behavior = registry[entity.type]
 	local config = world.entity_configurations[entity.type]
-	local cell
+	local primary_cell
 	if entity.primary_coordinate then
-		cell = world:get_cell(entity.primary_coordinate)
-		if cell == nil then
+		primary_cell = world:get_cell(entity.primary_coordinate)
+		if primary_cell == nil then
 			error("No cell at " .. coords.encode_coord(entity.primary_coordinate))
 		end
 	else
@@ -178,7 +178,10 @@ function new_entity(entity_: any, world: World): Entity
 
 	server_behavior.init(entity, world)
 	world.entities[entity.id] = entity
-	if cell then
+
+	for _, coord in entity.coordinates do
+		local cell = world:get_cell(coord)
+		assert(cell, "No cell at " .. coords.encode_coord(coord))
 		cell.entities[entity.id] = true
 	end
 

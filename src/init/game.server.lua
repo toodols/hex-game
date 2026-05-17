@@ -51,6 +51,7 @@ local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 local updates_mod = require(ServerScriptService.Server.updates)
 local server_util = require(ServerScriptService.Server.util)
 local datastore_mod = require(ServerScriptService.Server.datastore)
+local structures = require(ReplicatedStorage.Shared.structures)
 require(ServerScriptService.Server.teleport)
 
 if ServerScriptService.Server:FindFirstChild "pow" then
@@ -81,7 +82,8 @@ remotes_mod.get_world_data_remote.OnServerInvoke = function(player)
 	end
 	local player_team = team_mod.team_of(main_world, player)
 	local serialized = serialize_mod.serialize_world(main_world, {}, { team = player_team.id, player = player.UserId })
-	return serialized
+
+	return structures.serialize_partial_world(serialized)
 end :: any
 
 function republish_teams(world: World)

@@ -15,7 +15,7 @@ export type Room = {
 --- {x, y, z} where x,y,z: number and x+y+z = 0 <br/>
 --- The z component can be derived but exists for completeness
 export type CubicCoordinate = { number }
-export type EncodedCoordinate = string
+export type EncodedCoordinate = number
 
 export type Signal<T> = {
 	listen: (listener: (message: T) -> ()) -> (),
@@ -97,6 +97,7 @@ export type AnimationState = ({
 export type Entity = {
 	active: boolean,
 
+	name: string,
 	type: string,
 	coordinates: { CubicCoordinate },
 	primary_coordinate: CubicCoordinate,
@@ -464,8 +465,7 @@ export type WorldUpdate =
 	}
 	| {
 		type: "turn_timer",
-		turn_start_time: number,
-		turn_end_time: number,
+		schedule: TurnScheduleData,
 	}
 	| {
 		type: "world",
@@ -487,17 +487,20 @@ export type WorldUpdate =
 		player_data: { [string]: PlayerData },
 	}
 
-export type TurnSchedule = {
-	end_time: number,
+export type TurnSchedule = TurnScheduleData & {
 	get_end_time: () -> number,
 	loop_thread: thread,
-	now: number?,
 	run_turn: () -> (),
+	turn_ran_signal: Signal<nil>,
+	wait_thread: thread?,
+}
+
+export type TurnScheduleData = {
+	end_time: number,
+	now: number?,
 	running: boolean,
 	start_time: number,
 	start_time_sync: number,
-	turn_ran_signal: Signal<nil>,
-	wait_thread: thread?,
 }
 
 export type Ability = {
@@ -553,7 +556,7 @@ export type EntityConfiguration = {
 	range: number?,
 	can_revive: boolean,
 
-	-- list of offsets in addition to entity.primary_coordinate
+	-- list of offsets (including entity.primary_coordinate)
 	offsets: { CubicCoordinate },
 	layer: number,
 	cost: { [Item]: number },
@@ -611,9 +614,6 @@ export type EntityEvent = {
 	event_type: "took_damage",
 	damage_result: DamageResult,
 	damage: Damage,
-	entity_id: EntityId,
-} | {
-	event_type: "update",
 	entity_id: EntityId,
 } | {
 	event_type: "promoted",
@@ -749,20 +749,21 @@ export type World = {
 export type PartialWorld = {
 	cells: { [EncodedCoordinate]: HexCell },
 	coalitions: { CoalitionData },
-	teams: { TeamData },
-	turn: number,
-	highest_turn: number,
-	entities: { [EntityId]: Entity },
-	turn_schedule: TurnSchedule?,
+	conclusion: Conclusion?,
 	current_skips: number,
-	needed_skips: number,
+	entities: { [string]: Entity },
 	entity_configurations: { [string]: EntityConfiguration },
 	global_configuration: GlobalConfiguration,
+	highest_turn: number,
+	needed_skips: number,
 	neutral_team: TeamId,
-	spectator_team: TeamId,
 	quests: { [string]: Quest },
+	skipped: { number },
+	spectator_team: TeamId,
 	systems: { System },
-	conclusion: Conclusion?,
+	teams: { TeamData },
+	turn: number,
+	turn_schedule: TurnScheduleData?,
 }
 
 -- Questing types
@@ -799,15 +800,16 @@ export type QuestStage = {
 }
 
 export type ServerQuestStageBehavior = {
+	choice_selected: ((Quest, World, string) -> ())?,
 	progression_requisite: ((Quest, World) -> boolean)?,
 	stage_start: ((Quest, World) -> ())?,
-	choice_selected: ((Quest, World, string) -> ())?,
 }
 
 export type Quest = {
 	id: string,
-	title: string,
 	current_stage: string,
+	details: any,
+	title: string,
 	-- client only
 	current_stage_data: QuestStage,
 	-- server only
@@ -816,7 +818,6 @@ export type Quest = {
 	quest_update_signal: Signal<Quest>,
 	-- tutorial only, keeps track of which cells the player is selecting
 	tutorial_player_selection: { [Player]: { CubicCoordinate } }?,
-	details: any,
 }
 
 return {}

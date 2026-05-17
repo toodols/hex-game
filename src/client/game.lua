@@ -11,10 +11,6 @@ local client_entity_mod = require(script.Parent.entity)
 local visuals = require(script.Parent.visuals)
 local ui = require(ReplicatedStorage.Client.ui.game)
 
-local into_vec3 = coords.into_vec3
-local encode_coord = coords.encode_coord
-local decode_coord = coords.decode_coord
-
 type Entity = types.Entity
 type World = types.World
 type HexCell = types.HexCell
@@ -59,13 +55,13 @@ end
 function update_neighbors(world: World, coordinates: { CubicCoordinate })
 	local neighbor_set = {}
 	for _, coord in coordinates do
-		neighbor_set[encode_coord(coord)] = coord
+		neighbor_set[coords.encode_coord(coord)] = coord
 		for _, neighbor_coord in coords.neighbors_eq(coord, 1) do
-			neighbor_set[encode_coord(neighbor_coord)] = coord
+			neighbor_set[coords.encode_coord(neighbor_coord)] = coord
 		end
 	end
 	for encoded_neighbor_coord, coord in neighbor_set do
-		local neighbor_cell = world:get_cell(decode_coord(encoded_neighbor_coord))
+		local neighbor_cell = world:get_cell(coords.decode_coord(encoded_neighbor_coord))
 		if neighbor_cell then
 			for neighbor_entity_id in neighbor_cell.entities do
 				local neighbor_entity = world.entities[neighbor_entity_id]
@@ -84,7 +80,7 @@ end
 function create_cell_instance(world: World, cell: HexCell): Model
 	local instance = cells_mod.cell_models[cell.type]:Clone()
 	instance.Parent = world.cell_instance_root
-	instance:PivotTo(CFrame.new(into_vec3(cell.coordinate) * 4.542 / 2))
+	instance:PivotTo(CFrame.new(coords.into_vec3(cell.coordinate) * 4.542 / 2))
 	instance.Name = coords.encode_coord(cell.coordinate) -- for debugging
 	world.cell_instance_map[coords.encode_coord(cell.coordinate)] = instance
 	instance:FindFirstChild("Base").Color = cell_color(world, cell)
@@ -208,6 +204,7 @@ end
 
 function handle_cells(world: World, update: WorldUpdate)
 	assert(update.type == "cells", "not a cell update")
+	assert(type(next(update.cells) :: any) == "number", "cells should be a map from numbers")
 
 	-- remove cells that no longer exist
 	for old_encoded_coord, old_cell in world.cells do

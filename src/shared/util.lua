@@ -251,9 +251,69 @@ function table_count_entries(tab: { [any]: any }): number
 	return count
 end
 
-function assert_eq(a, b, msg)
-	if not deep_equal(a, b) then
-		error(`Assertion failed{if msg then " " .. msg else ""}: {a} != {b}`)
+function display(tab)
+	if type(tab) == "table" then
+		local t = "{"
+		for k, v in tab do
+			t = t .. `{k} = {display(v)}, `
+		end
+		return t .. "}"
+	else
+		return tostring(tab)
+	end
+end
+
+function eq_with_path(a, b, path)
+	path = path or {}
+	if a == b then
+		return false
+	elseif type(a) == "function" or type(b) == "function" then
+		return false
+	elseif type(a) ~= "table" or type(b) ~= "table" then
+		print(path)
+		return true
+	end
+
+	for key in a do
+		table.insert(path, key)
+		if eq_with_path(a[key], b[key], path) then
+			return true
+		end
+		table.remove(path)
+	end
+
+	for key in b do
+		table.insert(path, key)
+		if eq_with_path(a[key], b[key], path) then
+			return true
+		end
+		table.remove(path)
+	end
+	return false
+end
+
+function assert_eq(a, b, msg, original_a, original_b)
+	original_a = original_a or a
+	original_b = original_b or b
+	if a == b then
+		return
+	elseif type(a) == "function" or type(b) == "function" then
+		return
+	elseif type(a) ~= "table" or type(b) ~= "table" then
+		eq_with_path(original_a, original_b)
+		error(
+			`Assertion failed{if msg then " " .. msg else ""} {display(a)} != {display(b)} in {display(original_a)} != {display(
+				original_b
+			)}`
+		)
+	end
+
+	for key in a do
+		assert_eq(a[key], b[key], msg, original_a, original_b)
+	end
+
+	for key in b do
+		assert_eq(a[key], b[key], msg, original_a, original_b)
 	end
 end
 

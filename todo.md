@@ -6,30 +6,30 @@
 	- [ ] Warning indicator entity 
 - [ ] Add `exclusion`, creates a fog that blocks visibility or building for enemy
 - [ ] `vault` has passive that blocks lethal damage by consuming items in its inventory
-- [ ] Systems should be visible to the client and should show total items
 - [ ] Finish implementation of tutorial
 - [ ] Add actual preview for ItemsFilterPreview
-- [ ] Make lobby ui look better
 - [ ] Split `client/ui/game/entity_information`
-
+- [ ] Show the system a cell is part of in ui
+- [ ] Show the items and income for the system in that turn
 - [ ] Spectator starts off with no visibility
 	- Visibility can be granted or revoked by player teams
-
 - [ ] `host` A building that can control time
 - [ ] `empath` An offensive building that copies status effects of buildings it kills
-- [ ] Unlock system that unlocks new buildings with each win
 - [ ] Change entity_update to use entity_id when adding to queue, then fill with entity at serialization step
-- [ ] Validate phony on the server
+- [ ] Find a better name for serializing and structures (or merge them)
 
 # Ongoing
 - [ ] `terminal` A building that can allow buildings to "fast travel"
-	- New entity status `lock`
+	- [x] New entity status `lock`
 - [ ] Entities get respective buffs while on a resource tile
 	- [x] Vit: Passive Healing
 - [ ] Add settings menu 
 	- [x] with configurable keybinds
 	- [ ] and configurable UI scales
 - [ ] Add keybinds for ui
+	- [ ] keybind labels should float (use react portals)
+- [ ] Unlock system that unlocks new buildings with each win
+	- [ ] Conclusion should show a selection of new buildings to choose from
 
 # Complete
 - [x] Make `impression` functional

@@ -6,7 +6,6 @@ local default_stylesheet = require(script.default_stylesheet)
 if RunService:IsClient() then
 	local stylesheets_folder = ReplicatedStorage:FindFirstChild "Stylesheets"
 	if stylesheets_folder ~= nil then
-		print(stylesheets_folder:FindFirstChild "DefaultStylesheet")
 		return {
 			default_stylesheet = stylesheets_folder:FindFirstChild "DefaultStylesheet",
 		}

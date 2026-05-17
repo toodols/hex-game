@@ -1,8 +1,9 @@
-local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local client_tests = require(script.client)
-local server_tests = require(script.server)
+local default_tests = require(script.default)
 local unit_tests = require(script.unit)
-local util = require(ReplicatedStorage.Shared.util)
+local misc_tests = require(script.misc)
+local sanity_tests = require(script.sanity)
+local serializing_tests = require(script.serializing)
 
 function run_tests()
 	local total = 0
@@ -30,9 +31,12 @@ function run_tests()
 
 	_G.is_testing = true
 	run_tests_recursive {
-		server = server_tests,
+		default = default_tests,
 		client = client_tests,
 		unit = unit_tests,
+		misc = misc_tests,
+		sanity = sanity_tests,
+		serializing = serializing_tests,
 	}
 	_G.is_testing = nil
 
@@ -45,7 +49,7 @@ end
 
 return {
 	run_tests = run_tests,
-	server = server_tests,
+	default = default_tests,
 	client = client_tests,
 	unit = unit_tests,
 }

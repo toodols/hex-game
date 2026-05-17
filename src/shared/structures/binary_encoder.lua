@@ -44,6 +44,9 @@ local function write()
 end
 
 local function read(data)
+	if type(data) ~= "string" then
+		error(data .. " is not a string")
+	end
 	local offset = 0
 
 	local reader = {}

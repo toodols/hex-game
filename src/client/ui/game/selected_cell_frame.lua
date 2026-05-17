@@ -118,6 +118,9 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 			return best_uncompressed_entity(world, entities_from_cells(world, props_ref.current.selected_cells))
 		else
 			local current_idx = table.find(entities_ref.current, uncompressed_entity.current)
+			if current_idx == nil then
+				return best_uncompressed_entity(world, entities_from_cells(world, props_ref.current.selected_cells))
+			end
 			return entities_ref.current[(current_idx - 2 + #entities_ref.current) % #entities_ref.current + 1]
 		end
 	end
@@ -126,7 +129,11 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 			return best_uncompressed_entity(world, entities_from_cells(world, props_ref.current.selected_cells))
 		else
 			local current_idx = table.find(entities_ref.current, uncompressed_entity.current)
-			return entities_ref.current[(current_idx % #entities_ref.current) + 1]
+			if current_idx == nil then
+				return best_uncompressed_entity(world, entities_from_cells(world, props_ref.current.selected_cells))
+			else
+				return entities_ref.current[(current_idx % #entities_ref.current) + 1]
+			end
 		end
 	end
 

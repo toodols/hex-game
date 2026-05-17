@@ -27,20 +27,7 @@ type EntityAction = types.EntityAction
 type TeamId = types.TeamId
 type System = types.System
 type Effect = types.Effect
-
--- function portals_tick(world: World)
--- 	for _, cell in world.cells do
--- 		if cell.type == "portal" then
--- 			local max_steps = cell.portal.open_time + cell.portal.close_time
--- 			cell.portal.steps = (cell.portal.steps + 1) % max_steps
--- 			if cell.portal.steps < cell.portal.open_time then
--- 				cell.portal.open = true
--- 			else
--- 				cell.portal.open = false
--- 			end
--- 		end
--- 	end
--- end
+type WorldUpdate = types.WorldUpdate
 
 -- add all entities' queued_decisions into the global action queue
 function queue_entity_decisions(world: World, queue: { EntityAction })
@@ -166,7 +153,14 @@ function delete_deconstructed_entities(world: World, queue: { EntityAction })
 	end
 end
 
-function run_action_phase(world: World, extra_actions: { EntityAction }?)
+function run_action_phase(
+	world: World,
+	extra_actions: { EntityAction }?
+): {
+	elapsed: number,
+	updates: { [TeamId]: { WorldUpdate } },
+	dropped: { EntityAction },
+}
 	local t0 = tick()
 
 	if #world.action_queue > 0 then
@@ -182,13 +176,11 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 		end
 	end
 	table.sort(world.action_queue, function(a, b)
-		if a.requested_at then
-		end
+		return a.requested_at < b.requested_at
 	end)
 
 	queue_entity_decisions(world, world.action_queue)
 	delete_deconstructed_entities(world, world.action_queue)
-	-- portals_tick(world)
 
 	systems_mod.compute_systems(world)
 	visibility_mod.compute_visibility(world)
@@ -234,6 +226,8 @@ function run_action_phase(world: World, extra_actions: { EntityAction }?)
 				type = "regeneration",
 				duration = 2,
 			})
+		elseif on_rad then
+			-- todo: add rad buff
 		end
 	end
 

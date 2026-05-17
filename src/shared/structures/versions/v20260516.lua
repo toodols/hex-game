@@ -1,9 +1,6 @@
--- module for serializing and deserializing game state
-
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local ServerScriptService = game:GetService "ServerScriptService"
 
-local server_entity_mod = require(ServerScriptService.Server.entity)
+local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local coords_mod = require(ReplicatedStorage.Shared.coords)
@@ -38,12 +35,17 @@ local tagged_union = schema.tagged_union
 local f64 = schema.f64
 local i32_infinite = schema.i32_infinite
 local keycode = schema.keycode
+local dynamic = schema.dynamic
 
-if #util.table_keys(server_entity_mod.registry) == 0 then
-	error "No entities registered in server entity registry. Likely before it has loaded."
+if #util.table_keys(shared_entity_mod.registry) == 0 then
+	error "No entities registered in shared entity registry. Likely before it has loaded."
 end
 
-local entity_types = enum "entity_types"(util.table_keys(server_entity_mod.registry))
+-- for some reason client's keys and server's keys are in different orders which messes everything up
+-- here we sort them to make sure they're the same
+local entity_keys = util.table_keys(shared_entity_mod.registry)
+table.sort(entity_keys)
+local entity_types = enum "entity_types"(entity_keys)
 
 local entity_statuses = enum "entity_statuses" {
 	"lock",
@@ -145,7 +147,6 @@ local icon = tagged_union "icon"({
 	},
 }, "type")
 
--- 4 bytes
 local team_id = u8
 
 local player_id = i32
@@ -153,7 +154,7 @@ local player_id = i32
 local research_id = enum(util.table_keys(researches_mod.researches))
 research_id.label = "research_id"
 
-local research_state = struct "research_state" {
+local research_item = struct "research_item" {
 	cost = map(item_type, i32),
 	cost_is_paid = boolean,
 	time = i32,
@@ -163,6 +164,8 @@ local research_state = struct "research_state" {
 	id = research_id,
 	icon = icon,
 	coord = coord,
+	dependencies = array(research_id),
+	conflicts = array(research_id),
 	status = enum {
 		"incomplete",
 		"researching",
@@ -170,8 +173,8 @@ local research_state = struct "research_state" {
 	},
 }
 
-local researches = struct "researches" {
-	states = collect_by_key(research_state, "id"),
+local research_state = struct "research_state" {
+	states = collect_by_key(research_item, "id"),
 	queue = array(research_id),
 }
 
@@ -180,7 +183,8 @@ local queued_decision = tagged_union "queued_decision"({
 		type = const "ability",
 		ability_id = str,
 		entity_id = entity_id,
-		coordinates = array(coord),
+		coordinate = coord,
+		requested_at = f64,
 	},
 	-- construct = struct {
 	--  type = const "construct",
@@ -203,15 +207,19 @@ local effect = tagged_union "effect"({
 	shield = struct {
 		type = const "shield",
 		health = i32,
+		duration = option(i32),
 	},
 	infected = struct {
 		type = const "infected",
+		duration = option(i32),
 	},
 	infected_immune = struct {
 		type = const "infected_immune",
+		duration = option(i32),
 	},
 	regeneration = struct {
 		type = const "regeneration",
+		duration = option(i32),
 	},
 }, "type")
 
@@ -227,6 +235,7 @@ local entity: Schema<Entity> = struct "entity" {
 	type = entity_types,
 	coordinates = array(coord),
 	id = entity_id,
+	name = str,
 	rotation = option(u8),
 	health = i32_infinite,
 	max_health = i32_infinite,
@@ -250,16 +259,19 @@ local entity: Schema<Entity> = struct "entity" {
 	charges = option(i32),
 	cost_fulfilled = option(map(item_type, i32)),
 	build_time = option(i32),
-	researches = option(researches),
+	researches = option(research_state),
 	queued_decisions = array(queued_decision),
-	server_data = struct {
+	always_visible = option(boolean),
+	can_deconstruct = option(boolean),
+	bonus_clock = option(i32),
+	server_data = option(struct {
 		requested_at = f64,
 		child_relationship = option(enum { "lock", "disguise", "revived" }),
 		parent = option(entity_id),
 		always_visible = boolean,
 		always_visible_for = map(team_id, const(true)),
 		incorporeal = boolean,
-	},
+	}),
 }
 
 local cell_types = enum "cell_types" {
@@ -272,10 +284,14 @@ local cell: Schema<HexCell> = struct "cell" {
 	coordinate = coord,
 	entities = map(entity_id, const(true)),
 	influences = const {},
-	server_data = const {
+	buildable_for_team = option(boolean),
+	visible_for_team = option(boolean),
+	always_visible = option(boolean),
+	owner = option(team_id),
+	server_data = option(const {
 		presence = {},
 		visibility = {},
-	},
+	}),
 }
 
 local color3 = {
@@ -340,14 +356,14 @@ local team_data = struct "team_data" {
 	is_player_team = boolean,
 	is_spectator_team = boolean,
 	color = team_color,
-	server_data = struct {
+	server_data = option(struct {
 		creative = boolean,
 		visibility = enum {
 			"normal",
 			"fogless",
 			"perfect",
 		},
-	},
+	}),
 }
 
 local global_configuration = struct "global_configuration" {
@@ -421,11 +437,19 @@ local coalition = struct "coalition" {
 	teams = array(team_id),
 }
 
+local conclusion = struct "conclusion" {
+	winning_coalition = coalition_id,
+	world_archive = str,
+}
+
+local entity_configuration = dynamic
+
 local world_schema = struct "world" {
-	entities = collect_by_key(entity, "id"),
 	cells = map(encoded_coord, cell),
+	entities = collect_by_key(entity, "id"),
 	teams = collect_by_key(team_data, "id"),
 	coalitions = collect_by_key(coalition, "id"),
+	entity_configurations = map(str, entity_configuration),
 	global_configuration = global_configuration,
 	neutral_team = team_id,
 	spectator_team = team_id,
@@ -433,17 +457,194 @@ local world_schema = struct "world" {
 	highest_turn = i32,
 	speed_multiplier = i32,
 	speed_base = i32,
-	skipped = const {},
+	skipped = option(array(player_id)),
 	turn_schedule = option(turn_schedule),
 	quests = collect_by_key(quest, "id"),
 	player_data = map(player_id, player_data),
+	conclusion = option(conclusion),
 }
 
+local system = struct "system" {
+	entities = map(entity_id, const(true)),
+	cells = map(encoded_coord, const(true)),
+	overflow_items = array(item_type),
+	power = i32,
+	heart_type = option(str),
+	team = team_id,
+}
+
+local partial_world = struct "partial_world" {
+	cells = map(encoded_coord, cell),
+	coalitions = collect_by_key(coalition, "id"),
+	teams = collect_by_key(team_data, "id"),
+	quests = collect_by_key(quest, "id"),
+	systems = array(system),
+	turn = i32,
+	skipped = array(player_id),
+	current_skips = i32,
+	needed_skips = i32,
+	highest_turn = i32,
+	turn_schedule = option(turn_schedule),
+	entities = collect_by_key(entity, "id"),
+	entity_configurations = map(str, entity_configuration),
+	global_configuration = global_configuration,
+	neutral_team = team_id,
+	spectator_team = team_id,
+	conclusion = option(conclusion),
+}
+
+local damage_result = struct "damage_result" {
+	amount = i32,
+	lethal = boolean,
+}
+
+local damage = struct "damage" {
+	amount = i32,
+	damage_type = enum { "healing", "physical" },
+	piercing = boolean,
+	nonlethal = boolean,
+	friendly_fire = boolean,
+}
+
+local entity_event = tagged_union "entity_event"({
+	consumed_items = struct {
+		type = const "entity_event",
+		event_type = const "consumed_items",
+		entity_id = entity_id,
+		items = map(item_type, i32),
+	},
+	created = struct {
+		type = const "entity_event",
+		event_type = const "created",
+		entity_id = entity_id,
+	},
+	destroy = struct {
+		type = const "entity_event",
+		event_type = const "destroy",
+		entity_id = entity_id,
+		death_type = str,
+	},
+	produced_items = struct {
+		type = const "entity_event",
+		event_type = const "produced_items",
+		entity_id = entity_id,
+		items = map(item_type, i32),
+	},
+	research_completed = struct {
+		type = const "entity_event",
+		event_type = const "research_completed",
+		entity_id = entity_id,
+		research_id = research_id,
+	},
+	status_changed = struct {
+		type = const "entity_event",
+		event_type = const "status_changed",
+		entity_id = entity_id,
+	},
+	took_damage = struct {
+		type = const "entity_event",
+		event_type = const "took_damage",
+		entity_id = entity_id,
+		damage_result = damage_result,
+		damage = damage,
+	},
+	promoted = struct {
+		type = const "entity_event",
+		event_type = const "promoted",
+		entity_id = entity_id,
+		team_id = team_id,
+	},
+}, "event_type")
+
+local world_update = tagged_union "world_update"({
+	ability = struct {
+		type = const "ability",
+		ability_id = str,
+		entity_id = entity_id,
+		coordinate = coord,
+	},
+	cells = struct {
+		type = const "cells",
+		cells = map(encoded_coord, cell),
+	},
+	cell_update = struct {
+		type = const "cell_update",
+		coord = coord,
+	},
+	entity_created = struct {
+		type = const "entity_created",
+		entity_id = entity_id,
+	},
+	entity_update = struct {
+		type = const "entity_update",
+		entity = entity,
+	},
+	entity_event = entity_event,
+	exchange = struct {
+		type = const "exchange",
+		input_items = option(map(item_type, i32)),
+		input_power = option(i32),
+		output_items = option(map(item_type, i32)),
+		output_power = option(i32),
+	},
+	quest_update = struct {
+		type = const "quest_update",
+		quest = quest,
+	},
+	teams = struct {
+		type = const "teams",
+		teams = map(team_id, team_data),
+		coalitions = map(coalition_id, coalition),
+	},
+	turn = struct {
+		type = const "turn",
+		highest_turn = i32,
+		turn = i32,
+	},
+	turn_completed = struct { type = const "turn_completed" },
+	turn_skipped = struct { type = const "turn_skipped" },
+	turn_skips = struct {
+		type = const "turn_skips",
+		current_skips = i32,
+		skipped = array(player_id),
+		needed_skips = i32,
+	},
+	turn_timer = struct {
+		type = const "turn_timer",
+		schedule = turn_schedule,
+	},
+	world = struct {
+		type = const "world",
+		world = partial_world,
+	},
+	systems = struct {
+		type = const "systems",
+		systems = array(system),
+	},
+	conclusion = struct {
+		type = const "conclusion",
+		conclusion = conclusion,
+	},
+	player_data = struct {
+		type = const "player_data",
+		player_data = map(str, player_data),
+	},
+}, "type")
+local world_updates = array(world_update)
+
 return {
-	id = "v20260511",
+	id = "v20260516",
+	next = nil,
+	migrate = nil,
+
+	cell = cell,
+	encoded_coord = encoded_coord,
+	entity = entity,
+	entity_configuration = entity_configuration,
+	partial_world = partial_world,
 	player_settings = player_settings,
 	player_data = player_data,
 	world_schema = world_schema,
-	next = nil,
-	migrate = nil,
+	world_update = world_update,
+	world_updates = world_updates,
 }

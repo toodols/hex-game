@@ -1,14 +1,14 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
+
 local types = require(ReplicatedStorage.Shared.types)
 local util = require(ReplicatedStorage.Shared.util)
 local new_signal = require(ReplicatedStorage.Shared.signal).new_signal
 local shared_entity_mod = require(ReplicatedStorage.Shared.entity)
+
+local coords_mod = require(script.Parent.coords)
 local line_of_sight = require(script.line_of_sight).line_of_sight
 local astar = require(script.pathfinding).astar
 local bfs = require(script.pathfinding).bfs
-
-local coords_mod = require(script.Parent.coords)
-local encode_coord = coords_mod.encode_coord
 
 type CubicCoordinate = types.CubicCoordinate
 type Extents = types.Extents
@@ -24,12 +24,13 @@ type TeamData = types.TeamData
 type EntityConfiguration = types.EntityConfiguration
 type GlobalConfiguration = types.GlobalConfiguration
 type WorldUpdate = types.WorldUpdate
+type TurnSchedule = types.TurnSchedule
 
 -- Filters all values that are inside the world
 function coords_filter(world: World, values: { CubicCoordinate }): { CubicCoordinate }
 	local results = {}
 	for _, v in values do
-		local key = encode_coord(v)
+		local key = coords_mod.encode_coord(v)
 		if world.cells[key] then
 			table.insert(results, v)
 		end
@@ -118,7 +119,7 @@ function world_query_entity(world: World, props: any): { Entity }
 		local entities = cell.entities
 		for entity_id in entities do
 			if not world.entities[entity_id] then
-				error(`{entity_id} not found for {encode_coord(cell.coordinate)}`)
+				error(`{entity_id} not found for {coords_mod.encode_coord(cell.coordinate)}`)
 			end
 			if pred(world.entities[entity_id]) then
 				table.insert(results, world.entities[entity_id])
@@ -148,7 +149,7 @@ function world_add_update(self: World, update: WorldUpdate)
 end
 
 function world_get_cell(self: World, coord: CubicCoordinate): HexCell?
-	return self.cells[encode_coord(coord)]
+	return self.cells[coords_mod.encode_coord(coord)]
 end
 
 -- Turns out using luau's iterators is actually like 50% slower than creating a new table even for 100k elements
@@ -258,13 +259,15 @@ function new_world_empty(entity_config: { [string]: EntityConfiguration }?, glob
 	return world
 end
 
+-- apply incoming changes from PartialWorld into World
+-- server-side calls will need to hydrate turn_schedule
 function apply_world_data(world: World, data: PartialWorld)
 	world.coalitions = data.coalitions
 	world.teams = data.teams
 	world.conclusion = data.conclusion
 	world.turn = data.turn
 	world.global_configuration = data.global_configuration
-	world.turn_schedule = data.turn_schedule
+	world.turn_schedule = data.turn_schedule :: TurnSchedule
 	world.highest_turn = data.highest_turn
 	world.entities = data.entities
 	world.neutral_team = data.neutral_team
@@ -273,6 +276,7 @@ function apply_world_data(world: World, data: PartialWorld)
 	world.needed_skips = data.needed_skips
 	world.current_skips = data.current_skips
 	world.cells = data.cells
+	world.skipped = data.skipped
 end
 
 -- creates a complete world from serialized world
@@ -321,7 +325,7 @@ function new_world_from_extents(extents: Extents): World
 			for z = extents[3].min, extents[3].max do
 				if x + y + z == 0 then
 					local coord = { x, y, z }
-					world.cells[encode_coord(coord)] = empty_cell(coord)
+					world.cells[coords_mod.encode_coord(coord)] = empty_cell(coord)
 				end
 			end
 		end

@@ -10,7 +10,7 @@ local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 local util = require(ReplicatedStorage.Shared.util)
 local datastore_mod = require(ServerScriptService.Server.datastore)
 local base64 = require(ReplicatedStorage.Shared.base64)
-local structures = require(ServerScriptService.Server.structures)
+local structures = require(ReplicatedStorage.Shared.structures)
 
 local match_result_webhook = HttpService:GetSecret "MATCH_RESULT_WEBHOOK_URL"
 match_result_webhook = match_result_webhook:AddPrefix "https://discord.com/api/webhooks/"

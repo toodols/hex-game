@@ -5,6 +5,7 @@ local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local team_mod = require(ReplicatedStorage.Shared.team)
 local coords_mod = require(ReplicatedStorage.Shared.coords)
+local structures = require(ReplicatedStorage.Shared.structures)
 
 local serialize_mod = require(script.Parent.serialize)
 local remotes_mod = require(script.Parent.remotes)
@@ -166,7 +167,7 @@ function flush_updates(world: World): { [TeamId]: { WorldUpdate } }
 			continue
 		end
 		local updates_for_player = get_updates(world, se_ctx, { team = player_team.id, player = player.UserId }, buffer)
-		remotes_mod.world_updates_remote:FireClient(player, updates_for_player)
+		remotes_mod.world_updates_remote:FireClient(player, structures.serialize_world_updates(updates_for_player))
 	end
 
 	for _, team in world.teams do

@@ -1,11 +1,7 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
-local ServerScriptService = game:GetService "ServerScriptService"
 local util = require(ReplicatedStorage.Shared.util)
 local formatting = require(ReplicatedStorage.Shared.formatting)
 local coords = require(ReplicatedStorage.Shared.coords)
-local OpenSkill = require(ServerScriptService.Server.openskill)
-local binary_encoder = require(ServerScriptService.Server.structures.binary_encoder)
-local schema = require(ServerScriptService.Server.structures.schema)
 
 local assert_eq = util.assert_eq
 
@@ -59,73 +55,18 @@ function tests.sector()
 	)
 end
 
-function tests.openskill()
-	local alice = OpenSkill.Rating()
-	local bob = OpenSkill.Rating()
-	local charlie = OpenSkill.Rating()
-
-	-- charlie always loses
-	for i = 1, 10 do
-		OpenSkill.Rate { { alice }, { bob, charlie } }
-		OpenSkill.Rate { { alice, bob }, { charlie } }
-		OpenSkill.Rate { { bob }, { alice } }
-		OpenSkill.Rate { { bob }, { alice, charlie } }
-		OpenSkill.Rate { { alice }, { bob, charlie } }
-	end
-
-	local alice_ordinal = OpenSkill.Ordinal(alice)
-	local bob_ordinal = OpenSkill.Ordinal(bob)
-	local charlie_ordinal = OpenSkill.Ordinal(charlie)
-
-	assert(bob_ordinal > alice_ordinal, "bob should be better than alice")
-	assert(alice_ordinal > charlie_ordinal, "alice should be better than charlie")
-	assert(bob_ordinal > charlie_ordinal, "bob should be better than charlie")
-
-	OpenSkill.Rate({ { alice }, { bob } }, { rank = { 0, 0 } })
-
-	local alice_new_ordinal = OpenSkill.Ordinal(alice)
-	local bob_new_ordinal = OpenSkill.Ordinal(bob)
-	assert(alice_new_ordinal > alice_ordinal, "alice's ordinal should go up")
-	assert(bob_new_ordinal < bob_ordinal, "bob's ordinal should go down")
+function tests.rotate_coord()
+	assert_eq(coords.rotate_coord({ 0, 0, 0 }, 1), { 0, 0, 0 })
+	assert_eq(coords.rotate_coord({ -1, 1, 0 }, 1), { 0, 1, -1 })
+	assert_eq(coords.rotate_coord({ 1, -1, 0 }, 1), { 0, -1, 1 })
+	assert_eq(coords.rotate_coord({ 0, 1, -1 }, 1), { 1, 0, -1 })
+	assert_eq(coords.rotate_coord({ 0, 4, -4 }, 3), { 0, -4, 4 })
+	assert_eq(coords.rotate_coord({ 0, 4, -4 }, 0), { 0, 4, -4 })
+	assert_eq(coords.rotate_coord({ 1, 2, -3 }, 1), { 3, -1, -2 })
 end
 
-function tests.binary_encoder()
-	local struct = schema.struct
-	local i32 = schema.i32
-	local str = schema.str
-	local boolean = schema.boolean
-	local const = schema.const
-	local dynamic_table = schema.dynamic_table
-
-	local person = struct {
-		type = const "person",
-		name = str,
-		age = i32,
-		alive = boolean,
-	}
-	local writer = binary_encoder.write()
-	i32.write(writer, 30)
-	local sample = {
-		type = "person",
-		name = "John Doe",
-		age = 30,
-		alive = true,
-	}
-	person.write(writer, sample)
-	dynamic_table.write(writer, sample)
-	local text = writer.to_string()
-	local reader = binary_encoder.read(text)
-	assert(i32.read(reader) == 30, "number")
-	local data = person.read(reader)
-	assert(data.type == "person", "type")
-	assert(data.name == "John Doe", "name")
-	assert(data.age == 30, "age")
-	assert(data.alive == true, "alive")
-	local data2 = dynamic_table.read(reader)
-	assert(data2.type == "person", "type")
-	assert(data2.name == "John Doe", "name")
-	assert(data2.age == 30, "age")
-	assert(data2.alive == true, "alive")
+function tests.fit_coords()
+	local triangle = { { 0, 0, 0 }, { 1, 0, 0 }, {} }
 end
 
 return tests

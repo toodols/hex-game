@@ -28,11 +28,21 @@ function construct_interaction(world: World, entry: Interaction, player_info: Pl
 		warn("Entity configuration not found for entity type: ", entry.entity_type)
 		return {}
 	end
+	local coordinates = {}
+	for _, offset in entity_config.offsets do
+		table.insert(coordinates, coords.coords_add(entry.coordinate, offset))
+	end
 
-	-- the cell exists
-	local cell = world:get_cell(entry.coordinate)
-	if not cell then
-		return {}
+	-- all cells exist
+	for _, coord in coordinates do
+		local cell = world:get_cell(coord)
+		if not cell then
+			return {}
+		end
+		-- and is not blocked
+		if cell_blocked(world, coord, player_info.team, entry.entity_type) then
+			return {}
+		end
 	end
 
 	if not presence_mod.team_may_naively_place_blueprint(world, player_info.team, entry.coordinate) then
@@ -46,19 +56,9 @@ function construct_interaction(world: World, entry: Interaction, player_info: Pl
 		end
 	end
 
-	-- and is not blocked
-	if cell_blocked(world, cell.coordinate, player_info.team, entry.entity_type) then
-		return {}
-	end
-
 	-- and can be built by the player
 	if not entity_config.buildable then
 		return {}
-	end
-
-	local coordinates = {}
-	for _, offset in entity_config.offsets do
-		table.insert(coordinates, coords.coords_add(entry.coordinate, offset))
 	end
 
 	if world.global_configuration.construction_condition_enabled then

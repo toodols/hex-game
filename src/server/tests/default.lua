@@ -1,4 +1,3 @@
-local HttpService = game:GetService "HttpService"
 local ServerScriptService = game:GetService "ServerScriptService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 
@@ -6,8 +5,8 @@ local world_mod = require(ReplicatedStorage.Shared.world)
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local coords = require(ReplicatedStorage.Shared.coords)
+local structures = require(ReplicatedStorage.Shared.structures)
 
-local structures = require(ServerScriptService.Server.structures)
 local presets = require(ServerScriptService.Server.presets)
 local cleanup = require(ServerScriptService.Server.cleanup).cleanup
 local action_phase_mod = require(ServerScriptService.Server.action_phase)
@@ -67,7 +66,7 @@ function tests.extractor_filling_stockpile()
 	local world = presets.blank_map()
 	world.global_configuration.decaying_enabled = false
 
-	local extractor = spawn_entity(world, "extractor", "bar_deposit")
+	local _extractor = spawn_entity(world, "extractor", "bar_deposit")
 	local stockpile = spawn_entity(world, "stockpile")
 
 	for i = 1, 2 do
@@ -310,13 +309,13 @@ function tests.capture_extractor()
 		owner = world.capturable_team,
 	}, world)
 
-	local infinite_source = entity_mod.new_entity({
+	local _infinite_source = entity_mod.new_entity({
 		type = "infinite_source",
 		primary_coordinate = { -1, 1, 0 },
 		owner = team1.id,
 	}, world)
 
-	local vertex = entity_mod.new_entity({
+	local _vertex = entity_mod.new_entity({
 		type = "vertex",
 		primary_coordinate = { 0, 0, 0 },
 		status = "blueprint",
@@ -530,7 +529,7 @@ function tests.correct_phony_updates()
 	local disguise_target =
 		entity_mod.new_entity({ type = "stockpile", owner = teams.team2.id, primary_coordinate = { 1, 0, -1 } }, world)
 
-	local enemy =
+	local _enemy =
 		entity_mod.new_entity({ type = "scout", owner = teams.team1.id, primary_coordinate = { -2, 0, 2 } }, world)
 
 	table.insert(phony.queued_decisions, {
@@ -563,17 +562,6 @@ function tests.correct_phony_updates()
 		"Disguise should be visible but not active to phony's team"
 	)
 
-	cleanup(world)
-end
-
-function tests.archive_world()
-	-- todo
-	local world = presets.my_map()
-	local compressed = structures.serialize_world(world)
-	local as_json = HttpService:JSONEncode(world)
-	print("World saved as", #compressed, "bytes")
-	print(("Is %d%% of JSON size"):format(math.floor(#compressed / #as_json * 100)))
-	local timestamp, decompressed_world = structures.deserialize_world(compressed)
 	cleanup(world)
 end
 
@@ -733,7 +721,7 @@ function tests.taunt_chain_reaction()
 		owner = teams.team2.id,
 	}, world)
 
-	local infinite_source = entity_mod.new_entity({
+	local _infinite_source = entity_mod.new_entity({
 		type = "infinite_source",
 		primary_coordinate = { -2, 2, 0 },
 		owner = teams.team2.id,
@@ -875,9 +863,9 @@ function tests.lose_visibility_when_lose_entity()
 end
 
 function tests.weird_presence_after_load()
-	local world, teams = presets.my_map()
+	local world, _teams = presets.my_map()
 	local bin = structures.serialize_world(world)
-	local timestamp, data = structures.deserialize_world(bin)
+	local _timestamp, data = structures.deserialize_world(bin)
 
 	turn_scheduler.turn_schedule_kill(world.turn_schedule)
 	world_mod.apply_world_data(world, data)
@@ -908,7 +896,7 @@ end
 -- end
 
 function tests.infected_effect()
-	local world, teams = presets.blank_map()
+	local world, _teams = presets.blank_map()
 	world.global_configuration.decaying_enabled = false
 
 	local scout0 = entity_mod.new_entity({
@@ -955,7 +943,7 @@ function tests.necromancer()
 	local world, teams = presets.blank_map()
 	world.global_configuration.decaying_enabled = false
 
-	local infinite_source = entity_mod.new_entity({
+	local _infinite_source = entity_mod.new_entity({
 		type = "infinite_source",
 		primary_coordinate = { 2, 0, -2 },
 		owner = teams.team1.id,
@@ -971,7 +959,7 @@ function tests.necromancer()
 		primary_coordinate = { -1, 0, 1 },
 		owner = teams.team2.id,
 	}, world)
-	local necromancer = entity_mod.new_entity({
+	local _necromancer = entity_mod.new_entity({
 		type = "necromancer",
 		primary_coordinate = { 0, -1, 1 },
 		owner = teams.team2.id,
@@ -1017,6 +1005,24 @@ function tests.deposit_is_incorporeal()
 		world:get_cell({ 0, 0, 0 }).server_data.presence[world.neutral_team] == nil,
 		"Deposit should not create a presence"
 	)
+end
+
+function tests.big_building()
+	local world, teams = presets.blank_map()
+	world.entity_configurations.big.buildable = true
+	local _updates = router.on_client_interaction(world, {
+		player_team = teams.team1,
+		data = { {
+			type = "construct",
+			entity_type = "big",
+			coordinate = { 0, 0, 0 },
+		} },
+	})
+	local offsets = world.entity_configurations.big.offsets
+	for _, offset in offsets do
+		local entities = world:get_cell(offset).entities
+		assert(next(entities) ~= nil, `{coords.encode_coord(offset)} is missing entities`)
+	end
 end
 
 return tests

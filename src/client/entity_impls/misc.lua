@@ -6,6 +6,10 @@ local entity_mod = require(ReplicatedStorage.Client.entity)
 type Entity = types.Entity
 type World = types.World
 
+entity_mod.registry.big = entity_mod.with_defaults {
+	model = asset_server.load "Entities/Big",
+}
+
 entity_mod.registry.infinite_source = entity_mod.with_defaults {
 	model = asset_server.load "Entities/InfiniteSource",
 }
@@ -66,8 +70,8 @@ entity_mod.registry.anima = entity_mod.with_defaults {
 	model = asset_server.load "Entities/Anima",
 }
 
-entity_mod.registry.rash = entity_mod.with_defaults { 
-	model = asset_server.load "Entities/Rash"
+entity_mod.registry.rash = entity_mod.with_defaults {
+	model = asset_server.load "Entities/Rash",
 }
 
 return {}

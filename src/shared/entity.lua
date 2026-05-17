@@ -50,7 +50,6 @@ type PartialEntityConfiguration = {
 
 function with_defaults(t: PartialEntityConfiguration): EntityConfiguration
 	t.type = t.type or error "no type"
-	t.init = t.init or function() end
 	t.internal = t.internal or false
 	t.build_time = t.build_time or 0
 	t.construction_condition = t.construction_condition or {}

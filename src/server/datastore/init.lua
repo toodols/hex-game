@@ -2,10 +2,10 @@ local DataStoreService = game:GetService "DataStoreService"
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local ServerScriptService = game:GetService "ServerScriptService"
 
-local types = require(ReplicatedStorage.Shared.types)
 local openskill = require(ServerScriptService.Server.openskill)
-local structures = require(ServerScriptService.Server.structures)
 
+local types = require(ReplicatedStorage.Shared.types)
+local structures = require(ReplicatedStorage.Shared.structures)
 local base64 = require(ReplicatedStorage.Shared.base64)
 local util = require(ReplicatedStorage.Shared.util)
 local default_settings = require(ReplicatedStorage.Shared.settings).default_settings

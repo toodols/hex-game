@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local result_mod = require(ReplicatedStorage.Shared.result)
+local util = require(ReplicatedStorage.Shared.util)
 
 local err = result_mod.err
 local ok = result_mod.ok
@@ -160,7 +161,7 @@ local boolean: Schema<boolean> = {
 
 local array = with_label(function<T>(schema: Schema<T>): Schema<{ T }>
 	return {
-		label = `[{schema.label}]`,
+		label = `[{schema.label or "unnamed"}]`,
 		write = function(writer, data)
 			local count = 0
 			for _ in data do
@@ -212,11 +213,13 @@ local map = with_label(function<K, V>(key_schema: Schema<K>, value_schema: Schem
 		read = function(reader)
 			local count = reader.read_u16()
 			local data = {}
+
 			for i = 1, count do
 				local k = key_schema.read(reader)
 				local v = value_schema.read(reader)
 				data[k] = v
 			end
+
 			return data
 		end,
 		validate = function(data)
@@ -333,24 +336,23 @@ local i32_infinite = {
 }
 
 local struct = with_label(function<T>(object: { [string]: Schema<any> | any }): Schema<T>
-	local keys = {}
-	for k in object do
-		table.insert(keys, k)
+	for key, schema in object do
+		if schema.read == nil and schema.write == nil and schema.validate == nil then
+			error("the schema for " .. key .. " doesn't look like a schema")
+		end
 	end
-
 	local self
 	self = {
+		object = object,
 		write = function(writer, data)
-			for _, key in keys do
+			for key, schema in object do
 				local value = data[key]
-				local schema = object[key]
 				schema.write(writer, value)
 			end
 		end,
 		read = function(reader)
 			local data = {}
-			for _, key in keys do
-				local schema = object[key]
+			for key, schema in object do
 				data[key] = schema.read(reader)
 			end
 			return data
@@ -359,8 +361,7 @@ local struct = with_label(function<T>(object: { [string]: Schema<any> | any }): 
 			if type(data) ~= "table" then
 				return err()
 			end
-			for _, key in keys do
-				local schema = object[key]
+			for key, schema in object do
 				local value = data[key]
 				local result = schema.validate(value)
 				if not result.is_ok then
@@ -558,6 +559,7 @@ local roblox_types = enum "roblox_type" {
 	"UDim2",
 	"BrickColor",
 	"table",
+	"nil",
 }
 
 local dynamic_table
@@ -578,6 +580,12 @@ local dynamic: Schema<any> = {
 		elseif t == "table" then
 			roblox_types.write(writer, t)
 			dynamic_table.write(writer, data)
+		elseif t == "nil" then
+			roblox_types.write(writer, t)
+		elseif t == "function" then
+			error "can't serialize functions"
+		else
+			error("wrote nothing. type is " .. t)
 		end
 	end,
 	read = function(reader)
@@ -590,6 +598,8 @@ local dynamic: Schema<any> = {
 			return boolean.read(reader)
 		elseif t == "table" then
 			return dynamic_table.read(reader)
+		elseif t == "nil" then
+			return nil
 		end
 		return nil
 	end,
@@ -600,7 +610,21 @@ local dynamic: Schema<any> = {
 
 dynamic_table = map(dynamic, dynamic)
 
+local error_schema: Schema<any> = {
+	label = "error",
+	write = function()
+		error "error"
+	end,
+	read = function()
+		error "error"
+	end,
+	validate = function()
+		error "error"
+	end,
+}
+
 return {
+	error = error_schema,
 	f64 = f64,
 	i32 = i32,
 	i32_infinite = i32_infinite,

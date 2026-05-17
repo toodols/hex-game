@@ -19,9 +19,6 @@ function handle_ability_actions(world: World)
 		local entity = world.entities[interaction.entity_id]
 		local config = world.entity_configurations[entity.type]
 		local ability = config.abilities[interaction.ability_id]
-		if ability == nil then
-			print(interaction)
-		end
 		if abilities[ability.type] == nil then
 			error("Unknown ability type " .. ability.type)
 		end
