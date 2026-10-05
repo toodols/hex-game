@@ -44,6 +44,7 @@ function get_neighbors_set(world: World, coordinates: { CubicCoordinate }): { [E
 end
 
 local error_type = {
+	ok = 0,
 	-- can happen intentionally or unintentionally
 	dismiss = 1,
 	-- triggered because of lag or desync

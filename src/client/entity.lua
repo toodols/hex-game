@@ -68,17 +68,19 @@ function with_defaults(t: any)
 			world.instance_entity_map[instance] = nil
 
 			if event.death_type == "killed" then
-				for _, part in instance:GetDescendants() do
-					if not part:IsA "BasePart" then
-						continue
+				task.spawn(function()
+					for _, part in instance:GetDescendants() do
+						if not part:IsA "BasePart" then
+							continue
+						end
+						part.Anchored = false
+						part.CanCollide = false
+						part:ApplyImpulse(part:GetMass() * Vector3.new(math.random(-30, 30), 60, math.random(-30, 30)))
+						Debris:AddItem(part, 1)
+						task.wait(0.1)
 					end
-					part.Anchored = false
-					part.CanCollide = false
-					part:ApplyImpulse(part:GetMass() * Vector3.new(math.random(-30, 30), 60, math.random(-30, 30)))
-					Debris:AddItem(part, 1)
-					task.wait(0.1)
-				end
-				instance:Destroy()
+					instance:Destroy()
+				end)
 			else
 				instance:Destroy()
 			end

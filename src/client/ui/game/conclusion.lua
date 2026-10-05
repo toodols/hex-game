@@ -19,7 +19,7 @@ function Conclusion()
 	local conclusion, set_conclusion = React.useState(world.conclusion)
 
 	React.useEffect(function()
-		world.world_update_signal.listen(function(updates)
+		return world.world_update_signal.listen(function(updates)
 			for _, update in updates do
 				if update.type == "conclusion" then
 					set_conclusion(update.conclusion)
@@ -99,10 +99,8 @@ function Conclusion()
 			}),
 		}),
 		Bottom = React.createElement("Frame", {
-			Position = UDim2.new(0, 0, 1, 0),
 			Size = UDim2.new(1, 0, 0, 0),
-			AnchorPoint = Vector2.new(0, 1),
-			[React.Tag] = "container",
+			[React.Tag] = "container align-bl",
 		}, {
 
 			LobbyButton = React.createElement("TextButton", {

@@ -15,13 +15,10 @@ function Hitpoints(props: { entity_id: EntityId })
 	return React.createElement(
 		"Frame",
 		{
-			AnchorPoint = Vector2.new(1, 0),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BackgroundTransparency = 1,
-			BorderColor3 = Color3.fromRGB(0, 0, 0),
-			BorderSizePixel = 0,
-			Position = UDim2.new(1, 0, 0, 0),
 			Size = UDim2.new(0, 100, 1, 0),
+			[React.Tag] = "align-br",
 		},
 		{
 			GridLayout = React.createElement("UIGridLayout", {

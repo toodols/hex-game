@@ -19,6 +19,7 @@ function TextActionButton(
 	local enabled = if props.enabled then props.enabled else true
 
 	return React.createElement("TextButton", {
+		[React.Tag] = props[React.Tag],
 		BackgroundColor3 = props.color,
 		BackgroundTransparency = 1,
 		LayoutOrder = props.LayoutOrder,
@@ -43,9 +44,9 @@ function TextActionButton(
 					}):Play()
 				end
 				else nil,
-		Position = props.Position or UDim2.new(0, 0, 0, 0),
+		Position = props.Position,
 		Size = props.Size or UDim2.new(1, 0, 0, 20),
-		AnchorPoint = props.AnchorPoint or Vector2.new(0, 0),
+		AnchorPoint = props.AnchorPoint,
 		Text = props.Text,
 		TextColor3 = if enabled then props.color else props.color:Lerp(Color3.fromRGB(255, 255, 255), 0.5),
 		TextSize = 14,

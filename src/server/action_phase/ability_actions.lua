@@ -17,6 +17,9 @@ function handle_ability_actions(world: World)
 		end)
 	do
 		local entity = world.entities[interaction.entity_id]
+		if entity == nil or entity.is_destroyed then
+			continue
+		end
 		local config = world.entity_configurations[entity.type]
 		local ability = config.abilities[interaction.ability_id]
 		if abilities[ability.type] == nil then

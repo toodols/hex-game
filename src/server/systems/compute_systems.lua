@@ -50,20 +50,6 @@ function compute_systems(world: World): { System }
 					if ent.owner == initial_entity.owner then
 						table.insert(systems[#systems], coord)
 
-						local portals = {}
-						if cell.type == "portal" and cell.portal.open then
-							portals = cell.portal.group
-						end
-						for _, portal in portals do
-							local encoded_neighbor_coord = coords.encode_coord(portal)
-							if
-								not visited[encoded_neighbor_coord] and not visitable_stack_map[encoded_neighbor_coord]
-							then
-								table.insert(visitable_stack, portal)
-								visitable_stack_map[encoded_neighbor_coord] = true
-							end
-						end
-
 						for _, neighbor in coords.neighbors_eq(coord, 1) do
 							local encoded_neighbor_coord = coords.encode_coord(neighbor)
 							if not visitable_stack_map[encoded_neighbor_coord] then

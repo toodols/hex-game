@@ -58,8 +58,7 @@ function ResearchPreview(props: {
 			[React.Tag] = "subtitle",
 		}, {
 			KeybindLabel = React.createElement(KeybindLabel, {
-				Position = UDim2.new(1, 0, 1, 0),
-				AnchorPoint = Vector2.new(1, 1),
+				[React.Tag] = "align-br",
 				action_id = "research",
 				action = function(action_name, input_state, input_object)
 					if input_state == Enum.UserInputState.Begin and props.active then

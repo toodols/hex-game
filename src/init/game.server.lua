@@ -45,30 +45,32 @@ require(ReplicatedStorage.Client.entity_impls) -- client also needs to be loaded
 local tests = require(ServerScriptService.Server.tests)
 local remotes_mod = require(ServerScriptService.Server.remotes)
 local router_mod = require(ServerScriptService.Server.router)
-local serialize_mod = require(ServerScriptService.Server.serialize)
+local view_mod = require(ServerScriptService.Server.view)
 local presets = require(ServerScriptService.Server.presets)
 local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 local updates_mod = require(ServerScriptService.Server.updates)
 local server_util = require(ServerScriptService.Server.util)
 local datastore_mod = require(ServerScriptService.Server.datastore)
-local structures = require(ReplicatedStorage.Shared.structures)
+local serializing = require(ReplicatedStorage.Shared.serializing)
 require(ServerScriptService.Server.teleport)
 
-if ServerScriptService.Server:FindFirstChild "pow" then
-	local pow = require(ServerScriptService.Server.pow)
+if ServerScriptService:FindFirstChild "Powder" then
+	local Powder = require(ServerScriptService.Powder)
 
-	pow.init {
-		permissions = {
-			owner = {
-				["195294332"] = 5,
-				["123907031"] = 5,
-			},
+	Powder.start {
+		assignments = {
+			[195294332] = { roles = { "owner" }, rank = "root" },
+			[123907031] = { roles = { "owner" }, rank = "root" },
 		},
-		extras_shared = { ServerScriptService.Server.pow_extras.extras_shared },
-		extras_server = { ServerScriptService.Server.pow_extras.extras_server },
+		extensions = {
+			shared = { ReplicatedStorage.Shared.powder_commands },
+			server = { ServerScriptService.Server.powder_commands },
+		},
+		persistence = if RunService:IsStudio() then false else "PowderPermissions",
+		pack = true,
 	}
 else
-	warn "Did not find pow. Cannot initialize."
+	warn "Did not find Powder. Cannot initialize."
 end
 
 if RunService:IsStudio() then
@@ -78,19 +80,22 @@ end
 local main_world
 remotes_mod.get_world_data_remote.OnServerInvoke = function(player)
 	while not main_world or not team_mod.team_of(main_world, player) do
+		if player.Parent == nil then
+			return nil
+		end
 		task.wait()
 	end
 	local player_team = team_mod.team_of(main_world, player)
-	local serialized = serialize_mod.serialize_world(main_world, {}, { team = player_team.id, player = player.UserId })
+	local view = view_mod.world_view(main_world, {}, { team = player_team.id, player = player.UserId })
 
-	return structures.serialize_partial_world(serialized)
+	return serializing.serialize_partial_world(view)
 end :: any
 
 function republish_teams(world: World)
 	world:add_update {
 		type = "teams",
 		teams = util.table_map(world.teams, function(team)
-			return serialize_mod.serialize_team(world, team)
+			return view_mod.team_view(world, team)
 		end),
 		coalitions = world.coalitions,
 	}
@@ -149,23 +154,51 @@ function start_game(teleport_data: { room: types.Room }?)
 				return
 			end
 			table.insert(team.players, plr.UserId)
-			table.insert(team.historical_players, plr.UserId)
+			if table.find(team.historical_players, plr.UserId) == nil then
+				table.insert(team.historical_players, plr.UserId)
+			end
 		else
-			local team_with_least_players = nil
+			local previous_team = nil
 			for _, team in main_world.teams do
-				if not team.is_player_team then
-					continue
+				if team.is_player_team and table.find(team.historical_players, plr.UserId) ~= nil then
+					previous_team = team
+					break
 				end
-				if not team_with_least_players or #team.players < #team_with_least_players.players then
-					team_with_least_players = team
+			end
+			local team_with_least_players = previous_team
+			if team_with_least_players == nil then
+				for _, team in main_world.teams do
+					if not team.is_player_team then
+						continue
+					end
+					if not team_with_least_players or #team.players < #team_with_least_players.players then
+						team_with_least_players = team
+					end
 				end
 			end
 			assert(team_with_least_players, "no teams found")
 			table.insert(team_with_least_players.players, plr.UserId)
-			table.insert(team_with_least_players.historical_players, plr.UserId)
+			if table.find(team_with_least_players.historical_players, plr.UserId) == nil then
+				table.insert(team_with_least_players.historical_players, plr.UserId)
+			end
+		end
+		if main_world.player_data[tostring(plr.UserId)] == nil then
+			main_world.player_data[tostring(plr.UserId)] = datastore_mod.default_player_data()
 		end
 		task.defer(function()
-			main_world.player_data[tostring(plr.UserId)] = datastore_mod.get_player_data(plr.UserId)
+			local success, player_data
+			for attempt = 1, 3 do
+				success, player_data = pcall(datastore_mod.get_player_data, plr.UserId)
+				if success then
+					break
+				end
+				warn(`Failed to load player data for {plr.Name} (attempt {attempt}):`, player_data)
+				task.wait(attempt)
+			end
+			if not success then
+				return
+			end
+			main_world.player_data[tostring(plr.UserId)] = player_data
 			main_world:add_update {
 				type = "player_data",
 				player_data = {
@@ -195,11 +228,37 @@ function start_game(teleport_data: { room: types.Room }?)
 			util.table_remove_needle(team.players, plr.UserId)
 		end
 		util.table_remove_needle(main_world.skipped, plr.UserId)
-		local player_data = main_world.player_data[tostring(plr.UserId)]
-		datastore_mod.set_player_data(plr.UserId, player_data)
 		turn_scheduler.recalculate_skips(main_world)
 		republish_teams(main_world)
 		updates_mod.flush_updates(main_world)
+		local player_data = main_world.player_data[tostring(plr.UserId)]
+		if player_data ~= nil then
+			local success, err = pcall(datastore_mod.set_player_data, plr.UserId, player_data)
+			if not success then
+				warn(`Failed to save player data for {plr.Name}:`, err)
+			end
+		end
+	end)
+
+	game:BindToClose(function()
+		local remaining = 0
+		for _, plr in Players:GetPlayers() do
+			local player_data = main_world.player_data[tostring(plr.UserId)]
+			if player_data == nil then
+				continue
+			end
+			remaining += 1
+			task.spawn(function()
+				local success, err = pcall(datastore_mod.set_player_data, plr.UserId, player_data)
+				if not success then
+					warn(`Failed to save player data for {plr.Name}:`, err)
+				end
+				remaining -= 1
+			end)
+		end
+		while remaining > 0 do
+			task.wait()
+		end
 	end)
 end
 

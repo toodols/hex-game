@@ -140,29 +140,6 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 	local next_entity = get_next()
 	local previous_entity = get_previous()
 
-	-- React.useEffect(function()
-	-- 	if RunService:IsClient() then
-	-- 		ContextActionService:BindAction("next_entity", function(action_name, input_state, input_object)
-	-- 			if input_state == Enum.UserInputState.Begin then
-	-- 				uncompressed_entity.current = get_next()
-	-- 				force_update(nil)
-	-- 			end
-	-- 		end, false, Enum.KeyCode.RightBracket)
-
-	-- 		ContextActionService:BindAction("previous_entity", function(action_name, input_state, input_object)
-	-- 			if input_state == Enum.UserInputState.Begin then
-	-- 				uncompressed_entity.current = get_previous()
-	-- 				force_update(nil)
-	-- 			end
-	-- 		end, false, Enum.KeyCode.LeftBracket)
-
-	-- 		return function()
-	-- 			ContextActionService:UnbindAction "build"
-	-- 		end
-	-- 	end
-	-- 	return function() end
-	-- end, {})
-
 	local deposit_type = nil
 	if #props.selected_cells == 1 then
 		deposit_type = deposit_mod.get_deposit_type(world, props.selected_cells[1])
@@ -178,6 +155,9 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 			{
 				LayoutOrder = 2,
 				[React.Tag] = "background container-v align-cc list-v list-pad-5 pad-5",
+				[React.Change.AbsoluteSize] = function(v)
+					print("content absolute size changed to", v.AbsoluteSize.X, v.AbsoluteSize.Y)
+				end,
 			},
 			util.table_from_entries(util.table_map(entities_ref.current, function(entity_id, idx)
 				return {
@@ -218,8 +198,7 @@ function SelectedCellFrame(props: { selected_cells: { CubicCoordinate } })
 				}, {
 					KeybindLabel = React.createElement(KeybindLabel, {
 						action_id = "construct",
-						AnchorPoint = Vector2.new(1, 1),
-						Position = UDim2.new(1, 0, 1, 0),
+						[React.Tag] = "align-br",
 						action = function(action_name, input_state, input_object)
 							if input_state == Enum.UserInputState.Begin then
 								toggle_submenu { type = "build", cell = props.selected_cells[1] }

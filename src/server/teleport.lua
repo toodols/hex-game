@@ -7,7 +7,10 @@ local placeids = require(ReplicatedStorage.Shared.placeids)
 
 teleport_remote.OnServerEvent:Connect(function(player, data)
 	if data == "lobby" then
-		TeleportService:Teleport(placeids.lobby, player)
+		local success, err = pcall(TeleportService.Teleport, TeleportService, placeids.lobby, player)
+		if not success then
+			warn(`Failed to teleport {player.Name} to the lobby:`, err)
+		end
 	end
 end)
 

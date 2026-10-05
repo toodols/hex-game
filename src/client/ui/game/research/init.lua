@@ -344,8 +344,7 @@ function ResearchBottom(props: {
 								tween_refs.current[i]:Play()
 							end
 						end,
-						Position = UDim2.new(0, 0, 1, 0),
-						AnchorPoint = Vector2.new(0, 1),
+						[React.Tag] = "align-bl",
 						on_click = function()
 							client_interaction_remote:FireServer {
 								{

@@ -24,6 +24,11 @@ end
 
 function HighlightOnHover(props: { Text: string, coords: { CubicCoordinate }, LayoutOrder: number? })
 	local context = React.useContext(MainContext)
+	React.useEffect(function()
+		return function()
+			clear_show_cells(context)
+		end
+	end, {})
 	return React.createElement("TextButton", {
 		[React.Tag] = "solid as-x pad-h-5",
 		Size = UDim2.new(0, 0, 0, 25),

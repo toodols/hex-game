@@ -28,6 +28,7 @@ entity_mod.registry.fountain = entity_mod.with_defaults {
 			local instance = world.entity_instance_map[self.id]
 			if not instance then
 				warn "no instance for fountain update"
+				return
 			end
 			local item = instance:FindFirstChild "Item"
 			item.Color = items_mod.item_colors[item_type]
@@ -39,6 +40,8 @@ entity_mod.registry.fountain = entity_mod.with_defaults {
 		if not instance then
 			return
 		end
+		world.entity_instance_map[self.id] = nil
+		world.instance_entity_map[instance] = nil
 
 		if event.death_type == "used" then
 			local item = instance:FindFirstChild "Item"

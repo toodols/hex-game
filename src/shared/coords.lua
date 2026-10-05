@@ -88,23 +88,41 @@ function decode_coord(s: EncodedCoordinate): CubicCoordinate
 	return { decode_x, decode_y, -decode_x - decode_y }
 end
 
+function sanitize_coord(value: any): CubicCoordinate?
+	if typeof(value) ~= "table" then
+		return nil
+	end
+	local x, y, z = value[1], value[2], value[3]
+	for i = 1, 3 do
+		local component = value[i]
+		if typeof(component) ~= "number" or component % 1 ~= 0 or math.abs(component) >= SIGNED_MAX then
+			return nil
+		end
+	end
+	if x + y + z ~= 0 then
+		return nil
+	end
+	return { x, y, z }
+end
+
 function display_coord(coord: CubicCoordinate): string
 	return string.format("(%d, %d, %d)", coord[1], coord[2], coord[3])
 end
 
--- i am pretty certain neighbors_eq is broken
 -- returns neighbors at a radius. can give neighbors that are out of bounds
 function neighbors_eq(center: CubicCoordinate, radius: number)
 	local result = {}
 	if radius == 0 then
 		table.insert(result, center)
 	else
-		for _, dir in rotation_to_direction do
-			for i = 1, radius do
+		for rotation = 1, 6 do
+			local dir = rotation_to_direction[rotation % 6]
+			local step = rotation_to_direction[(rotation + 2) % 6]
+			for i = 0, radius - 1 do
 				local neighbor = {
-					center[1] + dir[1] * i,
-					center[2] + dir[2] * i,
-					center[3] + dir[3] * i,
+					center[1] + dir[1] * radius + step[1] * i,
+					center[2] + dir[2] * radius + step[2] * i,
+					center[3] + dir[3] * radius + step[3] * i,
 				}
 				table.insert(result, neighbor)
 			end
@@ -260,6 +278,7 @@ return {
 	coords_lerp = coords_lerp,
 	coords_round = coords_round,
 	display_coord = display_coord,
+	sanitize_coord = sanitize_coord,
 	rotate_coord = rotate_coord,
 	sector = sector,
 	into_set = into_set,

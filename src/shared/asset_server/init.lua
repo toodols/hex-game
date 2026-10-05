@@ -12,6 +12,7 @@ function load<T>(path: string): T?
 		current_instance = current_instance:FindFirstChild(segment)
 		if not current_instance then
 			warn("Asset not found in path: " .. path)
+			return nil
 		end
 	end
 

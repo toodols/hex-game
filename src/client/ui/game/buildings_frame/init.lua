@@ -196,7 +196,7 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 	end, { is_expanded })
 
 	React.useEffect(function()
-		world.world_update_signal.listen(function(updates)
+		return world.world_update_signal.listen(function(updates)
 			for _, update in updates do
 				if update.type == "entity_update" then
 					force_update(nil)
@@ -204,17 +204,16 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 				end
 			end
 		end)
-	end)
+	end, {})
 
 	return React.createElement("Frame", {
 		Visible = props.Visible,
-		AnchorPoint = Vector2.new(0.5, 1),
 		BackgroundTransparency = 1,
 		LayoutOrder = 2,
 		Position = UDim2.new(0.5, 0, 1, HEIGHT),
 		Size = UDim2.new(0, 1000, 0.8, 0),
 		ref = ref,
-		[React.Tag] = "list-v list-bl list-pad-2",
+		[React.Tag] = "list-v list-bl list-pad-2 align-bc",
 	}, {
 		SizeConstraint = React.createElement("UISizeConstraint", {
 			MinSize = Vector2.new(0, 300),
@@ -222,13 +221,13 @@ function BuildingsFrame(props: { Visible: boolean, cell: CubicCoordinate })
 		Content = React.createElement(
 			"Frame",
 			{
-				AnchorPoint = Vector2.new(0.5, 1),
 				BackgroundTransparency = 1,
 				BorderColor3 = Color3.fromRGB(27, 42, 53),
 				ClipsDescendants = true,
 				LayoutOrder = 1,
 				Position = UDim2.new(0.5, 0, 1, -20),
 				Size = UDim2.new(1, 0, 0, if is_expanded then 0 else 300),
+				[React.Tag] = "align-bc",
 			},
 			{
 				UIPageLayout = React.createElement("UIPageLayout", {

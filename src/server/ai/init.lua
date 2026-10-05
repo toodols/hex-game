@@ -109,7 +109,7 @@ function claim_bar_deposit(
 					end
 				end
 
-				if dist < distance then
+				if dist ~= nil and dist < distance then
 					distance = dist
 					if coords_mod.coords_eq(start_coord, deposit_coord) then
 						candidate = {
@@ -152,11 +152,17 @@ function decide(world: World, team: TeamData, config_profile: ConfigProfile, mem
 		local heart = nil
 		for entity_id in system.entities do
 			local entity = world.entities[entity_id]
+			if entity == nil then
+				continue
+			end
 			if heart == nil then
 				heart = entity
 			elseif entity.type == "heart" then
 				heart = entity
 			end
+		end
+		if heart == nil then
+			continue
 		end
 
 		memory.systems[system_id] = {
@@ -168,6 +174,10 @@ function decide(world: World, team: TeamData, config_profile: ConfigProfile, mem
 	print(memory)
 
 	for i = 1, 10 do
+		for _, system in memory.systems do
+			system.debt = {}
+			system.income = {}
+		end
 		local blueprints = world:query_entity {
 			status = "blueprint",
 			owner = team.id,
@@ -177,12 +187,13 @@ function decide(world: World, team: TeamData, config_profile: ConfigProfile, mem
 			local valid_systems = {}
 			for encoded_neighbor, neighbor in server_util.get_neighbors_set(world, blueprint.coordinates) do
 				local system = world.systems[world.cell_system_map[encoded_neighbor]]
-				if system ~= nil and system.team == blueprint.owner then
-					table.insert(valid_systems, memory.systems[world.cell_system_map[encoded_neighbor]])
+				local memory_system = memory.systems[world.cell_system_map[encoded_neighbor]]
+				if system ~= nil and system.team == blueprint.owner and memory_system ~= nil then
+					valid_systems[memory_system] = true
 				end
 			end
 
-			for _, system in valid_systems do
+			for system in valid_systems do
 				for item, amount in blueprint.cost do
 					system.debt[item] = (system.debt[item] or 0) + amount - (blueprint.cost_fulfilled[item] or 0)
 				end
@@ -196,7 +207,7 @@ function decide(world: World, team: TeamData, config_profile: ConfigProfile, mem
 			}
 		do
 			local system = memory.systems[world.entity_system_map[entity.id]]
-			if entity.type == "extractor" then
+			if entity.type == "extractor" and system ~= nil then
 				local deposit_ty = entity.deposit
 				local item_ty
 				if deposit_ty == "bar_deposit" then

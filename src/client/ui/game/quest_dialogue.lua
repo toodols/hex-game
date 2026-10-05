@@ -51,16 +51,11 @@ function QuestDialogue(props: {
 					Enum.FontStyle.Normal
 				),
 				Position = UDim2.new(0, 0, 0, 5),
-				RichText = true,
 				Size = UDim2.new(1, 0, 0, 25),
 				Text = `{props.quest.title}`,
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 18,
-				[React.Tag] = "text-l",
-			}, {
-				PaddingLeft = React.createElement("UIPadding", {
-					PaddingLeft = UDim.new(0, 10),
-				}),
+				[React.Tag] = "text-l pad-l-10",
 			}),
 			Description = React.createElement("TextLabel", {
 				AutomaticSize = Enum.AutomaticSize.Y,
@@ -72,7 +67,6 @@ function QuestDialogue(props: {
 				),
 				LayoutOrder = 2,
 				Position = UDim2.new(0, 0, 0, 30),
-				RichText = true,
 				Size = UDim2.new(1, 0, 0, 0),
 				Text = format_text(world, current_stage_data.messages[message_num], {
 					this_quest = props.quest,
@@ -80,16 +74,9 @@ function QuestDialogue(props: {
 				TextColor3 = Color3.fromRGB(200, 200, 200),
 				TextSize = 13,
 				TextWrapped = true,
-				[React.Tag] = "text-l",
-			}, {
-				PaddingLeft = React.createElement("UIPadding", {
-					PaddingLeft = UDim.new(0, 10),
-				}),
+				[React.Tag] = "description text-l pad-l-10",
 			}),
 			ContinueLabel = React.createElement("TextLabel", {
-				AnchorPoint = Vector2.new(1, 1),
-				AutomaticSize = Enum.AutomaticSize.Y,
-				BackgroundTransparency = 1,
 				FontFace = Font.new(
 					"rbxasset://fonts/families/Michroma.json",
 					Enum.FontWeight.Bold,
@@ -97,17 +84,11 @@ function QuestDialogue(props: {
 				),
 				LayoutOrder = 2,
 				Position = UDim2.new(1, -5, 1, -5),
-				Size = UDim2.new(1, 0, 0, 0),
 				Text = "Click to Continue",
 				Visible = current_stage_data.can_advance or message_num < #current_stage_data.messages,
 				TextColor3 = Color3.fromRGB(130, 130, 130),
-				TextSize = 13,
 				TextWrapped = true,
-				[React.Tag] = "text-r",
-			}, {
-				PaddingLeft = React.createElement("UIPadding", {
-					PaddingLeft = UDim.new(0, 10),
-				}),
+				[React.Tag] = "container-v text-r align-br pad-l-10",
 			}),
 			Corner = React.createElement(Corner),
 		},

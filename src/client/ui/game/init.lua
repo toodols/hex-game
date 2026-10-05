@@ -14,10 +14,15 @@ type World = types.World
 
 function bind_sprint()
 	ContextActionService:BindAction("sprint", function(action_name, input_state, input_object)
+		local character = Players.LocalPlayer.Character
+		local humanoid = if character ~= nil then character:FindFirstChildOfClass "Humanoid" else nil
+		if humanoid == nil then
+			return
+		end
 		if input_state == Enum.UserInputState.Begin then
-			Players.LocalPlayer.Character.Humanoid.WalkSpeed = 32
+			humanoid.WalkSpeed = 32
 		elseif input_state == Enum.UserInputState.End then
-			Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+			humanoid.WalkSpeed = 16
 		end
 	end, false, Enum.KeyCode.LeftShift)
 end

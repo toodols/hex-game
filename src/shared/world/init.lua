@@ -83,6 +83,8 @@ function purge_destroyed_entities(world: World)
 			local instance = world.entity_instance_map[entity.id]
 			if instance then
 				warn(`Instance for entity {entity.id} ({entity.type}) still exists`)
+				world.instance_entity_map[instance] = nil
+				instance:Destroy()
 			end
 			world.entity_instance_map[entity.id] = nil
 		end
@@ -95,9 +97,10 @@ function world_query_entity(world: World, props: any): { Entity }
 	if props.primary_coordinate then
 		warn "use of `primary_coordinate` in query_entity! use `coordinate` instead"
 	end
+	props = table.clone(props)
+	props.is_destroyed = false
 	local results = {}
 	local function pred(entity: Entity)
-		props.is_destroyed = false
 		if entity.server_data and entity.active == false or entity.active == false then
 			return false
 		end

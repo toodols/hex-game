@@ -105,7 +105,7 @@ function bfs(world: World, start: CubicCoordinate, max_depth: number, team: Team
 
 				if cell_is_open(world, cell, team) and not visited[encode_coord(neighbor)] then
 					table.insert(new_stack, neighbor)
-					visited[encode_coord(current)] = true
+					visited[encode_coord(neighbor)] = true
 				end
 			end
 		end

@@ -5,7 +5,7 @@ local world_mod = require(ReplicatedStorage.Shared.world)
 local util = require(ReplicatedStorage.Shared.util)
 local types = require(ReplicatedStorage.Shared.types)
 local coords = require(ReplicatedStorage.Shared.coords)
-local structures = require(ReplicatedStorage.Shared.structures)
+local serializing = require(ReplicatedStorage.Shared.serializing)
 
 local presets = require(ServerScriptService.Server.presets)
 local cleanup = require(ServerScriptService.Server.cleanup).cleanup
@@ -864,8 +864,8 @@ end
 
 function tests.weird_presence_after_load()
 	local world, _teams = presets.my_map()
-	local bin = structures.serialize_world(world)
-	local _timestamp, data = structures.deserialize_world(bin)
+	local bin = serializing.serialize_world(world)
+	local _timestamp, data = serializing.deserialize_world(bin)
 
 	turn_scheduler.turn_schedule_kill(world.turn_schedule)
 	world_mod.apply_world_data(world, data)

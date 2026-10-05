@@ -190,23 +190,13 @@ export type Extents = { ExtentsDim }
 
 export type InstanceMap<T> = { [T]: PVInstance }
 
-export type DepositType = "bar_deposit" | "tar_deposit" | "vit_deposit" | "rad_deposit" | "portal"
-
-type Portal = {
-	group: { CubicCoordinate },
-	open: boolean,
-	steps: number,
-	open_time: number,
-	close_time: number,
-}
+export type DepositType = "bar_deposit" | "tar_deposit" | "vit_deposit" | "rad_deposit" 
 
 export type CellTeamVisibility = {
 	-- visible by virtue of having an entity right next to this cell
 	contact: boolean?,
 	-- visible by virtue of this team having fog disabled
 	fogless: boolean?,
-	-- visible by virtue of this cell being a portal and a connected portal being occupied by the team
-	portal: boolean?,
 	-- illuminated by scout, or (later on) torch
 	illumination: boolean?,
 
@@ -225,8 +215,6 @@ export type HexCell = {
 	-- client only property created in server.serialize.serialize_cell_for_team
 	visible_for_team: boolean?,
 	buildable_for_team: boolean?,
-
-	portal: Portal?,
 
 	influences: {
 		[EntityId]: boolean,

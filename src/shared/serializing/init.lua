@@ -71,7 +71,7 @@ end
 
 return {
 	main = main,
-	validate_player_settings = main.player_data.validate,
+	validate_player_settings = main.player_settings.validate,
 
 	serialize_world = serialize_world,
 	deserialize_world = deserialize_world,

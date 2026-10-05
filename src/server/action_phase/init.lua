@@ -266,7 +266,7 @@ function run_action_phase(
 				world:add_update {
 					type = "entity_update",
 					entity = world.entities[entity_id],
-					targets = {
+					target = {
 						team_id,
 					},
 				}

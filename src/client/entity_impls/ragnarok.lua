@@ -51,6 +51,9 @@ entity_mod.registry.ragnarok = entity_mod.with_defaults {
 	end,
 	on_destroy = function(self: Entity, world: World)
 		local instance: Instance = world.entity_instance_map[self.id]
+		if instance == nil then
+			return
+		end
 		world.entity_instance_map[self.id] = nil
 		world.instance_entity_map[instance] = nil
 		Debris:AddItem(instance, 1)

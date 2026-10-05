@@ -54,6 +54,21 @@ abilities.cannon = function(world: World, entity: Entity, ability: Ability, inte
 	damage_mod.delayed_destruction(world, damage_mod.damage_cells(world, { cell.coordinate }, damage), damage)
 end
 
+function remove_disguise(world: World, entity: Entity)
+	if entity.disguise == nil then
+		return
+	end
+	local disguise = world.entities[entity.disguise]
+	entity.disguise = nil
+	if disguise ~= nil then
+		disguise.is_destroyed = true
+		world:add_update {
+			type = "entity_update",
+			entity = disguise,
+		}
+	end
+end
+
 abilities.disguise = function(world: World, entity: Entity, ability: Ability, interaction: Interaction?)
 	assert(ability.type == "disguise", "Expected ability to be disguise")
 	assert(interaction and interaction.type == "ability", "Expected interaction to be ability")
@@ -88,18 +103,7 @@ abilities.disguise = function(world: World, entity: Entity, ability: Ability, in
 
 	-- treat entity disguising as itself as resetting disguise
 	if top == entity then
-		-- if entity.disguise then
-		-- 	world.entities[entity.disguise].is_destroyed = true
-		-- 	world:add_update {
-		-- 		type = "entity_update",
-		-- 		entity = world.entities[entity.disguise],
-		-- 	}
-		-- end
-		entity.disguise = nil
-		world:add_update {
-			type = "disguise",
-			entity_id = entity.id,
-		}
+		remove_disguise(world, entity)
 		return
 	end
 
@@ -107,6 +111,8 @@ abilities.disguise = function(world: World, entity: Entity, ability: Ability, in
 		-- disguise a disguise???
 		top = world.entities[top.disguise]
 	end
+
+	remove_disguise(world, entity)
 
 	local copied = server_entity_mod.clone_entity(top)
 	copied.server_data.child_relationship = "disguise"
@@ -119,11 +125,6 @@ abilities.disguise = function(world: World, entity: Entity, ability: Ability, in
 	world:add_update {
 		type = "entity_update",
 		entity = copied,
-	}
-	world:add_update {
-		type = "entity_disguise",
-		entity_id = entity.id,
-		disguise_id = copied.id,
 	}
 end
 

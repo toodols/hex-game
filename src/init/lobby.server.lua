@@ -90,23 +90,47 @@ function room_membership_changed(room: Room)
 			if room_timers[room.id] == nil then
 				room.starting_at = workspace:GetServerTimeNow() + START_TIME
 				room_timers[room.id] = task.delay(START_TIME, function()
-					local party = {}
-					for player_id, data in room.players do
-						local player = Players:GetPlayerByUserId(player_id)
-						assert(player, "Player not found")
-						table.insert(party, player)
-					end
+					local success, err = pcall(function()
+						-- what if we signed the data to make it tamper proof
+						local code = TeleportService:ReserveServer(placeids.game)
 
-					-- what if we signed the data to make it tamper proof
-					local code = TeleportService:ReserveServer(placeids.game)
-					-- local options = Instance.new "TeleportOptions"
-					-- options.ReservedServerAccessCode = code
-					-- options:SetTeleportData {
-					-- 	room = room,
-					-- }
-					-- TeleportService:TeleportAsync(placeids.game, code, party, options)
-					print("teleporting with", HttpService:JSONEncode(room))
-					TeleportService:TeleportToPrivateServer(placeids.game, code, party, nil, { room = room })
+						local party = {}
+						local teleport_room = table.clone(room)
+						teleport_room.players = {}
+						for player_id, data in room.players do
+							local player = Players:GetPlayerByUserId(player_id)
+							if player == nil then
+								continue
+							end
+							table.insert(party, player)
+							teleport_room.players[player_id] = data
+						end
+						-- local options = Instance.new "TeleportOptions"
+						-- options.ReservedServerAccessCode = code
+						-- options:SetTeleportData {
+						-- 	room = room,
+						-- }
+						-- TeleportService:TeleportAsync(placeids.game, code, party, options)
+						print("teleporting with", HttpService:JSONEncode(teleport_room))
+						TeleportService:TeleportToPrivateServer(
+							placeids.game,
+							code,
+							party,
+							nil,
+							{ room = teleport_room }
+						)
+					end)
+					room_timers[room.id] = nil
+					room.starting_at = nil
+					if not success then
+						warn("Failed to teleport room", room.id, err)
+						if rooms[room.id] ~= nil then
+							room_membership_changed(room)
+						end
+						rooms_remote:FireAllClients {
+							rooms = rooms,
+						}
+					end
 				end)
 			end
 		else
@@ -141,14 +165,20 @@ type Props = {
 }
 
 rooms_remote.OnServerEvent:Connect(function(plr: Player, props: Props)
+	if typeof(props) ~= "table" then
+		return
+	end
 	if props.type == "new_room" then
+		props.map_type = props.map_type or "my_map"
+		if typeof(props.map_type) ~= "string" or maps[props.map_type] == nil then
+			return
+		end
 		for _, room in rooms do
 			if room.players[tostring(plr.UserId)] ~= nil then
 				room.players[tostring(plr.UserId)] = nil
 				room_membership_changed(room)
 			end
 		end
-		props.map_type = props.map_type or "my_map"
 		local room: Room = {
 			teams = maps[props.map_type].teams,
 			id = HttpService:GenerateGUID(false),

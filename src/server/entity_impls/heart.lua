@@ -52,9 +52,11 @@ entity_mod.registry.heart = entity_mod.with_defaults {
 				bonus_item = "tek"
 			end
 
-			if bonus_item ~= nil and self.bonus_clock % 2 == 0 then
+			if bonus_item ~= nil then
+				if self.bonus_clock % 2 == 0 then
+					table.insert(output_items, bonus_item)
+				end
 				self.bonus_clock = (self.bonus_clock + 1) % 2
-				table.insert(output_items, bonus_item)
 			end
 			table.insert(world.action_queue, {
 				entity_id = self.id,

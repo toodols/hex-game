@@ -276,7 +276,6 @@ local entity: Schema<Entity> = struct "entity" {
 
 local cell_types = enum "cell_types" {
 	"basic",
-	"portal",
 }
 
 local cell: Schema<HexCell> = struct "cell" {

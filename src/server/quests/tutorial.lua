@@ -83,8 +83,8 @@ local stages_behavior: { [string]: ServerQuestStageBehavior } = {
 
 			local unlisten
 			unlisten = world.turn_schedule.turn_ran_signal.listen(function()
-				local stockpile = (world:query_entity { type = "stockpile", query_global = true })[1]
-				if not stockpile then
+				local stockpile = (world:query_entity { type = "stockpile", status = "complete", query_global = true })[1]
+				if not stockpile or stockpile.inventory == nil then
 					unlisten()
 					self.details.error_message = "stockpile not found"
 					questing.quest_change_state(self, "error", world)

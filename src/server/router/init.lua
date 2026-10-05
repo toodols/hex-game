@@ -6,6 +6,7 @@ local items_mod = require(ReplicatedStorage.Shared.items)
 local team_mod = require(ReplicatedStorage.Shared.team)
 local result = require(ReplicatedStorage.Shared.result)
 local researches = require(ReplicatedStorage.Shared.researches)
+local coords_mod = require(ReplicatedStorage.Shared.coords)
 
 local questing = require(script.Parent.questing)
 local turn_scheduler = require(script.Parent.turn_scheduler)
@@ -13,7 +14,7 @@ local server_entity_mod = require(script.Parent.entity)
 local updates_mod = require(script.Parent.updates)
 local server_types = require(script.Parent.types)
 local entity_mod = require(script.Parent.entity)
-local structures = require(ReplicatedStorage.Shared.structures)
+local serializing = require(ReplicatedStorage.Shared.serializing)
 
 local ability_interaction = require(script.ability_interaction).ability_interaction
 local construct_interaction = require(script.construct_interaction).construct_interaction
@@ -69,9 +70,24 @@ function remove_unsupported_vertices(world: World, entity: Entity)
 	end
 end
 
+function is_valid_rotation(rotation: any): boolean
+	return typeof(rotation) == "number" and rotation % 1 == 0 and rotation >= 0 and rotation <= 5
+end
+
 function handle_interaction(world: World, entry: Interaction, player_info: PlayerInfo): { [EntityId]: boolean }
 	if typeof(entry) ~= "table" then
 		error "Expected entry to be a table"
+	end
+	local untyped_entry = entry :: any
+	if untyped_entry.coordinate ~= nil then
+		local coordinate = coords_mod.sanitize_coord(untyped_entry.coordinate)
+		if coordinate == nil then
+			return {}
+		end
+		untyped_entry.coordinate = coordinate
+	end
+	if untyped_entry.rotation ~= nil and not is_valid_rotation(untyped_entry.rotation) then
+		return {}
 	end
 	if entry.type == "construct" then
 		return construct_interaction(world, entry, player_info)
@@ -81,6 +97,9 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 		local entity = world.entities[entry.entity_id]
 		if not entity or not entity.active or entity.owner ~= player_info.team then
 			-- error_type.mistake
+			return {}
+		end
+		if entry.rotation == nil then
 			return {}
 		end
 		entity.rotation = entry.rotation
@@ -201,6 +220,10 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 			-- error_type.mistake
 			return {}
 		end
+		local config = world.entity_configurations[entity.type]
+		if typeof(entry.recipe_id) ~= "string" or config.recipes == nil or config.recipes[entry.recipe_id] == nil then
+			return {}
+		end
 		entity.current_recipe = entry.recipe_id
 		return { [entity.id] = true }
 	elseif entry.type == "set_inventory_filter" then
@@ -258,7 +281,7 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 		return {}
 	elseif entry.type == "tutorial_report_selection" then
 		local tutorial = world.quests.tutorial
-		if tutorial then
+		if tutorial and typeof(entry.selected) == "table" then
 			(tutorial.tutorial_player_selection :: any)[player_info.player] = entry.selected
 			questing.quest_update(tutorial, world)
 		end
@@ -268,9 +291,11 @@ function handle_interaction(world: World, entry: Interaction, player_info: Playe
 			error "no player"
 		end
 		local player_data = world.player_data[tostring(player_info.player.UserId)]
-		local res = structures.validate_player_settings(entry.settings)
+		local res = serializing.validate_player_settings(entry.settings)
 		local player_settings = result.unwrap(res)
-		player_data.settings = player_settings
+		player_data.settings = {
+			keybinds = player_settings.keybinds,
+		}
 		world:add_update {
 			type = "player_data",
 			player_data = {

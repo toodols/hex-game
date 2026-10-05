@@ -10,21 +10,16 @@ type World = types.World
 type Entity = types.Entity
 type TeamId = types.TeamId
 
-type SerializeTarget = server_types.SerializeTarget
-type SerializationContext = server_types.SerializationContext
+type ViewTarget = server_types.ViewTarget
+type ViewContext = server_types.ViewContext
 
-function serialize_entity(
-	world: World,
-	se_ctx: SerializationContext,
-	serialize_target: SerializeTarget,
-	entity: Entity
-): Entity?
+function entity_view(world: World, view_ctx: ViewContext, serialize_target: ViewTarget, entity: Entity): Entity?
 	if serialize_target.team == nil then
 		return entity
 	end
 
 	local value
-	local team_cache = get_cache(se_ctx, { team = serialize_target.team })
+	local team_cache = get_cache(view_ctx, { team = serialize_target.team })
 	if team_cache.entities[entity.id] ~= nil then
 		return team_cache.entities[entity.id]
 	end
@@ -64,5 +59,5 @@ function serialize_entity(
 end
 
 return {
-	serialize_entity = serialize_entity,
+	entity_view = entity_view,
 }

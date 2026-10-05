@@ -5,7 +5,7 @@ local ServerScriptService = game:GetService "ServerScriptService"
 local openskill = require(ServerScriptService.Server.openskill)
 
 local types = require(ReplicatedStorage.Shared.types)
-local structures = require(ReplicatedStorage.Shared.structures)
+local serializing = require(ReplicatedStorage.Shared.serializing)
 local base64 = require(ReplicatedStorage.Shared.base64)
 local util = require(ReplicatedStorage.Shared.util)
 local default_settings = require(ReplicatedStorage.Shared.settings).default_settings
@@ -18,6 +18,8 @@ type PlayerSettings = types.PlayerSettings
 
 local player_data_store = DataStoreService:GetDataStore "player_data"
 local game_saves_store = DataStoreService:GetDataStore "game_saves"
+
+local loaded_player_ids: { [string]: true } = {}
 
 function with_default_player_data(value): PlayerData
 	value = value or {}
@@ -35,34 +37,39 @@ function with_default_player_data(value): PlayerData
 end
 
 function load_world(key: string): World
-	local timestamp, world = structures.deserialize_world(base64.decode(game_saves_store:GetAsync(key)))
+	local timestamp, world = serializing.deserialize_world(base64.decode(game_saves_store:GetAsync(key)))
 	return world
 end
 
 function save_world(world: World, key: string)
-	local data = base64.encode(structures.serialize_world(world))
+	local data = base64.encode(serializing.serialize_world(world))
 	game_saves_store:SetAsync(key, data)
 	return data
 end
 
 function set_player_data(player_id: PlayerId, data: PlayerData)
-	player_data_store:SetAsync(player_id, base64.encode(structures.serialize_player_data(data)))
+	if not loaded_player_ids[tostring(player_id)] then
+		warn(`Not saving player data for {player_id} because it was never loaded`)
+		return
+	end
+	player_data_store:SetAsync(player_id, base64.encode(serializing.serialize_player_data(data)))
 end
 
 function get_player_data(player_id: PlayerId): PlayerData
 	local data = player_data_store:GetAsync(player_id)
-	if not data then
-		return with_default_player_data()
-	end
-	return with_default_player_data(structures.deserialize_player_data(base64.decode(data)))
+	local player_data = if data
+		then with_default_player_data(serializing.deserialize_player_data(base64.decode(data)))
+		else with_default_player_data()
+	loaded_player_ids[tostring(player_id)] = true
+	return player_data
 end
 
 function update_player_data(player_id: PlayerId, update: (PlayerData) -> PlayerData)
-	player_data_store:UpdateAsync(player_id, function(data: PlayerData)
-		if data == nil then
-			data = with_default_player_data()
-		end
-		return update(data)
+	player_data_store:UpdateAsync(player_id, function(data: string?)
+		local player_data = if data
+			then with_default_player_data(serializing.deserialize_player_data(base64.decode(data)))
+			else with_default_player_data()
+		return base64.encode(serializing.serialize_player_data(update(player_data)))
 	end)
 end
 

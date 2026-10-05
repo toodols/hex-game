@@ -14,7 +14,7 @@ type World = types.World
 type CellTeamVisibility = types.CellTeamVisibility
 type CubicCoordinate = types.CubicCoordinate
 type EncodedCoordinate = types.EncodedCoordinate
-type SerializeTarget = server_types.SerializeTarget
+type ViewTarget = server_types.ViewTarget
 
 -- Computes cell visibility for each team
 -- This also sets changed_to_true field of visibility
@@ -53,21 +53,6 @@ function compute_visibility(world: World)
 			continue
 		end
 
-		-- -- occupying a portal gives r<=1 visibility for each connected portal
-		-- local cell = world:get_cell(entity.primary_coordinate)
-		-- if cell.type == "portal" and cell.portal.open then
-		-- 	for _, connected in cell.portal.group do
-		-- 		-- ignore self
-		-- 		if coords.coords_eq(connected, entity.primary_coordinate) then
-		-- 			continue
-		-- 		end
-		-- 		local neighbors = coords.neighbors_leq(connected, 1)
-		-- 		for _, coord in neighbors do
-		-- 			add_visibility(coord, entity.owner, "portal")
-		-- 		end
-		-- 	end
-		-- end
-
 		-- local cell = world:get_cell(entity.primary_coordinate)
 		local neighbors = coords.neighbors_leq(entity.primary_coordinate, 2)
 		for _, coord in neighbors do
@@ -94,10 +79,10 @@ function compute_visibility(world: World)
 end
 
 function cell_visibility(visibility: CellTeamVisibility?)
-	return visibility and (visibility.contact or visibility.fogless or visibility.portal or visibility.illumination)
+	return visibility and (visibility.contact or visibility.fogless or visibility.illumination)
 end
 
-function entity_visibility(world: World, serialize_target: SerializeTarget, entity: Entity): boolean
+function entity_visibility(world: World, serialize_target: ViewTarget, entity: Entity): boolean
 	if entity.server_data.always_visible then
 		return true
 	end

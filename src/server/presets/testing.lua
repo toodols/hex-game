@@ -38,7 +38,7 @@ function all_entities(): World
 		return entity
 	end
 
-	world.cells[coords.encode_coord(start)].type = "bar_deposit"
+	set_deposit_type(world, start, "bar_deposit")
 
 	for _, ty in
 		{

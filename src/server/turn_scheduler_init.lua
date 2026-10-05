@@ -42,8 +42,13 @@ function hydrate(world: World, schedule: TurnSchedule)
 
 			schedule.end_time = math.huge
 			task.spawn(function()
-				schedule.run_turn()
-				schedule.turn_ran_signal.send()
+				local success, err = xpcall(function()
+					schedule.run_turn()
+					schedule.turn_ran_signal.send()
+				end, debug.traceback)
+				if not success then
+					warn("Turn failed to run:", err)
+				end
 				if schedule.running then
 					schedule.get_end_time()
 				end

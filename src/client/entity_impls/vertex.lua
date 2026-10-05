@@ -15,6 +15,7 @@ function update_vertex_artifacts(self: Entity, world: World)
 	local instance = world.entity_instance_map[self.id]
 	if instance == nil then
 		warn "no instance for vertex update"
+		return
 	end
 	util.set_transparency(instance:FindFirstChild "0,0,0", entity_mod.ENTITY_TRANSPARENCY[self.status])
 

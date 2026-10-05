@@ -11,6 +11,7 @@ local tutorial_map = require(script.tutorial).tutorial_map
 local testing_maps = require(script.testing)
 local util = require(ReplicatedStorage.Shared.util)
 local turn_scheduler_init = require(script.Parent.turn_scheduler_init)
+local turn_scheduler = require(script.Parent.turn_scheduler)
 local set_deposit_type = require(script.Parent.deposit).set_deposit_type
 
 type World = types.World
@@ -176,6 +177,7 @@ function lightning()
 	local world, teams = my_map()
 	world.speed_base = 6
 	world.speed_multiplier = 0.01
+	turn_scheduler.reset_turn_time(world, world.turn_schedule)
 	return world, teams
 end
 

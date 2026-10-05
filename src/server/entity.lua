@@ -221,9 +221,9 @@ end
 --- Does not remove it from world.entities
 function remove_entity(world: World, entity: Entity)
 	if entity.active then
-		local cell = world:get_cell(entity.primary_coordinate)
-		assert(cell, "cell not found")
 		for _, coord in entity.coordinates do
+			local cell = world:get_cell(coord)
+			assert(cell, "cell not found")
 			cell.entities[entity.id] = nil
 		end
 	end

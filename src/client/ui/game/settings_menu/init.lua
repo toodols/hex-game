@@ -19,11 +19,7 @@ function SettingsMenu()
 	local player_settings = React.useContext(SettingsContext)
 
 	local handle_keybind_change = function(id: string, new_key: Enum.KeyCode)
-		if new_key == Enum.KeyCode.Unknown then
-			player_settings.keybinds[id] = nil
-		else
-			player_settings.keybinds[id] = new_key
-		end
+		player_settings.keybinds[id] = new_key
 		-- client tells server the updated settings and server triggers updates for Main with the new settings
 		-- so the duration when keybinds are updated to when they are actually bound by the ui is the player's ping
 		-- i could have client -> self but it would cause double rendering which is redundant

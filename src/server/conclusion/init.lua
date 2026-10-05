@@ -10,7 +10,7 @@ local turn_scheduler = require(ServerScriptService.Server.turn_scheduler)
 local util = require(ReplicatedStorage.Shared.util)
 local datastore_mod = require(ServerScriptService.Server.datastore)
 local base64 = require(ReplicatedStorage.Shared.base64)
-local structures = require(ReplicatedStorage.Shared.structures)
+local serializing = require(ReplicatedStorage.Shared.serializing)
 
 local match_result_webhook = HttpService:GetSecret "MATCH_RESULT_WEBHOOK_URL"
 match_result_webhook = match_result_webhook:AddPrefix "https://discord.com/api/webhooks/"
@@ -67,26 +67,37 @@ function update_ratings(world: World, winning_coalition: CoalitionId?)
 	local rated_players = {}
 	for _, coalition in world.coalitions do
 		local rate_team = {}
-		table.insert(rate_teams, rate_team)
 		for _, team_id in coalition.teams do
-			if team_id == winning_coalition then
-				table.insert(rank, 0)
-			else
-				table.insert(rank, 1)
-			end
 			local team = world.teams[team_id]
+			if not team.is_player_team then
+				continue
+			end
 			for _, player_id in team.historical_players do
 				local player_data = world.player_data[tostring(player_id)]
+				if player_data == nil or table.find(rated_players, player_id) ~= nil then
+					continue
+				end
 				table.insert(rate_team, player_data.rating)
 				table.insert(rated_players, player_id)
 			end
 		end
+		if #rate_team == 0 then
+			continue
+		end
+		table.insert(rate_teams, rate_team)
+		table.insert(rank, if coalition.id == winning_coalition then 0 else 1)
+	end
+	if #rate_teams == 0 then
+		return
 	end
 	openskill.Rate(rate_teams, { rank = rank })
 	for _, player_id in rated_players do
 		local player_data = world.player_data[tostring(player_id)]
 		player_data.rating_ordinal = openskill.Ordinal(player_data.rating)
-		datastore_mod.set_player_data(player_id, player_data)
+		local success, err = pcall(datastore_mod.set_player_data, player_id, player_data)
+		if not success then
+			warn(`Failed to save player data for {player_id}:`, err)
+		end
 	end
 	world:add_update {
 		type = "player_data",
@@ -95,6 +106,9 @@ function update_ratings(world: World, winning_coalition: CoalitionId?)
 end
 
 function handle_conclusion(world: World)
+	if world.conclusion ~= nil then
+		return
+	end
 	local is_concluded, winning_coalition = check_conclusion(world)
 	if is_concluded then
 		if world.turn_schedule ~= nil then
@@ -102,11 +116,16 @@ function handle_conclusion(world: World)
 			turn_scheduler.report_turn_time(world)
 		end
 
-		local data = base64.encode(structures.serialize_world(world))
+		local data = base64.encode(serializing.serialize_world(world))
 
 		world.conclusion = {
 			winning_coalition = winning_coalition,
 			world_archive = data,
+		}
+
+		world:add_update {
+			type = "conclusion",
+			conclusion = world.conclusion,
 		}
 
 		if world.global_configuration.rated then
@@ -121,45 +140,45 @@ function handle_conclusion(world: World)
 			local winning_teams = if winning_coalition ~= nil then world.coalitions[winning_coalition].teams else nil
 
 			if not RunService:IsStudio() and match_result_webhook ~= nil then
-				local content = ""
-				content ..= table.concat(
-					util.table_filter_map(world.teams, function(team)
-						if not team.is_player_team then
-							return nil
-						end
-						local did_win = table.find(winning_teams, team.id) ~= nil
-						return `# {team.name} ({if is_draw then "DRAW" elseif did_win then "WIN" else "LOSE"})\n`
-							.. table.concat(
-								util.table_map(team.historical_players, function(player_id: PlayerId)
-									local player_data = world.player_data[tostring(player_id)]
-									local player = Players:GetPlayerByUserId(player_id)
-									local player_name = if player
-										then player.Name
-										else Players:GetNameFromUserIdAsync(player_id)
+				local success, err = pcall(function()
+					local content = ""
+					content ..= table.concat(
+						util.table_filter_map(world.teams, function(team)
+							if not team.is_player_team then
+								return nil
+							end
+							local did_win = winning_teams ~= nil and table.find(winning_teams, team.id) ~= nil
+							return `# {team.name} ({if is_draw then "DRAW" elseif did_win then "WIN" else "LOSE"})\n`
+								.. table.concat(
+									util.table_map(team.historical_players, function(player_id: PlayerId)
+										local player_data = world.player_data[tostring(player_id)]
+										local player = Players:GetPlayerByUserId(player_id)
+										local player_name = if player
+											then player.Name
+											else Players:GetNameFromUserIdAsync(player_id)
 
-									return ` - {player_name} ({util.round2(old_player_ratings[tostring(player_id)])} -> {util.round2(
-										player_data.rating_ordinal
-									)})`
-								end),
-								"\n"
-							)
-					end),
-					"\n"
-				)
+										return ` - {player_name} ({util.round2(old_player_ratings[tostring(player_id)])} -> {util.round2(
+											player_data.rating_ordinal
+										)})`
+									end),
+									"\n"
+								)
+						end),
+						"\n"
+					)
 
-				HttpService:PostAsync(
-					match_result_webhook,
-					HttpService:JSONEncode {
-						content = content,
-					}
-				)
+					HttpService:PostAsync(
+						match_result_webhook,
+						HttpService:JSONEncode {
+							content = content,
+						}
+					)
+				end)
+				if not success then
+					warn("Failed to post match result:", err)
+				end
 			end
 		end
-
-		world:add_update {
-			type = "conclusion",
-			conclusion = world.conclusion,
-		}
 	end
 end
 

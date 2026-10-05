@@ -4,17 +4,14 @@ local ReplicatedStorage = game:GetService "ReplicatedStorage"
 
 local action_phase = require(ServerScriptService.Server.action_phase)
 local util = require(ReplicatedStorage.Shared.util)
-local structures = require(ReplicatedStorage.Shared.structures)
-local binary_encoder = require(ReplicatedStorage.Shared.structures.binary_encoder)
-local schema_mod = require(ReplicatedStorage.Shared.structures.schema)
-local world_mod = require(ReplicatedStorage.Shared.world)
-local client_game_mod = require(ReplicatedStorage.Client.game)
-local base64 = require(ReplicatedStorage.Shared.base64)
+local serializing = require(ReplicatedStorage.Shared.serializing)
+local binary_encoder = require(ReplicatedStorage.Shared.serializing.binary_encoder)
+local schema_mod = require(ReplicatedStorage.Shared.serializing.schema)
 
 local presets = require(ServerScriptService.Server.presets)
 local router = require(ServerScriptService.Server.router)
 local cleanup = require(ServerScriptService.Server.cleanup).cleanup
-local serialize_mod = require(ServerScriptService.Server.serialize)
+local view_mod = require(ServerScriptService.Server.view)
 
 local assert_eq = util.assert_eq
 local struct = schema_mod.struct
@@ -130,11 +127,11 @@ function tests.archive_world()
 	-- todo
 	local world = presets.my_map()
 
-	local compressed = structures.serialize_world(world)
+	local compressed = serializing.serialize_world(world)
 	local as_json = HttpService:JSONEncode(world)
 	print("World saved as", #compressed, "bytes")
 	print(("Is %d%% of JSON size"):format(math.floor(#compressed / #as_json * 100)))
-	local _timestamp, _decompressed_world = structures.deserialize_world(compressed)
+	local _timestamp, _decompressed_world = serializing.deserialize_world(compressed)
 
 	cleanup(world)
 end
@@ -142,11 +139,11 @@ end
 function tests.serialize_partial_world()
 	local world, teams = presets.my_map()
 
-	local partial_world = serialize_mod.serialize_world(world, {}, {
+	local partial_world = view_mod.world_view(world, {}, {
 		team = teams.team1.id,
 		player = nil,
 	})
-	local partial_world_schema = structures.main.partial_world
+	local partial_world_schema = serializing.main.partial_world
 	local writer = binary_encoder.write()
 	for key, schema in partial_world_schema.object do
 		try(function()
@@ -166,32 +163,32 @@ function tests.serialize_partial_world()
 		end)
 	end
 	assert(partial_world.cells[next(partial_world.cells)].server_data == nil, "Server data should not be serialized")
-	local compressed = structures.serialize_partial_world(partial_world)
-	local decompressed = structures.deserialize_partial_world(compressed)
+	local compressed = serializing.serialize_partial_world(partial_world)
+	local decompressed = serializing.deserialize_partial_world(compressed)
 	assert_eq(partial_world, decompressed)
 	cleanup(world)
 end
 
 function tests.serialize_one_entity()
 	local world, teams = presets.my_map()
-	local raw_scout = (world:query_entity {
+	local scout = (world:query_entity {
 		type = "scout",
 		owner = teams.team1.id,
 		query_global = true,
 	})[1]
 
-	local scout = serialize_mod.serialize_entity(world, {}, { team = teams.team1.id }, raw_scout)
+	local scout_view = view_mod.entity_view(world, {}, { team = teams.team1.id }, scout)
 	local writer = binary_encoder.write()
-	structures.main.entity.write(writer, scout)
+	serializing.main.entity.write(writer, scout_view)
 	local reader = binary_encoder.read(writer.to_string())
-	local result = structures.main.entity.read(reader)
-	assert_eq(scout, result)
+	local result = serializing.main.entity.read(reader)
+	assert_eq(scout_view, result)
 	cleanup(world)
 end
 
 function tests.serialize_world_updates()
 	local world, teams = presets.my_map()
-	local partial_world = serialize_mod.serialize_world(world, {}, {
+	local partial_world = view_mod.world_view(world, {}, {
 		team = teams.team1.id,
 		player = nil,
 	})
@@ -229,7 +226,7 @@ function tests.serialize_world_updates()
 	for _, update in updates do
 		local writer = binary_encoder.write()
 		try(function()
-			structures.main.world_update.write(writer, update)
+			serializing.main.world_update.write(writer, update)
 		end, function()
 			print("data", update)
 			error "failed to write update"
@@ -237,7 +234,7 @@ function tests.serialize_world_updates()
 
 		local reader = binary_encoder.read(writer.to_string())
 		local result = try(function()
-			return structures.main.world_update.read(reader)
+			return serializing.main.world_update.read(reader)
 		end, function()
 			print("data", update)
 			error "failed to read update"
@@ -245,8 +242,8 @@ function tests.serialize_world_updates()
 		assert_eq(update, result)
 	end
 
-	local data = structures.serialize_world_updates(updates)
-	local decompressed = structures.deserialize_world_updates(data)
+	local data = serializing.serialize_world_updates(updates)
+	local decompressed = serializing.deserialize_world_updates(data)
 
 	assert_eq(updates, decompressed)
 	-- client_game_mod.handle_updates(client_world, decompressed)

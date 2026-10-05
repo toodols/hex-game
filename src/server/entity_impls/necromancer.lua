@@ -13,6 +13,9 @@ type EntityId = types.EntityId
 entity_mod.registry.necromancer = entity_mod.with_defaults {
 	autogenerates_vertex = true,
 	influences = function(self: Entity, world: World)
+		if self.status ~= "complete" then
+			return
+		end
 		local config = world.entity_configurations[self.type]
 		local neighbors = coords.neighbors_leq(self.primary_coordinate, config.range)
 		for _, coord in neighbors do

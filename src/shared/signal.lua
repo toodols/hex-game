@@ -12,10 +12,11 @@ function new_signal<T>(): Signal<T>
 			end
 		end,
 		wait = function()
+			local thread = coroutine.running()
 			local listener
 			listener = function(message)
-				coroutine.resume(coroutine.running(), message)
 				listeners[listener] = nil
+				task.spawn(thread, message)
 			end
 			listeners[listener] = true
 			return coroutine.yield()

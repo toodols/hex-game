@@ -12,26 +12,29 @@ require(ReplicatedStorage.Client.entity_impls)
 require(ReplicatedStorage.Shared.entity_impls)
 require(ReplicatedStorage.Shared.effect_impls)
 
-local structures = require(ReplicatedStorage.Shared.structures)
+local serializing = require(ReplicatedStorage.Shared.serializing)
 
 type World = types.World
 type WorldUpdate = types.WorldUpdate
 
 local world_data = get_world_data_remote:InvokeServer()
-local world = world_mod.new_world_from_data(structures.deserialize_partial_world(world_data))
+local world = world_mod.new_world_from_data(serializing.deserialize_partial_world(world_data))
 _G.world = world
 game_mod.render_world(world)
 
 local update_queue = {}
 local processing = false
 local connection = world_updates_remote.OnClientEvent:Connect(function(updates_binary: string)
-	local updates = structures.deserialize_world_updates(updates_binary)
+	local updates = serializing.deserialize_world_updates(updates_binary)
 	table.insert(update_queue, updates)
 	if not processing then
 		processing = true
 		while #update_queue > 0 do
 			local first = table.remove(update_queue, 1)
-			game_mod.handle_updates(world, first)
+			local success, err = xpcall(game_mod.handle_updates, debug.traceback, world, first)
+			if not success then
+				warn("Failed to handle updates:", err)
+			end
 		end
 		processing = false
 	end

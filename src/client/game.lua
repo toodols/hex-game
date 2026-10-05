@@ -67,6 +67,7 @@ function update_neighbors(world: World, coordinates: { CubicCoordinate })
 				local neighbor_entity = world.entities[neighbor_entity_id]
 				if not neighbor_entity then
 					warn("missing", neighbor_entity_id)
+					continue
 				end
 				local client_behavior = client_entity_mod.registry[neighbor_entity.type]
 				client_behavior.neighbor_changed(neighbor_entity, world)
@@ -164,7 +165,10 @@ function step_animations(world: World)
 					animation_state.step = animation_state.step - animation_state.period
 				end
 			end
-			behavior.animate(entity, world, animation_state)
+			local success, err = pcall(behavior.animate, entity, world, animation_state)
+			if not success then
+				warn(`Failed to animate {entity.id} ({entity.type}):`, err)
+			end
 		end
 	end
 end
@@ -180,6 +184,8 @@ end
 function destroy_world_instances(world: World)
 	world.cell_instance_map = {}
 	world.entity_instance_map = {}
+	world.instance_cell_map = {}
+	world.instance_entity_map = {}
 	if world.cell_instance_root then
 		world.cell_instance_root:Destroy()
 	end
@@ -191,7 +197,7 @@ end
 function hide_entities(world: World, old: HexCell)
 	for entity_id in old.entities do
 		local entity = world.entities[entity_id]
-		if entity.always_visible then
+		if entity == nil or entity.always_visible then
 			continue
 		end
 		local client_behavior = client_entity_mod.registry[entity.type]
@@ -233,6 +239,7 @@ function handle_cells(world: World, update: WorldUpdate)
 		if old and old.type ~= cell.type then
 			local instance = world.cell_instance_map[encoded_coord]
 			if instance then
+				world.instance_cell_map[instance] = nil
 				instance:Destroy()
 			end
 			local new_instance = create_cell_instance(world, cell)
@@ -269,6 +276,10 @@ function handle_entity_event(world: World, event: EntityEvent)
 		end
 	elseif event.event_type == "destroy" then
 		local entity = world.entities[event.entity_id]
+		if entity == nil then
+			warn("entity not found", event.entity_id, "when handling event", event.event_type)
+			return
+		end
 		local behavior = client_entity_mod.registry[entity.type]
 		behavior.on_destroy(entity, world, event)
 	end
@@ -363,9 +374,12 @@ function handle_updates(world: World, updates: { WorldUpdate })
 			local entity_instance = world.entity_instance_map[update.entity_id]
 			if entity_instance == nil then
 				warn("entity not found", update.entity_id, "when handling ability", update.ability_id)
-				return
+				continue
 			end
 			local entity = world.entities[update.entity_id]
+			if entity == nil or cell_instance == nil then
+				continue
+			end
 			local ability = world.entity_configurations[entity.type].abilities[update.ability_id]
 			if ability.type == "cannon" then
 				visuals.scout_attack_effect(entity_instance, cell_instance)

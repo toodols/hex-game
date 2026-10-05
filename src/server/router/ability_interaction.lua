@@ -25,26 +25,44 @@ function ability_interaction(world: World, entry: Interaction, player_info: Play
 		return {}
 	end
 
+	local coordinate = entry.coordinate
 	if ability.type == "cannon" or ability.type == "rash" then
+		if coordinate == nil or ability.range == nil then
+			return {}
+		end
 		local candidates =
 			ability_mod.entity_attack_candidates(world, entity, ability.range, player_info.team, ability.ignore_los)
 
-		if candidates[coords_mod.encode_coord(entry.coordinate)] == nil then
+		if candidates[coords_mod.encode_coord(coordinate)] == nil then
 			return {}
 		end
 	elseif ability.type == "disguise" then
-		local cell = world:get_cell(entry.coordinate)
+		if coordinate == nil then
+			return {}
+		end
+		local cell = world:get_cell(coordinate)
 		if cell == nil then
 			return {}
 		end
+		if ability.range ~= nil and coords_mod.coords_dist(entity.primary_coordinate, coordinate) > ability.range then
+			return {}
+		end
 	elseif ability.type == "solution_activate" or ability.type == "impression_activate" then
-		--ok
+		coordinate = nil
+	else
+		return {}
 	end
 
 	util.table_extract(entity.queued_decisions, function(decision)
 		return decision.type == "ability" and decision.ability_id == entry.ability_id
 	end)
-	table.insert(entity.queued_decisions, entry)
+	table.insert(entity.queued_decisions, {
+		type = "ability",
+		ability_id = entry.ability_id,
+		entity_id = entity.id,
+		coordinate = coordinate,
+		requested_at = (entry :: any).requested_at,
+	})
 	return { [entity.id] = true }
 end
 

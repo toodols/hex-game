@@ -28,7 +28,7 @@ export type PlayerInfo = {
 	player: Player?,
 }
 
-export type SerializeTarget = {
+export type ViewTarget = {
 	team: TeamId,
 	player: PlayerId,
 } | {
@@ -39,7 +39,7 @@ export type SerializeTarget = {
 	player: nil,
 }
 
-export type SerializingCache = {
+export type ViewCache = {
 	cells: { [EncodedCoordinate]: HexCell }?,
 	systems: { System }?,
 	entities: { [EntityId]: Entity }?,
@@ -47,11 +47,17 @@ export type SerializingCache = {
 }
 
 -- this is a cache for personalized data
--- TODO: use this cache
-export type SerializationContext = {
+export type ViewContext = {
 	[TeamId]: {
-		[PlayerId]: SerializingCache,
+		[PlayerId]: ViewCache,
 	},
+}
+
+export type InteractionResult = {
+	success: boolean,
+	error_msg: string?,
+	error_type: number,
+	dirty_entities: { [EntityId]: boolean },
 }
 
 return {}

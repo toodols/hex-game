@@ -294,7 +294,10 @@ function StoreEntityButton(props: { entity_id: EntityId, LayoutOrder: number? })
 		color = Color3.fromRGB(255, 255, 120),
 		ImageColor3 = Color3.fromRGB(200, 200, 200),
 		on_click = function()
-			local candidates = coords_mod.neighbors_eq(entity.primary_coordinate, 1)
+			local candidates: { [EncodedCoordinate]: true } = {}
+			for _, coord in coords_mod.neighbors_eq(entity.primary_coordinate, 1) do
+				candidates[coords_mod.encode_coord(coord)] = true
+			end
 			table.insert(selection_mode_stack, {
 				type = "select_some_cell",
 				candidates = candidates,

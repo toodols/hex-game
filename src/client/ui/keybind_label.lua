@@ -41,7 +41,7 @@ function KeybindLabel(props: {
 		AnchorPoint = props.AnchorPoint,
 		Position = props.Position,
 		ref = ref,
-		[React.Tag] = `stroke solid text-c ty-c`,
+		[React.Tag] = `stroke solid text-c ty-c {props[React.Tag] or ""}`,
 		Size = UDim2.new(0, 15, 0, 15),
 		TextSize = 10,
 		Text = text,

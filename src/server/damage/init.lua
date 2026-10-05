@@ -149,6 +149,9 @@ function damage_cells(world: World, targets: { CubicCoordinate }, damage: Damage
 
 		for _, target in targets do
 			local cell = world:get_cell(target)
+			if cell == nil then
+				continue
+			end
 			local gauge = damage.amount
 
 			local entities = get_attackable_entities(world, cell, damage)

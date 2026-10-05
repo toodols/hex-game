@@ -114,7 +114,7 @@ function PlayerList(props: { visible: boolean })
 	local teams, set_teams = React.useState(world.teams)
 
 	React.useEffect(function()
-		world.world_update_signal.listen(function(updates)
+		return world.world_update_signal.listen(function(updates)
 			for _, update in updates do
 				if update.type == "teams" then
 					set_teams(update.teams)

@@ -17,12 +17,12 @@
 		"ServerScriptService": {
 			"Server": {
 				"$path": "src/server",
-				"pow": {
-					"$path": "pow/package.project.json"
-				},
 				"openskill": {
 					"$path": "openskill/src"
 				}
+			},
+			"Powder": {
+				"$path": "../Powder/src"
 			},
 			"server_init": {
 				"$path": "src/init/game.server.lua"

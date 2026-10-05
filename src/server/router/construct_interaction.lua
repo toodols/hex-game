@@ -20,7 +20,10 @@ type HexCell = types.HexCell
 type TeamId = types.TeamId
 type CubicCoordinate = types.CubicCoordinate
 
+
+
 function construct_interaction(world: World, entry: Interaction, player_info: PlayerInfo): { [EntityId]: boolean }
+	print "received construct interaction"
 	assert(entry.type == "construct", "Expected entry to be a construct interaction")
 
 	local entity_config = world.entity_configurations[entry.entity_type]
@@ -37,33 +40,39 @@ function construct_interaction(world: World, entry: Interaction, player_info: Pl
 	for _, coord in coordinates do
 		local cell = world:get_cell(coord)
 		if not cell then
+			print "cell doesn't exist"
 			return {}
 		end
 		-- and is not blocked
 		if cell_blocked(world, coord, player_info.team, entry.entity_type) then
+			print "cell blocked"
 			return {}
 		end
 	end
 
 	if not presence_mod.team_may_naively_place_blueprint(world, player_info.team, entry.coordinate) then
+		print "team may not naively place blueprint"
 		return {}
 	end
 
 	if player_info.player then
 		local player_data = world.player_data[tostring(player_info.player.UserId)]
 		if not unlockable_mod.player_has_unlockable(player_data, entity_config.required_unlockable) then
+			print "player does not have required unlockable"
 			return {}
 		end
 	end
 
 	-- and can be built by the player
 	if not entity_config.buildable then
+		print "not buildable"
 		return {}
 	end
 
 	if world.global_configuration.construction_condition_enabled then
 		local ok = validate_condition(world, coordinates, player_info.team, entity_config.construction_condition, true)
 		if not ok then
+			print "not okay"
 			return {}
 		end
 	end

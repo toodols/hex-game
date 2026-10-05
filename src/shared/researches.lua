@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService "ReplicatedStorage"
 local types = require(ReplicatedStorage.Shared.types)
+local team_mod = require(ReplicatedStorage.Shared.team)
 
 type World = types.World
 type HexCell = types.HexCell
@@ -145,6 +146,9 @@ function get_cells_researches(world: World, cells: { HexCell }, team: TeamId): {
 	for entity_id in influences do
 		local entity = world.entities[entity_id]
 		if not entity then
+			continue
+		end
+		if entity.is_destroyed or not team_mod.is_allied(world, entity.owner, team) then
 			continue
 		end
 		if entity.researches ~= nil then
